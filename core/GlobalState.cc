@@ -2191,17 +2191,16 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
 
     result->copyOptions(*this);
 
-    // We share the file table entries with the original GlobalState, and then copy the content of the name table,
-    // string storage, and uuid to ensure that we remain compatible with the session cache.
+    // We share the file table entries with the original GlobalState, and uuid to ensure that we remain compatible with
+    // the session cache.
     result->files = make_shared<FileTable>(*this->files);
     result->kvstoreUuid = this->kvstoreUuid;
-    const auto &fromNames = *this->nameTable;
-    auto &toNames = *result->nameTable;
-    toNames.strings = fromNames.strings;
-    toNames.utf8Names = fromNames.utf8Names;
-    toNames.constantNames = fromNames.constantNames;
-    toNames.uniqueNames = fromNames.uniqueNames;
-    toNames.namesByHash = fromNames.namesByHash;
+
+    // NOTE: This the only situation where we share the name table, as this GlobalState will be stashed away in LSP's
+    // undo state while the copy is used for typechecking. As there's only ever one in use at a given time, it's safe to
+    // allow those two references to exist. If we ever switch to using this stale global state for operations while the
+    // slow path is running, we'll need to revisit this.
+    result->nameTable = this->nameTable;
 
     // Reserve space for the symbol tables, under the assumption that we'll probably grow to a similar size on the slow
     // path.
