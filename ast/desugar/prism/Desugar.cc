@@ -1978,8 +1978,12 @@ ast::ExpressionPtr Desugarer::desugar(pm_node_t *node) {
             auto caseMatchNode = down_cast_nonnull<pm_case_match_node>(node);
 
             auto inNodes = absl::MakeSpan(caseMatchNode->conditions.nodes, caseMatchNode->conditions.size);
+            // Without an `else` clause, Ruby raises `NoMatchingPatternError`.
+            // (For simplicity, we reuse the unimplemented helper here, because the exn class doesn't matter.)
             auto nilLoc = location.copyEndWithZeroLength();
-            auto elseClause = desugarElse(up_cast(caseMatchNode->else_clause), nilLoc);
+            auto elseClause = caseMatchNode->else_clause == nullptr
+                                  ? MK::RaiseTypedUnimplemented(nilLoc)
+                                  : desugarElse(up_cast(caseMatchNode->else_clause), nilLoc);
 
             // Build an if ladder similar to CASE_NODE
 

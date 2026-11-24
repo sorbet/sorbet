@@ -2538,9 +2538,12 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 auto exprName = dctx.freshNameUnique(core::Names::assignTemp());
                 auto exprVar = MK::Assign(exprLoc, exprName, node2TreeImpl(dctx, caseMatch->expr));
 
-                // Desugar the `else` block
+                // Desugar the `else` block. Without one, Ruby raises `NoMatchingPatternError`.
+                // (For simplicity, we reuse the unimplemented helper here, because the exn class doesn't matter.)
                 auto nilLoc = loc.copyEndWithZeroLength();
-                ExpressionPtr res = desugarBranch(dctx, caseMatch->elseBody, NullBranch::Missing, nilLoc);
+                ExpressionPtr res = caseMatch->elseBody == nullptr
+                                        ? MK::RaiseTypedUnimplemented(nilLoc)
+                                        : desugarBranch(dctx, caseMatch->elseBody, NullBranch::Missing, nilLoc);
 
                 // Desugar each `in` as an `if` branch calling `Magic.<pattern-match>()`
                 for (auto it = caseMatch->inBodies.rbegin(); it != caseMatch->inBodies.rend(); ++it) {

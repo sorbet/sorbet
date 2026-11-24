@@ -110,35 +110,6 @@ test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:27: Expected `Integer` but
     30 |    else 3
     31 |    end
 
-test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:35: Expected `Integer` but found `T.nilable(Integer)` for argument `x` https://srb.help/7002
-    35 |    case x
-    36 |    in 1 then 1
-    37 |    in 2 then 2
-    38 |    end
-  Expected `Integer` for argument `x` of method `Object#takes_integer`:
-    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:4:
-     4 |sig {params(x: Integer).void}
-                    ^
-  Got `T.nilable(Integer)` originating from:
-    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:36:
-    36 |    in 1 then 1
-                      ^
-    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:37:
-    37 |    in 2 then 2
-                      ^
-    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:38:
-    38 |    end
-               ^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:35: Replace with `T.must(case x
-        in 1 then 1
-        in 2 then 2
-        end)`
-    35 |    case x
-    36 |    in 1 then 1
-    37 |    in 2 then 2
-    38 |    end
-
 test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:42: Expected `Integer` but found `T.nilable(Integer)` for argument `x` https://srb.help/7002
     42 |    case x
     43 |    in 1
@@ -208,4 +179,4 @@ test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:51: Expected `Integer` but
     test/cli/missing-else-nil-loc/missing_else_nil_loc.rb:51: Replace with `T.must(1 if c)`
     51 |  takes_integer((1 if c))
                          ^^^^^^
-Errors: 8
+Errors: 7

@@ -16,7 +16,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         if ::T.unsafe(::Kernel).raise("Sorbet rewriter pass partially unimplemented")
           nil
         else
-          <emptyTree>
+          ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
         end
       end
     end
