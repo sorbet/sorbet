@@ -50,10 +50,9 @@ autocorrect_method_return.rb:27: Expected `String` but found `NilClass` for meth
     26 |def implicit_return_via_else
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `NilClass` originating from:
-    autocorrect_method_return.rb:27:
-    27 |  if T.unsafe(nil)
-    28 |    return 'yep'
+    autocorrect_method_return.rb:29:
     29 |  end
+             ^
 
 autocorrect_method_return.rb:34: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
     34 |  T.let("", T.nilable(String))
@@ -114,13 +113,12 @@ autocorrect_method_return.rb:55: Expected `String` but found `T.nilable(String)`
     51 |def implicit_return_without_keyword(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `T.nilable(String)` originating from:
-    autocorrect_method_return.rb:52:
-    52 |  if T.unsafe(nil)
-    53 |    ""
-    54 |  end
     autocorrect_method_return.rb:53:
     53 |    ""
             ^^
+    autocorrect_method_return.rb:54:
+    54 |  end
+             ^
 Errors: 8
 
 --------------------------------------------------------------------------
@@ -243,10 +241,9 @@ autocorrect_method_return.rb:27: Expected `String` but found `NilClass` for meth
     26 |def implicit_return_via_else
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `NilClass` originating from:
-    autocorrect_method_return.rb:27:
-    27 |  if T.unsafe(nil)
-    28 |    return 'yep'
+    autocorrect_method_return.rb:29:
     29 |  end
+             ^
   Autocorrect: Done
     autocorrect_method_return.rb:27: Replaced with `T.unsafe(if T.unsafe(nil)
         return 'yep'
@@ -314,13 +311,12 @@ autocorrect_method_return.rb:55: Expected `String` but found `T.nilable(String)`
     51 |def implicit_return_without_keyword(x)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `T.nilable(String)` originating from:
-    autocorrect_method_return.rb:52:
-    52 |  if T.unsafe(nil)
-    53 |    ""
-    54 |  end
     autocorrect_method_return.rb:53:
     53 |    ""
             ^^
+    autocorrect_method_return.rb:54:
+    54 |  end
+             ^
 Errors: 8
 
 --------------------------------------------------------------------------

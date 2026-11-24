@@ -78,6 +78,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
     LocalRef retSym;
     BasicBlock *entry = res->entry();
     BasicBlock *cont;
+    // The loc of the expression whose value the method returns, if it has a body.
+    core::LocOffsets finalExprLoc;
     {
         CFG::UnfreezeCFGLocalVariables unfreezeVars(*res);
         retSym = cctx.newTemporary(core::Names::returnMethodTemp());
@@ -157,8 +159,10 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
                 }
             }
             cont = walk(cctx.withTarget(retSym), stats[lastStat], cont);
+            finalExprLoc = stats[lastStat].loc();
         } else {
             cont = walk(cctx.withTarget(retSym), expr, cont);
+            finalExprLoc = expr.loc();
         }
     }
     // Past this point, res->localVariables is a fixed size.
@@ -175,6 +179,10 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
         } else {
             rvLoc = res->loc;
         }
+    } else if (auto lastLoc = cont->exprs.back().loc; lastLoc.exists() && lastLoc.empty() && finalExprLoc.exists()) {
+        // The last instruction has no source of its own (e.g., the `nil` of a missing `else`), so
+        // the value comes from the final expression as a whole.
+        rvLoc = finalExprLoc;
     } else {
         rvLoc = cont->exprs.back().loc;
     }

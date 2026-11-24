@@ -57,6 +57,10 @@ public:
     bool isInsideRubyBlock;
     bool isInsideLambda;
     bool breakIsJump;
+    // While walking the `else` branch of an `if`, the loc of the outermost `if` in its chain of
+    // `if`/`elsif`/`else` (or `case`/`when`/`else`) branches, and `none` otherwise. `walk` clears
+    // this before walking any children, so only the `else` branch's own node sees it.
+    core::LocOffsets ifChainLoc;
     BasicBlock *nextScope;
     BasicBlock *breakScope;
     BasicBlock *rescueScope;
@@ -81,8 +85,9 @@ private:
                BasicBlock *breakScope, BasicBlock *rescueScope, UnorderedMap<core::SymbolRef, LocalRef> &aliases,
                UnorderedMap<core::NameRef, LocalRef> &discoveredUndeclaredFields, uint32_t &temporaryCounter)
         : ctx(ctx), inWhat(inWhat), target(target), loops(loops), isInsideRubyBlock(false), isInsideLambda(false),
-          breakIsJump(false), nextScope(nextScope), breakScope(breakScope), rescueScope(rescueScope), aliases(aliases),
-          discoveredUndeclaredFields(discoveredUndeclaredFields), temporaryCounter(temporaryCounter) {};
+          breakIsJump(false), ifChainLoc(core::LocOffsets::none()), nextScope(nextScope), breakScope(breakScope),
+          rescueScope(rescueScope), aliases(aliases), discoveredUndeclaredFields(discoveredUndeclaredFields),
+          temporaryCounter(temporaryCounter) {};
 };
 } // namespace sorbet::cfg
 #endif // SORBET_BUILDER_H
