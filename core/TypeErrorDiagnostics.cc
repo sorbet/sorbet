@@ -42,6 +42,23 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
     }
 }
 
+void TypeErrorDiagnostics::maybeInsertElse(const GlobalState &gs, ErrorBuilder &e, Loc loc) {
+    if (!gs.suggestUnsafe.has_value() || loc.adjustLen(gs, 0, 3).source(gs) != "end") {
+        return;
+    }
+
+    auto &unsafe = *gs.suggestUnsafe;
+    auto title = fmt::format("Insert `else {}(nil)`", unsafe);
+    auto [startOfLine, indentation] = loc.findStartOfIndentation(gs);
+    if (startOfLine == loc) {
+        // The `end` starts its own line, so give the `else` its own lines too, indented like the `end`.
+        auto indent = Loc(loc.file(), loc.beginPos() - indentation, loc.beginPos()).source(gs).value();
+        e.replaceWith(title, loc, "else\n{}  {}(nil)\n{}", indent, unsafe, indent);
+    } else {
+        e.replaceWith(title, loc, "else {}(nil) ", unsafe);
+    }
+}
+
 void TypeErrorDiagnostics::insertTypeArguments(const GlobalState &gs, ErrorBuilder &e, ClassOrModuleRef klass,
                                                core::Loc replaceLoc) {
     // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to

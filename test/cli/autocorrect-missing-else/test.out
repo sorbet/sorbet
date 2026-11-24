@@ -5,39 +5,47 @@ extend T::Sig
 
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def if_multi_line(c, u)
-  T.unsafe(if c
+  if c
     u
-  end)
+  else
+    T.unsafe(nil)
+  end
 end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def if_single_line(c, u)
-  T.unsafe(if c then u end)
+  if c then u else T.unsafe(nil) end
 end
 
 sig {params(x: Integer, u: T.untyped).returns(String)}
 def elsif_chain(x, u)
-  T.unsafe(if x == 1
+  if x == 1
     u
   elsif x == 2
     u
-  end)
+  else
+    T.unsafe(nil)
+  end
 end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def unless_multi_line(c, u)
-  T.unsafe(unless c
+  unless c
     u
-  end)
+  else
+    T.unsafe(nil)
+  end
 end
 
 sig {params(x: Integer, u: T.untyped).returns(String)}
 def case_when(x, u)
-  T.unsafe(case x
+  case x
   when 1 then u
   when 2
     u
-  end)
+  else
+    T.unsafe(nil)
+  end
 end
 
 sig {params(x: Integer, u: T.untyped).returns(String)}
@@ -58,9 +66,13 @@ end
 sig {params(c: T::Boolean, d: T::Boolean, u: T.untyped).returns(String)}
 def both_missing_else(c, d, u)
   if c
-    T.unsafe(if d
+    if d
       u
-    end)
+    else
+      T.unsafe(nil)
+    end
+  else
+    T.unsafe(nil)
   end
 end
 
@@ -68,27 +80,29 @@ sig {params(c: T::Boolean).returns(Integer)}
 def error_in_then_too(c)
   if c
     T.unsafe("not an integer")
+  else
+    T.unsafe(nil)
   end
 end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def modifier_if(c, u)
-  T.unsafe(u if c)
+  u if c
 end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def modifier_unless(c, u)
-  T.unsafe(u unless c)
+  u unless c
 end
 
 sig {params(c: T::Boolean, d: T::Boolean, u: T.untyped).returns(String)}
 def modifier_if_nested(c, d, u)
-  T.unsafe(u if d) if c
+  u if d if c
 end
 
 sig {params(c: T::Boolean).returns(String)}
 def modifier_if_return(c)
-  T.unsafe(return "" if c)
+  return "" if c
 end
 
 module M
@@ -96,9 +110,11 @@ module M
 
   sig {params(c: T::Boolean, u: T.untyped).returns(String)}
   def in_module(c, u)
-    T.unsafe(if c
+    if c
       u
-    end)
+    else
+      T.unsafe(nil)
+    end
   end
 end
 
@@ -107,66 +123,76 @@ class B < BasicObject
 
   sig {params(c: T::Boolean, u: T.untyped).returns(String)}
   def in_basic_object(c, u)
-    T.unsafe(if c
+    if c
       u
-    end)
+    else
+      T.unsafe(nil)
+    end
   end
 end
 
 --- --suggest-unsafe -a, after autocorrecting
 
-autocorrect-missing-else.rb:74: unexpected token kIF_MOD https://srb.help/2001
-    74 |  T.unsafe(u if c)
-                     ^^
-
-autocorrect-missing-else.rb:79: unexpected token kUNLESS_MOD https://srb.help/2001
-    79 |  T.unsafe(u unless c)
-                     ^^^^^^
-
-autocorrect-missing-else.rb:84: unexpected token kIF_MOD https://srb.help/2001
-    84 |  T.unsafe(u if d) if c
-                     ^^
-
-autocorrect-missing-else.rb:89: unexpected token kIF_MOD https://srb.help/2001
-    89 |  T.unsafe(return "" if c)
-                             ^^
-
-autocorrect-missing-else.rb:62: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    62 |  end
-             ^
-  Expected `String` for result type of method `both_missing_else`:
-    autocorrect-missing-else.rb:57:
-    57 |def both_missing_else(c, d, u)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+autocorrect-missing-else.rb:88: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+    88 |  u if c
+                ^
+  Expected `String` for result type of method `modifier_if`:
+    autocorrect-missing-else.rb:87:
+    87 |def modifier_if(c, u)
+        ^^^^^^^^^^^^^^^^^^^^^
   Got `NilClass` originating from:
-    autocorrect-missing-else.rb:62:
-    62 |  end
-             ^
+    autocorrect-missing-else.rb:88:
+    88 |  u if c
+                ^
 
-autocorrect-missing-else.rb:69: Expected `Integer` but found `NilClass` for method result type https://srb.help/7005
-    69 |  end
-             ^
-  Expected `Integer` for result type of method `error_in_then_too`:
-    autocorrect-missing-else.rb:66:
-    66 |def error_in_then_too(c)
-        ^^^^^^^^^^^^^^^^^^^^^^^^
+autocorrect-missing-else.rb:93: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+    93 |  u unless c
+                    ^
+  Expected `String` for result type of method `modifier_unless`:
+    autocorrect-missing-else.rb:92:
+    92 |def modifier_unless(c, u)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `NilClass` originating from:
-    autocorrect-missing-else.rb:69:
-    69 |  end
-             ^
+    autocorrect-missing-else.rb:93:
+    93 |  u unless c
+                    ^
 
-autocorrect-missing-else.rb:84: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    84 |  T.unsafe(u if d) if c
-                               ^
+autocorrect-missing-else.rb:98: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+    98 |  u if d if c
+                ^
   Expected `String` for result type of method `modifier_if_nested`:
-    autocorrect-missing-else.rb:83:
-    83 |def modifier_if_nested(c, d, u)
+    autocorrect-missing-else.rb:97:
+    97 |def modifier_if_nested(c, d, u)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `NilClass` originating from:
-    autocorrect-missing-else.rb:84:
-    84 |  T.unsafe(u if d) if c
-                               ^
-Errors: 7
+    autocorrect-missing-else.rb:98:
+    98 |  u if d if c
+                ^
+
+autocorrect-missing-else.rb:98: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+    98 |  u if d if c
+                     ^
+  Expected `String` for result type of method `modifier_if_nested`:
+    autocorrect-missing-else.rb:97:
+    97 |def modifier_if_nested(c, d, u)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `NilClass` originating from:
+    autocorrect-missing-else.rb:98:
+    98 |  u if d if c
+                     ^
+
+autocorrect-missing-else.rb:103: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+     103 |  return "" if c
+                          ^
+  Expected `String` for result type of method `modifier_if_return`:
+    autocorrect-missing-else.rb:102:
+     102 |def modifier_if_return(c)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got `NilClass` originating from:
+    autocorrect-missing-else.rb:103:
+     103 |  return "" if c
+                          ^
+Errors: 5
 
 --- -a
 

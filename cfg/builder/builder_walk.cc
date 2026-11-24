@@ -321,6 +321,22 @@ BasicBlock *CFGBuilder::returnFromTailPosition(CFGContext cctx, BasicBlock *curr
 
     // An autocorrect can't wrap an "invented" a branch on its own, so we fall back to wrapping the whole conditional.
     auto whatLoc = isInventedBranch(iff, branch, loc) ? wholeLoc : loc;
+    auto &other = isThen ? iff.elsep : iff.thenp;
+    auto condLoc = iff.cond.loc();
+    if (ast::isa_tree<ast::EmptyTree>(branch) && wholeLoc.exists() && condLoc.exists() && other.loc().exists()) {
+        // There's no `else` keyword.
+        if (other.loc().beginPos() < condLoc.beginPos()) {
+            // A modifier `if` or `unless`. There's no `end` to insert an `else` before, and wrapping
+            // the whole conditional (as in `T.unsafe(x if c)`) isn't valid Ruby.
+            whatLoc = core::LocOffsets::none();
+        } else if (iff.loc.endPos() == wholeLoc.endPos() || iff.loc.endPos() == other.loc().endPos()) {
+            // `iff` ends with the whole conditional (an `if`, `unless` or `elsif`), or with its
+            // other branch (a `when`), so the whole conditional's `end` keyword is its own. Let the
+            // autocorrect insert an `else` right before it. (Otherwise, `iff` is an `if` nested
+            // directly in an `else`, which has an `end` of its own.)
+            whatLoc = core::LocOffsets{wholeLoc.endPos() - 3, wholeLoc.endPos() - 3};
+        }
+    }
 
     synthesizeExpr(current, LocalRef::finalReturn(), loc, make_insn<Return>(cctx.target, whatLoc));
     jumpToDead(current, cctx.inWhat, loc);

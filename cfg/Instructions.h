@@ -380,6 +380,9 @@ CheckSize(Send, 48, 8);
 INSN(Return) : public Instruction {
 public:
     VariableUseSite what;
+    // The source that an autocorrect for a type error in the returned value edits. If it's
+    // zero-length, it's the start of the `end` keyword of a conditional that has no `else`, where an
+    // autocorrect can insert one.
     core::LocOffsets whatLoc;
 
     Return(LocalRef what, core::LocOffsets whatLoc);
