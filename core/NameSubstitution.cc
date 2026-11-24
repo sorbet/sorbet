@@ -5,14 +5,15 @@
 using namespace std;
 namespace sorbet::core {
 
-NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : toNameTableId(to.nameTable.nameTableId) {
+NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to)
+    : toNameTableId(to.nameTable->nameTableId) {
     Timer timeit(to.tracer(), "NameSubstitution.new", from.creation);
 
     SLOW_DEBUG_ONLY(from.sanityCheck());
 
     {
         UnfreezeNameTable unfreezeNames(to);
-        const auto &fromNames = from.nameTable;
+        const auto &fromNames = *from.nameTable;
         utf8NameSubstitution.reserve(fromNames.utf8Names.size());
         constantNameSubstitution.reserve(fromNames.constantNames.size());
         uniqueNameSubstitution.reserve(fromNames.uniqueNames.size());

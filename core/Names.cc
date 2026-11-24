@@ -26,12 +26,12 @@ static_assert(is_nothrow_destructible_v<NameRef>);
 static_assert(is_nothrow_swappable_v<NameRef>);
 
 NameRef::NameRef(const GlobalState &gs, NameKind kind, uint32_t id)
-    : DebugOnlyCheck(gs.nameTable, kind, id), _id{(id << KIND_BITS) | static_cast<uint32_t>(kind)} {
+    : DebugOnlyCheck(*gs.nameTable, kind, id), _id{(id << KIND_BITS) | static_cast<uint32_t>(kind)} {
     // If this fails, the symbol table is too big :(
     ENFORCE_NO_TIMER(id <= MAX_ID);
 }
 
-NameRef::NameRef(const GlobalState &gs, NameRef ref) : NameRef(gs.nameTable, ref) {}
+NameRef::NameRef(const GlobalState &gs, NameRef ref) : NameRef(*gs.nameTable, ref) {}
 
 NameRef::NameRef(const NameTable &names, NameRef ref)
     : DebugOnlyCheck(names, ref.kind(), ref.unsafeTableIndex()), _id(ref.rawId()) {
@@ -409,7 +409,7 @@ void NameRefDebugCheck::check(const NameSubstitution &subst) const {
 }
 
 void NameRef::enforceCorrectGlobalState(const GlobalState &gs) const {
-    runDebugOnlyCheck(gs.nameTable, kind(), unsafeTableIndex());
+    runDebugOnlyCheck(*gs.nameTable, kind(), unsafeTableIndex());
 }
 
 void NameRef::sanityCheckSubstitution(const NameSubstitution &subst) const {
@@ -417,7 +417,7 @@ void NameRef::sanityCheckSubstitution(const NameSubstitution &subst) const {
 }
 
 const UniqueNameData NameRef::dataUnique(const GlobalState &gs) const {
-    const auto &names = gs.nameTable;
+    const auto &names = *gs.nameTable;
     ENFORCE_NO_TIMER(kind() == NameKind::UNIQUE);
     ENFORCE_NO_TIMER(uniqueIndex() < names.uniqueNames.size(), "unique name {} id out of bounds {}", uniqueIndex(),
                      names.uniqueNames.size());
@@ -425,7 +425,7 @@ const UniqueNameData NameRef::dataUnique(const GlobalState &gs) const {
 }
 
 const UTF8NameData NameRef::dataUtf8(const GlobalState &gs) const {
-    const auto &names = gs.nameTable;
+    const auto &names = *gs.nameTable;
     ENFORCE_NO_TIMER(kind() == NameKind::UTF8);
     ENFORCE_NO_TIMER(utf8Index() < names.utf8Names.size(), "utf8 name {} id out of bounds {}", utf8Index(),
                      names.utf8Names.size());
@@ -433,7 +433,7 @@ const UTF8NameData NameRef::dataUtf8(const GlobalState &gs) const {
 }
 
 const ConstantNameData NameRef::dataCnst(const GlobalState &gs) const {
-    const auto &names = gs.nameTable;
+    const auto &names = *gs.nameTable;
     ENFORCE_NO_TIMER(kind() == NameKind::CONSTANT);
     ENFORCE_NO_TIMER(constantIndex() < names.constantNames.size(), "constant name {} id out of bounds {}",
                      constantIndex(), names.constantNames.size());

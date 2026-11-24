@@ -965,7 +965,7 @@ Pickler SerializerImpl::pickleNameTable(const GlobalState &gs) {
 }
 
 void SerializerImpl::pickleNameTable(Pickler &p, const GlobalState &gs) {
-    const auto &names = gs.nameTable;
+    const auto &names = *gs.nameTable;
     // Write the size of the hash table out first, so that we can pre-allocate it when deserializing.
     p.putU4(names.namesByHash.size());
 
@@ -987,7 +987,7 @@ void SerializerImpl::pickleNameTable(Pickler &p, const GlobalState &gs) {
 }
 
 void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
-    auto &names = result.nameTable;
+    auto &names = *result.nameTable;
     names.utf8Names.clear();
     names.constantNames.clear();
     names.uniqueNames.clear();
@@ -1035,7 +1035,7 @@ void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
     }
 }
 void SerializerImpl::pickleNameTableDiff(Pickler &p, const GlobalState &gs) {
-    const auto &names = gs.nameTable;
+    const auto &names = *gs.nameTable;
     auto startUtf8 = names.utf8NamesWritten_;
     auto numNewUtf8 = names.utf8Names.size() - startUtf8;
     p.putU4(startUtf8);
@@ -1069,7 +1069,7 @@ void SerializerImpl::pickleNameTableDiff(Pickler &p, const GlobalState &gs) {
 }
 
 void SerializerImpl::unpickleNameTableDiff(UnPickler &p, GlobalState &result) {
-    auto &names = result.nameTable;
+    auto &names = *result.nameTable;
     auto startUtf8 = p.getU4();
     auto numNewUtf8 = p.getU4();
     ENFORCE(names.utf8Names.size() == startUtf8);
@@ -1153,7 +1153,7 @@ void Serializer::loadAndAppendNameTableDiff(GlobalState &gs, const uint8_t *cons
 }
 
 vector<uint8_t> Serializer::storeNameTableDiffCountAndHashSize(uint32_t count, const GlobalState &gs) {
-    const auto &names = gs.nameTable;
+    const auto &names = *gs.nameTable;
     Pickler p;
     p.putU4(Serializer::VERSION);
     p.putU4(count);
@@ -1165,7 +1165,7 @@ vector<uint8_t> Serializer::storeNameTableDiffCountAndHashSize(uint32_t count, c
 }
 
 uint32_t Serializer::loadNameTableDiffCountAndResizeNamesHash(GlobalState &gs, const uint8_t *const data) {
-    auto &names = gs.nameTable;
+    auto &names = *gs.nameTable;
     names.utf8Names.clear();
     names.constantNames.clear();
     names.uniqueNames.clear();

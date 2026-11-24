@@ -257,7 +257,7 @@ public:
     }
 
     // Copy names and clone history, optionally preserving the ID. Cache bookkeeping and freeze state use defaults.
-    NameTable deepCopy(bool keepId = false) const;
+    std::unique_ptr<NameTable> deepCopy(bool keepId = false) const;
 };
 
 class FileTable {
@@ -411,10 +411,10 @@ class GlobalState final {
     friend class UnfreezeFileTable;
     friend struct NameRefDebugCheck;
 
-    // Private constructor that allows specific global state and name table IDs. Used in
+    // Private constructor that accepts a specific global state ID and a preallocated name table. Used in
     // `makeEmptyGlobalStateForHashing` to avoid contention on the ID atomics.
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager,
-                std::shared_ptr<FileTable> files, int globalStateId, int nameTableId);
+                std::shared_ptr<FileTable> files, int globalStateId, std::shared_ptr<NameTable> nameTable);
 
 public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
@@ -542,16 +542,16 @@ public:
     void deleteTypeMemberSymbol(TypeMemberRef what);
     spdlog::logger &tracer() const;
     unsigned int namesUsedTotal() const {
-        return this->nameTable.namesUsedTotal();
+        return this->nameTable->namesUsedTotal();
     }
     unsigned int utf8NamesUsed() const {
-        return this->nameTable.utf8NamesUsed();
+        return this->nameTable->utf8NamesUsed();
     }
     unsigned int constantNamesUsed() const {
-        return this->nameTable.constantNamesUsed();
+        return this->nameTable->constantNamesUsed();
     }
     unsigned int uniqueNamesUsed() const {
-        return this->nameTable.uniqueNamesUsed();
+        return this->nameTable->uniqueNamesUsed();
     }
 
     unsigned int classAndModulesUsed() const;
@@ -601,12 +601,12 @@ public:
 
     int totalErrors() const;
     bool wasNameTableModified() const {
-        return this->nameTable.wasNameTableModified();
+        return this->nameTable->wasNameTableModified();
     }
     void markNameTableAsCached();
 
     uint32_t getNameTableDiffCount() const {
-        return this->nameTable.getNameTableDiffCount();
+        return this->nameTable->getNameTableDiffCount();
     }
     void setNameTableDiffCount(uint32_t count);
     void incrementNameTableDiffCount();
@@ -838,7 +838,7 @@ public:
     }
 
 private:
-    NameTable nameTable;
+    std::shared_ptr<NameTable> nameTable;
 
     std::string_view enterString(std::string_view nm);
     std::vector<ClassOrModule> classAndModules;
