@@ -73,7 +73,7 @@ sig {params(h: T::Hash[T.untyped, Integer], k: T.untyped).returns(String)}
 def or_assign_index(h, k)
   h[k] ||= 0
 # ^^^^ error: Expected `String` but found `Integer` for method result type
-# ^^^^ error: Expected `String` but found `Integer(0)` for method result type
+# ^^^^^^^^^^ error: Expected `String` but found `Integer(0)` for method result type
 end
 
 module ConstantBranch
