@@ -9,6 +9,9 @@ test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:13: Expected `Integer` but found
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:13:
     13 |  takes_integer(a.b ||= x)
                         ^^^
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:13:
+    13 |  takes_integer(a.b ||= x)
+                        ^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:13: Replace with `T.must(a.b ||= x)`
     13 |  takes_integer(a.b ||= x)
@@ -25,6 +28,9 @@ test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:14: Expected `Integer` but found
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:14:
     14 |  takes_integer(h[:k] ||= x)
                         ^^^^^
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:14:
+    14 |  takes_integer(h[:k] ||= x)
+                        ^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:14: Replace with `T.must(h[:k] ||= x)`
     14 |  takes_integer(h[:k] ||= x)
@@ -41,6 +47,9 @@ test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:15: Expected `Integer` but found
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:15:
     15 |  takes_integer(a.b &&= x)
                         ^^^
+    test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:15:
+    15 |  takes_integer(a.b &&= x)
+                        ^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/op-asgn-send-locs/op_asgn_send_locs.rb:15: Replace with `T.must(a.b &&= x)`
     15 |  takes_integer(a.b &&= x)
