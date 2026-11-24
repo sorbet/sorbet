@@ -218,8 +218,13 @@ class NameTable final {
     unsigned int uniqueNamesWritten_ = 0;
     bool nameTableFrozen = true;
 
+    // Allows hashing states to bypass the name table ID counter.
+    explicit NameTable(int nameTableId);
+
 public:
-    NameTable() = default;
+    int nameTableId;
+
+    NameTable();
     NameTable(const NameTable &) = delete;
     NameTable(NameTable &&) = default;
     NameTable &operator=(const NameTable &) = delete;
@@ -252,6 +257,7 @@ public:
     }
 
     // Copy names and clone history for the destination ID, leaving cache bookkeeping and freeze state at defaults.
+    // Preserve the name table ID when the source and destination global state IDs match.
     NameTable deepCopy(int fromGlobalStateId, int toGlobalStateId) const;
 };
 
@@ -406,10 +412,10 @@ class GlobalState final {
     friend class UnfreezeFileTable;
     friend struct NameRefDebugCheck;
 
-    // Private constructor that allows a specific globalStateId. Used in `makeEmptyGlobalStateForHashing` to avoid
-    // contention on the global state ID atomic.
+    // Private constructor that allows specific global state and name table IDs. Used in
+    // `makeEmptyGlobalStateForHashing` to avoid contention on the ID atomics.
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager,
-                std::shared_ptr<FileTable> files, int globalStateId);
+                std::shared_ptr<FileTable> files, int globalStateId, int nameTableId);
 
 public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);

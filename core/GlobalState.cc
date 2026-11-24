@@ -262,18 +262,24 @@ ClassOrModuleRef GlobalState::synthesizeClass(NameRef name, uint32_t superclass,
 }
 
 atomic<int> globalStateIdCounter(1);
+atomic<int> nameTableIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
+
+NameTable::NameTable() : NameTable(nameTableIdCounter.fetch_add(1)) {}
+
+NameTable::NameTable(int nameTableId) : nameTableId(nameTableId) {}
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
     : GlobalState(move(errorQueue), make_shared<lsp::TypecheckEpochManager>()) {}
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager)
-    : GlobalState(move(errorQueue), move(epochManager), make_shared<FileTable>(), globalStateIdCounter.fetch_add(1)) {}
+    : GlobalState(move(errorQueue), move(epochManager), make_shared<FileTable>(), globalStateIdCounter.fetch_add(1),
+                  nameTableIdCounter.fetch_add(1)) {}
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager,
-                         shared_ptr<FileTable> files, int globalStateId)
+                         shared_ptr<FileTable> files, int globalStateId, int nameTableId)
     : globalStateId(globalStateId), errorQueue(std::move(errorQueue)), lspQuery(lsp::Query::noQuery()),
-      epochManager(move(epochManager)), files(move(files)) {
+      epochManager(move(epochManager)), nameTable(nameTableId), files(move(files)) {
     auto &names = this->nameTable;
     // Reserve memory in internal vectors for the contents of payload.
     names.utf8Names.reserve(PAYLOAD_MAX_UTF8_NAME_COUNT);
@@ -296,7 +302,7 @@ unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logg
     // Note: Private constructor.
     unique_ptr<GlobalState> rv(
         new GlobalState(make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>()),
-                        make_shared<lsp::TypecheckEpochManager>(), make_shared<FileTable>(), -1));
+                        make_shared<lsp::TypecheckEpochManager>(), make_shared<FileTable>(), -1, -1));
     rv->initEmpty();
     return rv;
 }
@@ -2033,6 +2039,7 @@ NameTable NameTable::deepCopy(int fromGlobalStateId, int toGlobalStateId) const 
     result.uniqueNames.reserve(this->uniqueNames.capacity());
     result.utf8Names = this->utf8Names;
     if (fromGlobalStateId == toGlobalStateId) {
+        result.nameTableId = this->nameTableId;
         result.constantNames = this->constantNames;
         result.uniqueNames = this->uniqueNames;
     } else {
