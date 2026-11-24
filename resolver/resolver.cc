@@ -1375,16 +1375,10 @@ private:
 
                 case core::packages::PackageInfo::CanModifyResult::Subpackages:
                     if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
-                        e.setHeader("`{}` is part of a subpackage namespace, and must not have ancestors",
-                                    job.klass.show(ctx));
-
-                        e.addErrorLine(filePackageInfo.declLoc(), "Package defined here");
-
-                        auto subpackages =
-                            filePackageInfo.directSubPackages(ctx, job.klass.data(ctx)->packageRegistryOwner);
-                        if (!subpackages.empty()) {
-                            e.addErrorLine(subpackages.front().owner.data(ctx)->loc(), "First subpackage defined here");
-                        }
+                        auto attached = job.klass.data(ctx)->topAttachedClass(ctx);
+                        filePackageInfo.explainSubpackageNamespaceError(
+                            ctx, e, job.klass.show(ctx), "have a superclass", attached.data(ctx)->packageRegistryOwner,
+                            attached.show(ctx), "remove the superclass");
                     }
                     break;
 
@@ -1438,16 +1432,10 @@ private:
 
                 case core::packages::PackageInfo::CanModifyResult::Subpackages:
                     if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
-                        e.setHeader("`{}` is part of a subpackage namespace, and must not have ancestors",
-                                    job.klass.show(ctx));
-
-                        e.addErrorLine(filePackageInfo.declLoc(), "Package defined here");
-
-                        auto subpackages =
-                            filePackageInfo.directSubPackages(ctx, job.klass.data(ctx)->packageRegistryOwner);
-                        if (!subpackages.empty()) {
-                            e.addErrorLine(subpackages.front().owner.data(ctx)->loc(), "First subpackage defined here");
-                        }
+                        auto attached = job.klass.data(ctx)->topAttachedClass(ctx);
+                        filePackageInfo.explainSubpackageNamespaceError(
+                            ctx, e, job.klass.show(ctx), "have ancestors", attached.data(ctx)->packageRegistryOwner,
+                            attached.show(ctx), job.isInclude ? "remove the `include`" : "remove the `extend`");
                     }
                     break;
 

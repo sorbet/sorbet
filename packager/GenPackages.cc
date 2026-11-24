@@ -35,6 +35,26 @@ vector<core::packages::Import> computeNewImports(const core::GlobalState &gs,
         }
     }
 
+    // Every package nested under a package marked `imported_by_nested_packages!` has to import it (or a package in
+    // between), even if it's not referenced anywhere. Importing the nearest unsatisfied one satisfies all of them
+    // (see enclosingPackagesMissingImport).
+    auto unsatisfied =
+        core::packages::PackageInfo::enclosingPackagesMissingImport(gs, pkgInfo.mangledName(), {}, importMap);
+    if (!unsatisfied.empty()) {
+        // An existing import of a package between it and this one satisfies it too, so keep that instead of adding
+        // another import, if there is one (--gen-packages=strict drops unreferenced imports otherwise).
+        auto toImport = unsatisfied.front();
+        auto &packageDB = gs.packageDB();
+        for (auto outer = packageDB.getParentPackage(gs, pkgInfo.mangledName()); outer != unsatisfied.front();
+             outer = packageDB.getParentPackage(gs, outer)) {
+            if (pkgInfo.importsPackage(outer) != nullptr) {
+                toImport = outer;
+                break;
+            }
+        }
+        importMap.emplace(toImport);
+    }
+
     vector<core::packages::Import> newImports;
     newImports.reserve(importMap.size());
     for (auto &mangledName : importMap) {

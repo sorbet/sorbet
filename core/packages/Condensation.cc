@@ -391,6 +391,28 @@ void Condensation::Traversal::recordStrata(core::GlobalState &gs) const {
             }
         }
     }
+
+    if constexpr (debug_mode) {
+        // `imported_by_nested_packages!` is only sound if a package where it takes effect is never typechecked after
+        // a package nested under it. Its import requirement is what guarantees that.
+        //
+        // Except in --gen-packages mode, where every annotation takes effect before --gen-packages adds the imports
+        // that guarantee this. That's a limitation of package-directed --gen-packages in general: it computes strata
+        // from the imports as they are before it fixes them, so a package can be resolved before one that it
+        // references but doesn't import yet (see the package-directed run in the package-gen-packages CLI test).
+        if (db.genPackagesMode() == GenPackagesMode::Disabled) {
+            for (auto name : db.packages()) {
+                auto &info = db.getPackageInfo(name);
+                for (auto outer = db.getParentPackage(gs, name); outer.exists();
+                     outer = db.getParentPackage(gs, outer)) {
+                    auto &outerInfo = db.getPackageInfo(outer);
+                    ENFORCE(!outerInfo.importedByNestedPackagesSatisfied() || outerInfo.stratum <= info.stratum,
+                            "`{}` is typechecked after `{}`, which is nested under it", outerInfo.show(gs),
+                            info.show(gs));
+                }
+            }
+        }
+    }
 }
 
 namespace {

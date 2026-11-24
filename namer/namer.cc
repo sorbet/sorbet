@@ -128,6 +128,7 @@ class SymbolFinder {
         switch (send->fun.rawId()) {
             case core::Names::prelude_bang().rawId():
             case core::Names::test_bang().rawId():
+            case core::Names::importedByNestedPackages().rawId():
                 if (!isPackageClass || send->hasBlock() || send->hasNonBlockArgs()) {
                     break;
                 }
@@ -1849,6 +1850,11 @@ private:
                     packageInfo->locs.testPackage = mod.loc;
                 }
                 break;
+            case core::Names::importedByNestedPackages().rawId():
+                if (auto *packageInfo = packageInfoForContext(ctx)) {
+                    packageInfo->locs.importedByNestedPackages = mod.loc;
+                }
+                break;
             case core::Names::declareFinal().rawId():
                 symbolData->flags.isFinal = true;
                 symbolData->singletonClass(ctx).data(ctx)->flags.isFinal = true;
@@ -2825,14 +2831,10 @@ public:
 
             case core::packages::PackageInfo::CanModifyResult::Subpackages:
                 if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
-                    e.setHeader("`{}` is part of a subpackage namespace, and must not be generic", onSymbol.show(ctx));
-
-                    e.addErrorLine(filePackageInfo.declLoc(), "Package defined here");
-                    auto subpackages = filePackageInfo.directSubPackages(ctx, onSymbol.data(ctx)->packageRegistryOwner);
-                    if (!subpackages.empty()) {
-                        auto &subpackageInfo = ctx.state.packageDB().getPackageInfo(subpackages[0]);
-                        e.addErrorLine(subpackageInfo.declLoc(), "First subpackage defined here");
-                    }
+                    auto attached = onSymbol.data(ctx)->topAttachedClass(ctx);
+                    filePackageInfo.explainSubpackageNamespaceError(
+                        ctx, e, onSymbol.show(ctx), "be generic", attached.data(ctx)->packageRegistryOwner,
+                        attached.show(ctx), isTypeTemplate ? "remove the `type_template`" : "remove the `type_member`");
                 }
                 return ignoreBadTypeMember(ctx, move(tree));
 

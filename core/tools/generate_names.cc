@@ -497,6 +497,7 @@ NameDef names[] = {
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
     {"prelude_bang", "prelude!"},
     {"test_bang", "test!"},
+    {"importedByNestedPackages", "imported_by_nested_packages!"},
     {"usesInternals", "uses_internals"},
 
     // GlobalState initEmpty()

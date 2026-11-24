@@ -412,6 +412,8 @@ struct PackageSpecBodyWalk {
             }
         } else if (send.fun == core::Names::prelude_bang() && !send.hasBlock() && !send.hasNonBlockArgs()) {
             // Handled as a class-level modifier in namer.
+        } else if (send.fun == core::Names::importedByNestedPackages() && !send.hasBlock() && !send.hasNonBlockArgs()) {
+            // Handled as a class-level modifier in namer.
         } else if (send.fun == core::Names::visibleTo()) {
             if (send.numPosArgs() == 1) {
                 if (auto target = ast::cast_tree<ast::Literal>(send.getPosArg(0))) {
@@ -630,6 +632,7 @@ struct PackageSpecBodyWalk {
             case core::Names::visibleTo().rawId():
             case core::Names::prelude_bang().rawId():
             case core::Names::test_bang().rawId():
+            case core::Names::importedByNestedPackages().rawId():
                 return true;
 
             default:
@@ -864,6 +867,49 @@ void validatePackageNamespace(core::Context ctx, const PackageInfo &pkgInfo) {
     }
 }
 
+// We can only allow behavior on a package namespace if there are no nested packages, or if every nested package
+// imports the outer package (and so is never typechecked before it). Otherwise, package-directed mode would mutate a
+// namespace that an earlier package already saw.
+//
+// `imported_by_nested_packages!` opts into checking for that condition. We want to generally discourage structuring
+// code that way, but allow people to opt in where it would be very hard to avoid (easier gradual adoption).
+void validateEnclosingPackageImports(core::Context ctx, const PackageInfo &pkgInfo) {
+    const auto &packageDB = ctx.state.packageDB();
+    if (packageDB.genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
+        // --gen-packages computes imports itself rather than reporting missing ones.
+        return;
+    }
+
+    auto unsatisfied = pkgInfo.enclosingPackagesMissingImport(ctx);
+    if (unsatisfied.empty()) {
+        return;
+    }
+
+    if (auto e = ctx.beginError(pkgInfo.locs.declLoc, core::errors::Packager::MissingEnclosingPackageImport)) {
+        // Importing the nearest one satisfies all of them.
+        auto &nearestInfo = packageDB.getPackageInfo(unsatisfied.front());
+        auto nearestName = nearestInfo.show(ctx);
+        auto importNearest = fmt::format("import {}", nearestName);
+        e.setHeader("`{}` is nested under `{}`, so it must `{}`", pkgInfo.show(ctx), nearestName, importNearest);
+        for (auto outer : unsatisfied) {
+            auto &outerInfo = packageDB.getPackageInfo(outer);
+            e.addErrorLine(core::Loc(outerInfo.file, outerInfo.locs.importedByNestedPackages),
+                           "`{}` is marked `{}` here", outerInfo.show(ctx), "imported_by_nested_packages!");
+        }
+
+        auto parent = packageDB.getParentPackage(ctx, pkgInfo.mangledName());
+        if (parent != unsatisfied.front()) {
+            e.addErrorNote("Importing a package between `{}` and `{}` instead (like `{}`) would also work, because "
+                           "that package is subject to the same requirement",
+                           nearestName, pkgInfo.show(ctx), packageDB.getPackageInfo(parent).show(ctx));
+        }
+
+        if (auto autocorrect = pkgInfo.addImport(ctx, nearestInfo)) {
+            e.addAutocorrect(std::move(*autocorrect));
+        }
+    }
+}
+
 void validatePackage(core::Context ctx) {
     const auto &packageDB = ctx.state.packageDB();
     auto absPkg = packageDB.getPackageNameForFile(ctx.file);
@@ -883,6 +929,7 @@ void validatePackage(core::Context ctx) {
 
     auto &pkgInfo = packageDB.getPackageInfo(absPkg);
     validatePackageNamespace(ctx, pkgInfo);
+    validateEnclosingPackageImports(ctx, pkgInfo);
 
     bool skipImportVisibilityCheck = packageDB.allowRelaxedPackagerChecksFor(pkgInfo.mangledName());
     auto enforceLayering = ctx.state.packageDB().enforceLayering();
@@ -1014,6 +1061,7 @@ vector<ast::ParsedFile> Packager::runIncremental(const core::GlobalState &gs, ve
                 PackageInfo copy{info.mangledName_, info.file, info.locs.loc, info.locs.declLoc};
                 copy.locs.preludePackage = info.locs.preludePackage;
                 copy.locs.testPackage = info.locs.testPackage;
+                copy.locs.importedByNestedPackages = info.locs.importedByNestedPackages;
                 rewritePackageSpec(gs, file, copy);
             }
             validatePackage(ctx);
@@ -1059,6 +1107,20 @@ void Packager::buildPackageDB(core::GlobalState &gs, WorkerPool &workers, absl::
                     // As we're iterating over all packages in this pass, it's sufficient to mark only the parent as
                     // having subpackages.
                     info.hasSubPackages = true;
+                }
+
+                // For each marked package enclosing this one whose `imported_by_nested_packages!` requirement this
+                // package doesn't meet, record that it isn't met (see `importedByNestedPackagesSatisfied`).
+                // Only this package's own imports matter, which rewritePackageSpec just populated.
+                // In --gen-packages mode, which adds the missing imports itself (and doesn't report them),
+                // treat every annotation as taking effect.
+                if (gs.packageDB().genPackagesMode() == core::packages::GenPackagesMode::Disabled) {
+                    for (auto outer : info.enclosingPackagesMissingImport(gs)) {
+                        auto &outerInfo = *gs.packageDB().getPackageInfoNonConst(outer);
+                        if (!outerInfo.nestedPackageMissingImport.exists()) {
+                            outerInfo.nestedPackageMissingImport = pkgName;
+                        }
+                    }
                 }
             }
         }

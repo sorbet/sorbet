@@ -14,6 +14,7 @@
 #include <vector>
 
 namespace sorbet::core {
+class ErrorBuilder;
 struct AutocorrectSuggestion;
 class NameRef;
 class Loc;
@@ -140,6 +141,9 @@ public:
 
         // Set to non-none loc when this package is marked `prelude!`
         core::LocOffsets preludePackage;
+
+        // Set to non-none loc when this package is marked `imported_by_nested_packages!`
+        core::LocOffsets importedByNestedPackages;
     } locs;
 
     core::FileRef file;
@@ -167,6 +171,13 @@ public:
     // maintaining this field as it becomes a property of symbol nesting, but would involve following more memory
     // indirections.
     bool hasSubPackages = false;
+
+    // An arbitrary package nested under this one that doesn't meet this package's
+    // `imported_by_nested_packages!` requirement, if such a package exists.
+    //
+    // While one exists, the annotation has no effect, to avoid mutating a prefix of the symbol
+    // table in package-directed mode.
+    MangledName nestedPackageMissingImport;
 
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
 
@@ -227,7 +238,44 @@ public:
     std::vector<MangledName> directSubPackages(const core::GlobalState &gs,
                                                ClassOrModuleRef startFrom = ClassOrModuleRef()) const;
 
+    // Describe a `CanModifyResult::Subpackages`-style error: `subject` (the namespace `namespaceName` that this
+    // package owns, with `<PackageSpecRegistry>` node `packageRegistryOwner`, or its singleton class) can't
+    // `restriction` (e.g. "be generic"). Sets the header, points at a package nested under the namespace, and says
+    // how to fix it: `alternative`, or making this package's `imported_by_nested_packages!` take effect.
+    void explainSubpackageNamespaceError(const core::GlobalState &gs, ErrorBuilder &e, std::string_view subject,
+                                         std::string_view restriction, ClassOrModuleRef packageRegistryOwner,
+                                         std::string_view namespaceName, std::string_view alternative) const;
+
     const Import *importsPackage(MangledName mangledName) const;
+
+    // The packages enclosing this one (at any depth) that are marked `imported_by_nested_packages!`, but whose
+    // import requirement this package doesn't meet, nearest first.
+    //
+    // Consider something like this:
+    //
+    //     M1              # marked `imported_by_nested_packages!`
+    //     M1::M2          # also marked
+    //     M1::M2::Curr    # the current package
+    //
+    // A marked packge like M1 or M2 requires that each package nested under it either import that
+    // package (e.g., M2 must import M1) or some package between the marked package and the current
+    // package (e.g., Curr can import either M2 or M1).
+    //
+    // In particular, it's sufficient for `Curr` to only `import M2`, because `M2` must necessarily
+    // `import M1` (as it's also nested under `M1`). Thus for `Curr`, `import M2` implies `import M1`.
+    //
+    // Thus the autocorrect to import a missing import in `Curr` only needs `enclosingPackagesMissingImport(gs)[0]`,
+    // but we have to compute the full list because the packager needs all of them, so it can record on the
+    // enclosing ones that their `imported_by_nested_packages!` marker was not satisfied.
+    std::vector<MangledName> enclosingPackagesMissingImport(const core::GlobalState &gs) const;
+
+    // A variant of `enclosingPackagesMissingImport` for package `pkg` that takes its imports as parameters,
+    // for callers that check a set of imports they've just computed (e.g., GenPackages).
+    //
+    // A package counts as imported if it's in either `imports` or `moreImports`.
+    static std::vector<MangledName> enclosingPackagesMissingImport(const core::GlobalState &gs, MangledName pkg,
+                                                                   absl::Span<const Import> imports,
+                                                                   const UnorderedSet<MangledName> &moreImports);
 
     // Is it a layering violation to import otherPkg from this package?
     bool causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const;
@@ -257,6 +305,14 @@ public:
         return this->locs.testPackage.exists();
     }
 
+    // True when this package is marked `imported_by_nested_packages!` AND every package nested
+    // under it meets that import requirement.
+    //
+    // (Only then does the annotation take effect, because otherwise a nested package might be typechecked before it.)
+    bool importedByNestedPackagesSatisfied() const {
+        return this->importedByNestedPackages() && !this->nestedPackageMissingImport.exists();
+    }
+
     // Do this package's visible_to rules allow `importingPkg` to import this package?
     bool isVisibleTo(const core::GlobalState &gs, const PackageInfo &importingPkgInfo) const;
 
@@ -267,7 +323,8 @@ public:
         // The symbol is in the PackageSpecRegistry hierarchy, and cannot be modified.
         PackageSpec,
 
-        // The symbol is the namespace of a package, and subpackges exist.
+        // The symbol is a namespace on the path to a subpackage, and this package's `imported_by_nested_packages!`
+        // doesn't take effect (see `importedByNestedPackagesSatisfied`).
         Subpackages,
 
         // The symbol belongs to another package.
@@ -321,8 +378,17 @@ public:
     renderPackageRbContents(const core::GlobalState &gs, std::vector<Import> newImports,
                             const UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel>
                                 &newStrictnessByPkg) const;
+
+private:
+    // True when the package is marked `imported_by_nested_packages!`.
+    //
+    // Whether the annotation takes effect also depends on the packages nested under this one, so code deciding what
+    // to allow on this package's namespaces must use `importedByNestedPackagesSatisfied` instead.
+    bool importedByNestedPackages() const {
+        return this->locs.importedByNestedPackages.exists();
+    }
 };
-CheckSize(PackageInfo, 216, 8);
+CheckSize(PackageInfo, 232, 8);
 
 } // namespace sorbet::core::packages
 #endif
