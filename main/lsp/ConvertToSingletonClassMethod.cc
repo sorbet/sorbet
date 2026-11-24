@@ -107,7 +107,7 @@ core::LocOffsets receiverWithParens(string_view source, core::LocOffsets send, c
 
     // Make sure the receiver is inside the send.
     // A receiver without parens starts where its send starts, so the scan below stops right away.
-    if (!(send.beginPos() <= receiver.beginPos() && receiver.endPos() <= send.endPos())) {
+    if (!send.exists() || !send.contains(receiver)) {
         return receiver;
     }
 
