@@ -49,6 +49,14 @@ class T::Enum
   sig {overridable.params(serialized_val: T.untyped).returns(T::Boolean)}
   def self.has_serialized?(serialized_val); end
 
+  # Whether the `enums do` block has started running
+  sig { returns(T::Boolean) }
+  def self.started_initializing?; end
+
+  # Whether the `enums do` block has finished running
+  sig { returns(T::Boolean) }
+  def self.fully_initialized?; end
+
 
   ## T::Props::CustomType
 
