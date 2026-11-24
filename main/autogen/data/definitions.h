@@ -155,7 +155,6 @@ struct Reference {
 CheckSize(Reference, 96, 8);
 
 struct AutogenConfig {
-    const std::vector<std::string> behaviorAllowedInRBIsPaths;
     const bool msgpackSkipReferenceMetadata = false;
 };
 

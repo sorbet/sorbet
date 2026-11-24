@@ -1,7 +1,7 @@
 // has to go first because it violates our poisons
 #include "mpack/mpack.h"
 
-#include "absl/strings/match.h"
+#include "absl/algorithm/container.h"
 #include "core/GlobalState.h"
 #include "main/autogen/data/definitions.h"
 #include "main/autogen/data/msgpack.h"
@@ -104,8 +104,7 @@ void MsgpackWriterFull::packRange(mpack_writer_t *writer, uint32_t begin, uint32
     mpack_write_u32(writer, end - begin);
 }
 
-void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
-                                       const AutogenConfig &autogenCfg) {
+void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def) {
     optional<MsgpackArray> defsArray;
 
     if (version <= 6) {
@@ -122,11 +121,7 @@ void MsgpackWriterFull::packDefinition(mpack_writer_t *writer, core::Context ctx
 
     // defines_behavior
     packBool(writer, def.defines_behavior);
-    const auto &filePath = ctx.file.data(ctx).path();
-    ENFORCE(!def.defines_behavior || !ctx.file.data(ctx).isRBI() ||
-                absl::c_any_of(autogenCfg.behaviorAllowedInRBIsPaths,
-                               [&](auto &allowedPath) { return absl::StartsWith(filePath, allowedPath); }),
-            "RBI files should never define behavior");
+    ENFORCE(!def.defines_behavior || !ctx.file.data(ctx).isRBI(), "RBI files should never define behavior");
 
     // isEmpty
     packBool(writer, def.is_empty);
@@ -191,7 +186,7 @@ void MsgpackWriterBase::writeSymbols(core::Context ctx, mpack_writer_t *writer, 
     }
 }
 
-string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg) {
+string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf) {
     char *body;
     size_t bodySize;
     mpack_writer_t writer;
@@ -229,7 +224,7 @@ string MsgpackWriterFull::pack(core::Context ctx, ParsedFile &pf, const AutogenC
             {
                 MsgpackArray defs(&temporaryWriter, pf.defs.size());
                 for (auto &def : pf.defs) {
-                    packDefinition(&temporaryWriter, ctx, pf, def, autogenCfg);
+                    packDefinition(&temporaryWriter, ctx, pf, def);
                 }
             }
 

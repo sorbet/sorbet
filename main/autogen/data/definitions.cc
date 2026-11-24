@@ -170,11 +170,11 @@ string ParsedFile::toMsgpack(core::Context ctx, int version, const AutogenConfig
     if (autogenCfg.msgpackSkipReferenceMetadata) {
         MsgpackWriterLite write(version);
 
-        return write.pack(ctx, *this, autogenCfg);
+        return write.pack(ctx, *this);
     } else {
         MsgpackWriterFull write(version);
 
-        return write.pack(ctx, *this, autogenCfg);
+        return write.pack(ctx, *this);
     }
 }
 

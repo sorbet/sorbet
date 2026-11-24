@@ -749,10 +749,6 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
     options.add_options(section)("autogen-subclasses-ignore",
                                  "Like --ignore, but only ignore <pattern> in `-p autogen-subclasses`. (repeatable)",
                                  cxxopts::value<vector<string>>(), "<pattern>[,<pattern>...]");
-    options.add_options(section)("autogen-behavior-allowed-in-rbi-files-paths",
-                                 "Autogen may consider RBI files whose paths start "
-                                 "with <path-prefix> to be behavior-defining. (repeatable)",
-                                 cxxopts::value<vector<string>>(), "<path-prefix>[,<path-prefix>...]");
     options.add_options(section)("autogen-msgpack-skip-reference-metadata",
                                  "Skip serializing extra metadata on references when printing msgpack in autogen",
                                  cxxopts::value<bool>());
@@ -1205,16 +1201,6 @@ void readOptions(Options &opts,
                     opts.autogenSubclassesRelativeIgnorePatterns.emplace_back(fmt::format("/{}", pNormalized));
                 }
             }
-        }
-
-        if (raw.count("autogen-behavior-allowed-in-rbi-files-paths") > 0) {
-            if (!opts.cacheSensitiveOptions.runningUnderAutogen) {
-                logger->error("autogen-behavior-allowed-in-rbi-files-paths can only be used with -p autogen or -p "
-                              "autogen-msgpack");
-                throw EarlyReturnWithCode(1);
-            }
-            opts.autogenBehaviorAllowedInRBIFilesPaths =
-                raw["autogen-behavior-allowed-in-rbi-files-paths"].as<vector<string>>();
         }
 
         opts.autogenMsgpackSkipReferenceMetadata = raw["autogen-msgpack-skip-reference-metadata"].as<bool>();
