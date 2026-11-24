@@ -97,8 +97,8 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
 // When in doubt, it returns the receiver's loc unchanged, which is what the code action used before
 // it looked for parens (i.e., no worse than before).
 //
-// The cursors `open` and `close` only ever move away from the receiver, and stay inside the send,
-// so the loop terminates, and it never goes back to a character it has already passed.
+// It only looks at the send's text, and since it only ever shrinks its views of that text, it never
+// goes back to a character it has passed.
 core::LocOffsets receiverWithParens(string_view source, core::LocOffsets send, core::LocOffsets receiver) {
     // (The receiver of the `x.foo` that `x&.foo` desugars to is a temporary that holds `x`, with a zero-width loc.)
     if (receiver.empty()) {
@@ -111,33 +111,22 @@ core::LocOffsets receiverWithParens(string_view source, core::LocOffsets send, c
         return receiver;
     }
 
-    // `[begin, end)` is always the receiver wrapped in zero or more pairs of matched parens.
-    auto begin = receiver.beginPos(), end = receiver.endPos();
-    // These cursors search outwards from the current receiver to find the next pair.
-    auto open = begin, close = end;
-    while (true) {
-        ENFORCE(send.beginPos() <= begin && begin <= receiver.beginPos());
-        ENFORCE(receiver.endPos() <= end && end <= send.endPos());
+    // `before` and `after` are the parts of the send before and after the receiver. The text between
+    // them is always the receiver wrapped in zero or more pairs of matched parens: `before` only ever
+    // loses characters from its end, and `after` only from its start. `open` and `close` are the same,
+    // without the whitespace next to the receiver.
+    auto before = source.substr(send.beginPos(), receiver.beginPos() - send.beginPos());
+    auto after = source.substr(receiver.endPos(), send.endPos() - receiver.endPos());
+    auto open = absl::StripTrailingAsciiWhitespace(before);
+    auto close = absl::StripLeadingAsciiWhitespace(after);
 
-        // Skip over whitespace
-        while (open > send.beginPos() && absl::ascii_isspace(source[open - 1])) {
-            open--;
-        }
-        while (close < send.endPos() && absl::ascii_isspace(source[close])) {
-            close++;
-        }
-
-        if (open == send.beginPos() || close == send.endPos() || source[open - 1] != '(' || source[close] != ')') {
-            // Reached the bounds of the send, or didn't find parens on both sides.
-            break;
-        }
-
-        // Found matching open/close parentheses, let's consume and look for more.
-        begin = --open;
-        end = ++close;
-
-        ENFORCE(begin < receiver.beginPos() && receiver.endPos() < end);
-        ENFORCE(source[begin] == '(' && source[end - 1] == ')');
+    // Each iteration takes a pair of parens, so `before` and `after` get shorter. They can't get
+    // shorter than empty, so the loop terminates.
+    while (!open.empty() && !close.empty() && open.back() == '(' && close.front() == ')') {
+        before = open.substr(0, open.size() - 1);
+        after = close.substr(1);
+        open = absl::StripTrailingAsciiWhitespace(before);
+        close = absl::StripLeadingAsciiWhitespace(after);
     }
 
     // Scanning backwards can land on a paren in a comment, not the real paren:
@@ -155,12 +144,15 @@ core::LocOffsets receiverWithParens(string_view source, core::LocOffsets send, c
     //
     // If we find something, give up and return the receiver. This is pessimistic and might generate a
     // bad edit anyways (e.g., in cases where preserving the parens was truly required), but oh well.
-    for (auto i = open; i > send.beginPos() && source[i - 1] != '\n'; i--) {
-        if (source[i - 1] == '#' || source[i - 1] == '=') {
-            return receiver;
-        }
+    auto lastOnLine = open.find_last_of("\n#=");
+    if (lastOnLine != string_view::npos && open[lastOnLine] != '\n') {
+        return receiver;
     }
 
+    uint32_t begin = send.beginPos() + before.size();
+    uint32_t end = send.endPos() - after.size();
+    ENFORCE(begin == receiver.beginPos() || (source[begin] == '(' && begin < receiver.beginPos()));
+    ENFORCE(end == receiver.endPos() || (source[end - 1] == ')' && receiver.endPos() < end));
     return {begin, end};
 }
 
