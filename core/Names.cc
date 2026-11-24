@@ -415,24 +415,27 @@ void NameRef::sanityCheckSubstitution(const NameSubstitution &subst) const {
 }
 
 const UniqueNameData NameRef::dataUnique(const GlobalState &gs) const {
+    const auto &names = gs.nameTable;
     ENFORCE_NO_TIMER(kind() == NameKind::UNIQUE);
-    ENFORCE_NO_TIMER(uniqueIndex() < gs.nameTable.uniqueNames.size(), "unique name {} id out of bounds {}",
-                     uniqueIndex(), gs.nameTable.uniqueNames.size());
-    return UniqueNameData(gs.nameTable.uniqueNames[uniqueIndex()], gs);
+    ENFORCE_NO_TIMER(uniqueIndex() < names.uniqueNames.size(), "unique name {} id out of bounds {}", uniqueIndex(),
+                     names.uniqueNames.size());
+    return UniqueNameData(names.uniqueNames[uniqueIndex()], gs);
 }
 
 const UTF8NameData NameRef::dataUtf8(const GlobalState &gs) const {
+    const auto &names = gs.nameTable;
     ENFORCE_NO_TIMER(kind() == NameKind::UTF8);
-    ENFORCE_NO_TIMER(utf8Index() < gs.nameTable.utf8Names.size(), "utf8 name {} id out of bounds {}", utf8Index(),
-                     gs.nameTable.utf8Names.size());
-    return UTF8NameData(gs.nameTable.utf8Names[utf8Index()], gs);
+    ENFORCE_NO_TIMER(utf8Index() < names.utf8Names.size(), "utf8 name {} id out of bounds {}", utf8Index(),
+                     names.utf8Names.size());
+    return UTF8NameData(names.utf8Names[utf8Index()], gs);
 }
 
 const ConstantNameData NameRef::dataCnst(const GlobalState &gs) const {
+    const auto &names = gs.nameTable;
     ENFORCE_NO_TIMER(kind() == NameKind::CONSTANT);
-    ENFORCE_NO_TIMER(constantIndex() < gs.nameTable.constantNames.size(), "constant name {} id out of bounds {}",
-                     constantIndex(), gs.nameTable.constantNames.size());
-    return ConstantNameData(gs.nameTable.constantNames[constantIndex()], gs);
+    ENFORCE_NO_TIMER(constantIndex() < names.constantNames.size(), "constant name {} id out of bounds {}",
+                     constantIndex(), names.constantNames.size());
+    return ConstantNameData(names.constantNames[constantIndex()], gs);
 }
 
 NameRef NameRef::addEq(GlobalState &gs) const {

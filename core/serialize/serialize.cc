@@ -965,36 +965,38 @@ Pickler SerializerImpl::pickleNameTable(const GlobalState &gs) {
 }
 
 void SerializerImpl::pickleNameTable(Pickler &p, const GlobalState &gs) {
+    const auto &names = gs.nameTable;
     // Write the size of the hash table out first, so that we can pre-allocate it when deserializing.
-    p.putU4(gs.nameTable.namesByHash.size());
+    p.putU4(names.namesByHash.size());
 
-    p.putU4(gs.nameTable.utf8Names.size());
-    for (const auto &n : gs.nameTable.utf8Names) {
+    p.putU4(names.utf8Names.size());
+    for (const auto &n : names.utf8Names) {
         p.putU4(core::NameHash::hashMixUTF8(n.utf8));
         pickle(p, n);
     }
-    p.putU4(gs.nameTable.constantNames.size());
-    for (const auto &n : gs.nameTable.constantNames) {
+    p.putU4(names.constantNames.size());
+    for (const auto &n : names.constantNames) {
         p.putU4(core::NameHash::hashMixConstant(n.original.rawId()));
         pickle(p, n);
     }
-    p.putU4(gs.nameTable.uniqueNames.size());
-    for (const auto &n : gs.nameTable.uniqueNames) {
+    p.putU4(names.uniqueNames.size());
+    for (const auto &n : names.uniqueNames) {
         p.putU4(core::NameHash::hashMixUnique(n.uniqueNameKind, n.num, n.original.rawId()));
         pickle(p, n);
     }
 }
 
 void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
-    result.nameTable.utf8Names.clear();
-    result.nameTable.constantNames.clear();
-    result.nameTable.uniqueNames.clear();
-    result.nameTable.namesByHash.clear();
+    auto &names = result.nameTable;
+    names.utf8Names.clear();
+    names.constantNames.clear();
+    names.uniqueNames.clear();
+    names.namesByHash.clear();
 
     {
         Timer timeit(result.tracer(), "preallocateNameHash");
         auto namesByHashSize = p.getU4();
-        result.nameTable.namesByHash.resize(namesByHashSize);
+        names.namesByHash.resize(namesByHashSize);
     }
 
     {
@@ -1002,102 +1004,104 @@ void SerializerImpl::unpickleNameTable(UnPickler &p, GlobalState &result) {
 
         int namesSize = p.getU4();
         ENFORCE_NO_TIMER(namesSize > 0);
-        result.nameTable.utf8Names.reserve(nextPowerOfTwo(namesSize));
+        names.utf8Names.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             auto hash = p.getU4();
-            result.nameTable.utf8Names.emplace_back(unpickleUTF8Name(p, result));
-            auto &bucket = result.nameTable.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+            names.utf8Names.emplace_back(unpickleUTF8Name(p, result));
+            auto &bucket = names.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
             bucket.hash = hash;
             bucket.rawId = core::NameRef(result, core::NameKind::UTF8, i).rawId();
         }
         namesSize = p.getU4();
         ENFORCE_NO_TIMER(namesSize > 0);
-        result.nameTable.constantNames.reserve(nextPowerOfTwo(namesSize));
+        names.constantNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             auto hash = p.getU4();
-            result.nameTable.constantNames.emplace_back(unpickleConstantName(p, result));
-            auto &bucket = result.nameTable.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+            names.constantNames.emplace_back(unpickleConstantName(p, result));
+            auto &bucket = names.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
             bucket.hash = hash;
             bucket.rawId = core::NameRef(result, core::NameKind::CONSTANT, i).rawId();
         }
         namesSize = p.getU4();
         ENFORCE_NO_TIMER(namesSize > 0);
-        result.nameTable.uniqueNames.reserve(nextPowerOfTwo(namesSize));
+        names.uniqueNames.reserve(nextPowerOfTwo(namesSize));
         for (int i = 0; i < namesSize; i++) {
             auto hash = p.getU4();
-            result.nameTable.uniqueNames.emplace_back(unpickleUniqueName(p, result));
-            auto &bucket = result.nameTable.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+            names.uniqueNames.emplace_back(unpickleUniqueName(p, result));
+            auto &bucket = names.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
             bucket.hash = hash;
             bucket.rawId = core::NameRef(result, core::NameKind::UNIQUE, i).rawId();
         }
     }
 }
 void SerializerImpl::pickleNameTableDiff(Pickler &p, const GlobalState &gs) {
-    auto startUtf8 = gs.nameTable.utf8NamesWritten_;
-    auto numNewUtf8 = gs.nameTable.utf8Names.size() - startUtf8;
+    const auto &names = gs.nameTable;
+    auto startUtf8 = names.utf8NamesWritten_;
+    auto numNewUtf8 = names.utf8Names.size() - startUtf8;
     p.putU4(startUtf8);
     p.putU4(numNewUtf8);
 
-    for (unsigned int i = startUtf8; i < gs.nameTable.utf8Names.size(); i++) {
-        p.putU4(core::NameHash::hashMixUTF8(gs.nameTable.utf8Names[i].utf8));
-        pickle(p, gs.nameTable.utf8Names[i]);
+    for (unsigned int i = startUtf8; i < names.utf8Names.size(); i++) {
+        p.putU4(core::NameHash::hashMixUTF8(names.utf8Names[i].utf8));
+        pickle(p, names.utf8Names[i]);
     }
 
-    auto startConstant = gs.nameTable.constantNamesWritten_;
-    auto numNewConstant = gs.nameTable.constantNames.size() - startConstant;
+    auto startConstant = names.constantNamesWritten_;
+    auto numNewConstant = names.constantNames.size() - startConstant;
     p.putU4(startConstant);
     p.putU4(numNewConstant);
 
-    for (unsigned int i = startConstant; i < gs.nameTable.constantNames.size(); i++) {
-        p.putU4(core::NameHash::hashMixConstant(gs.nameTable.constantNames[i].original.rawId()));
-        pickle(p, gs.nameTable.constantNames[i]);
+    for (unsigned int i = startConstant; i < names.constantNames.size(); i++) {
+        p.putU4(core::NameHash::hashMixConstant(names.constantNames[i].original.rawId()));
+        pickle(p, names.constantNames[i]);
     }
 
-    auto startUnique = gs.nameTable.uniqueNamesWritten_;
-    auto numNewUnique = gs.nameTable.uniqueNames.size() - startUnique;
+    auto startUnique = names.uniqueNamesWritten_;
+    auto numNewUnique = names.uniqueNames.size() - startUnique;
     p.putU4(startUnique);
     p.putU4(numNewUnique);
 
-    for (unsigned int i = startUnique; i < gs.nameTable.uniqueNames.size(); i++) {
-        auto &n = gs.nameTable.uniqueNames[i];
+    for (unsigned int i = startUnique; i < names.uniqueNames.size(); i++) {
+        auto &n = names.uniqueNames[i];
         p.putU4(core::NameHash::hashMixUnique(n.uniqueNameKind, n.num, n.original.rawId()));
         pickle(p, n);
     }
 }
 
 void SerializerImpl::unpickleNameTableDiff(UnPickler &p, GlobalState &result) {
+    auto &names = result.nameTable;
     auto startUtf8 = p.getU4();
     auto numNewUtf8 = p.getU4();
-    ENFORCE(result.nameTable.utf8Names.size() == startUtf8);
+    ENFORCE(names.utf8Names.size() == startUtf8);
 
     for (uint32_t i = startUtf8; i < startUtf8 + numNewUtf8; i++) {
         auto hash = p.getU4();
-        result.nameTable.utf8Names.emplace_back(unpickleUTF8Name(p, result));
-        auto &bucket = result.nameTable.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+        names.utf8Names.emplace_back(unpickleUTF8Name(p, result));
+        auto &bucket = names.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
         bucket.hash = hash;
         bucket.rawId = core::NameRef(result, core::NameKind::UTF8, i).rawId();
     }
 
     auto startConstant = p.getU4();
     auto numNewConstant = p.getU4();
-    ENFORCE(result.nameTable.constantNames.size() == startConstant);
+    ENFORCE(names.constantNames.size() == startConstant);
 
     for (uint32_t i = startConstant; i < startConstant + numNewConstant; i++) {
         auto hash = p.getU4();
-        result.nameTable.constantNames.emplace_back(unpickleConstantName(p, result));
-        auto &bucket = result.nameTable.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+        names.constantNames.emplace_back(unpickleConstantName(p, result));
+        auto &bucket = names.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
         bucket.hash = hash;
         bucket.rawId = core::NameRef(result, core::NameKind::CONSTANT, i).rawId();
     }
 
     auto startUnique = p.getU4();
     auto numNewUnique = p.getU4();
-    ENFORCE(result.nameTable.uniqueNames.size() == startUnique);
+    ENFORCE(names.uniqueNames.size() == startUnique);
 
     for (uint32_t i = startUnique; i < startUnique + numNewUnique; i++) {
         auto hash = p.getU4();
-        result.nameTable.uniqueNames.emplace_back(unpickleUniqueName(p, result));
-        auto &bucket = result.nameTable.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+        names.uniqueNames.emplace_back(unpickleUniqueName(p, result));
+        auto &bucket = names.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
         bucket.hash = hash;
         bucket.rawId = core::NameRef(result, core::NameKind::UNIQUE, i).rawId();
     }
@@ -1149,21 +1153,23 @@ void Serializer::loadAndAppendNameTableDiff(GlobalState &gs, const uint8_t *cons
 }
 
 vector<uint8_t> Serializer::storeNameTableDiffCountAndHashSize(uint32_t count, const GlobalState &gs) {
+    const auto &names = gs.nameTable;
     Pickler p;
     p.putU4(Serializer::VERSION);
     p.putU4(count);
-    p.putU4(gs.nameTable.namesByHash.size());
-    p.putU4(gs.nameTable.utf8Names.size());
-    p.putU4(gs.nameTable.constantNames.size());
-    p.putU4(gs.nameTable.uniqueNames.size());
+    p.putU4(names.namesByHash.size());
+    p.putU4(names.utf8Names.size());
+    p.putU4(names.constantNames.size());
+    p.putU4(names.uniqueNames.size());
     return p.result();
 }
 
 uint32_t Serializer::loadNameTableDiffCountAndResizeNamesHash(GlobalState &gs, const uint8_t *const data) {
-    gs.nameTable.utf8Names.clear();
-    gs.nameTable.constantNames.clear();
-    gs.nameTable.uniqueNames.clear();
-    gs.nameTable.namesByHash.clear();
+    auto &names = gs.nameTable;
+    names.utf8Names.clear();
+    names.constantNames.clear();
+    names.uniqueNames.clear();
+    names.namesByHash.clear();
 
     UnPickler p(data, gs.tracer());
     if (p.getU4() != Serializer::VERSION) {
@@ -1174,10 +1180,10 @@ uint32_t Serializer::loadNameTableDiffCountAndResizeNamesHash(GlobalState &gs, c
     auto utf8NamesSize = p.getU4();
     auto constantNamesSize = p.getU4();
     auto uniqueNamesSize = p.getU4();
-    gs.nameTable.namesByHash.resize(namesByHashSize);
-    gs.nameTable.utf8Names.reserve(nextPowerOfTwo(utf8NamesSize));
-    gs.nameTable.constantNames.reserve(nextPowerOfTwo(constantNamesSize));
-    gs.nameTable.uniqueNames.reserve(nextPowerOfTwo(uniqueNamesSize));
+    names.namesByHash.resize(namesByHashSize);
+    names.utf8Names.reserve(nextPowerOfTwo(utf8NamesSize));
+    names.constantNames.reserve(nextPowerOfTwo(constantNamesSize));
+    names.uniqueNames.reserve(nextPowerOfTwo(uniqueNamesSize));
     return diffCount;
 }
 
