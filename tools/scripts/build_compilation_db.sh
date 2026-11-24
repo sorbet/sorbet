@@ -42,10 +42,25 @@ if ! ./bazel build "$ui_event_filter" "${bazel_args[@]}" //tools:compdb >&2; the
   exit 1
 fi
 
+# Absolutely qualify `external/` paths into the output_base, so that running
+# another target (like `format_cxx.sh`) doesn't make clangd fail to find all
+# the files it's looking for.
+#
+# This is a bit bespoke, because those paths can show up either like
+#
+#     -Iexternal/
+#     -Bexternal/
+#     ... external/ ...
+#     "external/..."
+#
+# and the `external/` substring could show up in other places (e.g.,
+# `foo/external/bar`). But this regex seems to work on all paths we produce today.
+output_base="$(./bazel info "${bazel_args[@]}" output_base 2> /dev/null)"
+sed -E "s#([ \"]|-[BI])external/#\\1$output_base/external/#g" bazel-bin/tools/compile_commands.json > compile_commands.json
+
 if command -v jq &> /dev/null; then
-  jq . < bazel-bin/tools/compile_commands.json > compile_commands.json
-else
-  cp bazel-bin/tools/compile_commands.json compile_commands.json
+  jq . < compile_commands.json > compile_commands.json.tmp
+  mv compile_commands.json.tmp compile_commands.json
 fi
 
 echo '[ .. ] Wrote ./compile_commands.json'
