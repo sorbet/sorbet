@@ -205,6 +205,37 @@ TEST_CASE("Substitute") {
     REQUIRE_EQ("<U other>", other2.showRaw(gs2));
 }
 
+TEST_CASE("NameRefOwnershipUsesNameTableId") {
+    GlobalState gs(errorQueue);
+    gs.initEmpty();
+    GlobalState other(errorQueue);
+    other.initEmpty();
+
+    NameRef constant, otherConstant;
+    {
+        UnfreezeNameTable thaw(gs);
+        UnfreezeNameTable thawOther(other);
+        constant = gs.enterNameConstant("NameTableOwnership");
+        otherConstant = other.enterNameConstant("NameTableOwnership");
+    }
+
+    // Changing global state IDs must not affect name ownership or confuse the double-substitution check.
+    gs.globalStateId = other.globalStateId;
+    auto original = constant.dataCnst(gs)->original;
+    CHECK_NOTHROW(original.enforceCorrectGlobalState(gs));
+    if constexpr (debug_mode) {
+        CHECK_THROWS_WITH_AS(original.enforceCorrectGlobalState(other),
+                             doctest::Contains("NameRef not owned by correct NameTable"), SorbetException);
+    }
+
+    NameSubstitution subst(gs, other);
+    CHECK_EQ(subst.substitute(constant), otherConstant);
+    if constexpr (debug_mode) {
+        CHECK_THROWS_WITH_AS(subst.substitute(otherConstant), doctest::Contains("substituting a name twice!"),
+                             SorbetException);
+    }
+}
+
 TEST_CASE("CopyForSlowPathPreservesNameRefOwnership") {
     GlobalState gs(errorQueue);
     gs.initEmpty();

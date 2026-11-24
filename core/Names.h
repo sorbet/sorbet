@@ -21,7 +21,7 @@ struct UniqueName final {
     uint32_t num;
     UniqueNameKind uniqueNameKind;
 
-    UniqueName deepCopy(const NameTable &names, int gsId) const;
+    UniqueName deepCopy(const NameTable &names) const;
 };
 
 CheckSize(UniqueName, 12, 4);
@@ -29,7 +29,7 @@ CheckSize(UniqueName, 12, 4);
 struct ConstantName final {
     NameRef original;
 
-    ConstantName deepCopy(const NameTable &names, int gsId) const;
+    ConstantName deepCopy(const NameTable &names) const;
 };
 CheckSize(ConstantName, 4, 4);
 

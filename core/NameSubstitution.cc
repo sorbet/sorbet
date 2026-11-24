@@ -5,7 +5,7 @@
 using namespace std;
 namespace sorbet::core {
 
-NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : toGlobalStateId(to.globalStateId) {
+NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : toNameTableId(to.nameTable.nameTableId) {
     Timer timeit(to.tracer(), "NameSubstitution.new", from.creation);
 
     SLOW_DEBUG_ONLY(from.sanityCheck());

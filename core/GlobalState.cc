@@ -2027,27 +2027,29 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->pathPrefix = other.pathPrefix;
 }
 
-NameTable NameTable::deepCopy(int fromGlobalStateId, int toGlobalStateId) const {
+NameTable NameTable::deepCopy(bool keepId) const {
     NameTable result;
+    if (keepId) {
+        result.nameTableId = this->nameTableId;
+    }
     result.deepCloneHistory = this->deepCloneHistory;
     result.deepCloneHistory.emplace_back(
-        DeepCloneHistoryEntry{fromGlobalStateId, utf8NamesUsed(), constantNamesUsed(), uniqueNamesUsed()});
+        DeepCloneHistoryEntry{this->nameTableId, utf8NamesUsed(), constantNamesUsed(), uniqueNamesUsed()});
 
     result.strings = this->strings;
     result.utf8Names.reserve(this->utf8Names.capacity());
     result.constantNames.reserve(this->constantNames.capacity());
     result.uniqueNames.reserve(this->uniqueNames.capacity());
     result.utf8Names = this->utf8Names;
-    if (fromGlobalStateId == toGlobalStateId) {
-        result.nameTableId = this->nameTableId;
+    if (keepId) {
         result.constantNames = this->constantNames;
         result.uniqueNames = this->uniqueNames;
     } else {
         for (const auto &name : this->constantNames) {
-            result.constantNames.emplace_back(name.deepCopy(result, toGlobalStateId));
+            result.constantNames.emplace_back(name.deepCopy(result));
         }
         for (const auto &name : this->uniqueNames) {
-            result.uniqueNames.emplace_back(name.deepCopy(result, toGlobalStateId));
+            result.uniqueNames.emplace_back(name.deepCopy(result));
         }
     }
 
@@ -2065,7 +2067,7 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     if (keepId) {
         result->globalStateId = this->globalStateId;
     }
-    result->nameTable = this->nameTable.deepCopy(this->globalStateId, result->globalStateId);
+    result->nameTable = this->nameTable.deepCopy(keepId);
 
     result->files = make_shared<FileTable>(*this->files);
     result->lspQuery = this->lspQuery;

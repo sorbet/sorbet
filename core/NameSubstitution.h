@@ -57,7 +57,7 @@ private:
     std::vector<NameRef> constantNameSubstitution;
     std::vector<NameRef> uniqueNameSubstitution;
 
-    int toGlobalStateId;
+    int toNameTableId;
 };
 
 /**

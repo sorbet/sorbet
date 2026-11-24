@@ -198,10 +198,10 @@ class NameTable final {
     friend struct NameRefDebugCheck;
 
     struct DeepCloneHistoryEntry {
-        int globalStateId;
-        unsigned int lastUTF8NameKnownByParentGlobalState;
-        unsigned int lastConstantNameKnownByParentGlobalState;
-        unsigned int lastUniqueNameKnownByParentGlobalState;
+        int nameTableId;
+        unsigned int lastUTF8NameKnownByParentNameTable;
+        unsigned int lastConstantNameKnownByParentNameTable;
+        unsigned int lastUniqueNameKnownByParentNameTable;
     };
     std::vector<DeepCloneHistoryEntry> deepCloneHistory;
 
@@ -256,9 +256,8 @@ public:
         return this->nameTableDiffCount;
     }
 
-    // Copy names and clone history for the destination ID, leaving cache bookkeeping and freeze state at defaults.
-    // Preserve the name table ID when the source and destination global state IDs match.
-    NameTable deepCopy(int fromGlobalStateId, int toGlobalStateId) const;
+    // Copy names and clone history, optionally preserving the ID. Cache bookkeeping and freeze state use defaults.
+    NameTable deepCopy(bool keepId = false) const;
 };
 
 class FileTable {
