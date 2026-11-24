@@ -341,7 +341,7 @@ NameRefDebugCheck::NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint3
     // store the globalStateId of the creating global state to allow sharing refs between siblings
     // when the ref refers to a name in the common ancestor
     globalStateId = gs.globalStateId;
-    for (const auto &deepCloneInfo : gs.deepCloneHistory) {
+    for (const auto &deepCloneInfo : gs.nameTable.deepCloneHistory) {
         switch (kind) {
             case NameKind::UTF8:
                 if (index < deepCloneInfo.lastUTF8NameKnownByParentGlobalState) {
@@ -378,7 +378,7 @@ void NameRefDebugCheck::check(const GlobalState &gs, NameKind kind, uint32_t ind
     if (globalStateId == gs.globalStateId) {
         return;
     }
-    for (const auto &deepCloneInfo : gs.deepCloneHistory) {
+    for (const auto &deepCloneInfo : gs.nameTable.deepCloneHistory) {
         if (globalStateId == deepCloneInfo.globalStateId) {
             switch (kind) {
                 case NameKind::UTF8:
@@ -416,23 +416,23 @@ void NameRef::sanityCheckSubstitution(const NameSubstitution &subst) const {
 
 const UniqueNameData NameRef::dataUnique(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(kind() == NameKind::UNIQUE);
-    ENFORCE_NO_TIMER(uniqueIndex() < gs.uniqueNames.size(), "unique name {} id out of bounds {}", uniqueIndex(),
-                     gs.uniqueNames.size());
-    return UniqueNameData(gs.uniqueNames[uniqueIndex()], gs);
+    ENFORCE_NO_TIMER(uniqueIndex() < gs.nameTable.uniqueNames.size(), "unique name {} id out of bounds {}",
+                     uniqueIndex(), gs.nameTable.uniqueNames.size());
+    return UniqueNameData(gs.nameTable.uniqueNames[uniqueIndex()], gs);
 }
 
 const UTF8NameData NameRef::dataUtf8(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(kind() == NameKind::UTF8);
-    ENFORCE_NO_TIMER(utf8Index() < gs.utf8Names.size(), "utf8 name {} id out of bounds {}", utf8Index(),
-                     gs.utf8Names.size());
-    return UTF8NameData(gs.utf8Names[utf8Index()], gs);
+    ENFORCE_NO_TIMER(utf8Index() < gs.nameTable.utf8Names.size(), "utf8 name {} id out of bounds {}", utf8Index(),
+                     gs.nameTable.utf8Names.size());
+    return UTF8NameData(gs.nameTable.utf8Names[utf8Index()], gs);
 }
 
 const ConstantNameData NameRef::dataCnst(const GlobalState &gs) const {
     ENFORCE_NO_TIMER(kind() == NameKind::CONSTANT);
-    ENFORCE_NO_TIMER(constantIndex() < gs.constantNames.size(), "constant name {} id out of bounds {}", constantIndex(),
-                     gs.constantNames.size());
-    return ConstantNameData(gs.constantNames[constantIndex()], gs);
+    ENFORCE_NO_TIMER(constantIndex() < gs.nameTable.constantNames.size(), "constant name {} id out of bounds {}",
+                     constantIndex(), gs.nameTable.constantNames.size());
+    return ConstantNameData(gs.nameTable.constantNames[constantIndex()], gs);
 }
 
 NameRef NameRef::addEq(GlobalState &gs) const {

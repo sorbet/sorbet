@@ -188,6 +188,44 @@ public:
     }
 };
 
+// Owns the name entries, their string storage and hash index, and the bookkeeping for caching and cloning them.
+class NameTable final {
+    friend class GlobalState;
+    friend class NameRef;
+    friend class NameSubstitution;
+    friend class serialize::Serializer;
+    friend class serialize::SerializerImpl;
+    friend struct NameRefDebugCheck;
+
+    struct DeepCloneHistoryEntry {
+        int globalStateId;
+        unsigned int lastUTF8NameKnownByParentGlobalState;
+        unsigned int lastConstantNameKnownByParentGlobalState;
+        unsigned int lastUniqueNameKnownByParentGlobalState;
+    };
+    std::vector<DeepCloneHistoryEntry> deepCloneHistory;
+
+    static constexpr int STRINGS_PAGE_SIZE = 4096;
+    StableStringStorage<STRINGS_PAGE_SIZE> strings;
+    std::vector<UTF8Name> utf8Names;
+    std::vector<ConstantName> constantNames;
+    std::vector<UniqueName> uniqueNames;
+    NameHash namesByHash;
+
+    uint32_t nameTableDiffCount = 0;
+    unsigned int utf8NamesWritten_ = 0;
+    unsigned int constantNamesWritten_ = 0;
+    unsigned int uniqueNamesWritten_ = 0;
+    bool nameTableFrozen = true;
+
+public:
+    NameTable() = default;
+    NameTable(const NameTable &) = delete;
+    NameTable(NameTable &&) = default;
+    NameTable &operator=(const NameTable &) = delete;
+    NameTable &operator=(NameTable &&) = default;
+};
+
 class FileTable {
     std::vector<std::shared_ptr<File>> files;
     UnorderedMap<std::string, FileRef> fileRefByPath;
@@ -754,35 +792,18 @@ public:
     }
 
 private:
-    uint32_t nameTableDiffCount = 0;
+    NameTable nameTable;
 
-    struct DeepCloneHistoryEntry {
-        int globalStateId;
-        unsigned int lastUTF8NameKnownByParentGlobalState;
-        unsigned int lastConstantNameKnownByParentGlobalState;
-        unsigned int lastUniqueNameKnownByParentGlobalState;
-    };
-    std::vector<DeepCloneHistoryEntry> deepCloneHistory;
-
-    static constexpr int STRINGS_PAGE_SIZE = 4096;
-    StableStringStorage<STRINGS_PAGE_SIZE> strings;
     std::string_view enterString(std::string_view nm);
-    std::vector<UTF8Name> utf8Names;
-    std::vector<ConstantName> constantNames;
-    std::vector<UniqueName> uniqueNames;
     std::vector<ClassOrModule> classAndModules;
     std::vector<Method> methods;
     std::vector<Field> fields;
     std::vector<TypeParameter> typeMembers;
     std::vector<TypeParameter> typeParameters;
-    NameHash namesByHash;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
     std::shared_ptr<FileTable> files;
-    unsigned int utf8NamesWritten_ = 0;
-    unsigned int constantNamesWritten_ = 0;
-    unsigned int uniqueNamesWritten_ = 0;
 
     core::packages::PackageDB packageDB_;
 
@@ -792,7 +813,6 @@ private:
     bool unfreezeSymbolTable();
     bool unfreezeNameTable();
     bool unfreezeFileTable();
-    bool nameTableFrozen = true;
     bool symbolTableFrozen = true;
     // Unlike symbolTableFrozen, this still allows updating existing symbols (e.g., adding locs).
     bool newSymbolsForbidden = false;
