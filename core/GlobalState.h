@@ -224,6 +224,32 @@ public:
     NameTable(NameTable &&) = default;
     NameTable &operator=(const NameTable &) = delete;
     NameTable &operator=(NameTable &&) = default;
+
+    unsigned int namesUsedTotal() const {
+        return this->utf8Names.size() + this->constantNames.size() + this->uniqueNames.size();
+    }
+
+    unsigned int utf8NamesUsed() const {
+        return this->utf8Names.size();
+    }
+
+    unsigned int constantNamesUsed() const {
+        return this->constantNames.size();
+    }
+
+    unsigned int uniqueNamesUsed() const {
+        return this->uniqueNames.size();
+    }
+
+    bool wasNameTableModified() const {
+        return this->utf8Names.size() > this->utf8NamesWritten_ ||
+               this->constantNames.size() > this->constantNamesWritten_ ||
+               this->uniqueNames.size() > this->uniqueNamesWritten_;
+    }
+
+    uint32_t getNameTableDiffCount() const {
+        return this->nameTableDiffCount;
+    }
 };
 
 class FileTable {
@@ -507,10 +533,18 @@ public:
     // See the comment on the implementation for more.
     void deleteTypeMemberSymbol(TypeMemberRef what);
     spdlog::logger &tracer() const;
-    unsigned int namesUsedTotal() const;
-    unsigned int utf8NamesUsed() const;
-    unsigned int constantNamesUsed() const;
-    unsigned int uniqueNamesUsed() const;
+    unsigned int namesUsedTotal() const {
+        return this->nameTable.namesUsedTotal();
+    }
+    unsigned int utf8NamesUsed() const {
+        return this->nameTable.utf8NamesUsed();
+    }
+    unsigned int constantNamesUsed() const {
+        return this->nameTable.constantNamesUsed();
+    }
+    unsigned int uniqueNamesUsed() const {
+        return this->nameTable.uniqueNamesUsed();
+    }
 
     unsigned int classAndModulesUsed() const;
     unsigned int methodsUsed() const;
@@ -558,10 +592,14 @@ public:
     ErrorBuilder beginIndexerError(Loc loc, ErrorClass what);
 
     int totalErrors() const;
-    bool wasNameTableModified() const;
+    bool wasNameTableModified() const {
+        return this->nameTable.wasNameTableModified();
+    }
     void markNameTableAsCached();
 
-    uint32_t getNameTableDiffCount() const;
+    uint32_t getNameTableDiffCount() const {
+        return this->nameTable.getNameTableDiffCount();
+    }
     void setNameTableDiffCount(uint32_t count);
     void incrementNameTableDiffCount();
 

@@ -1836,23 +1836,6 @@ unsigned int GlobalState::filesUsed() const {
     return files->size();
 }
 
-unsigned int GlobalState::namesUsedTotal() const {
-    const auto &names = this->nameTable;
-    return names.utf8Names.size() + names.constantNames.size() + names.uniqueNames.size();
-}
-
-unsigned int GlobalState::utf8NamesUsed() const {
-    return nameTable.utf8Names.size();
-}
-
-unsigned int GlobalState::constantNamesUsed() const {
-    return nameTable.constantNames.size();
-}
-
-unsigned int GlobalState::uniqueNamesUsed() const {
-    return nameTable.uniqueNames.size();
-}
-
 unsigned int GlobalState::symbolsUsedTotal() const {
     return classAndModulesUsed() + methodsUsed() + fieldsUsed() + typeParametersUsed() + typeMembersUsed();
 }
@@ -2407,22 +2390,11 @@ bool GlobalState::shouldReportErrorOn(FileRef file, ErrorClass what) const {
     return level >= what.minLevel;
 }
 
-bool GlobalState::wasNameTableModified() const {
-    const auto &names = this->nameTable;
-    return names.utf8Names.size() > names.utf8NamesWritten_ ||
-           names.constantNames.size() > names.constantNamesWritten_ ||
-           names.uniqueNames.size() > names.uniqueNamesWritten_;
-}
-
 void GlobalState::markNameTableAsCached() {
     auto &names = this->nameTable;
     names.utf8NamesWritten_ = names.utf8Names.size();
     names.constantNamesWritten_ = names.constantNames.size();
     names.uniqueNamesWritten_ = names.uniqueNames.size();
-}
-
-uint32_t GlobalState::getNameTableDiffCount() const {
-    return nameTable.nameTableDiffCount;
 }
 
 void GlobalState::setNameTableDiffCount(uint32_t count) {
