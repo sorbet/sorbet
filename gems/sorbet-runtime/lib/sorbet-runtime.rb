@@ -17,6 +17,7 @@ module T::Private::Types; end
 # an ordering between groups.
 
 # These are pre-reqs for almost everything in here.
+require_relative 'types/private/unbound_methods'
 require_relative 'types/configuration'
 require_relative 'types/_types'
 require_relative 'types/private/decl_state'

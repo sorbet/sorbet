@@ -2,10 +2,6 @@
 # typed: true
 
 module T::Private::Final
-  # Avoids adding a call cache entry to every module checked; see T::Private::ClassUtils.
-  INSTANCE_VARIABLE_DEFINED = Kernel.instance_method(:instance_variable_defined?)
-  private_constant :INSTANCE_VARIABLE_DEFINED
-
   module NoInherit
     def inherited(arg)
       super(arg)
@@ -45,7 +41,7 @@ module T::Private::Final
   end
 
   def self.final_module?(mod)
-    INSTANCE_VARIABLE_DEFINED.bind_call(mod, :@sorbet_final_module)
+    T::Private::UnboundMethods::INSTANCE_VARIABLE_DEFINED.bind_call(mod, :@sorbet_final_module)
   end
 
   private_class_method def self.mark_as_final_module(mod)
