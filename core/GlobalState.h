@@ -188,6 +188,78 @@ public:
     }
 };
 
+// Owns the name entries, their string storage and hash index, and the bookkeeping for caching and cloning them.
+class NameTable final {
+    friend class GlobalState;
+    friend class NameRef;
+    friend class NameSubstitution;
+    friend class serialize::Serializer;
+    friend class serialize::SerializerImpl;
+    friend struct NameRefDebugCheck;
+
+    struct DeepCloneHistoryEntry {
+        int nameTableId;
+        unsigned int lastUTF8NameKnownByParentNameTable;
+        unsigned int lastConstantNameKnownByParentNameTable;
+        unsigned int lastUniqueNameKnownByParentNameTable;
+    };
+    std::vector<DeepCloneHistoryEntry> deepCloneHistory;
+
+    static constexpr int STRINGS_PAGE_SIZE = 4096;
+    StableStringStorage<STRINGS_PAGE_SIZE> strings;
+    std::vector<UTF8Name> utf8Names;
+    std::vector<ConstantName> constantNames;
+    std::vector<UniqueName> uniqueNames;
+    NameHash namesByHash;
+
+    uint32_t nameTableDiffCount = 0;
+    unsigned int utf8NamesWritten_ = 0;
+    unsigned int constantNamesWritten_ = 0;
+    unsigned int uniqueNamesWritten_ = 0;
+    bool nameTableFrozen = true;
+
+    // Allows hashing states to bypass the name table ID counter.
+    explicit NameTable(int nameTableId);
+
+public:
+    int nameTableId;
+
+    NameTable();
+    NameTable(const NameTable &) = delete;
+    NameTable(NameTable &&) = default;
+    NameTable &operator=(const NameTable &) = delete;
+    NameTable &operator=(NameTable &&) = default;
+
+    unsigned int namesUsedTotal() const {
+        return this->utf8Names.size() + this->constantNames.size() + this->uniqueNames.size();
+    }
+
+    unsigned int utf8NamesUsed() const {
+        return this->utf8Names.size();
+    }
+
+    unsigned int constantNamesUsed() const {
+        return this->constantNames.size();
+    }
+
+    unsigned int uniqueNamesUsed() const {
+        return this->uniqueNames.size();
+    }
+
+    bool wasNameTableModified() const {
+        return this->utf8Names.size() > this->utf8NamesWritten_ ||
+               this->constantNames.size() > this->constantNamesWritten_ ||
+               this->uniqueNames.size() > this->uniqueNamesWritten_;
+    }
+
+    uint32_t getNameTableDiffCount() const {
+        return this->nameTableDiffCount;
+    }
+
+    // Copy names and clone history, optionally preserving the ID. Cache bookkeeping and freeze state use defaults.
+    std::unique_ptr<NameTable> deepCopy(bool keepId = false) const;
+};
+
 class FileTable {
     std::vector<std::shared_ptr<File>> files;
     UnorderedMap<std::string, FileRef> fileRefByPath;
@@ -339,10 +411,10 @@ class GlobalState final {
     friend class UnfreezeFileTable;
     friend struct NameRefDebugCheck;
 
-    // Private constructor that allows a specific globalStateId. Used in `makeEmptyGlobalStateForHashing` to avoid
-    // contention on the global state ID atomic.
+    // Private constructor that accepts a specific global state ID and a preallocated name table. Used in
+    // `makeEmptyGlobalStateForHashing` to avoid contention on the ID atomics.
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager,
-                std::shared_ptr<FileTable> files, int globalStateId);
+                std::shared_ptr<FileTable> files, int globalStateId, std::shared_ptr<NameTable> nameTable);
 
 public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
@@ -469,10 +541,18 @@ public:
     // See the comment on the implementation for more.
     void deleteTypeMemberSymbol(TypeMemberRef what);
     spdlog::logger &tracer() const;
-    unsigned int namesUsedTotal() const;
-    unsigned int utf8NamesUsed() const;
-    unsigned int constantNamesUsed() const;
-    unsigned int uniqueNamesUsed() const;
+    unsigned int namesUsedTotal() const {
+        return this->nameTable->namesUsedTotal();
+    }
+    unsigned int utf8NamesUsed() const {
+        return this->nameTable->utf8NamesUsed();
+    }
+    unsigned int constantNamesUsed() const {
+        return this->nameTable->constantNamesUsed();
+    }
+    unsigned int uniqueNamesUsed() const {
+        return this->nameTable->uniqueNamesUsed();
+    }
 
     unsigned int classAndModulesUsed() const;
     unsigned int methodsUsed() const;
@@ -520,10 +600,14 @@ public:
     ErrorBuilder beginIndexerError(Loc loc, ErrorClass what);
 
     int totalErrors() const;
-    bool wasNameTableModified() const;
+    bool wasNameTableModified() const {
+        return this->nameTable->wasNameTableModified();
+    }
     void markNameTableAsCached();
 
-    uint32_t getNameTableDiffCount() const;
+    uint32_t getNameTableDiffCount() const {
+        return this->nameTable->getNameTableDiffCount();
+    }
     void setNameTableDiffCount(uint32_t count);
     void incrementNameTableDiffCount();
 
@@ -754,35 +838,18 @@ public:
     }
 
 private:
-    uint32_t nameTableDiffCount = 0;
+    std::shared_ptr<NameTable> nameTable;
 
-    struct DeepCloneHistoryEntry {
-        int globalStateId;
-        unsigned int lastUTF8NameKnownByParentGlobalState;
-        unsigned int lastConstantNameKnownByParentGlobalState;
-        unsigned int lastUniqueNameKnownByParentGlobalState;
-    };
-    std::vector<DeepCloneHistoryEntry> deepCloneHistory;
-
-    static constexpr int STRINGS_PAGE_SIZE = 4096;
-    StableStringStorage<STRINGS_PAGE_SIZE> strings;
     std::string_view enterString(std::string_view nm);
-    std::vector<UTF8Name> utf8Names;
-    std::vector<ConstantName> constantNames;
-    std::vector<UniqueName> uniqueNames;
     std::vector<ClassOrModule> classAndModules;
     std::vector<Method> methods;
     std::vector<Field> fields;
     std::vector<TypeParameter> typeMembers;
     std::vector<TypeParameter> typeParameters;
-    NameHash namesByHash;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
     std::shared_ptr<FileTable> files;
-    unsigned int utf8NamesWritten_ = 0;
-    unsigned int constantNamesWritten_ = 0;
-    unsigned int uniqueNamesWritten_ = 0;
 
     core::packages::PackageDB packageDB_;
 
@@ -792,7 +859,6 @@ private:
     bool unfreezeSymbolTable();
     bool unfreezeNameTable();
     bool unfreezeFileTable();
-    bool nameTableFrozen = true;
     bool symbolTableFrozen = true;
     // Unlike symbolTableFrozen, this still allows updating existing symbols (e.g., adding locs).
     bool newSymbolsForbidden = false;

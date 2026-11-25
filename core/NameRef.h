@@ -6,6 +6,7 @@
 
 namespace sorbet::core {
 class GlobalState;
+class NameTable;
 class NameSubstitution;
 struct UniqueName;
 struct ConstantName;
@@ -75,13 +76,13 @@ constexpr size_t alignof__UniqueName = alignof(UniqueName *);
 CheckSize(UniqueNameData, sizeof__UniqueName, alignof__UniqueName);
 
 struct NameRefDebugCheck {
-    int globalStateId;
+    int nameTableId;
 
-    constexpr NameRefDebugCheck() : globalStateId(-1) {}
+    constexpr NameRefDebugCheck() : nameTableId(-1) {}
 
-    NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint32_t id);
+    NameRefDebugCheck(const NameTable &names, NameKind kind, uint32_t id);
 
-    void check(const GlobalState &gs, NameKind kind, uint32_t id) const;
+    void check(const NameTable &names, NameKind kind, uint32_t id) const;
     void check(const NameSubstitution &subst) const;
 };
 
@@ -118,6 +119,8 @@ public:
     NameRef(const GlobalState &gs, NameKind kind, uint32_t id);
 
     NameRef(const GlobalState &gs, NameRef ref);
+
+    NameRef(const NameTable &names, NameRef ref);
 
     NameRef(const NameRef &nm) = default;
 
