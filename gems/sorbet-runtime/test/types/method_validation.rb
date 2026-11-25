@@ -642,6 +642,60 @@ module Opus::Types::Test
         assert_match(/\AParameter 'c': Expected type Integer, got type String with value "bye"/, err.message)
       end
 
+      it 'binds required params after a rest param to the trailing args' do
+        @mod.sig { params(rest: String, a: Integer).void }
+        def @mod.foo(*rest, a); end
+
+        @mod.foo(0)
+        @mod.foo('x', 'y', 0)
+
+        err = assert_raises(TypeError) do
+          @mod.foo(0, 'x', 'y')
+        end
+        assert_match(/\AParameter 'rest': Expected type String, got type Integer with value 0/, err.message)
+
+        err = assert_raises(ArgumentError) do
+          @mod.foo
+        end
+        assert_match(/wrong number of arguments \(given 0, expected 1\+\)/, err.message)
+      end
+
+      it 'binds required params on both sides of a rest param' do
+        @mod.sig { params(a: Integer, b: Symbol, rest: String, c: Float, d: NilClass).void }
+        def @mod.foo(a, b, *rest, c, d); end
+
+        @mod.foo(0, :s, 1.0, nil)
+        @mod.foo(0, :s, 'x', 'y', 1.0, nil)
+
+        err = assert_raises(TypeError) do
+          @mod.foo(0, :s, 'x', nil, 1.0)
+        end
+        assert_match(/\AParameter 'c': Expected type Float, got type NilClass/, err.message)
+
+        err = assert_raises(ArgumentError) do
+          @mod.foo(0, :s, nil)
+        end
+        assert_match(/wrong number of arguments \(given 3, expected 4\+\)/, err.message)
+      end
+
+      it 'binds required params after a rest param alongside kwargs and a block' do
+        @mod.sig { params(rest: String, a: Integer, k: Symbol, blk: T.proc.void).void }
+        def @mod.foo(*rest, a, k: :x, &blk); end
+
+        @mod.foo('x', 0, k: :y) {}
+        @mod.foo(0) {}
+
+        err = assert_raises(TypeError) do
+          @mod.foo('x', 'y', k: :y) {}
+        end
+        assert_match(/\AParameter 'a': Expected type Integer, got type String with value "y"/, err.message)
+
+        err = assert_raises(TypeError) do
+          @mod.foo('x', 0, k: 1) {}
+        end
+        assert_match(/\AParameter 'k': Expected type Symbol, got type Integer with value 1/, err.message)
+      end
+
       it 'raises an error when two parameters have the same name' do
 
         @mod.sig { params(_: Integer, _: Integer).returns(String) } # rubocop:disable Lint/DuplicateHashKey
