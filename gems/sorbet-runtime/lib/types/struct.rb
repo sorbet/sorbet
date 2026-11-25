@@ -10,7 +10,7 @@ end
 class T::Struct < T::InexactStruct
   def self.inherited(subclass)
     super(subclass)
-    original_method = subclass.singleton_class.instance_method(:inherited)
+    original_method = T::Private::UnboundMethods::INSTANCE_METHOD.bind_call(subclass.singleton_class, :inherited)
     T::Private::ClassUtils.replace_method(original_method, subclass.singleton_class, :inherited) do |s|
       super(s)
       raise "#{self.name} is a subclass of T::Struct and cannot be subclassed"
@@ -24,7 +24,7 @@ class T::ImmutableStruct < T::InexactStruct
   def self.inherited(subclass)
     super(subclass)
 
-    original_method = subclass.singleton_class.instance_method(:inherited)
+    original_method = T::Private::UnboundMethods::INSTANCE_METHOD.bind_call(subclass.singleton_class, :inherited)
     T::Private::ClassUtils.replace_method(original_method, subclass.singleton_class, :inherited) do |s|
       super(s)
       raise "#{self.name} is a subclass of T::ImmutableStruct and cannot be subclassed"

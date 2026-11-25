@@ -11,11 +11,11 @@
 module T::Private::ClassUtils
   # `name` must be an instance method (for class methods, pass in mod.singleton_class)
   def self.visibility_method_name(mod, name)
-    if mod.public_method_defined?(name)
+    if T::Private::UnboundMethods::PUBLIC_METHOD_DEFINED.bind_call(mod, name)
       :public
-    elsif mod.protected_method_defined?(name)
+    elsif T::Private::UnboundMethods::PROTECTED_METHOD_DEFINED.bind_call(mod, name)
       :protected
-    elsif mod.private_method_defined?(name)
+    elsif T::Private::UnboundMethods::PRIVATE_METHOD_DEFINED.bind_call(mod, name)
       :private
     else
       # Raises a NameError formatted like the Ruby VM would (the exact text formatting
@@ -29,26 +29,26 @@ module T::Private::ClassUtils
   end
 
   def self.def_with_visibility(mod, name, visibility, method=nil, &block)
-    mod.module_exec do
+    T::Private::UnboundMethods::MODULE_EXEC.bind_call(mod) do
       # Start a visibility (public/protected/private) region, so that
       # all of the method redefinitions happen with the right visibility
       # from the beginning. This ensures that any other code that is
       # triggered by `method_added`, sees the redefined method with the
       # right visibility.
-      send(visibility)
+      T::Private::UnboundMethods::VISIBILITY.fetch(visibility).bind_call(mod)
 
       if method
-        define_method(name, method)
+        T::Private::UnboundMethods::DEFINE_METHOD.bind_call(mod, name, method)
       else
-        define_method(name, &block)
+        T::Private::UnboundMethods::DEFINE_METHOD.bind_call(mod, name, &block)
       end
 
-      if block && block.arity < 0 && respond_to?(:ruby2_keywords, true)
+      if block && block.arity < 0
         # Fetch .parameters once: each call builds a fresh array.
-        parameters = instance_method(name).parameters
+        parameters = T::Private::UnboundMethods::INSTANCE_METHOD.bind_call(mod, name).parameters
         has_rest = parameters.any? { |kind, _| kind == :rest }
         has_keywords = parameters.any? { |kind, _| kind == :keyrest || kind == :keyreq || kind == :key }
-        ruby2_keywords(name) if has_rest && !has_keywords
+        T::Private::UnboundMethods::RUBY2_KEYWORDS.bind_call(mod, name) if has_rest && !has_keywords
       end
     end
   end
@@ -71,7 +71,7 @@ module T::Private::ClassUtils
     # In the common case the method is owned by `mod` itself, in which case the loop below
     # would always `break` before the raise could match (`mod` precedes any non-prepended
     # ancestor in its own ancestor chain), so skip computing `mod.ancestors` entirely.
-    if original_owner != mod
+    if !T::Private::UnboundMethods::EQUAL.bind_call(original_owner, mod)
       mod.ancestors.each do |ancestor|
         break if ancestor == mod
         if ancestor == original_owner

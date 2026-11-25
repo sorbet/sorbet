@@ -111,18 +111,16 @@ module T::Props
         methods[name] = blk
 
         cls = decorated_class
-        if cls.method_defined?(name) || cls.private_method_defined?(name)
+        if T::Private::UnboundMethods::METHOD_DEFINED.bind_call(cls, name) || T::Private::UnboundMethods::PRIVATE_METHOD_DEFINED.bind_call(cls, name)
           # Ruby does not emit "method redefined" warnings for aliased methods
           # (more robust than undef_method that would create a small window in which the method doesn't exist)
-          cls.send(:alias_method, name, name)
+          T::Private::UnboundMethods::ALIAS_METHOD.bind_call(cls, name, name)
         end
-        cls.send(:define_method, name) do |*args|
+        T::Private::UnboundMethods::DEFINE_METHOD.bind_call(cls, name) do |*args|
           self.class.decorator.send(:eval_lazily_defined_method!, name)
           send(name, *args)
         end
-        if cls.respond_to?(:ruby2_keywords, true)
-          cls.send(:ruby2_keywords, name)
-        end
+        T::Private::UnboundMethods::RUBY2_KEYWORDS.bind_call(cls, name)
         cls.send(:private, name)
       end
 

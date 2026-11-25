@@ -373,11 +373,12 @@ module T::Private::Methods
     end
 
     # We allow `sig` in the current module's context (normal case) and
-    if hook_mod != current_declaration.mod &&
+    declared_mod = current_declaration.mod
+    if !T::Private::UnboundMethods::EQUAL.bind_call(hook_mod, declared_mod) &&
        # inside `class << self`, and
-       hook_mod.singleton_class != current_declaration.mod &&
+       !T::Private::UnboundMethods::EQUAL.bind_call(T::Private::UnboundMethods::SINGLETON_CLASS.bind_call(hook_mod), declared_mod) &&
        # on `self` at the top level of a file
-       current_declaration.mod != TOP_SELF
+       !T::Private::UnboundMethods::EQUAL.bind_call(declared_mod, TOP_SELF)
       raise "A method (#{method_name}) is being added on a different class/module (#{hook_mod}) than the " \
             "last call to `sig` (#{current_declaration.mod}). Make sure each call " \
             "to `sig` is immediately followed by a method definition on the same " \
@@ -386,7 +387,7 @@ module T::Private::Methods
     # Overwrite the DeclarationBlock mod with `mod`, which is the Module that owns the method.
     current_declaration.mod = mod
 
-    original_method = mod.instance_method(method_name)
+    original_method = T::Private::UnboundMethods::INSTANCE_METHOD.bind_call(mod, method_name)
     sig_block = lambda do
       T::Private::Methods.run_sig(method_name, original_method, current_declaration, unwrap: true)
     end
@@ -647,7 +648,7 @@ module T::Private::Methods
 
   # use this directly if you don't want/need to box up the method into an object to pass to method_to_key.
   private_class_method def self.method_owner_and_name_to_key(owner, name)
-    "#{owner.object_id}##{name}"
+    "#{T::Private::UnboundMethods::OBJECT_ID.bind_call(owner)}##{name}"
   end
 
   private_class_method def self.method_to_key(method)
@@ -790,7 +791,7 @@ module T::Private::Methods
 
   module SingletonMethodHooks
     def singleton_method_added(name)
-      key = ::T::Private::Methods._on_method_added(T.unsafe(self), singleton_class, name)
+      key = ::T::Private::Methods._on_method_added(T.unsafe(self), T::Private::UnboundMethods::SINGLETON_CLASS.bind_call(self), name)
       T::Private::DeclState.current.last_method_key = key if key
       super(name)
       T::Private::DeclState.current.last_method_key = nil if key

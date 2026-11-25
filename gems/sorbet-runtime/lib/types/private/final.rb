@@ -41,7 +41,7 @@ module T::Private::Final
   end
 
   def self.final_module?(mod)
-    mod.instance_variable_defined?(:@sorbet_final_module)
+    T::Private::UnboundMethods::INSTANCE_VARIABLE_DEFINED.bind_call(mod, :@sorbet_final_module)
   end
 
   private_class_method def self.mark_as_final_module(mod)
