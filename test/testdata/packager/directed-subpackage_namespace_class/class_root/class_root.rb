@@ -4,7 +4,7 @@ class ClassRoot # error: `ClassRoot` cannot be a `class`, because packages are n
   class Helper; end
 end
 
-ClassRoot::Helper.new
+ClassRoot::Helper.new # error: Unable to resolve constant `Helper`
 
 module ClassRoot::Extra
 end

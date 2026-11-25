@@ -1507,6 +1507,8 @@ To fix this error, either:
 - change `class A` to `module A`, and move any behavior (methods, mixins, a superclass, top-level statements) onto a constant nested inside `A`, or
 - if `A` must be a `class` or define behavior and that can't be avoided, mark package `A` with `imported_by_nested_packages!`. This is discouraged, because behavior on a namespace that other packages are nested under slows down code loading in large codebases.
 
+Until the error is fixed, Sorbet isolates every definition of `A` in that file (including compact forms like `module A::C` and `A::X = 1`) from the real `A` namespace. The constants and methods defined in them don't resolve, even from inside those definitions or from other files, and Sorbet doesn't report the more specific errors about `A`'s superclass, mixins, or type members ([5083](#5083), [4016](#4016)). Definitions of `A` in other files, as a plain `module`, are unaffected.
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs when a constant is dynamically referenced through the singleton class of `self`:

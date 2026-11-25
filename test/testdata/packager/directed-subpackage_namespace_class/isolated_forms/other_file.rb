@@ -1,8 +1,8 @@
 # typed: true
 
-module IsolatedForms # error: `IsolatedForms` was previously defined as a `class`
+module IsolatedForms
   class FromOtherFile; end
 end
 
 IsolatedForms::FromOtherFile
-IsolatedForms::Helper
+IsolatedForms::Helper # error: Unable to resolve constant `Helper`

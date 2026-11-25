@@ -959,6 +959,10 @@ private:
     PackageMangledClasses &packageMangledClasses;
     PackageMangledStaticFields &packageMangledStaticFields;
     const PackageInfo *const package;
+    // The restricted package namespaces (see `isRestrictedPackageNamespace`) that this file wrongly defines
+    // as a `class` or defines behavior on, as their `<PackageSpecRegistry>` node. Every mention of such a
+    // namespace in the file is isolated. See `findIsolatedNamespaces`.
+    UnorderedSet<core::ClassOrModuleRef> isolatedNamespaces;
     // Isolate the definitions in an unpackaged file that would populate a package's namespace (see
     // `isPackageTerritory`). Its other definitions, like new root constants or reopened payload classes, are entered
     // as usual, the way unpackaged RBIs need.
@@ -1550,6 +1554,21 @@ private:
             return true;
         }
 
+        // Isolate every mention of such a namespace in this file (not just the offending definition), so
+        // that the file can't make a class of, or add behavior to, a namespace symbol that (in
+        // package-directed mode) a nested package might have already created as a plain module.
+        if (packageRegistryOwner.exists() && isolatedNamespaces.contains(packageRegistryOwner)) {
+            // The isolated definition's symbol belongs to no package, so report it here, before mangling.
+            if (isRestrictedNamespaceDefinition(klass)) {
+                auto namespaceName = owner == core::Symbols::root()
+                                         ? klass.name.show(ctx)
+                                         : fmt::format("{}::{}", owner.show(ctx), klass.name.show(ctx));
+                reportPackageNamespaceDefinitionError(ctx, klass, namespaceName, namespacePackage,
+                                                      packageRegistryOwner);
+            }
+            return true;
+        }
+
         return false;
     }
 
@@ -1591,9 +1610,9 @@ private:
     }
 
     void reportPackageNamespaceDefinitionError(core::MutableContext ctx, const core::FoundClass &klass,
-                                               core::ClassOrModuleRef symbol) {
+                                               string_view namespaceName, core::packages::MangledName namespacePackage,
+                                               core::ClassOrModuleRef packageRegistryOwner) {
         if (auto e = ctx.beginError(klass.declLoc, core::errors::Namer::PackageNamespaceDefinition)) {
-            auto namespaceName = symbol.show(ctx);
             auto isClass = klass.classKind == core::FoundClass::Kind::Class;
             auto restriction = isClass ? (klass.definesBehavior ? "be a `class` that defines behavior" : "be a `class`")
                                        : "define behavior";
@@ -1602,10 +1621,12 @@ private:
                     ? (isClass ? "make it a `module` and move its behavior onto a constant nested inside it"
                                : "move its behavior onto a constant nested inside it")
                     : "make it a `module`";
-            auto data = symbol.data(ctx);
-            auto &ownerInfo = ctx.state.packageDB().getPackageInfo(data->package);
-            ownerInfo.explainSubpackageNamespaceError(ctx, e, namespaceName, restriction, data->packageRegistryOwner,
+            auto &ownerInfo = ctx.state.packageDB().getPackageInfo(namespacePackage);
+            ownerInfo.explainSubpackageNamespaceError(ctx, e, namespaceName, restriction, packageRegistryOwner,
                                                       namespaceName, alternative);
+            e.addErrorNote("Until this is fixed, Sorbet isolates every definition of `{}` in this file, so the "
+                           "constants and methods they define don't resolve, even from inside them",
+                           namespaceName);
         }
     }
 
@@ -1738,9 +1759,10 @@ private:
         }
         ENFORCE(symbol.exists());
 
-        if (isRestrictedNamespaceDefinition(klass) && isOwnRestrictedPackageNamespace(ctx, symbol)) {
-            reportPackageNamespaceDefinitionError(ctx, klass, symbol);
-        }
+        // A `class` or behavior on a restricted namespace of this file's package is isolated (see
+        // `findIsolatedNamespaces`), so it never reaches the namespace's own symbol.
+        ENFORCE(!isRestrictedNamespaceDefinition(klass) || !isOwnRestrictedPackageNamespace(ctx, symbol),
+                "`{}` should have been isolated", symbol.show(ctx));
 
         const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
         const bool isModule = klass.classKind == core::FoundClass::Kind::Module;
@@ -2418,6 +2440,70 @@ public:
                 ctx.file.data(ctx).path());
     }
 
+    // A file in the owning package that defines a restricted package namespace as a `class`, or defines
+    // behavior on it, gets every mention of that namespace in the file isolated, not just that definition:
+    // namer decides mangling per (file, owner, name), and `TreeSymbolizer` maps every mention through that
+    // decision, so it has to be the same for all of them.
+    //
+    // This has to be decided before entering any of the file's classes, which is before the
+    // namespace's symbol necessarily exists, so it works from the package metadata that each class
+    // definition would get, computed along the chain of definitions that own it.
+    void findIsolatedNamespaces(core::Context ctx) {
+        if (this->package == nullptr) {
+            return;
+        }
+
+        // For each class definition, the package metadata its symbol would get, and the symbol it would
+        // reopen, if that already exists. As in `shouldMangleClassDefinition`, an existing symbol's metadata
+        // wins over the metadata computed from its owner.
+        vector<core::GlobalState::ClassOrModulePackageInfo> infos;
+        vector<core::ClassOrModuleRef> existingSymbols;
+        infos.reserve(foundDefs.klasses().size());
+        existingSymbols.reserve(foundDefs.klasses().size());
+        for (const auto &klass : foundDefs.klasses()) {
+            core::GlobalState::ClassOrModulePackageInfo ownerInfo;
+            core::ClassOrModuleRef existingOwner;
+            switch (klass.owner.kind()) {
+                case core::FoundDefinitionRef::Kind::Symbol: {
+                    existingOwner = klass.owner.symbol();
+                    ownerInfo = {existingOwner.data(ctx)->packageRegistryOwner, existingOwner.data(ctx)->package};
+                    break;
+                }
+                case core::FoundDefinitionRef::Kind::Class:
+                    ENFORCE(klass.owner.idx() < infos.size());
+                    ownerInfo = infos[klass.owner.idx()];
+                    existingOwner = existingSymbols[klass.owner.idx()];
+                    break;
+                default:
+                    break;
+            }
+
+            core::GlobalState::ClassOrModulePackageInfo info;
+            core::ClassOrModuleRef existing;
+            if (klass.name == core::Names::Constants::Root()) {
+                // Desugar's top-level `<root>` definition is the root symbol itself (see getClassSymbol).
+                existing = core::Symbols::root();
+                info = {existing.data(ctx)->packageRegistryOwner, existing.data(ctx)->package};
+            } else {
+                info = ctx.state.packageInfoForNestedName(ownerInfo, klass.name);
+                if (existingOwner.exists()) {
+                    auto member = existingOwner.data(ctx)->findMemberNoDealias(klass.name);
+                    if (member.exists() && member.isClassOrModule()) {
+                        existing = member.asClassOrModuleRef();
+                        info = {existing.data(ctx)->packageRegistryOwner, existing.data(ctx)->package};
+                    }
+                }
+            }
+            infos.emplace_back(info);
+            existingSymbols.emplace_back(existing);
+
+            if (isRestrictedNamespaceDefinition(klass) && info.package == package->mangledName() &&
+                isRestrictedPackageNamespace(ctx, info.package, info.packageRegistryOwner)) {
+                isolatedNamespaces.insert(info.packageRegistryOwner);
+            }
+        }
+    }
+
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
                                                ClassBehaviorLocsMap &classBehaviorLocs) {
         // Report once per file, before entering isolated recovery symbols. SymbolDefiner is constructed
@@ -2429,6 +2515,8 @@ public:
                             ctx.file.data(ctx).path(), "__package.rb");
             }
         }
+
+        findIsolatedNamespaces(ctx);
 
         SymbolDefiner::State state;
         state.definedClasses.reserve(foundDefs.klasses().size());

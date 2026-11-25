@@ -4,4 +4,4 @@ module UnsatisfiedBehavior # error: `UnsatisfiedBehavior` can only define behavi
   def self.helper; end
 end
 
-UnsatisfiedBehavior.helper
+UnsatisfiedBehavior.helper # error: Method `helper` does not exist on `T.class_of(UnsatisfiedBehavior)`
