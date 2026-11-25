@@ -1,0 +1,474 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+      end
+    end
+  end
+
+  begin
+    "child-only let"
+    class <emptyTree>::<C <describe 'child-only let'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def value<<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with input'>>)
+          <self>.input()
+        end
+      end
+
+      <runtime method definition of value>
+
+      begin
+        "with input"
+        class <emptyTree>::<C <context 'with input'>><<C <todo sym>>> < (<self>)
+          def input<<todo method>>(&<blk>)
+            "hello"
+          end
+
+          def <it 'uses the child value'><<todo method>>(&<blk>)
+            <self>.value()
+          end
+
+          <runtime method definition of input>
+        end
+      end
+
+      begin
+        "without using the subject"
+        class <emptyTree>::<C <context 'without using the subject'>><<C <todo sym>>> < (<self>)
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+        end
+      end
+    end
+  end
+
+  class <emptyTree>::<C IntegerInputConsumer><<C <todo sym>>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.params(:input, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
+    end
+
+    def call<<todo method>>(input, &<blk>)
+      input.to_s()
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of call>
+  end
+
+  class <emptyTree>::<C StringInputConsumer><<C <todo sym>>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.params(:input, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def call<<todo method>>(input, &<blk>)
+      input
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of call>
+  end
+
+  begin
+    "independently typed siblings"
+    class <emptyTree>::<C <describe 'independently typed siblings'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C String>)
+      end
+
+      def result<<todo method>>(&<blk>)
+        if <self>.is_a?(<emptyTree>::<C <context 'string input'>>)
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'string input'>>)
+            <emptyTree>::<C PREFIX>.+(<self>.handler().call(<self>.input()))
+          end
+        else
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'integer input'>>)
+            <emptyTree>::<C PREFIX>.+(<self>.handler().call(<self>.input()))
+          end
+        end
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <emptyTree>::<C PREFIX> = "value: "
+
+      <runtime method definition of result>
+
+      begin
+        "integer input"
+        class <emptyTree>::<C <context 'integer input'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C Integer>)
+          end
+
+          def input<<todo method>>(&<blk>)
+            42
+          end
+
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C IntegerInputConsumer>)
+          end
+
+          def handler<<todo method>>(&<blk>)
+            <emptyTree>::<C IntegerInputConsumer>.new()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            <emptyTree>::<C T>.reveal_type(<self>.result())
+          end
+
+          <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+          <runtime method definition of input>
+
+          <runtime method definition of handler>
+        end
+      end
+
+      begin
+        "string input"
+        class <emptyTree>::<C <context 'string input'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C String>)
+          end
+
+          def input<<todo method>>(&<blk>)
+            "hello"
+          end
+
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C StringInputConsumer>)
+          end
+
+          def handler<<todo method>>(&<blk>)
+            <emptyTree>::<C StringInputConsumer>.new()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            <emptyTree>::<C T>.reveal_type(<self>.result())
+          end
+
+          <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+          <runtime method definition of input>
+
+          <runtime method definition of handler>
+        end
+      end
+    end
+  end
+
+  begin
+    "deep transitive helpers"
+    class <emptyTree>::<C <describe 'deep transitive helpers'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def prepared<<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'intermediate'>>::<C <context 'with input'>>)
+          <self>.input()
+        end
+      end
+
+      def subject<<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'intermediate'>>::<C <context 'with input'>>)
+          <self>.prepared()
+        end
+      end
+
+      def read_subject<<todo method>>(&<blk>)
+        <self>.subject()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'intermediate'>>::<C <context 'with input'>>)
+          <self>.prepared()
+        end
+      end
+
+      <runtime method definition of prepared>
+
+      <runtime method definition of subject>
+
+      <runtime method definition of read_subject>
+
+      begin
+        "intermediate"
+        class <emptyTree>::<C <context 'intermediate'>><<C <todo sym>>> < (<self>)
+          "with input"
+
+          class <emptyTree>::<C <context 'with input'>><<C <todo sym>>> < (<self>)
+            def input<<todo method>>(&<blk>)
+              "hello"
+            end
+
+            def <it><<todo method>>(&<blk>)
+              <self>.read_subject()
+            end
+
+            <runtime method definition of input>
+          end
+        end
+      end
+    end
+  end
+
+  begin
+    "missing child input"
+    class <emptyTree>::<C <describe 'missing child input'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def value<<todo method>>(&<blk>)
+        if <self>.is_a?(<emptyTree>::<C <context 'missing'>>)
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'missing'>>)
+            <self>.input()
+          end
+        else
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with input'>>)
+            <self>.input()
+          end
+        end
+      end
+
+      <runtime method definition of value>
+
+      begin
+        "with input"
+        class <emptyTree>::<C <context 'with input'>><<C <todo sym>>> < (<self>)
+          def input<<todo method>>(&<blk>)
+            "hello"
+          end
+
+          def <it><<todo method>>(&<blk>)
+            <self>.value()
+          end
+
+          <runtime method definition of input>
+        end
+      end
+
+      begin
+        "missing"
+        class <emptyTree>::<C <context 'missing'>><<C <todo sym>>> < (<self>)
+          def <it><<todo method>>(&<blk>)
+            <self>.value()
+          end
+        end
+      end
+    end
+  end
+
+  begin
+    "parent consumption"
+    class <emptyTree>::<C <describe 'parent consumption'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def value<<todo method>>(&<blk>)
+        if <self>.is_a?(<emptyTree>::<C <context 'with input'>>)
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with input'>>)
+            <self>.input()
+          end
+        else
+          <self>.input()
+        end
+      end
+
+      def <it><<todo method>>(&<blk>)
+        <self>.value()
+      end
+
+      <runtime method definition of value>
+
+      begin
+        "with input"
+        class <emptyTree>::<C <context 'with input'>><<C <todo sym>>> < (<self>)
+          def input<<todo method>>(&<blk>)
+            "hello"
+          end
+
+          def <it><<todo method>>(&<blk>)
+            <self>.value()
+          end
+
+          <runtime method definition of input>
+        end
+      end
+    end
+  end
+
+  begin
+    "eager inherited helper"
+    class <emptyTree>::<C <describe 'eager inherited helper'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def value<<todo method>>(&<blk>)
+        if <self>.is_a?(<emptyTree>::<C <context 'missing'>>)
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'missing'>>)
+            <self>.input()
+          end
+        else
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with input'>>)
+            <self>.input()
+          end
+        end
+      end
+
+      <runtime method definition of value>
+
+      begin
+        "with input"
+        class <emptyTree>::<C <context 'with input'>><<C <todo sym>>> < (<self>)
+          def input<<todo method>>(&<blk>)
+            "hello"
+          end
+
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+
+          <runtime method definition of input>
+        end
+      end
+
+      begin
+        "missing"
+        class <emptyTree>::<C <context 'missing'>><<C <todo sym>>> < (<self>)
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+        end
+      end
+    end
+  end
+
+  begin
+    "overridden helpers with super"
+    class <emptyTree>::<C <describe 'overridden helpers with super'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C String>)
+      end
+
+      def value<<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'override'>>::<C <context 'with dependencies'>>)
+          <self>.input()
+        end
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of value>
+
+      begin
+        "override"
+        class <emptyTree>::<C <context 'override'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.override().returns(<emptyTree>::<C String>)
+          end
+
+          def value<<todo method>>(&<blk>)
+            begin
+              <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with dependencies'>>)
+              <self>.<untypedSuper>().+(<self>.suffix())
+            end
+          end
+
+          <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+          <runtime method definition of value>
+
+          begin
+            "with dependencies"
+            class <emptyTree>::<C <context 'with dependencies'>><<C <todo sym>>> < (<self>)
+              <self>.sig() do ||
+                <self>.returns(<emptyTree>::<C String>)
+              end
+
+              def input<<todo method>>(&<blk>)
+                "hello"
+              end
+
+              <self>.sig() do ||
+                <self>.returns(<emptyTree>::<C String>)
+              end
+
+              def suffix<<todo method>>(&<blk>)
+                "!"
+              end
+
+              def <it><<todo method>>(&<blk>)
+                <emptyTree>::<C T>.reveal_type(<self>.value())
+              end
+
+              <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+              <runtime method definition of input>
+
+              <runtime method definition of suffix>
+            end
+          end
+        end
+      end
+    end
+  end
+
+  begin
+    "invalid signed subject"
+    class <emptyTree>::<C <describe 'invalid signed subject'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C String>)
+      end
+
+      def value<<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'integer input'>>)
+          <self>.input()
+        end
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+      <runtime method definition of value>
+
+      begin
+        "integer input"
+        class <emptyTree>::<C <context 'integer input'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C Integer>)
+          end
+
+          def input<<todo method>>(&<blk>)
+            42
+          end
+
+          def <it><<todo method>>(&<blk>)
+            <self>.value()
+          end
+
+          <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+          <runtime method definition of input>
+        end
+      end
+    end
+  end
+
+  begin
+    "unused invalid helper"
+    class <emptyTree>::<C <describe 'unused invalid helper'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      def unused<<todo method>>(&<blk>)
+        <self>.never_defined()
+      end
+
+      def <it><<todo method>>(&<blk>)
+        42
+      end
+
+      <runtime method definition of unused>
+    end
+  end
+end

@@ -1,0 +1,565 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C RSpec><<C <todo sym>>> < ()
+    module <emptyTree>::<C Core><<C <todo sym>>> < ()
+      class <emptyTree>::<C ExampleGroup><<C <todo sym>>> < (::<todo sym>)
+        <self>.extend(<emptyTree>::<C T>::<C Sig>)
+      end
+    end
+  end
+
+  begin
+    "inherited before hook"
+    class <emptyTree>::<C <describe 'inherited before hook'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        if <self>.is_a?(<emptyTree>::<C <context 'with another message'>>)
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with another message'>>)
+            if <self>.error_message().==("expected")
+              <emptyTree>
+            else
+              <self>.raise("wrong message")
+            end
+          end
+        else
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with a message'>>)
+            if <self>.error_message().==("expected")
+              <emptyTree>
+            else
+              <self>.raise("wrong message")
+            end
+          end
+        end
+      end
+
+      begin
+        "with a message"
+        class <emptyTree>::<C <context 'with a message'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C String>)
+          end
+
+          def error_message<<todo method>>(&<blk>)
+            "expected"
+          end
+
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.void()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+
+          <runtime method definition of error_message>
+        end
+      end
+
+      begin
+        "with another message"
+        class <emptyTree>::<C <context 'with another message'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C String>)
+          end
+
+          def error_message<<todo method>>(&<blk>)
+            "expected"
+          end
+
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.void()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+
+          <runtime method definition of error_message>
+        end
+      end
+    end
+  end
+
+  begin
+    "per-example hook aliases"
+    class <emptyTree>::<C <describe 'per-example hook aliases'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with a message'>>)
+          <self>.error_message()
+        end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with a message'>>)
+          <self>.error_message()
+        end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <after><<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with a message'>>)
+          <self>.error_message()
+        end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <after><<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with a message'>>)
+          <self>.error_message()
+        end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <after><<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with a message'>>)
+          <self>.error_message()
+        end
+      end
+
+      begin
+        "with a message"
+        class <emptyTree>::<C <context 'with a message'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C String>)
+          end
+
+          def error_message<<todo method>>(&<blk>)
+            "expected"
+          end
+
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.void()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+
+          <runtime method definition of error_message>
+        end
+      end
+    end
+  end
+
+  begin
+    "multiple inherited hooks"
+    class <emptyTree>::<C <describe 'multiple inherited hooks'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'intermediate'>>::<C <context 'leaf'>>)
+          <self>.first_message()
+        end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        begin
+          <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'intermediate'>>::<C <context 'leaf'>>)
+          <self>.second_message()
+        end
+      end
+
+      begin
+        "intermediate"
+        class <emptyTree>::<C <context 'intermediate'>><<C <todo sym>>> < (<self>)
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.void()
+          end
+
+          def <before><<todo method>>(&<blk>)
+            begin
+              <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'leaf'>>)
+              <self>.third_message()
+            end
+          end
+
+          begin
+            "leaf"
+            class <emptyTree>::<C <context 'leaf'>><<C <todo sym>>> < (<self>)
+              <self>.sig() do ||
+                <self>.returns(<emptyTree>::<C String>)
+              end
+
+              def first_message<<todo method>>(&<blk>)
+                "first"
+              end
+
+              <self>.sig() do ||
+                <self>.returns(<emptyTree>::<C String>)
+              end
+
+              def second_message<<todo method>>(&<blk>)
+                "second"
+              end
+
+              <self>.sig() do ||
+                <self>.returns(<emptyTree>::<C String>)
+              end
+
+              def third_message<<todo method>>(&<blk>)
+                "third"
+              end
+
+              ::T::Sig::WithoutRuntime.sig() do ||
+                <self>.void()
+              end
+
+              def <it><<todo method>>(&<blk>)
+                42
+              end
+
+              <runtime method definition of first_message>
+
+              <runtime method definition of second_message>
+
+              <runtime method definition of third_message>
+            end
+          end
+        end
+      end
+    end
+  end
+
+  begin
+    "missing sibling hook dependency"
+    class <emptyTree>::<C <describe 'missing sibling hook dependency'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        if <self>.is_a?(<emptyTree>::<C <context 'missing message'>>)
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'missing message'>>)
+            <self>.error_message()
+          end
+        else
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with a message'>>)
+            <self>.error_message()
+          end
+        end
+      end
+
+      begin
+        "with a message"
+        class <emptyTree>::<C <context 'with a message'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C String>)
+          end
+
+          def error_message<<todo method>>(&<blk>)
+            "expected"
+          end
+
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.void()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+
+          <runtime method definition of error_message>
+        end
+      end
+
+      begin
+        "missing message"
+        class <emptyTree>::<C <context 'missing message'>><<C <todo sym>>> < (<self>)
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.void()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+        end
+      end
+    end
+  end
+
+  begin
+    "parent hook consumption"
+    class <emptyTree>::<C <describe 'parent hook consumption'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        if <self>.is_a?(<emptyTree>::<C <context 'with a message'>>)
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with a message'>>)
+            <self>.error_message()
+          end
+        else
+          <self>.error_message()
+        end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <it><<todo method>>(&<blk>)
+        42
+      end
+
+      begin
+        "with a message"
+        class <emptyTree>::<C <context 'with a message'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C String>)
+          end
+
+          def error_message<<todo method>>(&<blk>)
+            "expected"
+          end
+
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.void()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+
+          <runtime method definition of error_message>
+        end
+      end
+    end
+  end
+
+  begin
+    "context hook receiver"
+    class <emptyTree>::<C <describe 'context hook receiver'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        <self>.error_message()
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <after><<todo method>>(&<blk>)
+        <self>.error_message()
+      end
+
+      begin
+        "with a method"
+        class <emptyTree>::<C <context 'with a method'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C String>)
+          end
+
+          def error_message<<todo method>>(&<blk>)
+            "expected"
+          end
+
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.void()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+
+          <runtime method definition of error_message>
+        end
+      end
+    end
+  end
+
+  begin
+    "context hook helper receiver"
+    class <emptyTree>::<C <describe 'context hook helper receiver'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C String>)
+      end
+
+      def prepared<<todo method>>(&<blk>)
+        if <self>.is_a?(<emptyTree>::<C <context 'with a message'>>)
+          begin
+            <cast:<synthetic bind>>(<self>, <todo sym>, <emptyTree>::<C <context 'with a message'>>)
+            <self>.child_message()
+          end
+        else
+          <self>.child_message()
+        end
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        <self>.prepared()
+      end
+
+      <runtime method definition of prepared>
+
+      begin
+        "with a message"
+        class <emptyTree>::<C <context 'with a message'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C String>)
+          end
+
+          def child_message<<todo method>>(&<blk>)
+            "expected"
+          end
+
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.void()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            <self>.prepared()
+          end
+
+          <runtime method definition of child_message>
+        end
+      end
+    end
+  end
+
+  begin
+    "opaque hooks remain conservative"
+    class <emptyTree>::<C <describe 'opaque hooks remain conservative'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        <self>.error_message()
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        <self>.error_message()
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        <self>.error_message()
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        <self>.error_message()
+      end
+
+      <emptyTree>::<C SCOPE> = :example
+
+      begin
+        <emptyTree>::<C SCOPE>
+        <emptyTree>
+      end
+
+      begin
+        "with a message"
+        class <emptyTree>::<C <context 'with a message'>><<C <todo sym>>> < (<self>)
+          <self>.sig() do ||
+            <self>.returns(<emptyTree>::<C String>)
+          end
+
+          def error_message<<todo method>>(&<blk>)
+            "expected"
+          end
+
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.void()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+
+          <runtime method definition of error_message>
+        end
+      end
+    end
+  end
+
+  begin
+    "owner context helper"
+    class <emptyTree>::<C <describe 'owner context helper'>><<C <todo sym>>> < (<emptyTree>::<C RSpec>::<C Core>::<C ExampleGroup>)
+      <self>.sig() do ||
+        <self>.returns(<emptyTree>::<C String>)
+      end
+
+      def error_message<<todo method>>(&<blk>)
+        "expected"
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.void()
+      end
+
+      def <before><<todo method>>(&<blk>)
+        <self>.error_message()
+      end
+
+      <runtime method definition of error_message>
+
+      begin
+        "child"
+        class <emptyTree>::<C <context 'child'>><<C <todo sym>>> < (<self>)
+          ::T::Sig::WithoutRuntime.sig() do ||
+            <self>.void()
+          end
+
+          def <it><<todo method>>(&<blk>)
+            42
+          end
+        end
+      end
+    end
+  end
+end
