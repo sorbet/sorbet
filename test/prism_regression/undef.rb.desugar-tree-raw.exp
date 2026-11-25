@@ -8,12 +8,12 @@ ClassDef{
     }]
   rhs = [
     Send{
-      flags = {privateOk}
+      flags = {}
       recv = ConstantLit{
-        symbol = (module ::Kernel)
+        symbol = (class ::<Magic>)
         orig = nullptr
       }
-      fun = <U undef>
+      fun = <U <undef>>
       block = nullptr
       pos_args = 1
       args = [
@@ -22,12 +22,12 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {}
       recv = ConstantLit{
-        symbol = (module ::Kernel)
+        symbol = (class ::<Magic>)
         orig = nullptr
       }
-      fun = <U undef>
+      fun = <U <undef>>
       block = nullptr
       pos_args = 1
       args = [
@@ -36,12 +36,12 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {}
       recv = ConstantLit{
-        symbol = (module ::Kernel)
+        symbol = (class ::<Magic>)
         orig = nullptr
       }
-      fun = <U undef>
+      fun = <U <undef>>
       block = nullptr
       pos_args = 2
       args = [

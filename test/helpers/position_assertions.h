@@ -1,6 +1,7 @@
 #ifndef TEST_HELPERS_POSITION_ASSERTIONS_H
 #define TEST_HELPERS_POSITION_ASSERTIONS_H
 
+#include "core/packages/Stratum.h"
 #include "main/lsp/json_types.h"
 #include "main/lsp/wrapper.h"
 #include "main/options/options.h"
@@ -12,9 +13,6 @@ using namespace sorbet::realmain::lsp;
 
 // This is needed to skip error assertions when running under Prism
 extern realmain::options::Parser parser;
-
-class ErrorAssertion;
-class UntypedAssertion;
 
 /**
  * An assertion that is relevant to a specific set of characters on a line.
@@ -44,13 +42,19 @@ public:
     }
 
     /**
-     * Filters a vector of assertions and returns only ErrorAssertions.
+     * Returns all the assertions of type `T`
      */
-    static std::vector<std::shared_ptr<ErrorAssertion>>
-    getErrorAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
-
-    static std::vector<std::shared_ptr<UntypedAssertion>>
-    getUntypedAssertions(const std::vector<std::shared_ptr<RangeAssertion>> &assertions);
+    template <class T>
+    std::vector<std::shared_ptr<T>> static getAssertions(
+        const std::vector<std::shared_ptr<RangeAssertion>> &assertions) {
+        std::vector<std::shared_ptr<T>> rv;
+        for (auto assertion : assertions) {
+            if (auto assertionOfType = std::dynamic_pointer_cast<T>(assertion)) {
+                rv.push_back(assertionOfType);
+            }
+        }
+        return rv;
+    }
 
     const std::string filename;
     const std::unique_ptr<Range> range;
@@ -92,11 +96,10 @@ public:
                          std::string errorPrefix = "");
 
     const std::string message;
-    const bool matchesDuplicateErrors;
     static constexpr DiagnosticSeverity severity = DiagnosticSeverity::Error;
 
     ErrorAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
-                   std::string_view message, bool matchesDuplicateErrors);
+                   std::string_view message);
 
     std::string toString() const override;
 
@@ -115,9 +118,6 @@ public:
     std::string toString() const override;
     const std::string message;
 
-    // this exists solely to allow us to reuse ErrorAssertion's checkAll
-    // for UntypedAssertion. It should *always* be false.
-    static constexpr bool matchesDuplicateErrors = false;
     static constexpr DiagnosticSeverity severity = DiagnosticSeverity::Information;
 
     static bool checkAll(const UnorderedMap<std::string, std::shared_ptr<core::File>> &files,
@@ -619,6 +619,21 @@ public:
                                                        int assertionLine, std::string_view assertionContents,
                                                        std::string_view assertionType);
     const std::string symbol;
+    std::string toString() const override;
+};
+
+// # stratum: 0
+class StratumAssertion final : public RangeAssertion {
+public:
+    static std::shared_ptr<StratumAssertion> make(std::string_view filename, std::unique_ptr<Range> &range,
+                                                  int assertionLine, std::string_view assertionContents,
+                                                  std::string_view assertionType);
+
+    const core::packages::Stratum value;
+
+    StratumAssertion(std::string_view filename, std::unique_ptr<Range> &range, int assertionLine,
+                     core::packages::Stratum value);
+
     std::string toString() const override;
 };
 

@@ -1,0 +1,13 @@
+# bazel_clang_tidy added a load("@rules_shell") in
+# https://github.com/erenon/bazel_clang_tidy/pull/100 for Bazel 8.x
+# compatibility. Sorbet uses Bazel 7.x where sh_binary is still a native
+# rule, and we don't want to pull in the rules_shell dependency.
+# Remove this patch when upgrading to Bazel 8+.
+--- a/clang_tidy/BUILD
++++ b/clang_tidy/BUILD
+@@ -1,5 +1,3 @@
+-load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+-
+ sh_binary(
+     name = "clang_tidy",
+     srcs = ["run_clang_tidy.sh"],

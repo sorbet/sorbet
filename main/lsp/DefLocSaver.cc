@@ -6,9 +6,7 @@
 using namespace std;
 namespace sorbet::realmain::lsp {
 
-void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &methodDef = ast::cast_tree_nonnull<ast::MethodDef>(tree);
-
+void DefLocSaver::postTransformMethodDef(core::Context ctx, const ast::MethodDef &methodDef) {
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     bool lspQueryMatch = lspQuery.matchesLoc(ctx.locAt(methodDef.declLoc)) || lspQuery.matchesSymbol(methodDef.symbol);
 
@@ -44,12 +42,12 @@ void DefLocSaver::postTransformMethodDef(core::Context ctx, ast::ExpressionPtr &
         tp.type = symbolData->resultType;
         tp.origins.emplace_back(ctx.locAt(methodDef.declLoc));
         core::lsp::QueryResponse::pushQueryResponse(
-            ctx, core::lsp::MethodDefResponse(methodDef.symbol, ctx.locAt(methodDef.declLoc), methodDef.name, tp));
+            ctx, core::lsp::MethodDefResponse(methodDef.symbol, ctx.file, methodDef.loc, methodDef.declLoc,
+                                              methodDef.name, methodDef.flags.isAttrBestEffortUIOnly, tp));
     }
 }
 
-void DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &id = ast::cast_tree_nonnull<ast::UnresolvedIdent>(tree);
+void DefLocSaver::postTransformUnresolvedIdent(core::Context ctx, const ast::UnresolvedIdent &id) {
     if (id.kind == ast::UnresolvedIdent::Kind::Instance || id.kind == ast::UnresolvedIdent::Kind::Class) {
         core::ClassOrModuleRef klass;
         // Logic originally from `unresolvedIdent2Local` in `builder_walk.cc`, then modified.
@@ -94,14 +92,22 @@ core::MethodRef enclosingMethodFromContext(core::Context ctx) {
     }
 }
 
-void matchesQuery(core::Context ctx, ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
+void matchesQuery(core::Context ctx, const ast::ConstantLit *lit, const core::lsp::Query &lspQuery,
                   core::SymbolRef symbolBeforeDealias) {
     // Iterate. Ensures that we match "Foo" in "Foo::Bar" references.
     auto symbol = symbolBeforeDealias.dealias(ctx);
     while (lit && symbol.exists() && lit->original()) {
         auto &unresolved = *lit->original();
-        if (lspQuery.matchesLoc(ctx.locAt(lit->loc())) || lspQuery.matchesSymbol(symbol) ||
-            lspQuery.matchesSymbol(symbolBeforeDealias)) {
+
+        // `<PackageSpecRegistry>` symbols can show up in non-`__package.rb` files now (only in
+        // files with resolver errors), so we have to filter them out of reference results to
+        // pretend that they're not there.
+        auto isPackageCursor = symbolBeforeDealias.isClassOrModule() &&
+                               symbolBeforeDealias.asClassOrModuleRef().isPackageSpecSymbol(ctx) &&
+                               !ctx.file.data(ctx).isPackage(ctx);
+
+        if (!isPackageCursor && (lspQuery.matchesLoc(ctx.locAt(lit->loc())) || lspQuery.matchesSymbol(symbol) ||
+                                 lspQuery.matchesSymbol(symbolBeforeDealias))) {
             // This basically approximates the cfg::Alias case from Environment::processBinding.
             core::TypeAndOrigins tp;
             tp.origins.emplace_back(symbol.loc(ctx));
@@ -151,14 +157,12 @@ bool shouldLeaveAncestorForIDE(const ast::ExpressionPtr &anc) {
 
 } // namespace
 
-void DefLocSaver::postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &lit = ast::cast_tree_nonnull<ast::ConstantLit>(tree);
+void DefLocSaver::postTransformConstantLit(core::Context ctx, const ast::ConstantLit &lit) {
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     matchesQuery(ctx, &lit, lspQuery, lit.symbol());
 }
 
-void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
-    auto &classDef = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+void DefLocSaver::preTransformClassDef(core::Context ctx, const ast::ClassDef &classDef) {
     const core::lsp::Query &lspQuery = ctx.state.lspQuery;
     if (ast::isa_tree<ast::EmptyTree>(classDef.name)) {
         ENFORCE(classDef.symbol == core::Symbols::root());
@@ -174,6 +178,12 @@ void DefLocSaver::preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tr
         shouldLeaveAncestorForIDE(classDef.ancestors.front())) {
         auto lit = ast::cast_tree<ast::ConstantLit>(classDef.ancestors.front());
         matchesQuery(ctx, lit, lspQuery, lit->symbol());
+    }
+
+    // declLoc == loc usually implies that this class was synthetic in some way (Class.new, <root>, etc.)
+    if (classDef.declLoc != classDef.loc && lspQuery.matchesLoc(ctx.locAt(classDef.declLoc))) {
+        core::lsp::QueryResponse::pushQueryResponse(
+            ctx, core::lsp::ClassDefResponse(classDef.symbol, ctx.locAt(classDef.loc), ctx.locAt(classDef.declLoc)));
     }
 }
 

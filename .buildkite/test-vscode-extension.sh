@@ -2,13 +2,14 @@
 
 set -euo pipefail
 
-# TODO: We probably want to move this into https://github.com/sorbet/sorbet-build-image eventually
+if [ "${BUILDKITE_BRANCH:-}" != "master" ]; then
+  if ! git diff --name-only "origin/master...HEAD" | grep -q '^vscode_extension/'; then
+    echo "Skipping because there are no changes to vscode_extension/"
+    exit 0
+  fi
+fi
 
-curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-apt-get update
-apt-get install -y libxshmfence-dev libnss3-dev libatk1.0-0 libatk-bridge2.0-0 \
- libdrm2 xvfb libgdk-pixbuf2.0-0 libgtk-3-0 libgbm1	libasound2
-
+# shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/with_backoff.sh
 
 pushd vscode_extension

@@ -275,7 +275,7 @@ class NameError < StandardError
   # [1, 2, 3].method(:rject) # NameError with name "rject" and receiver: Array
   # [1, 2, 3].singleton_method(:rject) # NameError with name "rject" and receiver: [1, 2, 3]
   # ```
-  def self.new(*_); end
+  def initialize(*_); end
 
   # Return a list of the local variable names defined where this
   # [`NameError`](https://docs.ruby-lang.org/en/2.7.0/NameError.html) exception
@@ -320,7 +320,7 @@ class NoMethodError < NameError
   # call in private context, and can be accessed with `#private_call?` method.
   #
   # *receiver* argument stores an object whose method was called.
-  def self.new(*_); end
+  def initialize(*_); end
 
   # Return the arguments passed in as the third parameter to the constructor.
   def args; end
@@ -424,7 +424,7 @@ class SignalException < Exception
   # Construct a new
   # [`SignalException`](https://docs.ruby-lang.org/en/2.7.0/SignalException.html)
   # object. `sig_name` should be a known signal name.
-  def self.new(*_); end
+  def initialize(*_); end
 
   def signm; end
 
@@ -545,9 +545,9 @@ class SystemCallError < StandardError
   # object. The error number is subsequently available via the
   # [`errno`](https://docs.ruby-lang.org/en/2.7.0/SystemCallError.html#method-i-errno)
   # method.
-  sig { params(arg0: T.any(String, T.nilable(Integer))).returns(SystemCallError) }
-  sig { params(arg0: String, errno: T.nilable(Integer), func: T.nilable(Object)).returns(SystemCallError) }
-  def self.new(arg0, errno = nil, func = nil); end
+  sig { params(arg0: T.any(String, T.nilable(Integer))).void }
+  sig { params(arg0: String, errno: T.nilable(Integer), func: T.nilable(Object)).void }
+  def initialize(arg0, errno = nil, func = nil); end
 
   # Return this SystemCallError's error number.
   sig { returns(T.nilable(Integer)) }
@@ -563,7 +563,7 @@ end
 class SystemExit < Exception
   # Create a new `SystemExit` exception with the given status and message.
   # Status is true, false, or an integer. If status is not given, true is used.
-  def self.new(*_); end
+  def initialize(*_); end
 
   # Return the status value associated with this system exit.
   def status; end
@@ -648,7 +648,7 @@ class UncaughtThrowError < ArgumentError
   # ```
   # UncaughtThrowError: uncaught throw "foo"
   # ```
-  def self.new(*_); end
+  def initialize(*_); end
 
   # Return the tag object which was called for.
   def tag; end

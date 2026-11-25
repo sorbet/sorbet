@@ -1,4 +1,5 @@
 #include "main/lsp/ConvertToSingletonClassMethod.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/match.h"
 #include "core/sig_finder/sig_finder.h"
 #include "main/lsp/AbstractRewriter.h"
@@ -12,7 +13,7 @@ namespace {
 unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LSPTypecheckerDelegate &typechecker,
                                                  const LSPConfiguration &config,
                                                  const core::lsp::MethodDefResponse &definition) {
-    const auto &maybeSource = definition.termLoc.source(gs);
+    const auto &maybeSource = definition.declLoc().source(gs);
     if (!maybeSource.has_value()) {
         return nullptr;
     }
@@ -21,7 +22,7 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
         // Maybe this is an attr_reader or a prop or something. Abort.
         return nullptr;
     }
-    auto file = definition.termLoc.file();
+    auto file = definition.declLoc().file();
 
     auto shortName = definition.name.shortName(gs);
     auto insertAt = source.find(shortName);
@@ -29,12 +30,12 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
         return nullptr;
     }
 
-    auto insertSelfLoc = definition.termLoc.adjustLen(gs, insertAt, 0);
+    auto insertSelfLoc = definition.declLoc().adjustLen(gs, insertAt, 0);
     if (!insertSelfLoc.exists()) {
         return nullptr;
     }
 
-    auto insertParamLoc = definition.termLoc.adjustLen(gs, insertAt + shortName.size(), 0);
+    auto insertParamLoc = definition.declLoc().adjustLen(gs, insertAt + shortName.size(), 0);
     if (!insertParamLoc.exists()) {
         return nullptr;
     }
@@ -49,7 +50,7 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
     auto insertParamRange = Range::fromLoc(gs, insertParamLoc);
     ENFORCE(insertParamRange != nullptr);
 
-    auto uri = config.fileRef2Uri(gs, definition.termLoc.file());
+    auto uri = config.fileRef2Uri(gs, definition.declLoc().file());
     auto tdi = make_unique<VersionedTextDocumentIdentifier>(move(uri), JSONNullObject());
     vector<unique_ptr<TextEdit>> edits;
     edits.emplace_back(make_unique<TextEdit>(move(insertSelfRange), "self."));
@@ -66,7 +67,7 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
         auto &rootTree = resolvedTree.tree;
 
         auto ctx = core::Context(gs, core::Symbols::root(), file);
-        auto queryLoc = definition.termLoc.copyWithZeroLength();
+        auto queryLoc = definition.declLoc().copyWithZeroLength();
         auto parsedSig = sig_finder::SigFinder::findSignature(ctx, rootTree, queryLoc);
         if (parsedSig.has_value()) {
             if (!parsedSig->sig.argTypes.empty()) {
@@ -84,6 +85,75 @@ unique_ptr<TextDocumentEdit> createMethodDefEdit(const core::GlobalState &gs, LS
     }
 
     return make_unique<TextDocumentEdit>(move(tdi), move(edits));
+}
+
+// `(x).foo` desugars to just `x.foo`: there's no AST node that records the loc of the parens.
+// But `x` might not be valid as an argument expression without them: `(a rescue b).foo` is fine,
+// but `A.foo(a rescue b)` is a syntax error.
+//
+// This helper tries to find those surrounding parens by scanning outward from the receiver's loc,
+// bounded by the range of the overall send's loc.
+//
+// When in doubt, it returns the receiver's loc unchanged, which is what the code action used before
+// it looked for parens (i.e., no worse than before).
+//
+// It only looks at the send's text, and since it only ever shrinks its views of that text, it never
+// goes back to a character it has passed.
+core::LocOffsets receiverWithParens(string_view source, core::LocOffsets send, core::LocOffsets receiver) {
+    // (The receiver of the `x.foo` that `x&.foo` desugars to is a temporary that holds `x`, with a zero-width loc.)
+    if (receiver.empty()) {
+        return receiver;
+    }
+
+    // Make sure the receiver is inside the send.
+    // A receiver without parens starts where its send starts, so the scan below stops right away.
+    if (!send.exists() || !send.contains(receiver)) {
+        return receiver;
+    }
+
+    // `before` and `after` are the parts of the send before and after the receiver. The text between
+    // them is always the receiver wrapped in zero or more pairs of matched parens: `before` only ever
+    // loses characters from its end, and `after` only from its start. `open` and `close` are the same,
+    // without the whitespace next to the receiver.
+    auto before = source.substr(send.beginPos(), receiver.beginPos() - send.beginPos());
+    auto after = source.substr(receiver.endPos(), send.endPos() - receiver.endPos());
+    auto open = absl::StripTrailingAsciiWhitespace(before);
+    auto close = absl::StripLeadingAsciiWhitespace(after);
+
+    // Each iteration takes a pair of parens, so `before` and `after` get shorter. They can't get
+    // shorter than empty, so the loop terminates.
+    while (!open.empty() && !close.empty() && open.back() == '(' && close.front() == ')') {
+        before = open.substr(0, open.size() - 1);
+        after = close.substr(1);
+        open = absl::StripTrailingAsciiWhitespace(before);
+        close = absl::StripLeadingAsciiWhitespace(after);
+    }
+
+    // Scanning backwards can land on a paren in a comment, not the real paren:
+    //     ( # (
+    //       x).foo
+    // Scanning forwards can't: whitespace and `)` never start a comment.
+    //
+    // Keep scanning to the beginning of the line to try to find something that might be a comment
+    // (either a `#` or an `=` character, as in `=end`). We might find one that doesn't hide any of the
+    // parens, like a comment on a line above them, but oh well:
+    //     begin # hi
+    //       (x) end.foo
+    // (The scan never looks before the send, so code like `"#"; (x).foo` is fine--you have to get
+    // some really contrived cases like that `begin #` for this to matter.)
+    //
+    // If we find something, give up and return the receiver. This is pessimistic and might generate a
+    // bad edit anyways (e.g., in cases where preserving the parens was truly required), but oh well.
+    auto lastOnLine = open.find_last_of("\n#=");
+    if (lastOnLine != string_view::npos && open[lastOnLine] != '\n') {
+        return receiver;
+    }
+
+    uint32_t begin = send.beginPos() + before.size();
+    uint32_t end = send.endPos() - after.size();
+    ENFORCE(begin == receiver.beginPos() || (source[begin] == '(' && begin < receiver.beginPos()));
+    ENFORCE(end == receiver.endPos() || (source[end - 1] == ')' && receiver.endPos() < end));
+    return {begin, end};
 }
 
 class MethodCallSiteRewriter : public AbstractRewriter {
@@ -137,22 +207,18 @@ public:
             return;
         }
 
+        // Both the range to replace with the class name and the text to move into the arguments
+        // include the receiver's parens, so that the moved text is still a valid expression.
         auto receiverLoc =
-            sendResp->receiverLoc().exists() ? sendResp->receiverLoc() : sendResp->termLoc().copyWithZeroLength();
+            sendResp->receiverLoc().exists()
+                ? core::Loc(sendResp->file, receiverWithParens(sendResp->file.data(gs).source(),
+                                                               sendResp->termLocOffsets, sendResp->receiverLocOffsets))
+                : sendResp->termLoc().copyWithZeroLength();
 
         ENFORCE(edits.find(receiverLoc) == edits.end(), "Tried to edit the same call site twice...");
         edits[receiverLoc] = fmt::format("{}{}", owner.show(gs), sendResp->isPrivateOk ? "." : "");
 
-        auto receiverSource = string(sendResp->isPrivateOk ? "self" : sendResp->receiverLoc().source(gs).value());
-        if (absl::StrContains(receiverSource, ";")) {
-            // It never hurts to parenthesize an argument, it's still technically valid.
-            //
-            // If there's a `;` in the receiver, it could either be in a string (`"foo;bar".example`)
-            // OR it could be a statement separator: `(x; y).example`, and `example(x; y)` is a syntax error.
-            //
-            // Let's defend against this by parenthesizing, despite how rare this is likely to be.
-            receiverSource = fmt::format("({})", receiverSource);
-        }
+        auto receiverSource = string(sendResp->isPrivateOk ? "self" : receiverLoc.source(gs).value());
 
         if (!sendResp->argLocOffsets.empty()) {
             auto newFirstArgLoc = core::Loc(sendResp->file, sendResp->argLocOffsets.front().copyWithZeroLength());

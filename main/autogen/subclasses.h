@@ -22,7 +22,7 @@ public:
         Entries entries;
 
         SubclassInfo() = default;
-        SubclassInfo(ClassKind classKind, Entries entries) : classKind(classKind), entries(std::move(entries)){};
+        SubclassInfo(ClassKind classKind, Entries entries) : classKind(classKind), entries(std::move(entries)) {};
     };
 
     // Map between the subclass seen to information about the parent class

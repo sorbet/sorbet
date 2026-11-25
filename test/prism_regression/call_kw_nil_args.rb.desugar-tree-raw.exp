@@ -71,15 +71,15 @@ ClassDef{
         } }]
       rhs = InsSeq{
         stats = [
-          UnresolvedConstantLit{
-            cnst = <C <U <ErrorNode>>>
-            scope = EmptyTree
+          ConstantLit{
+            symbol = (static-field ::<ErrorNode>)
+            orig = nullptr
           }
           Literal{ value = 10 }
         ],
-        expr = UnresolvedConstantLit{
-          cnst = <C <U <ErrorNode>>>
-          scope = EmptyTree
+        expr = ConstantLit{
+          symbol = (static-field ::<ErrorNode>)
+          orig = nullptr
         }
       }
     }

@@ -95,3 +95,15 @@ class CommandWithCallAndMixin < Opus::Command
   sig { override.params(z: Integer).returns(Integer) }
   def foo(z); 0; end # error: Method `foo` is private in `CommandWithCallAndMixin` but not in `AbstractMixin`
 end
+
+class BadCommand < Opus::Command
+  sig {params(x: Integer).returns(String)}
+  def self.call(x) # error: Commands must only define instance methods, but `call` is a singleton class method
+    x.to_s
+  end
+
+  sig {params(x: Integer).returns(String)}
+  def self.foo(x) # error: Commands must only define instance methods, but `foo` is a singleton class method
+    x.to_s
+  end
+end

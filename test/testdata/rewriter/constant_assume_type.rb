@@ -92,3 +92,21 @@ T.reveal_type(K) # error: `GenericClassWithFixed`
 
 L = ModuleWithCustomNew.new
 T.reveal_type(L) # error: `T.untyped`
+
+M = NormalClass.new.freeze
+T.reveal_type(M) # error: `NormalClass`
+
+N = NewIsNilable.new.freeze # error: Assumed expression had type `NewIsNilable` but found `T.nilable(NewIsNilable)`
+T.reveal_type(N) # error: `NewIsNilable`
+
+class ClassWithCustomFreeze
+  extend T::Sig
+
+  sig {returns(Integer)}
+  def freeze
+    0
+  end
+end
+
+O = ClassWithCustomFreeze.new.freeze # error: Assumed expression had type `ClassWithCustomFreeze` but found `Integer`
+T.reveal_type(O) # error: `ClassWithCustomFreeze`

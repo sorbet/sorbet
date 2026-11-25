@@ -1123,7 +1123,7 @@ class Gem::Platform < Object
 
   def self.match(platform); end
 
-  def self.new(arch); end
+  def initialize(arch); end
 end
 
 # Generated when trying to lookup a gem to indicate that the gem was found, but
@@ -2751,9 +2751,9 @@ class Gem::Version < Object
         Gem::Version, # Will return the same version object
         NilClass # Deprecated, and will issue a warning
       )
-    ).returns(Gem::Version)
+    ).void
   end
-  def self.new(version); end
+  def initialize(version); end
 end
 
 class Gem::Package
@@ -3004,9 +3004,10 @@ end
 class Gem::Package::TarWriter
   def initialize(io); end
 
-  # Adds file `name` with permissions `mode`, and yields an
+  # Adds file `name` with permissions `mode` and mtime `mtime` (sets
+  # `Gem.source_date_epoch` if not specified), and yields an
   # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) for writing the file to
-  def add_file(name, mode); end
+  def add_file(name, mode, mtime = nil); end
 
   # Adds `name` with permissions `mode` to the tar, yielding `io` for writing
   # the file. The `digest_algorithm` is written to a read-only `name`.sum file
@@ -3247,7 +3248,7 @@ class Gem::StreamUI
   def download_reporter(*args); end
 end
 
-class Gem::Stream::UI::SilentProgressReporter
+class Gem::StreamUI::SilentProgressReporter
   def count; end
 
   def initialize(out_stream, size, initial_message, terminal_message = nil); end
@@ -3257,7 +3258,7 @@ class Gem::Stream::UI::SilentProgressReporter
   def done; end
 end
 
-class Gem::Stream::UI::SimpleProgressReporter
+class Gem::StreamUI::SimpleProgressReporter
   include Gem::DefaultUserInteraction
 
   def count; end
@@ -3269,7 +3270,7 @@ class Gem::Stream::UI::SimpleProgressReporter
   def done; end
 end
 
-class Gem::Stream::UI::VerboseProgressReporter
+class Gem::StreamUI::VerboseProgressReporter
   include Gem::DefaultUserInteraction
 
   def count; end
@@ -3281,7 +3282,7 @@ class Gem::Stream::UI::VerboseProgressReporter
   def done; end
 end
 
-class Gem::Stream::UI::SilentDownloadReporter
+class Gem::StreamUI::SilentDownloadReporter
   def initialize(out_stream, *args); end
 
   def fetch(filename, filesize); end
@@ -3291,7 +3292,7 @@ class Gem::Stream::UI::SilentDownloadReporter
   def done; end
 end
 
-class Gem::Stream::UI::ThreadedDownloadReporter
+class Gem::StreamUI::ThreadedDownloadReporter
   MUTEX = Mutex.new
 
   def file_name; end

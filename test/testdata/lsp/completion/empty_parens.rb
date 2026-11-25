@@ -31,6 +31,7 @@ def AAA_example1(m, a, b)
 
   AAA_example1() {}
   #            ^ error: Not enough arguments
+  #              ^^ error: does not take a block
   #            ^ completion: (nothing)
   #               ^ completion: (nothing)
 

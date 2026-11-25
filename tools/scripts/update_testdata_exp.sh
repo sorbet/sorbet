@@ -8,6 +8,9 @@ cd ../..
 
 if ! command -v parallel &> /dev/null; then
   echo "This script requires GNU parallel to be installed"
+  if [ "$(uname)" == "Darwin" ]; then
+      echo "run brew install parallel to install it"
+  fi
   exit 1
 fi
 
@@ -50,64 +53,99 @@ $0 [options] [<file>...]
 
 Arguments
   <file>      One or more *.rb files whose exp files to update.
-              Defaults to everything in test/testdata/
+              Defaults to everything in test/testdata/ and test/prism_regression/
 
 Options
-  --no-build  Don't build anything, just reuse what was already built
-  -h, --help  Print this message
+  --config=<config>  Build with this Bazel config instead of -c opt.
+                     May be repeated.
+  --no-build         Don't build anything, just reuse what bazel-bin/
+                     points at (whichever config built it last)
+  -h, --help         Print this message
 EOF
 }
 
 BUILD=1
-if [ $# -eq 0 ]; then
-  paths=(test/testdata test/prism_regression)
-else
-  while true; do
-    case $1 in
-      --no-build)
-        BUILD=
-        shift
-        ;;
-      -h|--help)
-        usage
-        exit 0
-        ;;
-      -*)
-        1>&2 echo "Unrecognized option '$1'"
-        1>&2 usage
-        exit 1
-        ;;
-      *)
-        break;
-    esac
-  done
-  paths=()
-  for path in "${@}"; do
-    if [[ "$path" = *.exp ]]; then
-      # delete shortest match of pattern from back of path
-      path=${path%.*.exp}
-      if [[ "$path" = */pass ]]; then
-        path=${path%/pass}
-      fi
-    fi
+configs=()
+while [ $# -gt 0 ]; do
+  case $1 in
+    --no-build)
+      BUILD=
+      shift
+      ;;
+    --config=*)
+      configs+=("$1")
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -*)
+      1>&2 echo "Unrecognized option '$1'"
+      1>&2 usage
+      exit 1
+      ;;
+    *)
+      break;
+  esac
+done
 
-    paths+=("$path")
-  done
+paths=()
+for path in "${@}"; do
+  if [[ "$path" = *.exp ]]; then
+    # delete shortest match of pattern from back of path
+    path=${path%.*.exp}
+    if [[ "$path" = */pass ]]; then
+      path=${path%/pass}
+    fi
+  fi
+
+  paths+=("$path")
+done
+
+if [ "${#paths[@]}" -eq 0 ]; then
+  paths=(test/testdata test/prism_regression)
+fi
+
+if [ "${#configs[@]}" -eq 0 ]; then
+  # Optimized builds update the whole corpus fastest.
+  configs=(-c opt)
 fi
 
 if [ "$BUILD" != "" ]; then
-  ./bazel build //main:sorbet //test:print_document_symbols -c opt
+  ./bazel build //main:sorbet //test:print_document_symbols "${configs[@]}"
+else
+  # Without these, every command that writes an exp file would leave it empty.
+  for binary in bazel-bin/main/sorbet bazel-bin/test/print_document_symbols; do
+    if [ ! -x "$binary" ]; then
+      1>&2 echo "$binary is missing. Build it, or omit --no-build"
+      exit 1
+    fi
+  done
 fi
 
 rb_src=()
 while IFS='' read -r line; do
   rb_src+=("$line")
-done < <(find "${paths[@]}" -name '*.rb*' | LC_COLLATE=C sort)
+done < <(find "${paths[@]}" \( -name '*.rb' -o -name '*.rbi' -o -name '*.rbupdate' -o -name '*.rbiupdate' \) | LC_COLLATE=C sort)
 
 basename=
 srcs=()
 
+# Whether any file in `srcs` has a line matching the pattern. `srcs` is empty
+# for a group made only of update files (`foo.1.rbupdate` has no `__` to group
+# it with `foo.rb`), and grep with no files would read stdin, so check first.
+srcs_match() {
+  [ "${#srcs[@]}" -gt 0 ] && grep -q "$1" "${srcs[@]}"
+}
+
 for this_src in "${rb_src[@]}" DUMMY; do
+  if grep -q "${this_src#test/}" test/BUILD; then
+    # If the test is directly mentioned in test/BULID, it's probably mentioned
+    # in an `exclude` line. Let's skip updating.
+    continue
+  fi
+
   # Packager tests are folder based.
   if [[ "$this_src" =~ (.*/packager/([^/]+)/).* ]]; then
     # Basename for all .exp files in packager folder is "pass.$pass.exp"
@@ -122,44 +160,73 @@ for this_src in "${rb_src[@]}" DUMMY; do
   fi
 
   if [ -n "$basename" ]; then
+    all_srcs=("${srcs[@]}")
+    srcs=()
+    for src in "${all_srcs[@]}"; do
+      case "$src" in
+        *.rb|*.rbi)
+          srcs+=("$src")
+          ;;
+      esac
+    done
+
+    args=()
+
     case "${srcs[0]}" in
-      test/prism_regression/*)
-        uses_prism=true
+      test/prism_regression/*|test/testdata/rbs/*)
+        args+=("--parser=prism")
         ;;
-      *)
-        uses_prism=false
     esac
 
-    needs_stripe_packages=false
-    if grep -q '^# enable-packager: true' "${srcs[@]}"; then
-      needs_stripe_packages=true
+    if srcs_match '^# enable-packager: true'; then
+      args+=("--sorbet-packages")
+      if srcs_match '^# enable-package-directed: true'; then
+        args+=("--experimental-package-directed")
+      fi
+
+      extra_slash_prefixes_deprecated=()
+      while IFS='' read -r prefix; do
+        extra_slash_prefixes_deprecated+=("$prefix")
+      done < <(grep '# extra-package-files-directory-prefix-slash-deprecated: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
+      if [ "${#extra_slash_prefixes_deprecated[@]}" -gt 0 ]; then
+        for prefix in "${extra_slash_prefixes_deprecated[@]}"; do
+          args+=("--extra-package-files-directory-prefix-slash-deprecated" "${prefix}")
+        done
+      fi
+
+      extra_slash_prefixes=()
+      while IFS='' read -r prefix; do
+        extra_slash_prefixes+=("$prefix")
+      done < <(grep '# extra-package-files-directory-prefix-slash: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
+      if [ "${#extra_slash_prefixes[@]}" -gt 0 ]; then
+        for prefix in "${extra_slash_prefixes[@]}"; do
+          args+=("--extra-package-files-directory-prefix-slash" "${prefix}")
+        done
+      fi
     fi
 
-    needs_requires_ancestor=false
-    if grep -q '^# enable-experimental-requires-ancestor: true' "${srcs[@]}"; then
-      needs_requires_ancestor=true
+    if srcs_match '^# enable-experimental-requires-ancestor: true'; then
+      args+=("--enable-experimental-requires-ancestor")
     fi
 
-    needs_rspec=false
-    if grep -q '^# enable-experimental-rspec: true' "${srcs[@]}"; then
-      needs_rspec=true
+    if srcs_match '^# enable-experimental-rspec: true'; then
+      args+=("--enable-experimental-rspec")
     fi
 
-    needs_experimental_rbs=false
-    if grep -q '^# enable-experimental-rbs-comments: true' "${srcs[@]}"; then
-      needs_experimental_rbs=true
+    if srcs_match '^# enable-experimental-rbs-comments: true'; then
+      args+=("--enable-experimental-rbs-comments")
     fi
 
-    if grep -q '^# typed-super: false' "${srcs[@]}"; then
-      needs_typed_super_false=true
-    else
-      needs_typed_super_false=false
+    if srcs_match '^# enable-experimental-method-modifiers: true'; then
+      args+=("--enable-experimental-method-modifiers")
     fi
 
-    if grep -q '^# enable-suggest-unsafe: true' "${srcs[@]}"; then
-      needs_suggest_unsafe=true
-    else
-      needs_suggest_unsafe=false
+    if srcs_match '^# typed-super: false'; then
+      args+=("--typed-super=false")
+    fi
+
+    if srcs_match '^# enable-suggest-unsafe: true'; then
+      args+=("--suggest-unsafe")
     fi
 
     for pass in "${passes[@]}"; do
@@ -206,71 +273,12 @@ for this_src in "${rb_src[@]}" DUMMY; do
           continue
         fi
       fi
-      if $needs_requires_ancestor; then
-        args=("--enable-experimental-requires-ancestor")
-      else
-        args=()
-      fi
-      if $needs_rspec; then
-        args+=("--enable-experimental-rspec")
-      else
-        args=()
-      fi
-      if $needs_experimental_rbs; then
-        args+=("--enable-experimental-rbs-comments")
-      fi
-      if $needs_typed_super_false; then
-        args+=("--typed-super=false")
-      else
-        args+=()
-      fi
-      if $needs_suggest_unsafe; then
-        args+=("--suggest-unsafe")
-      else
-        args+=()
-      fi
+
+      pass_args=()
       if [ "$pass" = "autogen" ]; then
-        args=("--stop-after=namer")
+        pass_args=("--stop-after=namer")
       elif [ "$pass" = "minimized-rbi" ]; then
-        args=("--minimize-to-rbi=$basename.minimize.rbi")
-      fi
-
-      if $needs_stripe_packages; then
-        args+=("--sorbet-packages")
-
-        extra_underscore_prefixes=()
-        while IFS='' read -r prefix; do
-          extra_underscore_prefixes+=("$prefix")
-        done < <(grep '# extra-package-files-directory-prefix-underscore: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
-        if [ "${#extra_underscore_prefixes[@]}" -gt 0 ]; then
-          for prefix in "${extra_underscore_prefixes[@]}"; do
-            args+=("--extra-package-files-directory-prefix-underscore" "${prefix}")
-          done
-        fi
-
-        extra_slash_prefixes_deprecated=()
-        while IFS='' read -r prefix; do
-          extra_slash_prefixes_deprecated+=("$prefix")
-        done < <(grep '# extra-package-files-directory-prefix-slash-deprecated: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
-        if [ "${#extra_slash_prefixes_deprecated[@]}" -gt 0 ]; then
-          for prefix in "${extra_slash_prefixes_deprecated[@]}"; do
-            args+=("--extra-package-files-directory-prefix-slash-deprecated" "${prefix}")
-          done
-        fi
-
-        extra_slash_prefixes=()
-        while IFS='' read -r prefix; do
-          extra_slash_prefixes+=("$prefix")
-        done < <(grep '# extra-package-files-directory-prefix-slash: ' "${srcs[@]}" | sort | awk -F': ' '{print $2}')
-        if [ "${#extra_slash_prefixes[@]}" -gt 0 ]; then
-          for prefix in "${extra_slash_prefixes[@]}"; do
-            args+=("--extra-package-files-directory-prefix-slash" "${prefix}")
-          done
-        fi
-      fi
-
-      if $uses_prism; then
-        args+=("--parser=prism")
+        pass_args=("--minimize-to-rbi=$basename.minimize.rbi")
       fi
 
       case "$pass" in
@@ -278,9 +286,9 @@ for this_src in "${rb_src[@]}" DUMMY; do
           # See above for why this case is weird.
           for exp in "${document_symbols_candidates[@]}"; do
             wanted_file="${exp%.document-symbols.exp}"
-            # `srcs` contains all of the exp files, too, but including them should be harmless.
+            # Keep update files in `all_srcs` so that document symbol expectations for them can be regenerated.
             echo bazel-bin/test/print_document_symbols \
-              "$wanted_file" "${srcs[@]}" \
+              "$wanted_file" "${all_srcs[@]}" \
               \> "$exp" \
               2\>/dev/null \
               >>"$COMMAND_FILE"
@@ -288,7 +296,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
           ;;
         autocorrects)
           echo tools/scripts/print_autocorrects_exp.sh \
-            "${args[@]}" "${srcs[@]}" \
+            "${args[@]+"${args[@]}"}" "${pass_args[@]+"${pass_args[@]}"}" "${srcs[@]}" \
             \> "$candidate" \
             2\> /dev/null \
             >>"$COMMAND_FILE"
@@ -297,7 +305,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
           echo bazel-bin/main/sorbet \
             --silence-dev-message --suppress-non-critical --censor-for-snapshot-tests \
             --print "$pass" --max-threads 0 \
-            "${args[@]}" "${srcs[@]}" \
+            "${args[@]+"${args[@]}"}" "${pass_args[@]+"${pass_args[@]}"}" "${srcs[@]}" \
             \> "$candidate" \
             2\>/dev/null \
             >>"$COMMAND_FILE"

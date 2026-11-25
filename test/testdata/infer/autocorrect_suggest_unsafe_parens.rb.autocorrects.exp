@@ -1,0 +1,30 @@
+# -- test/testdata/infer/autocorrect_suggest_unsafe_parens.rb --
+# typed: true
+# enable-suggest-unsafe: true
+extend T::Sig
+
+sig { params(x: Integer).void }
+def takes_int(x); end
+
+sig { params(u: T.untyped).void }
+def example(u)
+  takes_int(T.unsafe((u; '')))
+  #         ^^^^^^^ error: Expected `Integer` but found `String("")` for argument `x`
+
+  takes_int((T.unsafe('')))
+  #          ^^ error: Expected `Integer` but found `String("")` for argument `x`
+
+  takes_int((T.unsafe((u; ''))))
+  #          ^^^^^^^ error: Expected `Integer` but found `String("")` for argument `x`
+
+  takes_int(begin T.unsafe((u; '')) end)
+  #               ^^^^^^^ error: Expected `Integer` but found `String("")` for argument `x`
+
+  T.unsafe((u; nil)).foo
+  #        ^^^ error: Method `foo` does not exist on `NilClass`
+end
+
+class ParensInClassBody
+  (1; 2)
+end
+# ------------------------------

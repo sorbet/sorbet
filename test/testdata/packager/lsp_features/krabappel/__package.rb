@@ -5,6 +5,4 @@
 # Bart's teacher
 class Krabappel < PackageSpec
 #     ^^^^^^^^^ def: krabappel-pkg
-    export Test::Krabappel::Popquiz
-    #                       ^^^^^^^ usage: popquiz
 end

@@ -19,6 +19,12 @@ module T::Types
       nil
     end
 
+    # overrides Base
+    def build_lazy_fields
+      build_inner_lazy_fields(type)
+      nil
+    end
+
     def underlying_class
       Enumerable
     end
@@ -38,10 +44,12 @@ module T::Types
       return false unless obj.is_a?(Enumerable)
       case obj
       when Array
-        it = 0
-        while it < obj.count
-          return false unless type.recursively_valid?(obj[it])
-          it += 1
+        element_type = type
+        length = obj.count
+        index = 0
+        while index < length
+          return false unless element_type.recursively_valid?(obj[index])
+          index += 1
         end
         true
       when Hash

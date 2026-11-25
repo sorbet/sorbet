@@ -34,7 +34,7 @@ template <class E> using UnorderedSet = absl::flat_hash_set<E>;
 // Timing ENFORCEs is rather expensive for tests, so it is disabled by default.
 // If you want to collect timing data on particular ENFORCEs, flip this to `false`
 // and recompile.
-constexpr bool skip_enforce_timer = true;
+inline constexpr bool skip_enforce_timer = true;
 
 // Used for cases like https://xkcd.com/2200/
 // where there is some assumption that you believe should always hold.
@@ -55,9 +55,9 @@ constexpr bool skip_enforce_timer = true;
     } while (false);
 
 #ifdef SKIP_SLOW_ENFORCE
-constexpr bool skip_slow_enforce = true;
+inline constexpr bool skip_slow_enforce = true;
 #else
-constexpr bool skip_slow_enforce = false;
+inline constexpr bool skip_slow_enforce = false;
 #endif
 
 // Some ENFORCEs are super slow and/or don't pass on Stripe's codebase.

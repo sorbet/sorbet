@@ -4,6 +4,7 @@
 #include "core/ErrorCollector.h"
 #include "core/ErrorQueue.h"
 #include "core/NameSubstitution.h"
+#include "core/Refcounting.h"
 #include "core/TrailingObjects.h"
 #include "core/TypePtr.h"
 #include "core/Unfreeze.h"
@@ -139,7 +140,7 @@ struct FileIsTypedCase {
     StrictLevel strict;
 };
 
-TEST_CASE("FileIsTyped") { // NOLINT
+TEST_CASE("FileIsTyped") {
     vector<FileIsTypedCase> cases = {
         {"", StrictLevel::None},
         {"# typed: true", StrictLevel::True},
@@ -164,7 +165,7 @@ TEST_CASE("FileIsTyped") { // NOLINT
     }
 }
 
-TEST_CASE("Substitute") { // NOLINT
+TEST_CASE("Substitute") {
     GlobalState gs1(errorQueue);
     gs1.initEmpty();
 
@@ -204,14 +205,110 @@ TEST_CASE("Substitute") { // NOLINT
     REQUIRE_EQ("<U other>", other2.showRaw(gs2));
 }
 
+TEST_CASE("NameRefOwnershipUsesNameTableId") {
+    GlobalState gs(errorQueue);
+    gs.initEmpty();
+    GlobalState other(errorQueue);
+    other.initEmpty();
+
+    NameRef constant, otherConstant;
+    {
+        UnfreezeNameTable thaw(gs);
+        UnfreezeNameTable thawOther(other);
+        constant = gs.enterNameConstant("NameTableOwnership");
+        otherConstant = other.enterNameConstant("NameTableOwnership");
+    }
+
+    // Changing global state IDs must not affect name ownership or confuse the double-substitution check.
+    gs.globalStateId = other.globalStateId;
+    auto original = constant.dataCnst(gs)->original;
+    CHECK_NOTHROW(original.enforceCorrectGlobalState(gs));
+    if constexpr (debug_mode) {
+        CHECK_THROWS_WITH_AS(original.enforceCorrectGlobalState(other),
+                             doctest::Contains("NameRef not owned by correct NameTable"), SorbetException);
+    }
+
+    NameSubstitution subst(gs, other);
+    CHECK_EQ(subst.substitute(constant), otherConstant);
+    if constexpr (debug_mode) {
+        CHECK_THROWS_WITH_AS(subst.substitute(otherConstant), doctest::Contains("substituting a name twice!"),
+                             SorbetException);
+    }
+}
+
+TEST_CASE("CopyForSlowPathPreservesNameRefOwnership") {
+    GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    NameRef constant;
+    {
+        UnfreezeNameTable thaw(gs);
+        constant = gs.enterNameConstant("SlowPathCopyName");
+    }
+    CHECK_NOTHROW(constant.dataCnst(gs)->original.enforceCorrectGlobalState(gs));
+
+    auto copy = gs.copyForSlowPath({}, {}, {}, {}, {}, "", packages::GenPackagesMode::Disabled, false, false,
+                                   packages::Stratum(0));
+    CHECK_NE(gs.globalStateId, copy->globalStateId);
+
+    auto copiedConstant = copy->lookupNameConstant("SlowPathCopyName");
+    REQUIRE(copiedConstant.exists());
+    CHECK_EQ(constant, copiedConstant);
+    CHECK_NOTHROW(copiedConstant.enforceCorrectGlobalState(*copy));
+
+    // References embedded in the copied name table should be valid in the copied GlobalState.
+    auto originalInCopy = copiedConstant.dataCnst(*copy)->original;
+    CHECK_EQ("SlowPathCopyName", originalInCopy.show(*copy));
+    originalInCopy.enforceCorrectGlobalState(*copy);
+}
+
+TEST_CASE("DeepCopyNames") {
+    GlobalState gs(errorQueue);
+    gs.initEmpty();
+    NameRef sharedConstant;
+    {
+        UnfreezeNameTable unfreeze(gs);
+        sharedConstant = gs.enterNameConstant("SharedName");
+    }
+
+    auto parent = gs.deepCopyGlobalState();
+    NameRef parentConstant, unique;
+    {
+        UnfreezeNameTable unfreeze(*parent);
+        parentConstant = parent->enterNameConstant("ClonedName");
+        unique = parent->freshNameUnique(UniqueNameKind::Namer, parentConstant, 1);
+    }
+    parent->markNameTableAsCached();
+    parent->setNameTableDiffCount(7);
+    auto sibling = parent->deepCopyGlobalState();
+
+    for (bool keepId : {false, true}) {
+        INFO("keepId = ", keepId);
+        auto copy = parent->deepCopyGlobalState(keepId);
+        CHECK_EQ(copy->globalStateId == parent->globalStateId, keepId);
+        CHECK_EQ(copy->namesUsedTotal(), parent->namesUsedTotal());
+        CHECK_EQ(copy->lookupNameConstant("SharedName"), sharedConstant);
+        CHECK_EQ(copy->lookupNameConstant("ClonedName"), parentConstant);
+        CHECK_EQ(copy->lookupNameUnique(UniqueNameKind::Namer, parentConstant, 1), unique);
+        CHECK(copy->wasNameTableModified());
+        CHECK_EQ(copy->getNameTableDiffCount(), 0);
+
+        // References inside copied names must retain their shared ancestor's ownership, not the copy's ID.
+        for (auto constant : {sharedConstant, parentConstant}) {
+            constant.dataCnst(*copy)->original.enforceCorrectGlobalState(*sibling);
+        }
+        unique.dataUnique(*copy)->original.enforceCorrectGlobalState(*sibling);
+
+        UnfreezeNameTable unfreeze(*copy);
+        copy->enterNameUTF8("only_in_copy");
+        CHECK_FALSE(parent->lookupNameUTF8("only_in_copy").exists());
+        CHECK_FALSE(sibling->lookupNameUTF8("only_in_copy").exists());
+    }
+}
+
 // Privileged class that is friends with TypePtr
 class TypePtrTestHelper {
 public:
-    static std::atomic<uint32_t> *counter(const TypePtr &ptr) {
-        CHECK(ptr.containsPtr());
-        return &ptr.get()->counter;
-    }
-
     static uint64_t inlinedValue(const TypePtr &ptr) {
         CHECK(!ptr.containsPtr());
         return ptr.inlinedValue();
@@ -221,12 +318,12 @@ public:
         return ptr.store;
     }
 
-    static Refcounted *get(const TypePtr &ptr) {
+    static Refcountable *get(const TypePtr &ptr) {
         CHECK(ptr.containsPtr());
         return ptr.get();
     }
 
-    static TypePtr create(TypePtr::Tag tag, Refcounted *type) {
+    static TypePtr create(TypePtr::Tag tag, Refcountable *type) {
         return TypePtr(tag, type);
     }
 
@@ -243,29 +340,30 @@ TEST_SUITE("TypePtr") {
 
     TEST_CASE("Properly manages counter") {
         auto ptr = make_type<UnresolvedClassType>(Symbols::untyped(), vector<NameRef>{});
-        auto counter = TypePtrTestHelper::counter(ptr);
-        REQUIRE_NE(nullptr, counter);
-        CHECK_EQ(1, counter->load());
+        auto refptr = TypePtrTestHelper::get(ptr);
+        REQUIRE_NE(nullptr, refptr);
+        REQUIRE(!refptr->hasMultipleRefs());
 
         {
             // Copy should increment counter
             TypePtr ptrCopy(ptr);
-            REQUIRE_EQ(counter, TypePtrTestHelper::counter(ptrCopy));
-            CHECK_EQ(2, counter->load());
+            auto refptrCopy = TypePtrTestHelper::get(ptrCopy);
+            REQUIRE_EQ(refptr, refptrCopy);
+            REQUIRE(refptr->hasMultipleRefs());
         }
 
         // Destruction of copy should decrement counter
-        CHECK_EQ(1, counter->load());
+        REQUIRE(!refptr->hasMultipleRefs());
 
         {
             TypePtr ptrCopy(ptr);
             // Assigning/overwriting should decrement counter
             ptr = TypePtr();
-            CHECK_EQ(1, counter->load());
+            REQUIRE(!refptr->hasMultipleRefs());
 
             // Moving should keep counter the same
             ptr = move(ptrCopy);
-            CHECK_EQ(1, counter->load());
+            REQUIRE(!refptr->hasMultipleRefs());
 
             // Moving should clear counter from ptrCopy and make it an empty TypePtr
             CHECK_EQ(0, TypePtrTestHelper::store(ptrCopy));
@@ -274,9 +372,9 @@ TEST_SUITE("TypePtr") {
             // Assigning to nullptr should increment counter (and not try to increment the null counter field in
             // ptrCopy)
             ptrCopy = ptr;
-            CHECK_EQ(2, counter->load());
+            REQUIRE(refptr->hasMultipleRefs());
         }
-        CHECK_EQ(1, counter->load());
+        REQUIRE(!refptr->hasMultipleRefs());
     }
 
     TEST_CASE("Tagging works as expected") {
@@ -330,6 +428,124 @@ TEST_SUITE("TrailingObjects") {
         CHECK_EQ(12, TOTestSufficientlyAligned::totalSizeToAlloc<int>(1));
         CHECK_EQ(16, TOTestSufficientlyAligned::totalSizeToAlloc<int>(2));
     }
+}
+
+namespace {
+class TestRefCounted final : public sorbet::core::RefCounted<TestRefCounted> {
+public:
+    int value;
+    int *destructor_count;
+    TestRefCounted(int v, int &count) : value(v), destructor_count(&count) {}
+    ~TestRefCounted() {
+        (*destructor_count)++;
+    }
+};
+} // namespace
+
+TEST_SUITE("RefPtr") {
+    TEST_CASE("Default constructs to null") {
+        sorbet::core::RefPtr<TestRefCounted> ptr;
+        CHECK(!ptr);
+        CHECK(ptr == nullptr);
+        CHECK(ptr.get() == nullptr);
+    }
+
+    TEST_CASE("Constructs from raw pointer and releases") {
+        int dtor_count = 0;
+        {
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(42, dtor_count);
+            CHECK(ptr != nullptr);
+            CHECK_EQ(42, ptr->value);
+            CHECK_EQ(42, (*ptr).value);
+        }
+        CHECK_EQ(1, dtor_count);
+    }
+
+    TEST_CASE("Copy increments refcount") {
+        int dtor_count = 0;
+        {
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(7, dtor_count);
+            CHECK(!ptr->hasMultipleRefs());
+            {
+                sorbet::core::RefPtr<TestRefCounted> copy(ptr);
+                CHECK(ptr->hasMultipleRefs());
+                CHECK_EQ(ptr.get(), copy.get());
+            }
+            CHECK(!ptr->hasMultipleRefs());
+            CHECK_EQ(0, dtor_count);
+        }
+        CHECK_EQ(1, dtor_count);
+    }
+
+    TEST_CASE("Move does not increment refcount") {
+        int dtor_count = 0;
+        {
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(9, dtor_count);
+            auto *raw = ptr.get();
+            CHECK(!raw->hasMultipleRefs());
+
+            sorbet::core::RefPtr<TestRefCounted> moved(std::move(ptr));
+            CHECK(!ptr);
+            CHECK(moved);
+            CHECK_EQ(raw, moved.get());
+            CHECK(!raw->hasMultipleRefs());
+        }
+        CHECK_EQ(1, dtor_count);
+    }
+
+    TEST_CASE("Copy assignment") {
+        int dtor_count = 0;
+        {
+            auto a = sorbet::core::makeRefPtr<TestRefCounted>(1, dtor_count);
+            auto b = sorbet::core::makeRefPtr<TestRefCounted>(2, dtor_count);
+            auto *rawB = b.get();
+
+            a = b;
+            CHECK_EQ(rawB, a.get());
+            CHECK(rawB->hasMultipleRefs());
+            CHECK_EQ(1, dtor_count); // old 'a' destroyed
+        }
+        CHECK_EQ(2, dtor_count);
+    }
+
+    TEST_CASE("Move assignment") {
+        int dtor_count = 0;
+        {
+            auto a = sorbet::core::makeRefPtr<TestRefCounted>(1, dtor_count);
+            auto b = sorbet::core::makeRefPtr<TestRefCounted>(2, dtor_count);
+            auto *rawB = b.get();
+
+            a = std::move(b);
+            CHECK(!b);
+            CHECK_EQ(rawB, a.get());
+            CHECK(!rawB->hasMultipleRefs());
+            CHECK_EQ(1, dtor_count); // old 'a' destroyed
+        }
+        CHECK_EQ(2, dtor_count);
+    }
+
+    TEST_CASE("Assign nullptr releases") {
+        int dtor_count = 0;
+        {
+            auto ptr = sorbet::core::makeRefPtr<TestRefCounted>(5, dtor_count);
+            ptr = nullptr;
+            CHECK(!ptr);
+            CHECK_EQ(1, dtor_count);
+        }
+        CHECK_EQ(1, dtor_count);
+    }
+}
+
+TEST_CASE("isPackageSpecSymbol") {
+    GlobalState gs(errorQueue);
+    gs.initEmpty();
+
+    {
+        auto unfrezePackages = gs.packageDB().unfreeze();
+        gs.setPackagerOptions({}, {}, {}, {}, {}, "", packages::GenPackagesMode::Disabled, false, false);
+    }
+
+    CHECK_FALSE(Symbols::root().isPackageSpecSymbol(gs));
 }
 
 } // namespace sorbet::core

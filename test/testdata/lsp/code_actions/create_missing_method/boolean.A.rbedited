@@ -1,0 +1,19 @@
+# typed: true
+# selective-apply-code-action: refactor
+# enable-experimental-lsp-create-missing-method: true
+
+class SingleArg
+  extend T::Sig
+
+  sig { void }
+  def caller
+    greet(false)
+#   ^^^^^ error: Method `greet` does not exist on `SingleArg`
+#     ^ apply-code-action: [A] Create missing method
+  end
+
+  sig { params(param: T::Boolean).returns(T.untyped) }
+  def greet(param)
+    Kernel.raise NotImplementedError
+  end
+end

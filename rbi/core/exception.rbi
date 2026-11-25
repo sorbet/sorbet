@@ -272,12 +272,29 @@ class Exception < Object
   # objects or a single
   # [`String`](https://docs.ruby-lang.org/en/2.7.0/String.html) in the format
   # described in
-  # [`Exception#backtrace`](https://docs.ruby-lang.org/en/2.7.0/Exception.html#method-i-backtrace).
+  # [`Exception#backtrace`](https://docs.ruby-lang.org/en/2.7.0/Exception.html#method-i-backtrace),
+  # or, since Ruby 3.4, an array of
+  # [`Thread::Backtrace::Location`](https://docs.ruby-lang.org/en/3.4/Thread/Backtrace/Location.html)
+  # objects, which sets
+  # [`Exception#backtrace_locations`](https://docs.ruby-lang.org/en/3.4/Exception.html#method-i-backtrace_locations)
+  # too.
   sig do
     params(
         arg0: T.nilable(T.any(String, T::Array[String])),
     )
     .returns(T::Array[String])
+  end
+  sig do
+    params(
+        arg0: T::Array[Thread::Backtrace::Location],
+    )
+    .returns(T::Array[Thread::Backtrace::Location])
+  end
+  sig do
+    params(
+        arg0: T.nilable(T.any(String, T::Array[String], T::Array[Thread::Backtrace::Location])),
+    )
+    .returns(T.nilable(T.any(T::Array[String], T::Array[Thread::Backtrace::Location])))
   end
   def set_backtrace(arg0); end
 

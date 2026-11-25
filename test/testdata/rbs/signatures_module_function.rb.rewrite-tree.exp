@@ -1,0 +1,27 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C Config><<C <todo sym>>> < ()
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:key, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def fetch<<todo method>>(key, &<blk>)
+      key
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:key, <emptyTree>::<C String>).returns(<emptyTree>::<C String>)
+    end
+
+    def self.fetch<<todo method>>(key, &<blk>)
+      key
+    end
+
+    <self>.private(<runtime method definition of fetch>)
+
+    <runtime method definition of self.fetch>
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C Config>.fetch("a"))
+
+  <emptyTree>::<C Config>.fetch(0)
+end

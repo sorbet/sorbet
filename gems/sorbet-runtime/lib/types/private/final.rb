@@ -1,23 +1,23 @@
 # frozen_string_literal: true
-# typed: false
+# typed: true
 
 module T::Private::Final
   module NoInherit
     def inherited(arg)
       super(arg)
-      raise "#{self} was declared as final and cannot be inherited"
+      Kernel.raise "#{self} was declared as final and cannot be inherited"
     end
   end
 
   module NoIncludeExtend
     def included(arg)
       super(arg)
-      raise "#{self} was declared as final and cannot be included"
+      Kernel.raise "#{self} was declared as final and cannot be included"
     end
 
     def extended(arg)
       super(arg)
-      raise "#{self} was declared as final and cannot be extended"
+      Kernel.raise "#{self} was declared as final and cannot be extended"
     end
   end
 

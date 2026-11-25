@@ -1,6 +1,8 @@
 #ifndef SORBET_UNTAGGEDPTR_H
 #define SORBET_UNTAGGEDPTR_H
 
+#include <cstddef>
+
 namespace sorbet::core {
 
 template <class To> struct UntaggedPtr {

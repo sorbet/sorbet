@@ -288,7 +288,7 @@ class Dir < Object
   # ```
   sig do
     params(
-        pattern: T.any(String, T::Array[String]),
+        pattern: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
         flags: T.nilable(Integer),
         opts: T.nilable(T::Hash[Symbol, String]),
     )
@@ -296,7 +296,7 @@ class Dir < Object
   end
   sig do
     params(
-        pattern: T.any(String, T::Array[String]),
+        pattern: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
         flags: T.nilable(Integer),
         opts: T.nilable(T::Hash[Symbol, String]),
         blk: T.proc.params(arg0: String).returns(BasicObject),
@@ -305,7 +305,7 @@ class Dir < Object
   end
   sig do
     params(
-        pattern: T.any(String, T::Array[String]),
+        pattern: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
         opts: T.nilable(T::Hash[Symbol, String]),
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
@@ -313,7 +313,7 @@ class Dir < Object
   end
   sig do
     params(
-        pattern: T.any(String, T::Array[String]),
+        pattern: T.any(String, Pathname, T::Array[T.any(String, Pathname)]),
         opts: T.nilable(T::Hash[Symbol, String]),
     )
     .returns(T::Array[String])

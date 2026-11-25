@@ -75,8 +75,6 @@ public:
 
     virtual bool canPreempt(const LSPIndexer &) const;
 
-    virtual bool needsMultithreading(const LSPIndexer &) const;
-
     // Returns the phase at which the task is complete. Some tasks only need to interface with the preprocessor or the
     // indexer. The default implementation returns RUN.
     virtual Phase finalPhase() const;
@@ -93,6 +91,10 @@ public:
     // Runs the task. Is only ever invoked from the typechecker thread. Since it is exceedingly rare for a request to
     // not need to interface with the typechecker, this method must be implemented by all subclasses.
     virtual void run(LSPTypecheckerDelegate &typechecker) = 0;
+
+    // The stratum that this task is runnable at, if running from the preemption scheduler. By default this returns the
+    // last stratum, which is a conservatively correct choice for any task that supports preemption.
+    virtual core::packages::Stratum preemptionStratum(FileStratumMapping info) const;
 };
 
 /**
@@ -113,6 +115,8 @@ public:
     Phase finalPhase() const override;
 
     bool cancel(const MessageId &id) override;
+
+    core::packages::Stratum preemptionStratum(FileStratumMapping info) const override = 0;
 };
 
 // Doubles as the `methodString` for a `TextDocumentCompletion` LSPTask and also as
@@ -134,24 +138,6 @@ public:
     virtual void runSpecial(LSPTypechecker &typechecker, WorkerPool &worker) = 0;
     // Tells the scheduler how long to wait before it can schedule more tasks.
     virtual void schedulerWaitUntilReady() = 0;
-};
-
-class LSPIndexer;
-class TaskQueue;
-
-/**
- * Represents a preemption task. When run, it will run all tasks at the head of `taskQueue` that can preempt.
- */
-class LSPQueuePreemptionTask final : public LSPTask {
-    absl::Notification &finished;
-    TaskQueue &taskQueue;
-    LSPIndexer &indexer;
-
-public:
-    LSPQueuePreemptionTask(const LSPConfiguration &config, absl::Notification &finished, TaskQueue &taskQueue,
-                           LSPIndexer &indexer);
-
-    void run(LSPTypecheckerDelegate &tc) override;
 };
 
 } // namespace sorbet::realmain::lsp

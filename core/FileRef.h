@@ -9,8 +9,8 @@ class File;
 
 class FileRef final {
 public:
-    FileRef() : _id(0){};
-    FileRef(unsigned int id);
+    FileRef() noexcept : _id(0) {};
+    FileRef(unsigned int id) noexcept;
 
     FileRef(FileRef &f) = default;
     FileRef(const FileRef &f) = default;
@@ -18,21 +18,7 @@ public:
     FileRef &operator=(const FileRef &f) = default;
     FileRef &operator=(FileRef &&f) = default;
 
-    bool operator==(const FileRef &rhs) const {
-        return _id == rhs._id;
-    }
-
-    bool operator!=(const FileRef &rhs) const {
-        return !(rhs == *this);
-    }
-
-    bool operator<(const FileRef &rhs) const {
-        return _id < rhs._id;
-    }
-
-    bool operator>(const FileRef &rhs) const {
-        return _id > rhs._id;
-    }
+    auto operator<=>(const FileRef &rhs) const = default;
 
     inline unsigned int id() const {
         return _id;
@@ -51,11 +37,6 @@ public:
     // But File::Flag data is populated when the File is created, before needing to read the
     // file. This helper exposes that without tripping an ENFORCE.
     bool isPackage(const GlobalState &gs) const;
-
-    // Normally, using .data requires that the file have been read.
-    // But File::Flag data is populated when the File is created, before needing to read the
-    // file. This helper exposes that without tripping an ENFORCE.
-    bool isTestPackage(const GlobalState &gs) const;
 
 private:
     uint32_t _id;

@@ -21,10 +21,10 @@ const vector<string> PackageHelpers::LAYERS_LIB_APP = {"lib", "app"};
 const vector<string> PackageHelpers::LAYERS_UTIL_LIB_APP = {"util", "lib", "app"};
 
 string PackageTextBuilder::build() {
-    string out = fmt::format("class {} < PackageSpec\n", this->name);
+    string out = fmt::format("# typed: strict\n\nclass {} < PackageSpec\n", this->name);
 
     if (this->preludePackage) {
-        fmt::format_to(back_inserter(out), "  prelude_package\n");
+        fmt::format_to(back_inserter(out), "  prelude!\n");
     }
 
     if (!this->strictDeps.empty()) {
@@ -39,23 +39,17 @@ string PackageTextBuilder::build() {
         fmt::format_to(back_inserter(out), "  import {}\n", i);
     }
 
-    for (auto &i : this->testImports) {
-        fmt::format_to(back_inserter(out), "  test_import {}\n", i);
-    }
-
     fmt::format_to(back_inserter(out), "end\n");
 
     return out;
 }
 
-string PackageHelpers::makePackageRB(string name, string strictDeps, string layer, vector<string> imports,
-                                     vector<string> testImports) {
+string PackageHelpers::makePackageRB(string name, string strictDeps, string layer, vector<string> imports) {
     return PackageTextBuilder()
         .withName(move(name))
         .withStrictDeps(move(strictDeps))
         .withLayer(move(layer))
         .withImports(move(imports))
-        .withTestImports(move(testImports))
         .build();
 }
 

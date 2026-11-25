@@ -4,13 +4,13 @@
 #include "ast/ast.h"
 #include "core/ErrorFlusher.h"
 #include "core/core.h"
+#include "core/packages/Stratum.h"
 #include "main/lsp/ErrorReporter.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPFileUpdates.h"
 
 namespace sorbet {
 class WorkerPool;
-class KeyValueStore;
 class OwnedKeyValueStore;
 } // namespace sorbet
 
@@ -36,11 +36,14 @@ struct LSPQueryResult {
 };
 
 class UndoState;
+class FileStratumMapping;
 
 /**
  * Encapsulates typechecker operations and enforces that they happen on a single thread.
  */
 class LSPTypechecker final {
+    friend class FileStratumMapping;
+
     /** Contains the ID of the thread responsible for typechecking. */
     std::thread::id typecheckerThreadId;
     /**
@@ -52,7 +55,7 @@ class LSPTypechecker final {
     std::unique_ptr<core::GlobalState> gs;
 
     /**
-     * A copy of the kvstore produced during initialization, that's private to this LSP session.
+     * A private cache used during initialization and subsequent typechecking.
      */
     std::unique_ptr<cache::SessionCache> sessionCache;
 
@@ -63,12 +66,15 @@ class LSPTypechecker final {
     std::vector<core::FileRef> workspaceFiles;
 
     /**
-     * Trees that have been indexed with this->gs between slow path runs, which means that they may have names that are
-     * not present in the name table of the indexer. This is a sparse diff of trees indexed by file id, and should be
-     * consulted before re-indexing trees. This lookup strategy is implemented by this->getResolved. All of the trees in
-     * this map are valid to use with this->gs.
+     * Resolved trees for files that are open in the client, indexed by file id. These are consulted by
+     * this->getResolved before re-indexing and re-resolving a file.
+     *
+     * Every tree in this map is valid to use with this->gs: its names are present in this->gs's name table (which may
+     * not be true of the indexer's name table), and every symbol it references is still present in this->gs's symbol
+     * table. Maintaining the latter property requires discarding trees whenever an operation might delete symbols that
+     * a tree references (see the fast path in this->typecheck).
      */
-    UnorderedMap<int, ast::ParsedFile> indexedFinalGS;
+    UnorderedMap<int, ast::ParsedFile> resolvedFinalGS;
 
     /** Set only when typechecking is happening on the slow path. Contains all of the state needed to restore
      * LSPTypechecker to its pre-slow-path state. Can be null, which indicates that no slow path is currently running */
@@ -86,31 +92,41 @@ class LSPTypechecker final {
     bool slowPathBlocked ABSL_GUARDED_BY(slowPathBlockedMutex) = false;
     absl::Mutex slowPathBlockedMutex;
 
+    std::vector<core::packages::Stratum> fileToStratum;
+
+    core::packages::Stratum lastStratum;
+
+    std::unique_ptr<OwnedKeyValueStore> openSessionCache() const;
+
     enum class SlowPathMode {
         Init,
         Cancelable,
     };
 
-    /** Conservatively reruns entire pipeline without caching any trees. Returns 'true' if committed, 'false' if
-     * canceled. */
-    bool runSlowPath(LSPFileUpdates &updates, std::unique_ptr<const OwnedKeyValueStore> ownedKvstore,
-                     WorkerPool &workers, std::shared_ptr<core::ErrorFlusher> errorFlusher, SlowPathMode mode);
+    /** Reruns the pipeline using the session cache, closing the store after each indexing phase.
+     * Returns 'true' if committed, 'false' if canceled. */
+    std::pair<bool, core::packages::Stratum> runSlowPath(LSPFileUpdates &updates, WorkerPool &workers,
+                                                         std::shared_ptr<core::ErrorFlusher> errorFlusher,
+                                                         SlowPathMode mode);
+
+    struct FastPathResult {
+        // All of the files that we typechecked during the fast path.
+        std::vector<core::FileRef> filesTypechecked;
+
+        // Copies of the resolved trees for files typechecked during the fast path that are open in the client, for
+        // updating the cache of open files.
+        std::vector<ast::ParsedFile> resolvedTrees;
+    };
 
     /** Runs incremental typechecking on the provided updates. Returns the final list of files typechecked. */
-    std::vector<core::FileRef> runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
-                                           std::shared_ptr<core::ErrorFlusher> errorFlusher,
-                                           bool isNoopUpdateForRetypecheck) const;
+    FastPathResult runFastPath(LSPFileUpdates &updates, WorkerPool &workers,
+                               std::shared_ptr<core::ErrorFlusher> errorFlusher, bool isNoopUpdateForRetypecheck) const;
 
     /**
-     * Open the session-local kvstore.
+     * Populate `this->resolvedFinalGS` with copies of resolved trees from the `resolved` span, whose files are open in
+     * the client.
      */
-    std::unique_ptr<OwnedKeyValueStore> getKvStore() const;
-
-    /**
-     * Populate `this->indexedFinalGS` with copies of indexed trees from the `indexed` span, whose files are mentioned
-     * in the `openFiles` vector.
-     */
-    void cacheUpdatedFiles(absl::Span<const ast::ParsedFile> indexed, const UnorderedSet<core::FileRef> &openFiles);
+    void cacheUpdatedFiles(absl::Span<const ast::ParsedFile> resolved);
 
 public:
     LSPTypechecker(std::shared_ptr<const LSPConfiguration> config,
@@ -123,8 +139,9 @@ public:
      *
      * Writes all diagnostic messages to LSPOutput.
      */
-    void initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> gs, std::unique_ptr<KeyValueStore> kvstore,
-                    WorkerPool &workers, const LSPConfiguration &currentConfig);
+    void initialize(TaskQueue &queue, std::unique_ptr<core::GlobalState> gs,
+                    std::unique_ptr<cache::SessionCache> sessionCache, WorkerPool &workers,
+                    const LSPConfiguration &currentConfig);
 
     /**
      * Typechecks the given input. Returns 'true' if the updates were committed, or 'false' if typechecking was
@@ -140,7 +157,7 @@ public:
 
     /** Runs the provided query against the given files, and returns matches. */
     LSPQueryResult query(const core::lsp::Query &q, const std::vector<core::FileRef> &filesForQuery,
-                         WorkerPool &workers) const;
+                         WorkerPool &workers);
 
     /**
      * Returns the parsed file for the given file, up to the desugar pass, and local vars.
@@ -153,15 +170,18 @@ public:
     ast::ExpressionPtr getLocalVarTrees(core::FileRef fref) const;
 
     /**
-     * Returns copies of the indexed trees that have been run through the incremental resolver. There is no guarantee
-     * that the resolved trees are returned in the same order that the FileRefs appear in the input span.
+     * Returns copies of the resolved trees for the given files. There is no guarantee that the resolved trees are
+     * returned in the same order that the FileRefs appear in the input span.
+     *
+     * Trees for files that are open in the client are served from (and, on a miss, saved to) `this->resolvedFinalGS`.
+     * Other files are indexed and run through the incremental resolver.
      */
-    std::vector<ast::ParsedFile> getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers) const;
+    std::vector<ast::ParsedFile> getResolved(absl::Span<const core::FileRef> frefs, WorkerPool &workers);
 
     /**
-     * Returns a copy of the indexed tree that has been run through the incremental resolver.
+     * Returns a copy of the resolved tree for the given file.
      */
-    ast::ParsedFile getResolved(core::FileRef fref, WorkerPool &workers) const;
+    ast::ParsedFile getResolved(core::FileRef fref, WorkerPool &workers);
 
     /**
      * Returns the currently active GlobalState.
@@ -195,7 +215,66 @@ public:
      * doesn't actually change anything.
      */
     std::unique_ptr<LSPFileUpdates> getNoopUpdate(absl::Span<const core::FileRef> frefs) const;
+
+    /**
+     * Return a helper that can query information about package strata, without exposing the rest of the typechecker.
+     */
+    FileStratumMapping getFileStratumMapping() const;
 };
+
+class FileStratumMapping {
+    friend class LSPTypechecker;
+
+    const LSPTypechecker &tc;
+
+    FileStratumMapping(const LSPTypechecker &tc) : tc{tc} {}
+
+public:
+    /**
+     * Get the id of the stratum that an edit involving these file refs could be checked at.
+     */
+    core::packages::Stratum getStratumForFiles(absl::Span<const core::FileRef> frefs) const;
+
+    /**
+     * Get the id of the stratum that an edit involving these paths could be checked at.
+     */
+    core::packages::Stratum getStratumForPaths(absl::Span<const std::string_view> paths) const;
+
+    /**
+     * Get the id of the stratum that an edit involving these uris could be checked at.
+     */
+    core::packages::Stratum getStratumForUris(absl::Span<const std::string_view> uris) const;
+
+    /**
+     * Get the id of the stratum that an edit involving this file ref could be checked at.
+     */
+    core::packages::Stratum getStratumForFile(core::FileRef ref) const;
+
+    /**
+     * Get the id of the stratum that an edit involving this path could be checked at.
+     */
+    core::packages::Stratum getStratumForPath(const std::string_view path) const {
+        return this->getStratumForFile(this->tc.state().findFileByPath(path));
+    }
+
+    /**
+     * Get the id of the stratum that an edit involving this uri could be checked at.
+     */
+    core::packages::Stratum getStratumForUri(std::string_view uri) const {
+        return this->getStratumForFile(this->tc.config->uri2FileRef(this->tc.state(), uri));
+    }
+
+    /**
+     * Get the id of the last stratum in the condensation graph.
+     */
+    core::packages::Stratum getLastStratum() const {
+        return this->tc.lastStratum;
+    }
+};
+
+inline FileStratumMapping LSPTypechecker::getFileStratumMapping() const {
+    return FileStratumMapping{*this};
+}
 
 /**
  * Provides lambdas with a set of operations that they are allowed to do with the LSPTypechecker.
@@ -224,7 +303,7 @@ public:
     virtual ~LSPTypecheckerDelegate() = default;
 
     void initialize(InitializedTask &task, std::unique_ptr<core::GlobalState> gs,
-                    std::unique_ptr<KeyValueStore> kvstore, const LSPConfiguration &currentConfig);
+                    std::unique_ptr<cache::SessionCache> sessionCache, const LSPConfiguration &currentConfig);
 
     void resumeTaskQueue(InitializedTask &task);
 
@@ -240,6 +319,9 @@ public:
 
     void updateConfigAndGsFromOptions(const DidChangeConfigurationParams &options) const;
     std::unique_ptr<LSPFileUpdates> getNoopUpdate(absl::Span<const core::FileRef> frefs) const;
+    FileStratumMapping getFileStratumMapping() const {
+        return this->typechecker.getFileStratumMapping();
+    }
 };
 } // namespace sorbet::realmain::lsp
 #endif

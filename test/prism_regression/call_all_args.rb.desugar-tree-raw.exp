@@ -144,7 +144,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = ConstantLit{
         symbol = (class ::<Magic>)
         orig = nullptr
@@ -308,7 +308,7 @@ ClassDef{
     }
 
     Send{
-      flags = {}
+      flags = {doEndBlock}
       recv = ConstantLit{
         symbol = (class ::<Magic>)
         orig = nullptr

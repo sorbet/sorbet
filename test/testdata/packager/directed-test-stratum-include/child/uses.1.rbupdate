@@ -1,0 +1,7 @@
+# typed: strict
+# frozen_string_literal: true
+# assert-slow-path: true
+
+class Child::Uses; end
+
+class Child::NewClass; end

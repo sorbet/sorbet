@@ -1,4 +1,10 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  def method_with_only_rescue<<todo method>>(&<blk>)
+    <emptyTree>
+  rescue <emptyTree>::<C StandardError> => <rescueTemp>$2
+    <emptyTree>
+  end
+
   <emptyTree>::<C ARGV>.first()
 rescue => <rescueTemp>$2
   <cast:cast>(<emptyTree>::<C ARGV>.first(), <todo sym>, <emptyTree>::<C String>)
@@ -50,4 +56,6 @@ rescue <emptyTree>::<C StandardError> => <rescueTemp>$3
   <emptyTree>
 rescue => <rescueTemp>$4
   <emptyTree>
+
+  <runtime method definition of method_with_only_rescue>
 end

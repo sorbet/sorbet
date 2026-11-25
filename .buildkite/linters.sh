@@ -3,28 +3,28 @@
 set -euo pipefail
 export JOB_NAME=linters
 
-# shellcheck source=SCRIPTDIR/tools/setup-bazel.sh
+# shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/setup-bazel.sh
 
 set -x
 globalErr=0
 
 echo "~~~ Checking build files"
-if ! ./tools/scripts/format_build_files.sh -t &> buildifier; then
+if ! ./tools/scripts/format_build_files.sh -t > buildifier; then
     globalErr=1
     echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/format_build_files.sh --style error --append < buildifier
 fi
 
 echo "~~~ Checking c++ formatting"
-if ! ./tools/scripts/format_cxx.sh -t &> format_cxx; then
+if ! ./tools/scripts/format_cxx.sh -td &> format_cxx; then
     globalErr=1
     echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/format_cxx.sh --style error --append < format_cxx
 fi
 
 echo "~~~ Checking that the compilation db builds"
-if ! ./tools/scripts/build_compilation_db.sh &> compdb; then
+if ! ./tools/scripts/build_compilation_db.sh > compdb; then
     globalErr=1
     echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/build_compilation_db.sh --style error --append < compdb
@@ -63,6 +63,19 @@ if ! ./tools/scripts/format_website.sh -t &> format_website; then
     globalErr=1
     echo "^^^ +++"
     buildkite-agent annotate --context tools/scripts/format_website.sh --style error --append < format_website
+fi
+
+echo "~~~ Checking protoc dependency"
+./bazel query "somepath(//main:sorbet, @com_google_protobuf//:protoc)" 2> /dev/null > protoc_dependency
+if [ "$(wc -l protoc_dependency)" -ne 0 ]; then
+  globalErr=1
+  echo "^^^ +++"
+  cat >> protoc_dependency <<EOF
+
+There is a path to @com_google_protobuf//:protoc from //main:sorbet
+Please remove it, as this represents a substantial regression in compile times.
+EOF
+  buildkite-agent annotate --context "path to @com_google_protobuf//:protoc" --style error --append < protoc_dependency
 fi
 
 if grep -n -r '^  \w*\.md' website &> lint_docusaurus_md; then

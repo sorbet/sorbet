@@ -31,7 +31,7 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     serverCap->hoverProvider = true;
     serverCap->referencesProvider = true;
     serverCap->implementationProvider = true;
-    serverCap->documentFormattingProvider = opts.lspDocumentFormatRubyfmtEnabled;
+    serverCap->documentFormattingProvider = false;
     serverCap->sorbetShowSymbolProvider = true;
 
     auto codeActionProvider = make_unique<CodeActionOptions>();
@@ -55,4 +55,11 @@ unique_ptr<ResponseMessage> InitializeTask::runRequest(LSPTypecheckerDelegate &t
     response->result = make_unique<InitializeResult>(move(serverCap));
     return response;
 }
+
+core::packages::Stratum InitializeTask::preemptionStratum(FileStratumMapping info) const {
+    // Initialization will never happen from a preemption context.
+    ENFORCE(false, "Initialization should never happen from preemption");
+    return info.getLastStratum();
+}
+
 } // namespace sorbet::realmain::lsp

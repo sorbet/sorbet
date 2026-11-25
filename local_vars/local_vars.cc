@@ -15,13 +15,10 @@ class LocalNameInserter {
     friend class LocalVars;
 
     struct ArgFlags {
-        bool keyword : 1;
-        bool block : 1;
-        bool repeated : 1;
-        bool shadow : 1;
-
-        // In C++20 we can replace this with bit field initialzers
-        ArgFlags() : keyword(false), block(false), repeated(false), shadow(false) {}
+        bool keyword : 1 = false;
+        bool block : 1 = false;
+        bool repeated : 1 = false;
+        bool shadow : 1 = false;
 
         bool isPositional() const {
             return !this->keyword && !this->block && !this->repeated && !this->shadow;
@@ -108,7 +105,8 @@ class LocalNameInserter {
                     named.flags.shadow = true;
                     cursor = &shadow.expr;
                 },
-                [&](const ast::Local &local) { Exception::raise("Local variable found in argument list"); });
+                [&](const ast::Local &local) { unreachable("Local variable found in argument list"); },
+                [&](const ast::ExpressionPtr &expr) { unreachable("Unexpected node type in parameter position."); });
         }
 
         named.expr = move(arg);
@@ -120,10 +118,6 @@ class LocalNameInserter {
         int pos = -1;
         for (auto &param : methodParams) {
             ++pos;
-
-            if (!ast::isa_reference(param)) {
-                Exception::raise("Must be a reference!");
-            }
             auto named = nameArg(ctx, namedParams, move(param), pos);
             namedParams.emplace_back(move(named));
         }
@@ -240,6 +234,7 @@ class LocalNameInserter {
         ENFORCE(original.fun == core::Names::super() || original.fun == core::Names::untypedSuper());
 
         ast::ExpressionPtr originalBlock;
+        auto originalBlockType = original.flags.blockType;
         if (auto *rawBlock = original.rawBlock()) {
             originalBlock = move(*rawBlock);
         }
@@ -422,7 +417,7 @@ class LocalNameInserter {
                 newRecv = ast::MK::Magic(original.loc);
                 newFun = core::Names::callWithSplat();
                 // Re-add block argument
-                newFlags.hasBlock = true;
+                newFlags.blockType = originalBlockType;
                 newArgs.push_back(std::move(originalBlock));
             } else if (blockArg != nullptr) {
                 // <call-with-splat-and-block-pass>(..., &blk)
@@ -482,7 +477,7 @@ class LocalNameInserter {
             }
             // Re-add original block
             if (originalBlock) {
-                newFlags.hasBlock = true;
+                newFlags.blockType = originalBlockType;
                 newArgs.push_back(std::move(originalBlock));
             }
             kwArgKeyEntries.clear();
@@ -491,18 +486,6 @@ class LocalNameInserter {
 
         return ast::make_expression<ast::Send>(original.loc, std::move(newRecv), newFun, original.funLoc, newNumPosArgs,
                                                std::move(newArgs), newFlags);
-    }
-
-    void walkConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
-            walkConstantLit(ctx, lit->scope);
-        } else if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
-            // Do nothing.
-        } else {
-            // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
-            // Still want to do our best to recover (for e.g., LSP queries)
-            ast::TreeWalk::apply(ctx, *this, tree);
-        }
     }
 
 public:
@@ -572,7 +555,14 @@ public:
     }
 
     void postTransformUnresolvedConstantLit(core::MutableContext ctx, ast::ExpressionPtr &tree) {
-        walkConstantLit(ctx, tree);
+        auto &outermostScope = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree).outermostScope();
+        if (ast::isa_tree<ast::EmptyTree>(outermostScope) || ast::isa_tree<ast::ConstantLit>(outermostScope)) {
+            return;
+        }
+
+        // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
+        // Still want to do our best to recover (for e.g., LSP queries)
+        ast::TreeWalk::apply(ctx, *this, outermostScope);
     }
 
 private:

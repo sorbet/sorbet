@@ -37,44 +37,47 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <emptyTree>::<C X> = "hello"
 
-  class <emptyTree>::<C <describe 'example'>><<C <todo sym>>> < (<self>)
-    def <it '::<Magic>.<string-interpolate>("outside test_each ", x)'><<todo method>>(&<blk>)
-      <emptyTree>
-    end
-
-    def <it '::<Magic>.<string-interpolate>("outside test_each ", <self>.y())'><<todo method>>(&<blk>)
-      <emptyTree>
-    end
-
-    def <it '::<Magic>.<string-interpolate>("outside test_each ", <emptyTree>::<C X>)'><<todo method>>(&<blk>)
-      <emptyTree>
-    end
-
-    def <it '::<Magic>.<string-interpolate>("bar ", x)'><<todo method>>(&<blk>)
-      ["foo"].each() do |x|
+  begin
+    "example"
+    class <emptyTree>::<C <describe 'example'>><<C <todo sym>>> < (<self>)
+      def <it '::<Magic>.<string-interpolate>("outside test_each ", x)'><<todo method>>(&<blk>)
         <emptyTree>
       end
-    end
 
-    x = "hello"
+      def <it '::<Magic>.<string-interpolate>("outside test_each ", <self>.y())'><<todo method>>(&<blk>)
+        <emptyTree>
+      end
 
-    begin
-      ::<Magic>.<string-interpolate>("outside test_each ", x)
-      <emptyTree>
-    end
+      def <it '::<Magic>.<string-interpolate>("outside test_each ", <emptyTree>::<C X>)'><<todo method>>(&<blk>)
+        <emptyTree>
+      end
 
-    begin
-      ::<Magic>.<string-interpolate>("outside test_each ", <self>.y())
-      <emptyTree>
-    end
+      def <it '::<Magic>.<string-interpolate>("bar ", x)'><<todo method>>(&<blk>)
+        ["foo"].each() do |x|
+          <emptyTree>
+        end
+      end
 
-    begin
-      ::<Magic>.<string-interpolate>("outside test_each ", <emptyTree>::<C X>)
-      <emptyTree>
-    end
+      x = "hello"
 
-    <self>.test_each(["foo"]) do |x|
-      <runtime method definition of <it '::<Magic>.<string-interpolate>("bar ", x)'>>
+      begin
+        ::<Magic>.<string-interpolate>("outside test_each ", x)
+        <emptyTree>
+      end
+
+      begin
+        ::<Magic>.<string-interpolate>("outside test_each ", <self>.y())
+        <emptyTree>
+      end
+
+      begin
+        ::<Magic>.<string-interpolate>("outside test_each ", <emptyTree>::<C X>)
+        <emptyTree>
+      end
+
+      <self>.test_each(["foo"]) do |x|
+        <runtime method definition of <it '::<Magic>.<string-interpolate>("bar ", x)'>>
+      end
     end
   end
 end

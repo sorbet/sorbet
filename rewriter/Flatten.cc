@@ -86,7 +86,7 @@ class FlattenWalk {
         // this is all the metadata about this specific stack frame, and what scope it puts it into
         ScopeInfo scopeInfo;
         MethodData(optional<int> targetLocation, ScopeInfo scopeInfo)
-            : targetLocation(targetLocation), scopeInfo(scopeInfo){};
+            : targetLocation(targetLocation), scopeInfo(scopeInfo) {};
     };
 
     // This represents something that needs to be moved to the end of the class scope as well as information about how
@@ -95,7 +95,7 @@ class FlattenWalk {
     struct MovedItem {
         ast::ExpressionPtr expr;
         uint32_t staticLevel;
-        MovedItem(ast::ExpressionPtr expr, uint32_t staticLevel) : expr(move(expr)), staticLevel(staticLevel){};
+        MovedItem(ast::ExpressionPtr expr, uint32_t staticLevel) : expr(move(expr)), staticLevel(staticLevel) {};
         MovedItem() = default;
     };
 

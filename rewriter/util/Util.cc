@@ -14,23 +14,28 @@ unique_ptr<ast::UnresolvedConstantLit> dupUnresolvedConstantLit(const ast::Unres
         return nullptr;
     }
 
-    auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope);
-    if (!scopeCnst) {
-        if (ast::isa_tree<ast::EmptyTree>(cons->scope)) {
-            return make_unique<ast::UnresolvedConstantLit>(cons->loc, ast::MK::EmptyTree(), cons->cnst);
-        }
-        auto id = ast::cast_tree<ast::ConstantLit>(cons->scope);
-        if (id == nullptr) {
-            return nullptr;
-        }
-        ENFORCE(id->symbol() == core::Symbols::root());
-        return make_unique<ast::UnresolvedConstantLit>(cons->loc, ASTUtil::dupType(cons->scope), cons->cnst);
-    }
-    auto scope = ASTUtil::dupType(cons->scope);
-    if (scope == nullptr) {
+    auto result = cons->foldFromRoot(
+        [](const ast::ExpressionPtr &root) -> ast::ExpressionPtr {
+            if (ast::isa_tree<ast::EmptyTree>(root)) {
+                return ast::MK::EmptyTree();
+            }
+            auto id = ast::cast_tree<ast::ConstantLit>(root);
+            if (id == nullptr) {
+                return nullptr;
+            }
+            ENFORCE(id->symbol() == core::Symbols::root());
+            return ASTUtil::dupType(root);
+        },
+        [](ast::ExpressionPtr scope, core::NameRef name, core::LocOffsets loc) -> ast::ExpressionPtr {
+            if (scope == nullptr) {
+                return nullptr;
+            }
+            return ast::MK::UnresolvedConstant(loc, std::move(scope), name);
+        });
+    if (result == nullptr) {
         return nullptr;
     }
-    return make_unique<ast::UnresolvedConstantLit>(cons->loc, std::move(scope), cons->cnst);
+    return result.toUnique<ast::UnresolvedConstantLit>();
 }
 } // namespace
 
@@ -326,9 +331,7 @@ ast::ExpressionPtr ASTUtil::thunkBody(core::MutableContext ctx, ast::ExpressionP
     return std::move(block->body);
 }
 
-namespace {
-
-bool validAttrName(core::MutableContext ctx, core::LocOffsets loc, core::NameRef name) {
+bool ASTUtil::validAttrName(core::MutableContext ctx, core::LocOffsets loc, core::NameRef name) {
     auto shortName = name.shortName(ctx);
 
     auto validName = !shortName.empty() && (isalpha(shortName.front()) || shortName.front() == '_') &&
@@ -346,8 +349,6 @@ bool validAttrName(core::MutableContext ctx, core::LocOffsets loc, core::NameRef
 
     return validName;
 }
-
-} // namespace
 
 pair<core::NameRef, core::LocOffsets> ASTUtil::getAttrName(core::MutableContext ctx, core::NameRef attrFun,
                                                            const ast::ExpressionPtr &name) {

@@ -7,7 +7,7 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 DidChangeConfigurationTask::DidChangeConfigurationTask(const LSPConfiguration &config,
                                                        unique_ptr<DidChangeConfigurationParams> params,
-                                                       vector<string_view> &&openFiles, const uint32_t epoch)
+                                                       vector<string> &&openFiles, const uint32_t epoch)
     : LSPTask(config, LSPMethod::WorkspaceDidChangeConfiguration), params(move(params)), openFilePaths(move(openFiles)),
       epoch(epoch) {}
 
@@ -21,14 +21,32 @@ void DidChangeConfigurationTask::index(LSPIndexer &indexer) {
     indexer.updateConfigAndGsFromOptions(*params);
 }
 
-void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
-    tc.updateConfigAndGsFromOptions(*params);
+namespace {
+
+vector<core::FileRef> getOpenFileRefs(const LSPTypecheckerDelegate &tc, absl::Span<const string> openFilePaths) {
     vector<core::FileRef> openFileRefs;
-    for (auto const &path : openFilePaths) {
+    openFileRefs.reserve(openFilePaths.size());
+
+    for (const auto &path : openFilePaths) {
         openFileRefs.push_back(tc.state().findFileByPath(path));
     }
+
+    return openFileRefs;
+}
+
+} // namespace
+
+void DidChangeConfigurationTask::run(LSPTypecheckerDelegate &tc) {
+    tc.updateConfigAndGsFromOptions(*params);
+    auto openFileRefs = getOpenFileRefs(tc, this->openFilePaths);
     auto updates = tc.getNoopUpdate(openFileRefs);
     updates->epoch = epoch;
     tc.typecheckOnFastPath(std::move(updates), {});
 }
+
+core::packages::Stratum DidChangeConfigurationTask::preemptionStratum(FileStratumMapping info) const {
+    vector<string_view> paths(this->openFilePaths.begin(), this->openFilePaths.end());
+    return info.getStratumForPaths(paths);
+}
+
 } // namespace sorbet::realmain::lsp

@@ -15,6 +15,11 @@ class Abstract3
 end
 
 # @abstract
+class AbstractMalformedHelper
+  extend T::::Helpers # error: expected a constant after the `::` operator
+end
+
+# @abstract
 # @abstract
 class Abstract4
   extend ::T::Helpers
@@ -83,3 +88,6 @@ module RequiresAncestor2; end
 
 # @requires_ancestor: Multiple1::Multiple2
 module RequiresAncestor3; end
+
+# @unknown_annotation
+class UnknownAnnotation; end

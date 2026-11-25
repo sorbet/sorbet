@@ -36,13 +36,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
 
-    class <emptyTree>::<C <describe 'example'>><<C <todo sym>>> < (<self>)
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.void()
-      end
+    begin
+      "example"
+      class <emptyTree>::<C <describe 'example'>><<C <todo sym>>> < (<self>)
+        ::T::Sig::WithoutRuntime.sig() do ||
+          <self>.void()
+        end
 
-      def <it 'does thing'><<todo method>>(&<blk>)
-        <emptyTree>::<C T>.reveal_type(@x)
+        def <it 'does thing'><<todo method>>(&<blk>)
+          <emptyTree>::<C T>.reveal_type(@x)
+        end
       end
     end
   end

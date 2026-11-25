@@ -30,37 +30,11 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   class <emptyTree>::<C MerchantPropModel><<C <todo sym>>> < (::<todo sym>)
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.returns(::String)
-    end
-
-    def merchant<<todo method>>(&<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(::T.nilable(<emptyTree>::<C Opus>::<C Account>::<C Model>::<C Merchant>))
-    end
-
-    def merchant_<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:allow_direct_mutation, ::T.nilable(<emptyTree>::<C T>::<C Boolean>)).returns(<emptyTree>::<C Opus>::<C Account>::<C Model>::<C Merchant>)
-    end
-
-    def merchant_!<<todo method>>(allow_direct_mutation: = nil, &<blk>)
-      ::Kernel.raise("Sorbet rewriter pass partially unimplemented")
-    end
-
     <self>.include(<emptyTree>::<C T>::<C Props>)
 
     <self>.extend(<emptyTree>::<C ShardByMerchant>)
 
     <self>.merchant_prop()
-
-    <runtime method definition of merchant>
   end
 
   class <emptyTree>::<C MerchantTokenPropModel><<C <todo sym>>> < (::<todo sym>)

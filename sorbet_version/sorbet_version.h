@@ -1,80 +1,100 @@
 #ifndef SORBET_VERSION_H
 #define SORBET_VERSION_H
 
-// We want this header to be both a C++ and a C header, so that it can be depended on by very
-// low-level things
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if !defined(NDEBUG) || defined(FORCE_DEBUG)
 #define DEBUG_MODE
 #else
 #undef DEBUG_MODE
 #endif
 
-#ifdef __cplusplus
+// In release builds, this generated header defines macros with real values from
+// Bazel's workspace status file. In non-release builds, it is empty and the
+// #ifndef defaults below apply.
+#include "sorbet_version/sorbet_version_defines.h"
+
+// Wraps input in double quotes. https://stackoverflow.com/a/6671729
+#define Q_(x) #x
+#define QUOTED_(x) Q_(x)
+
+#define SORBET_VERSION_MAJOR_MINOR "0.6"
+
 namespace sorbet {
 
 #ifdef DEBUG_MODE
-constexpr bool debug_mode = true;
+inline constexpr bool debug_mode = true;
 #else
-constexpr bool debug_mode = false;
+inline constexpr bool debug_mode = false;
 #endif
 
 #ifdef TRACK_UNTYPED_BLAME_MODE
-constexpr bool track_untyped_blame_mode = true;
+inline constexpr bool track_untyped_blame_mode = true;
 #else
-constexpr bool track_untyped_blame_mode = false;
+inline constexpr bool track_untyped_blame_mode = false;
 #endif
 
 #if !defined(EMSCRIPTEN)
-constexpr bool emscripten_build = false;
+inline constexpr bool emscripten_build = false;
 #else
-constexpr bool emscripten_build = true;
+inline constexpr bool emscripten_build = true;
 #endif
 
 #if !defined(FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION)
-constexpr bool fuzz_mode = false;
+inline constexpr bool fuzz_mode = false;
 #else
-constexpr bool fuzz_mode = true;
+inline constexpr bool fuzz_mode = true;
 #endif
+
+#ifndef BUILD_RELEASE
+#define BUILD_RELEASE 0
+#endif
+inline constexpr bool is_release_build = BUILD_RELEASE;
+
+#ifndef STABLE_BUILD_SCM_CLEAN
+#define STABLE_BUILD_SCM_CLEAN "0"
+#endif
+inline constexpr char build_scm_clean[] = STABLE_BUILD_SCM_CLEAN;
+
+#ifndef STABLE_BUILD_SCM_REVISION
+#define STABLE_BUILD_SCM_REVISION "master"
+#endif
+inline constexpr char build_scm_revision[] = STABLE_BUILD_SCM_REVISION;
+
+#ifndef STABLE_BUILD_SCM_COMMIT_COUNT
+#define STABLE_BUILD_SCM_COMMIT_COUNT 0
+#endif
+inline constexpr int build_scm_commit_count = STABLE_BUILD_SCM_COMMIT_COUNT;
+
+#ifndef BUILD_TIMESTAMP
+#define BUILD_TIMESTAMP 0
+#endif
+inline constexpr long build_timestamp = BUILD_TIMESTAMP;
+
+#ifdef DEBUG_SYMBOLS
+#define STABLE_BUILD_DEBUG_SYMBOLS "true"
+inline constexpr bool is_with_debug_symbols = true;
+#else
+#define STABLE_BUILD_DEBUG_SYMBOLS "false"
+inline constexpr bool is_with_debug_symbols = false;
+#endif
+
+inline constexpr char full_version_string[] = SORBET_VERSION_MAJOR_MINOR "." QUOTED_(STABLE_BUILD_SCM_COMMIT_COUNT)
+#if BUILD_RELEASE
+    " git " STABLE_BUILD_SCM_REVISION
+#else
+    " (non-release)"
+#endif
+    " debug_symbols=" STABLE_BUILD_DEBUG_SYMBOLS " clean=" STABLE_BUILD_SCM_CLEAN
+#ifdef DEBUG_MODE
+    " debug_mode=true"
+#endif
+#ifdef TRACK_UNTYPED_BLAME_MODE
+    " untyped_blame=true"
+#endif
+    ;
 
 } // namespace sorbet
-#endif
-// ^^^ __cplusplus
 
-extern const char sorbet_version[];
-extern const char sorbet_codename[];
-extern const char sorbet_build_scm_revision[];
-extern const int sorbet_build_scm_commit_count;
-extern const char sorbet_build_scm_clean[];
-extern const long sorbet_build_timestamp;
-extern const char sorbet_full_version_string[];
-extern const int sorbet_is_release_build;
-extern const int sorbet_is_with_debug_symbols;
-
-// Linking against a function symbol suffers fewer pitfalls vs linking against a data symbol, especially when it's
-// possible the symbol could be multiply defined (it's easier to make a function symbol weak than it is to make a
-// constant global variable symbol weak: https://stackoverflow.com/questions/36087831).
-//
-// But using a data symbol directly can sometimes give better optimized code when there are no linking
-// concerns (e.g., we're only statically linking and all source code is available).
-//
-// Thus we provide both options so people can choose based on their needs. tl;dr if you're writing code inside Sorbet
-// itself, prefer the global variables above.
-const char *sorbet_getVersion();
-const char *sorbet_getCodename();
-const char *sorbet_getBuildSCMRevision();
-const int sorbet_getBuildSCMCommitCount();
-const char *sorbet_getBuildSCMClean();
-const long sorbet_getBuildTimestamp();
-const char *sorbet_getFullVersionString();
-const int sorbet_getIsReleaseBuild();
-const int sorbet_getIsWithDebugSymbols();
-
-#ifdef __cplusplus
-}
-#endif
+#undef Q_
+#undef QUOTED_
 
 #endif // SORBET_VERSION_H

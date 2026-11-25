@@ -23,7 +23,7 @@ ClassDef{
         name = <U result>
       }
       rhs = Send{
-        flags = {}
+        flags = {bracesBlock}
         recv = Array{
           elems = [
             Literal{ value = 1 }
@@ -60,7 +60,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, bracesBlock}
       recv = Self
       fun = <U tap>
       block = Block {
@@ -82,7 +82,7 @@ ClassDef{
     }
 
     Send{
-      flags = {privateOk}
+      flags = {privateOk, bracesBlock}
       recv = Self
       fun = <U tap>
       block = Block {

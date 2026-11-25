@@ -1,16 +1,15 @@
 #include "absl/strings/match.h"
-#include "absl/strings/str_join.h"
-#include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/sort/sort.h"
 #include "common/timers/Timer.h"
 #include "core/core.h"
+#include "core/errors/infer.h"
 #include "core/errors/resolver.h"
-#include "core/source_generator/source_generator.h"
 
 #include "absl/algorithm/container.h"
 
+#include "core/insert_method/insert_method.h"
 #include "core/sig_finder/sig_finder.h"
 #include "definition_validator/variance.h"
 
@@ -168,26 +167,33 @@ constructAllowIncompatibleAutocorrect(const core::Context ctx, const ast::Expres
 
     auto methodLoc = ctx.locAt(methodDef.declLoc);
 
-    // XXX cwong: This causes a duplicate error to be reported if the signature is syntactically
-    // malformed (e.g. `allow_incompatible: :bad`). There are a few ways to resolve this (e.g.
-    // have `findSignature` return an error vector and make it the caller's responsibility to
-    // display them).
-    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
-    if (!parsedSig.has_value()) {
+    auto *origSend = sig_finder::SigFinder::findSignatureSend(ctx, tree, methodLoc.copyWithZeroLength());
+    if (origSend == nullptr) {
         return nullopt;
     }
 
-    auto *block = parsedSig->origSend.block();
+    auto *block = origSend->block();
     if (!block) {
+        return nullopt;
+    }
+
+    // Walk the send chain in the sig block body to find the `override` call.
+    const ast::Send *overrideSend = nullptr;
+    for (auto cursor = ast::cast_tree<ast::Send>(block->body); cursor != nullptr;
+         cursor = ast::cast_tree<ast::Send>(cursor->recv)) {
+        if (cursor->fun == core::Names::override_()) {
+            overrideSend = cursor;
+            break;
+        }
+    }
+
+    if (overrideSend == nullptr) {
         return nullopt;
     }
 
     didReport = true;
 
-    auto blockBody = ast::cast_tree<ast::Send>(block->body);
-    ENFORCE(blockBody != nullptr);
-
-    auto replaceLoc = ctx.locAt(parsedSig->sig.seen.override_);
+    auto replaceLoc = ctx.locAt(overrideSend->funLoc.join(overrideSend->loc.copyEndWithZeroLength()));
 
     if (!replaceLoc.exists()) {
         return nullopt;
@@ -602,12 +608,15 @@ optional<core::AutocorrectSuggestion>
 constructOverrideAutocorrect(const core::Context ctx, const ast::ExpressionPtr &tree, const ast::MethodDef &methodDef) {
     auto methodLoc = ctx.locAt(methodDef.declLoc);
 
-    auto parsedSig = sig_finder::SigFinder::findSignature(ctx, tree, methodLoc.copyWithZeroLength());
-    if (!parsedSig.has_value()) {
+    // Only the send's syntax is needed here (its location, flags, and block), so look it up
+    // without parsing it: parsing has the side effect of reporting type errors on it, which we
+    // don't want to trigger just to find where it is.
+    auto *origSendPtr = sig_finder::SigFinder::findSignatureSend(ctx, tree, methodLoc.copyWithZeroLength());
+    if (origSendPtr == nullptr) {
         return nullopt;
     }
 
-    auto &origSend = parsedSig->origSend;
+    auto &origSend = *origSendPtr;
 
     // If the sig itself is generated, it doesn't make much sense to suggest an autocorrect for it.
     if (origSend.flags.isRewriterSynthesized) {
@@ -795,10 +804,13 @@ void validateFinalMethodHelper(core::Context ctx, const core::ClassOrModuleRef k
             e.setHeader("`{}` was declared as final but its method `{}` was not declared as final",
                         errMsgClass.show(ctx), sym.name(ctx).show(ctx));
             auto queryLoc = defLoc.copyWithZeroLength();
-            auto parsedSig = sig_finder::SigFinder::findSignature(ctx, classDef, queryLoc);
+            // Only the send's location is needed here, so look it up without parsing it: parsing
+            // has the side effect of reporting type errors on it, which we don't want to trigger
+            // just to find where it is.
+            auto *origSend = sig_finder::SigFinder::findSignatureSend(ctx, classDef, queryLoc);
 
-            if (parsedSig.has_value() && parsedSig->origSend.funLoc.exists()) {
-                auto funLoc = ctx.locAt(parsedSig->origSend.funLoc);
+            if (origSend != nullptr && origSend->funLoc.exists()) {
+                auto funLoc = ctx.locAt(origSend->funLoc);
                 e.replaceWith("Mark it as `sig(:final)`", funLoc, "sig(:final)");
             }
         }
@@ -1160,23 +1172,6 @@ private:
         }
     }
 
-    string defineInheritedAbstractMethod(const core::GlobalState &gs, const core::ClassOrModuleRef sym,
-                                         const core::MethodRef abstractMethodRef, const string &classOrModuleIndent) {
-        auto showOptions = core::ShowOptions().withUseValidSyntax().withConcretizeIfAbstract();
-        if (sym.data(gs)->attachedClass(gs).exists()) {
-            showOptions = showOptions.withForceSelfPrefix();
-        }
-        auto methodDefinition =
-            core::source_generator::prettyTypeForMethod(gs, abstractMethodRef, nullptr, showOptions);
-
-        vector<string> indentedLines;
-        absl::c_transform(
-            absl::StrSplit(methodDefinition, "\n"), std::back_inserter(indentedLines),
-            [classOrModuleIndent](auto &line) -> string { return fmt::format("{}  {}", classOrModuleIndent, line); });
-        auto indentedMethodDefinition = absl::StrJoin(indentedLines, "\n");
-        return indentedMethodDefinition;
-    }
-
     void validateAbstract(const core::Context ctx, core::ClassOrModuleRef sym, const ast::ClassDef &classDef) {
         if (sym.data(ctx)->flags.isAbstract) {
             return;
@@ -1205,57 +1200,16 @@ private:
 
         auto classOrModuleDeclaredAt = ctx.locAt(classDef.declLoc);
         auto classOrModuleEndsAt = ctx.locAt(classDef.loc.copyEndWithZeroLength());
-        auto hasSingleLineDefinition =
-            classOrModuleDeclaredAt.toDetails(ctx).first.line == classOrModuleEndsAt.toDetails(ctx).second.line;
-
-        auto hasEmptyBody = classDef.rhs.empty();
-        if (classDef.rhs.size() == 1) {
-            if (auto mdef = ast::cast_tree<ast::MethodDef>(classDef.rhs[0])) {
-                hasEmptyBody = ast::isa_tree<ast::EmptyTree>(mdef->rhs);
-            }
-        }
-
-        auto [endLoc, indentLength] = classOrModuleEndsAt.findStartOfIndentation(ctx);
-        string classOrModuleIndent(indentLength, ' ');
-        auto insertAt = endLoc.adjust(ctx, -indentLength, 0);
-
-        vector<core::AutocorrectSuggestion::Edit> edits;
-        bool singleLineAndNoBody = hasSingleLineDefinition && hasEmptyBody;
-        if (singleLineAndNoBody) {
-            // First, break the class/module definition up onto multiple lines.
-            auto endRange = classOrModuleDeclaredAt.copyEndWithZeroLength().join(classOrModuleEndsAt);
-            edits.emplace_back(
-                core::AutocorrectSuggestion::Edit{endRange, fmt::format("\n{}end", classOrModuleIndent)});
-
-            // Then, modify our insertion strategy such that we add new methods to the top of the class/module
-            // body rather than the bottom. This is a trick to ensure that we put the new methods within the new
-            // class/module body that we just created.
-            insertAt = classOrModuleDeclaredAt.copyEndWithZeroLength();
-        }
-
-        for (auto proto : missingAbstractMethods) {
-            errorBuilder.addErrorLine(proto.data(ctx)->loc(), "`{}` defined here", proto.data(ctx)->name.show(ctx));
-
-            if (hasSingleLineDefinition && !hasEmptyBody) {
-                // We don't suggest autocorrects for this case because we cannot say for sure how the
-                // class/module has been declared, and so we also can't determine how to modify it.
-                continue;
-            }
-
-            auto indentedMethodDefinition = defineInheritedAbstractMethod(ctx, sym, proto, classOrModuleIndent);
-            if (singleLineAndNoBody) {
-                edits.emplace_back(
-                    core::AutocorrectSuggestion::Edit{insertAt, fmt::format("\n{}", indentedMethodDefinition)});
-            } else {
-                edits.emplace_back(core::AutocorrectSuggestion::Edit{
-                    insertAt, fmt::format("{}\n{}", indentedMethodDefinition, classOrModuleIndent)});
-            }
-        }
+        auto edits =
+            core::insert_method::run(ctx, missingAbstractMethods, sym, classOrModuleDeclaredAt, classOrModuleEndsAt);
 
         if (edits.empty()) {
             return;
         }
 
+        for (auto proto : missingAbstractMethods) {
+            errorBuilder.addErrorLine(proto.data(ctx)->loc(), "`{}` defined here", proto.data(ctx)->name.show(ctx));
+        }
         errorBuilder.addAutocorrect(core::AutocorrectSuggestion{
             fmt::format("Define inherited abstract method{}", missingAbstractMethods.size() > 1 ? "s" : ""),
             edits,
@@ -1336,6 +1290,15 @@ public:
         if (!methodData->loc().file().exists()) {
             Exception::raise("file for method does not exist! ctx.file=\"{}\" method=\"{}\"", ctx.file.data(ctx).path(),
                              methodDef.symbol.show(ctx));
+        }
+
+        if (ctx.file.data(ctx).isRBI() && !methodData->flags.isOverloaded && !methodData->hasSig()) {
+            // Only check RBI files here, because non-RBI files will have this reported in
+            // inference, to be able to report a suggested sig. Note that this might report multiple
+            // errors (if a method is in a source file and an RBI file both without a sig), but that's okay.
+            if (auto e = ctx.beginError(methodDef.declLoc, core::errors::Infer::UntypedMethod)) {
+                e.setHeader("The method `{}` does not have a `{}`", methodData->name.show(ctx), "sig");
+            }
         }
 
         // Only perform this check if this isn't a module from the stdlib, and

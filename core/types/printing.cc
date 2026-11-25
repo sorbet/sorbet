@@ -36,7 +36,8 @@ string UnresolvedClassType::toStringWithTabs(const GlobalState &gs, int tabs) co
 
 string UnresolvedClassType::show(const GlobalState &gs, ShowOptions options) const {
     return fmt::format("{}::{} (unresolved)", this->scope.show(gs, options),
-                       fmt::map_join(this->names, "::", [&](const auto &el) -> string { return el.show(gs); }));
+                       fmt::map_join(this->names.rbegin(), this->names.rend(),
+                                     "::", [&](const auto &el) -> string { return el.show(gs); }));
 }
 
 string UnresolvedAppliedType::toStringWithTabs(const GlobalState &gs, int tabs) const {
@@ -80,7 +81,7 @@ string NamedLiteralType::show(const GlobalState &gs, ShowOptions options) const 
 string NamedLiteralType::showValue(const GlobalState &gs) const {
     switch (kind) {
         case NamedLiteralType::Kind::String:
-            return fmt::format("\"{}\"", absl::CEscape(name.show(gs)));
+            return fmt::format("\"{}\"", absl::Utf8SafeCEscape(name.show(gs)));
         case NamedLiteralType::Kind::Symbol: {
             return name.showAsSymbolLiteral(gs);
         }
@@ -433,10 +434,9 @@ string AppliedType::show(const GlobalState &gs, ShowOptions options) const {
 
         int arg_num = 0;
         fmt::format_to(std::back_inserter(buf), "{}",
-                       fmt::map_join(
-                           targs_it, this->targs.end(), ", ", [&](auto targ) -> auto{
-                               return fmt::format("arg{}: {}", arg_num++, targ.show(gs, options));
-                           }));
+                       fmt::map_join(targs_it, this->targs.end(), ", ", [&](auto targ) -> auto {
+                           return fmt::format("arg{}: {}", arg_num++, targ.show(gs, options));
+                       }));
 
         if (*procArity > 0) {
             fmt::format_to(std::back_inserter(buf), ")");

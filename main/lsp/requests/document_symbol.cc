@@ -166,7 +166,7 @@ public:
     }
 
     static vector<unique_ptr<DocumentSymbol>> documentSymbol(core::Context ctx, const ast::ExpressionPtr &tree) {
-        core::Loc fullFile{ctx.file, core::LocOffsets{0, static_cast<uint32_t>(ctx.file.data(ctx).source().size())}};
+        core::Loc fullFile{ctx.file, core::LocOffsets{0, static_cast<uint32_t>(ctx.file.data(ctx).sourceSize())}};
 
         Outliner outliner{fullFile};
 
@@ -210,6 +210,10 @@ unique_ptr<ResponseMessage> DocumentSymbolTask::runRequest(LSPTypecheckerDelegat
     response->result = Outliner::documentSymbol(ctx, resolved.tree);
 
     return response;
+}
+
+core::packages::Stratum DocumentSymbolTask::preemptionStratum(FileStratumMapping info) const {
+    return info.getStratumForUri(this->params->textDocument->uri);
 }
 
 } // namespace sorbet::realmain::lsp

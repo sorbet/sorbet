@@ -1,0 +1,7 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::<Magic>.<build-range>(1, 7, false).each() do |i|
+    ::<Magic>.<build-range>(1, 2, false).each() do |j|
+      <emptyTree>
+    end
+  end
+end

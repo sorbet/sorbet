@@ -1,42 +1,52 @@
 #include "rbs/SigsRewriter.h"
 
+#include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
-#include "common/typecase.h"
 #include "core/errors/rewriter.h"
 #include "parser/helper.h"
+#include "parser/prism/Helpers.h"
+
+extern "C" {
+#include "prism.h"
+}
 #include "rbs/SignatureTranslator.h"
-#include "rbs/TypeParamsToParserNodes.h"
 
 using namespace std;
+using namespace sorbet::parser::Prism;
 
 namespace sorbet::rbs {
 
 namespace {
 
-parser::Node *signaturesTarget(parser::Node *node) {
-    if (parser::isa_node<parser::DefMethod>(node) || parser::cast_node<parser::DefS>(node)) {
-        return node;
+bool canHaveSignature(pm_node_t *node, const parser::Prism::Parser &parser, const core::GlobalState &gs) {
+    if (node == nullptr) {
+        return false;
     }
 
-    if (auto send = parser::cast_node<parser::Send>(node)) {
-        if (parser::MK::isAttrAccessorSend(send) || parser::MK::isVisibilitySend(send)) {
-            return node;
+    switch (PM_NODE_TYPE(node)) {
+        case PM_DEF_NODE:
+            // Both instance methods and singleton methods use PM_DEF_NODE in Prism
+            // (singleton methods have a receiver field set)
+            return true;
+        case PM_CALL_NODE: {
+            return parser.isAttrAccessorCall(node) || isMethodDefSignatureTarget(node, parser, gs);
         }
+        default:
+            return false;
     }
-
-    return nullptr;
 }
 
 /**
  * Extracts and parses the argument from the annotation string.
  *
- * Considering an annotation like `@mixes_in_class_methods: ClassMethods`,
- * this function will extract and parse `ClassMethods` as a type then return the corresponding parser::Node.
+ * Considering an annotation like `@requires_ancestor: SomeModule`,
+ * this function will extract and parse `SomeModule` as a type then return the corresponding Prism node.
  *
  * We do not error if the node is not a constant, we just insert it as is and let the pipeline error down the line.
  */
-unique_ptr<parser::Node> extractHelperArgument(core::MutableContext ctx, Comment annotation, int offset) {
+pm_node_t *extractHelperArgument(core::MutableContext ctx, parser::Prism::Parser &parser, const Comment &annotation,
+                                 int offset) {
     while (annotation.string[offset] == ' ') {
         offset++;
     }
@@ -47,55 +57,59 @@ unique_ptr<parser::Node> extractHelperArgument(core::MutableContext ctx, Comment
         annotation.string.substr(offset),
     };
 
-    return rbs::SignatureTranslator(ctx).translateType(RBSDeclaration{vector<Comment>{comment}});
+    return rbs::SignatureTranslator(ctx, parser).translateType(RBSDeclaration{{comment}});
 }
 
 /**
- * Extracts and parses the helpers from the annotations.
+ * Extracts class-level helper method calls from annotations.
  *
- * Returns a `parser::NodeVec`, containing the `parser::Node` corresponding to each annotation.
- *
- * For example, given the annotations the following annotations:
- *
- *     # @abstract,
+ * For example, given the annotations:
+ *     # @abstract
  *     # @interface
  *
- * This function will return two `parser::Send` nodes:
- *
- *
- * 1. `self.abstract!()`
- * 2. `self.interface!()`
+ * This function will return Prism call nodes for:
+ *     self.abstract!()
+ *     self.interface!()
  *
  * It doesn't insert them into the body of the class/module/etc.
  */
-parser::NodeVec extractHelpers(core::MutableContext ctx, vector<Comment> annotations) {
-    parser::NodeVec helpers;
+vector<pm_node_t *> extractHelpers(core::MutableContext ctx, absl::Span<const Comment> annotations,
+                                   parser::Prism::Parser &parser) {
+    if (annotations.empty()) {
+        return {};
+    }
 
-    for (auto &annotation : annotations) {
+    Factory prism{parser};
+    vector<pm_node_t *> helpers;
+    helpers.reserve(annotations.size());
+
+    for (const auto &annotation : annotations) {
+        pm_node_t *helperNode = nullptr;
+
         if (annotation.string == "abstract") {
-            auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
-                                          core::Names::declareAbstract(), annotation.typeLoc);
-            helpers.emplace_back(move(send));
+            helperNode = prism.Call0(annotation.typeLoc, prism.Self(annotation.typeLoc), "abstract!"sv);
         } else if (annotation.string == "interface") {
-            auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
-                                          core::Names::declareInterface(), annotation.typeLoc);
-            helpers.emplace_back(move(send));
+            helperNode = prism.Call0(annotation.typeLoc, prism.Self(annotation.typeLoc), "interface!"sv);
         } else if (annotation.string == "final") {
-            auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
-                                          core::Names::declareFinal(), annotation.typeLoc);
-            helpers.emplace_back(move(send));
+            helperNode = prism.Call0(annotation.typeLoc, prism.Self(annotation.typeLoc), "final!"sv);
         } else if (annotation.string == "sealed") {
-            auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
-                                          core::Names::declareSealed(), annotation.typeLoc);
-            helpers.emplace_back(move(send));
-        } else if (absl::StartsWith(annotation.string, "requires_ancestor:")) {
-            if (auto type = extractHelperArgument(ctx, annotation, 18)) {
-                auto body = make_unique<parser::Begin>(annotation.typeLoc, NodeVec1(move(type)));
-                auto send = parser::MK::Send0(annotation.typeLoc, parser::MK::Self(annotation.typeLoc),
-                                              core::Names::requiresAncestor(), annotation.typeLoc);
-                auto block = make_unique<parser::Block>(annotation.typeLoc, move(send), nullptr, move(body));
-                helpers.emplace_back(move(block));
+            helperNode = prism.Call0(annotation.typeLoc, prism.Self(annotation.typeLoc), "sealed!"sv);
+        } else if (absl::StartsWith(annotation.string, "requires_ancestor:"sv)) {
+            if (auto type = extractHelperArgument(ctx, parser, annotation, "requires_ancestor:"sv.size())) {
+                auto statementsList = array{type};
+                auto *stmts = prism.StatementsNode(annotation.typeLoc, absl::MakeSpan(statementsList));
+
+                pm_node_t *callNode =
+                    prism.Call0(annotation.typeLoc, prism.Self(annotation.typeLoc), "requires_ancestor"sv);
+                auto *call = down_cast_nonnull<pm_call_node_t>(callNode);
+                call->block = prism.Block(annotation.typeLoc, stmts);
+
+                helperNode = callNode;
             }
+        }
+
+        if (helperNode != nullptr) {
+            helpers.emplace_back(helperNode);
         }
     }
 
@@ -103,92 +117,191 @@ parser::NodeVec extractHelpers(core::MutableContext ctx, vector<Comment> annotat
 }
 
 /**
- * Wraps the body in a `parser::Begin` if it isn't already.
+ * Wraps the body in a `PM_STATEMENTS_NODE` if it isn't already.
  *
  * This is useful for cases where we want to insert helpers into the body of a class/module/etc.
  */
-unique_ptr<parser::Node> maybeWrapBody(unique_ptr<parser::Node> &owner, unique_ptr<parser::Node> body) {
+pm_node_t *maybeWrapBody(pm_node_t *body, core::LocOffsets loc, parser::Prism::Parser &parser) {
+    Factory prism{parser};
+
     if (body == nullptr) {
-        return make_unique<parser::Begin>(owner->loc, parser::NodeVec());
-    } else if (parser::isa_node<parser::Begin>(body.get())) {
-        return body;
-    } else {
-        return make_unique<parser::Begin>(body->loc, NodeVec1(move(body)));
+        return prism.StatementsNode(loc, absl::Span<pm_node_t *>{});
     }
+
+    if (isa_node<pm_statements_node_t>(body)) {
+        return body; // Already wrapped
+    }
+
+    auto statementsList = array{body};
+    return prism.StatementsNode(loc, absl::MakeSpan(statementsList));
 }
 
 /**
  * Returns true if the body contains an `extend T::Helpers` call already.
  */
-bool containsExtendTHelper(parser::Begin *body) {
-    for (auto &stmt : body->stmts) {
-        auto send = parser::cast_node<parser::Send>(stmt.get());
-        if (send == nullptr) {
-            continue;
+bool containsExtendTHelper(pm_statements_node_t *body, const parser::Prism::Parser &prismParser,
+                           core::MutableContext ctx) {
+    ENFORCE(body != nullptr);
+
+    auto statements = absl::MakeSpan(body->body.nodes, body->body.size);
+    return absl::c_any_of(statements, [&](pm_node_t *stmt) {
+        auto *call = down_cast<pm_call_node_t>(stmt);
+        if (call == nullptr) {
+            return false;
         }
 
-        if (send->method != core::Names::extend()) {
-            continue;
+        auto methodName = prismParser.resolveConstant(call->name);
+        if (methodName != "extend") {
+            return false;
         }
 
-        if (send->receiver != nullptr && !parser::isa_node<parser::Self>(send->receiver.get())) {
-            continue;
+        if (call->receiver != nullptr && !isa_node<pm_self_node_t>(call->receiver)) {
+            return false;
         }
 
-        if (send->args.size() != 1) {
-            continue;
+        if (call->arguments == nullptr || call->arguments->arguments.size != 1) {
+            return false;
         }
 
-        auto arg = parser::cast_node<parser::Const>(send->args[0].get());
-        if (arg == nullptr) {
-            continue;
+        pm_node_t *arg = call->arguments->arguments.nodes[0];
+        auto *constantPath = down_cast<pm_constant_path_node_t>(arg);
+        if (constantPath == nullptr) {
+            return false;
         }
 
-        if (arg->name != core::Names::Constants::Helpers() || !parser::MK::isT(arg->scope)) {
-            continue;
+        auto argName = prismParser.resolveConstant(constantPath->name);
+        if (argName != "Helpers") {
+            return false;
         }
 
-        return true;
-    }
-
-    return false;
+        return prismParser.isT(constantPath->parent);
+    });
 }
 
 /**
  * Inserts an `extend T::Helpers` call into the body if it doesn't already exist.
  */
-void maybeInsertExtendTHelpers(unique_ptr<parser::Node> *body) {
-    auto begin = parser::cast_node<parser::Begin>(body->get());
-    ENFORCE(begin != nullptr);
+void maybeInsertExtendTHelpers(pm_node_t *body, core::LocOffsets loc, const parser::Prism::Parser &prismParser,
+                               core::MutableContext ctx, const parser::Prism::Factory &prism) {
+    auto *statements = down_cast_nonnull<pm_statements_node_t>(body);
+    ENFORCE(statements != nullptr);
 
-    if (containsExtendTHelper(begin)) {
+    if (containsExtendTHelper(statements, prismParser, ctx)) {
         return;
     }
 
-    auto send = parser::MK::Send1(begin->loc, parser::MK::Self(begin->loc), core::Names::extend(), begin->loc,
-                                  parser::MK::T_Helpers(begin->loc));
+    pm_node_t *tHelpers = prism.THelpers(loc);
+    pm_node_t *selfNode = prism.Self(loc);
+    pm_node_t *extendCall = prism.Call1(loc, selfNode, "extend"sv, tHelpers);
 
-    begin->stmts.emplace_back(move(send));
+    pm_node_list_append(&statements->body, extendCall);
 }
 
 /**
  * Inserts the helpers into the body.
  */
-void insertHelpers(unique_ptr<parser::Node> *body, parser::NodeVec helpers) {
-    auto begin = parser::cast_node<parser::Begin>(body->get());
-    ENFORCE(begin != nullptr);
+void insertHelpers(pm_node_t *body, absl::Span<pm_node_t *const> helpers) {
+    auto *statements = down_cast_nonnull<pm_statements_node_t>(body);
+    ENFORCE(statements != nullptr);
 
-    for (auto &helper : helpers) {
-        begin->stmts.emplace_back(move(helper));
+    for (auto *helper : helpers) {
+        pm_node_list_append(&statements->body, helper);
+    }
+}
+
+optional<core::AutocorrectSuggestion> autocorrectAbstractBody(core::MutableContext ctx, pm_node_t *method,
+                                                              const parser::Prism::Parser *prismParser,
+                                                              pm_node_t *method_body) {
+    core::LocOffsets editLoc;
+    string corrected;
+
+    if (method_body) {
+        editLoc = prismParser->translateLocation(method_body->location);
+        corrected = "super";
+    } else {
+        auto *def = down_cast_nonnull<pm_def_node_t>(method);
+        if (def->end_keyword_loc.start == nullptr || def->end_keyword_loc.start == def->end_keyword_loc.end) {
+            return nullopt;
+        }
+        auto methodLoc = prismParser->translateLocation(method->location);
+
+        // Default to insertion before `end` to keep header comments in place.
+        editLoc = prismParser->translateLocation(def->end_keyword_loc).copyWithZeroLength();
+        auto lineStart = core::Loc::pos2Detail(ctx.file.data(ctx), methodLoc.beginPos()).line;
+        auto lineEnd = core::Loc::pos2Detail(ctx.file.data(ctx), methodLoc.endPos()).line;
+
+        if (lineStart == lineEnd) {
+            auto methodName = prismParser->resolveConstant(def->name);
+            if ((def->parameters == nullptr || def->rparen_loc.start != nullptr) &&
+                !ctx.state.enterNameUTF8(methodName).isSetter(ctx.state)) {
+                auto headerLoc =
+                    prismParser->translateLocation(def->rparen_loc.start != nullptr ? def->rparen_loc : def->name_loc);
+                editLoc = core::LocOffsets{headerLoc.endPos(), methodLoc.endPos()};
+                corrected = " = super";
+            } else {
+                corrected = "super; ";
+            }
+        } else {
+            auto [_endLoc, indentLength] = ctx.locAt(methodLoc).findStartOfIndentation(ctx);
+            corrected = "  super\n" + string(indentLength, ' ');
+        }
+    }
+
+    return core::AutocorrectSuggestion{"Replace the abstract method body with `super`",
+                                       {core::AutocorrectSuggestion::Edit{ctx.locAt(editLoc), corrected}}};
+}
+
+bool isValidAbstractMethod(pm_node_t *node) {
+    auto *def = down_cast<pm_def_node_t>(node);
+    if (def == nullptr) {
+        return false;
+    }
+
+    if (def->body == nullptr) {
+        return false;
+    }
+
+    pm_node_t *bodyNode = def->body;
+
+    // Unwrap statements node if it contains exactly one statement
+    if (auto *stmts = down_cast<pm_statements_node_t>(bodyNode)) {
+        if (stmts->body.size != 1) {
+            return false;
+        }
+        bodyNode = stmts->body.nodes[0];
+    }
+
+    // Explicit arguments or a block would change the call instead of forwarding it.
+    auto *super = down_cast<pm_forwarding_super_node_t>(bodyNode);
+    return super != nullptr && super->block == nullptr;
+}
+
+void ensureAbstractMethodCallsSuper(core::MutableContext ctx, pm_node_t *node, parser::Prism::Parser *prismParser) {
+    auto *def = down_cast_nonnull<pm_def_node_t>(node);
+    if (!isValidAbstractMethod(node)) {
+        auto nodeLoc = prismParser->translateLocation(node->location);
+        if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSAbstractMethodNoSuper)) {
+            e.setHeader("Methods declared `{}` with an RBS comment must contain only a forwarding super call",
+                        "@abstract");
+            if (auto autocorrect = autocorrectAbstractBody(ctx, node, prismParser, def->body)) {
+                e.addAutocorrect(move(*autocorrect));
+            }
+        }
+    }
+
+    // The RBS error above fully diagnoses invalid bodies, so hide every abstract body from later resolver checks.
+    if (def->body != nullptr) {
+        prismParser->destroyNode(def->body);
+        def->body = nullptr;
     }
 }
 
 } // namespace
 
-void SigsRewriter::insertTypeParams(parser::Node *node, unique_ptr<parser::Node> *body) {
-    ENFORCE(parser::isa_node<parser::Class>(node) || parser::isa_node<parser::Module>(node) ||
-                parser::isa_node<parser::SClass>(node),
-            "Unimplemented node type: {}", node->nodeName());
+void SigsRewriter::insertTypeParams(pm_node_t *node, pm_node_t *body) {
+    ENFORCE(isa_node<pm_class_node_t>(node) || isa_node<pm_module_node_t>(node) ||
+                isa_node<pm_singleton_class_node_t>(node),
+            "Type parameters can only exist on classes, singleton classes, and modules");
 
     auto comments = commentsForNode(node);
     if (comments.signatures.empty()) {
@@ -204,397 +317,542 @@ void SigsRewriter::insertTypeParams(parser::Node *node, unique_ptr<parser::Node>
     }
 
     auto signature = comments.signatures[0];
-    auto typeParamsTranslator = SignatureTranslator(ctx);
+    auto typeParamsTranslator = SignatureTranslator{ctx, parser};
     auto typeParams = typeParamsTranslator.translateTypeParams(signature);
 
     if (typeParams.empty()) {
         return;
     }
 
-    auto begin = parser::cast_node<parser::Begin>(body->get());
-    ENFORCE(begin != nullptr);
+    auto *statements = down_cast_nonnull<pm_statements_node_t>(body);
 
-    for (auto &typeParam : typeParams) {
-        begin->stmts.emplace_back(move(typeParam));
+    for (auto *typeParam : typeParams) {
+        pm_node_list_append(&statements->body, typeParam);
     }
 }
 
-Comments SigsRewriter::commentsForNode(parser::Node *node) {
+Comments SigsRewriter::commentsForNode(pm_node_t *node) {
     auto comments = Comments{};
+
+    if (node == nullptr) {
+        return comments;
+    }
+
+    auto it = commentsByNode.find(node);
+    if (it == commentsByNode.end()) {
+        return comments;
+    }
+
     enum class SignatureState { None, Started, Multiline };
     auto state = SignatureState::None;
 
-    if (auto commentsNodesEntry = commentsByNode.find(node); commentsNodesEntry != commentsByNode.end()) {
-        auto commentsNodes = commentsNodesEntry->second;
-        auto declaration_comments = vector<Comment>();
+    auto &nodes = it->second;
+    auto declarationComments = RBSDeclaration::CommentsVector{};
 
-        for (auto &commentNode : commentsNodes) {
-            // If the comment starts with `# @`, it's an annotation
-            if (absl::StartsWith(commentNode.string, "# @")) {
-                auto comment = Comment{
-                    .commentLoc = commentNode.loc,
-                    .typeLoc = core::LocOffsets{commentNode.loc.beginPos() + 3, commentNode.loc.endPos()},
-                    .string = commentNode.string.substr(3),
-                };
-
-                comments.annotations.emplace_back(move(comment));
-                continue;
-            }
-
-            // If the comment starts with `#:`, it's a signature
-            if (absl::StartsWith(commentNode.string, "#:")) {
-                if (state == SignatureState::Multiline) {
-                    if (auto e =
-                            ctx.beginIndexerError(commentNode.loc, core::errors::Rewriter::RBSMultilineMisformatted)) {
-                        e.setHeader("Signature start (\"#:\") cannot appear after a multiline signature (\"#|\")");
-                        return comments;
-                    }
-                }
-                state = SignatureState::Started;
-                auto comment = Comment{
-                    .commentLoc = commentNode.loc,
-                    .typeLoc = core::LocOffsets{commentNode.loc.beginPos() + 2, commentNode.loc.endPos()},
-                    .string = commentNode.string.substr(2),
-                };
-
-                if (declaration_comments.empty()) {
-                    declaration_comments.emplace_back(move(comment));
-                } else {
-                    // We already have a declaration comment, create a separate RBSDeclaration for better errors
-                    // down the line
-                    comments.signatures.emplace_back(
-                        RBSDeclaration{move(declaration_comments)}); // Save current declaration
-                    declaration_comments.clear();
-                    declaration_comments.emplace_back(move(comment));
-                }
-                continue;
-            }
-
-            // If the comment starts with `#|`, it's a multiline signature
-            if (absl::StartsWith(commentNode.string, "#|")) {
-                if (state == SignatureState::None) {
-                    if (auto e =
-                            ctx.beginIndexerError(commentNode.loc, core::errors::Rewriter::RBSMultilineMisformatted)) {
-                        e.setHeader("Multiline signature (\"#|\") must be preceded by a signature start (\"#:\")");
-                        return comments;
-                    }
-                }
-                state = SignatureState::Multiline;
-                auto comment = Comment{
-                    .commentLoc = commentNode.loc,
-                    .typeLoc = core::LocOffsets{commentNode.loc.beginPos() + 2, commentNode.loc.endPos()},
-                    .string = commentNode.string.substr(2),
-                };
-
-                declaration_comments.emplace_back(move(comment));
-                continue;
-            }
+    for (auto &commentNode : nodes) {
+        if (absl::StartsWith(commentNode.string, "# @")) {
+            auto comment = Comment{
+                .commentLoc = commentNode.loc,
+                .typeLoc = core::LocOffsets{commentNode.loc.beginPos() + 3, commentNode.loc.endPos()},
+                .string = commentNode.string.substr(3),
+            };
+            comments.annotations.emplace_back(move(comment));
+            continue;
         }
-        if (!declaration_comments.empty()) {
-            auto rbsDeclaration = RBSDeclaration{move(declaration_comments)};
-            comments.signatures.emplace_back(move(rbsDeclaration));
+
+        if (absl::StartsWith(commentNode.string, "#:")) {
+            if (state == SignatureState::Multiline) {
+                if (auto e = ctx.beginIndexerError(commentNode.loc, core::errors::Rewriter::RBSMultilineMisformatted)) {
+                    e.setHeader("Signature start (\"#:\") cannot appear after a multiline signature (\"#|\")");
+                    return comments;
+                }
+            }
+            state = SignatureState::Started;
+            auto comment = Comment{
+                .commentLoc = commentNode.loc,
+                .typeLoc = core::LocOffsets{commentNode.loc.beginPos() + 2, commentNode.loc.endPos()},
+                .string = commentNode.string.substr(2),
+            };
+
+            if (declarationComments.empty()) {
+                declarationComments.emplace_back(move(comment));
+            } else {
+                comments.signatures.emplace_back(RBSDeclaration{move(declarationComments)});
+                declarationComments.clear();
+                declarationComments.emplace_back(move(comment));
+            }
+            continue;
         }
+
+        if (absl::StartsWith(commentNode.string, "#|")) {
+            if (state == SignatureState::None) {
+                if (auto e = ctx.beginIndexerError(commentNode.loc, core::errors::Rewriter::RBSMultilineMisformatted)) {
+                    e.setHeader("Multiline signature (\"#|\") must be preceded by a signature start (\"#:\")");
+                    return comments;
+                }
+            }
+            state = SignatureState::Multiline;
+            auto comment = Comment{
+                .commentLoc = commentNode.loc,
+                .typeLoc = core::LocOffsets{commentNode.loc.beginPos() + 2, commentNode.loc.endPos()},
+                .string = commentNode.string.substr(2),
+            };
+            declarationComments.emplace_back(move(comment));
+            continue;
+        }
+    }
+
+    if (!declarationComments.empty()) {
+        auto rbsDeclaration = RBSDeclaration{move(declarationComments)};
+        comments.signatures.emplace_back(move(rbsDeclaration));
     }
 
     return comments;
 }
 
-unique_ptr<parser::NodeVec> SigsRewriter::signaturesForNode(parser::Node *node) {
+unique_ptr<vector<pm_node_t *>> SigsRewriter::signaturesForNode(pm_node_t *node) {
     auto comments = commentsForNode(node);
 
     if (comments.signatures.empty()) {
         return nullptr;
     }
 
-    auto signatures = make_unique<parser::NodeVec>();
-    signatures->reserve(comments.signatures.size());
+    auto *method = down_cast<pm_def_node_t>(node);
+    auto *call = down_cast<pm_call_node_t>(node);
+    if (call != nullptr && isMethodDefSignatureTarget(node, parser, ctx.state)) {
+        method = down_cast_nonnull<pm_def_node_t>(call->arguments->arguments.nodes[0]);
+    }
 
-    auto signatureTranslator = rbs::SignatureTranslator(ctx);
+    auto signatures = make_unique<vector<pm_node_t *>>();
+    auto signatureTranslator = rbs::SignatureTranslator{ctx, parser};
 
     for (auto &declaration : comments.signatures) {
-        if (parser::isa_node<parser::DefMethod>(node) || parser::isa_node<parser::DefS>(node)) {
-            auto sig = signatureTranslator.translateMethodSignature(node, declaration, comments.annotations);
-
-            signatures->emplace_back(move(sig));
-        } else if (auto send = parser::cast_node<parser::Send>(node)) {
-            if (parser::MK::isVisibilitySend(send)) {
-                auto sig = signatureTranslator.translateMethodSignature(send->args[0].get(), declaration,
-                                                                        comments.annotations);
-                signatures->emplace_back(move(sig));
-            } else if (parser::MK::isAttrAccessorSend(send)) {
-                auto sig = signatureTranslator.translateAttrSignature(send, declaration, comments.annotations);
-                signatures->emplace_back(move(sig));
+        if (method != nullptr) {
+            auto sig = signatureTranslator.translateMethodSignature(up_cast(method), declaration, comments.annotations);
+            if (sig) {
+                signatures->emplace_back(sig);
+            }
+        } else if (call != nullptr) {
+            if (parser.isAttrAccessorCall(node)) {
+                auto sig = signatureTranslator.translateAttrSignature(call, declaration, comments.annotations);
+                if (sig) {
+                    signatures->emplace_back(sig);
+                }
             } else {
-                Exception::raise("Unimplemented node type: {}", node->nodeName());
+                Exception::raise("Unimplemented call node type for signatures");
             }
         } else {
-            Exception::raise("Unimplemented node type: {}", node->nodeName());
+            Exception::raise("Unimplemented node type for signatures: {}", (int)PM_NODE_TYPE(node));
         }
+    }
+
+    // All signatures share this method node. Validate and erase its body only once.
+    if (method != nullptr && !signatures->empty() &&
+        absl::c_any_of(comments.annotations,
+                       [](const Comment &annotation) { return annotation.string == "abstract"; })) {
+        ensureAbstractMethodCallsSuper(ctx, up_cast(method), &parser);
     }
 
     return signatures;
 }
 
 /**
- * Replace the synthetic node with a `T.type_alias` call.
+ * Replace the synthetic type alias node with a `T.type_alias` call.
  */
-unique_ptr<parser::Node> SigsRewriter::replaceSyntheticTypeAlias(unique_ptr<parser::Node> node) {
-    auto comments = commentsForNode(node.get());
-
-    if (comments.signatures.empty()) {
-        // This should never happen
-        Exception::raise("No inline comment found for synthetic type alias");
-    }
-
-    if (comments.signatures.size() > 1) {
-        // This should never happen
-        Exception::raise("Multiple signatures found for synthetic type alias");
-    }
+pm_node_t *SigsRewriter::replaceSyntheticTypeAlias(pm_node_t *node) {
+    auto comments = commentsForNode(node);
+    ENFORCE(!comments.signatures.empty(), "No inline comment found for synthetic type alias");
+    ENFORCE(comments.signatures.size() <= 1, "Multiple signatures found for synthetic type alias");
 
     auto aliasDeclaration = comments.signatures[0];
-    auto typeBeginLoc = (uint32_t)aliasDeclaration.string.find("=");
+    auto fullString = aliasDeclaration.string;
+    auto typeBeginLoc = fullString.find("=");
 
-    auto typeDeclaration = RBSDeclaration{vector<Comment>{Comment{
+    if (typeBeginLoc == string::npos) {
+        // No '=' found, invalid type alias
+        auto loc = parser.translateLocation(node->location);
+        return prism.TTypeAlias(loc, prism.TUntyped(loc));
+    }
+
+    auto typeDeclaration = RBSDeclaration{{Comment{
         .commentLoc = aliasDeclaration.commentLoc(),
-        .typeLoc = core::LocOffsets{aliasDeclaration.fullTypeLoc().beginPos() + typeBeginLoc + 1,
+        .typeLoc = core::LocOffsets{aliasDeclaration.fullTypeLoc().beginPos() + (uint32_t)typeBeginLoc + 1,
                                     aliasDeclaration.fullTypeLoc().endPos()},
-        .string = aliasDeclaration.string.substr(typeBeginLoc + 1),
+        .string = fullString.substr(typeBeginLoc + 1),
     }}};
 
-    auto type = SignatureTranslator(ctx).translateType(typeDeclaration);
+    auto signatureTranslator = rbs::SignatureTranslator{ctx, parser};
+    absl::Span<pair<core::LocOffsets, core::NameRef>> typeParams; // Empty for type aliases
+    auto type = signatureTranslator.translateAssertionType(typeParams, typeDeclaration);
 
     if (type == nullptr) {
-        type = parser::MK::TUntyped(node->loc);
+        auto loc = parser.translateLocation(node->location);
+        type = prism.TUntyped(loc);
     }
 
-    return parser::MK::TTypeAlias(type->loc, move(type));
+    auto loc = parser.translateLocation(type->location);
+    return prism.TTypeAlias(loc, type);
 }
 
-parser::NodeVec SigsRewriter::rewriteNodes(parser::NodeVec nodes) {
-    parser::NodeVec result;
-    result.reserve(nodes.size());
+void SigsRewriter::rewriteNodes(pm_node_list_t &nodes) {
+    for (size_t i = 0; i < nodes.size; i++) {
+        nodes.nodes[i] = rewriteBody(nodes.nodes[i]);
+    }
+}
 
-    for (auto &node : nodes) {
-        result.emplace_back(rewriteBody(move(node)));
+void SigsRewriter::rewriteArgumentsNode(pm_arguments_node_t *args) {
+    if (args) {
+        rewriteNodes(args->arguments);
+    }
+}
+
+pm_node_t *SigsRewriter::rewriteBody(pm_node_t *node) {
+    if (node == nullptr) {
+        return node;
     }
 
-    return result;
-}
+    // Handle statements nodes (class/module bodies with multiple statements)
+    if (auto *statements = down_cast<pm_statements_node_t>(node)) {
+        // Save old statements before modifying (pm_node_list_append can realloc, invalidating pointers)
+        pm_node_list_t oldStmts = statements->body;
+        statements->body = (pm_node_list_t){.size = 0, .capacity = 0, .nodes = nullptr};
 
-unique_ptr<parser::Node> SigsRewriter::rewriteBegin(unique_ptr<parser::Node> node) {
-    auto begin = parser::cast_node<parser::Begin>(node.get());
-    ENFORCE(begin != nullptr);
+        // For each statement, insert signatures before it if it's a signature target
+        for (size_t i = 0; i < oldStmts.size; i++) {
+            pm_node_t *stmt = oldStmts.nodes[i];
 
-    auto oldStmts = move(begin->stmts);
-    begin->stmts = parser::NodeVec();
-
-    for (auto &stmt : oldStmts) {
-        if (auto target = signaturesTarget(stmt.get())) {
-            if (auto signatures = signaturesForNode(target)) {
-                for (auto &declaration : *signatures) {
-                    begin->stmts.emplace_back(move(declaration));
+            if (canHaveSignature(stmt, parser, ctx.state)) {
+                if (auto signatures = signaturesForNode(stmt)) {
+                    // Add all signatures
+                    for (auto sig : *signatures) {
+                        pm_node_list_append(&statements->body, sig);
+                    }
                 }
             }
+
+            rewriteNode(stmt);
+
+            // Add the rewritten statement
+            pm_node_list_append(&statements->body, stmt);
         }
 
-        begin->stmts.emplace_back(rewriteNode(move(stmt)));
+        // Free the old list structure (not the nodes themselves, as they were moved)
+        free(oldStmts.nodes);
+
+        return node;
     }
+
+    // Handle single node that is a signature target
+    if (canHaveSignature(node, parser, ctx.state)) {
+        if (auto signatures = signaturesForNode(node)) {
+            rewriteNode(node);
+
+            // Wrap in a statements node with signatures + node
+            return createStatementsWithSignatures(node, move(signatures));
+        }
+    }
+
+    rewriteNode(node);
 
     return node;
 }
 
-unique_ptr<parser::Node> SigsRewriter::rewriteBody(unique_ptr<parser::Node> node) {
+void SigsRewriter::rewriteBody(pm_statements_node_t *stmts) {
+    rewriteBody(up_cast(stmts));
+}
+
+void SigsRewriter::processClassBody(pm_node_t *node, pm_node_t *&body, absl::Span<pm_node_t *const> helpers) {
+    auto loc = body ? parser.translateLocation(body->location) : parser.translateLocation(node->location);
+
+    body = maybeWrapBody(body, loc, parser);
+    if (!helpers.empty()) {
+        maybeInsertExtendTHelpers(body, loc, parser, ctx, prism);
+        insertHelpers(body, helpers);
+    }
+
+    insertTypeParams(node, body);
+}
+
+void SigsRewriter::rewriteClass(pm_node_t *node) {
     if (node == nullptr) {
-        return node;
+        return;
     }
 
-    if (parser::isa_node<parser::Begin>(node.get())) {
-        return rewriteBegin(move(node));
+    auto comments = commentsForNode(node);
+    auto helpers = extractHelpers(ctx, comments.annotations, parser);
+
+    if (comments.signatures.empty() && helpers.empty()) {
+        return;
     }
 
-    if (auto target = signaturesTarget(node.get())) {
-        if (auto signatures = signaturesForNode(target)) {
-            auto stmts = parser::NodeVec();
-            stmts.reserve(signatures->size() + 1);
+    switch (PM_NODE_TYPE(node)) {
+        case PM_CLASS_NODE:
+            processClassBody(node, down_cast_nonnull<pm_class_node_t>(node)->body, helpers);
+            break;
+        case PM_MODULE_NODE:
+            processClassBody(node, down_cast_nonnull<pm_module_node_t>(node)->body, helpers);
+            break;
+        case PM_SINGLETON_CLASS_NODE:
+            processClassBody(node, down_cast_nonnull<pm_singleton_class_node_t>(node)->body, helpers);
+            break;
+        default:
+            Exception::raise("Unimplemented node type for rewriteClass: {}", (int)PM_NODE_TYPE(node));
+    }
+}
 
-            for (auto &declaration : *signatures) {
-                stmts.emplace_back(move(declaration));
-            }
+inline void SigsRewriter::rewriteNullableNode(pm_node_t *node) {
+    if (node != nullptr) {
+        rewriteNode(node);
+    }
+}
 
-            auto loc = node->loc; // Grab the loc before moving the node out.
-            stmts.emplace_back(move(node));
-
-            return make_unique<parser::Begin>(loc, move(stmts));
+void SigsRewriter::rewriteNode(pm_node_t *node) {
+    switch (PM_NODE_TYPE(node)) {
+        case PM_BEGIN_NODE: {
+            auto *begin = down_cast_nonnull<pm_begin_node_t>(node);
+            rewriteNullableNode(up_cast(begin->statements));
+            rewriteNullableNode(up_cast(begin->rescue_clause));
+            rewriteNullableNode(up_cast(begin->else_clause));
+            rewriteNullableNode(up_cast(begin->ensure_clause));
+            break;
         }
+        case PM_BLOCK_NODE: {
+            auto *block = down_cast_nonnull<pm_block_node_t>(node);
+            block->body = rewriteBody(block->body);
+            break;
+        }
+        case PM_LOCAL_VARIABLE_WRITE_NODE: {
+            auto *n = down_cast_nonnull<pm_local_variable_write_node_t>(node);
+            rewriteNode(n->value);
+            break;
+            break;
+        }
+        case PM_LOCAL_VARIABLE_AND_WRITE_NODE: {
+            auto *n = down_cast_nonnull<pm_local_variable_and_write_node_t>(node);
+            rewriteNode(n->value);
+            break;
+        }
+        case PM_LOCAL_VARIABLE_OR_WRITE_NODE: {
+            auto *n = down_cast_nonnull<pm_local_variable_or_write_node_t>(node);
+            rewriteNode(n->value);
+            break;
+        }
+        case PM_LOCAL_VARIABLE_OPERATOR_WRITE_NODE: {
+            auto *n = down_cast_nonnull<pm_local_variable_operator_write_node_t>(node);
+            rewriteNode(n->value);
+            break;
+        }
+        case PM_MODULE_NODE: {
+            auto *mod = down_cast_nonnull<pm_module_node_t>(node);
+            rewriteBody(mod->body);
+            rewriteClass(node);
+            break;
+        }
+        case PM_CLASS_NODE: {
+            auto *cls = down_cast_nonnull<pm_class_node_t>(node);
+            rewriteBody(cls->body);
+            rewriteClass(node);
+            break;
+        }
+        case PM_DEF_NODE: {
+            auto *def = down_cast_nonnull<pm_def_node_t>(node);
+            rewriteBody(def->body);
+            break;
+        }
+        case PM_SINGLETON_CLASS_NODE: {
+            auto *sclass = down_cast_nonnull<pm_singleton_class_node_t>(node);
+            rewriteBody(sclass->body);
+            rewriteClass(node);
+            break;
+        }
+        case PM_FOR_NODE: {
+            auto *for_ = down_cast_nonnull<pm_for_node_t>(node);
+            if (auto *stmts = for_->statements) {
+                rewriteBody(stmts);
+            }
+            break;
+        }
+        case PM_ARRAY_NODE: {
+            auto *array = down_cast_nonnull<pm_array_node_t>(node);
+            rewriteNodes(array->elements);
+            break;
+        }
+        case PM_HASH_NODE: {
+            auto *hash = down_cast_nonnull<pm_hash_node_t>(node);
+            rewriteNodes(hash->elements);
+            break;
+        }
+        case PM_KEYWORD_HASH_NODE: {
+            auto *hash = down_cast_nonnull<pm_keyword_hash_node_t>(node);
+            rewriteNodes(hash->elements);
+            break;
+        }
+        case PM_ASSOC_NODE: {
+            auto *pair = down_cast_nonnull<pm_assoc_node_t>(node);
+            rewriteNode(pair->key);
+            rewriteNode(pair->value);
+            break;
+        }
+        case PM_RESCUE_NODE: {
+            auto *rescue = down_cast_nonnull<pm_rescue_node_t>(node);
+            if (auto *stmts = rescue->statements) {
+                rewriteBody(stmts);
+            }
+            if (auto *subsequent = rescue->subsequent) {
+                rewriteNode(up_cast(subsequent));
+            }
+            break;
+        }
+        case PM_ELSE_NODE: {
+            auto *else_ = down_cast_nonnull<pm_else_node_t>(node);
+            if (auto *stmts = else_->statements) {
+                rewriteBody(stmts);
+            }
+            break;
+        }
+        case PM_ENSURE_NODE: {
+            auto *ensure = down_cast_nonnull<pm_ensure_node_t>(node);
+            if (auto *stmts = ensure->statements) {
+                rewriteBody(stmts);
+            }
+            break;
+        }
+        case PM_IF_NODE: {
+            auto *if_ = down_cast_nonnull<pm_if_node_t>(node);
+            if (auto *stmts = if_->statements) {
+                rewriteBody(stmts);
+            }
+            if (auto *subsequent = if_->subsequent) {
+                if_->subsequent = rewriteBody(subsequent);
+            }
+            break;
+        }
+        case PM_UNLESS_NODE: {
+            auto *unless_ = down_cast_nonnull<pm_unless_node_t>(node);
+            if (auto *stmts = unless_->statements) {
+                rewriteBody(stmts);
+            }
+            if (auto *elseClause = unless_->else_clause) {
+                unless_->else_clause = down_cast_nonnull<pm_else_node_t>(rewriteBody(up_cast(elseClause)));
+            }
+            break;
+        }
+        case PM_MULTI_WRITE_NODE: {
+            auto *masgn = down_cast_nonnull<pm_multi_write_node_t>(node);
+            rewriteNode(masgn->value);
+            break;
+        }
+        case PM_CASE_NODE: {
+            auto *case_ = down_cast_nonnull<pm_case_node_t>(node);
+            rewriteNodes(case_->conditions);
+            if (auto *elseClause = case_->else_clause) {
+                case_->else_clause = down_cast_nonnull<pm_else_node_t>(rewriteBody(up_cast(elseClause)));
+            }
+            break;
+        }
+        case PM_CASE_MATCH_NODE: {
+            auto *case_ = down_cast_nonnull<pm_case_match_node_t>(node);
+            rewriteNodes(case_->conditions);
+            if (auto *elseClause = case_->else_clause) {
+                case_->else_clause = down_cast_nonnull<pm_else_node_t>(rewriteBody(up_cast(elseClause)));
+            }
+            break;
+        }
+        case PM_WHEN_NODE: {
+            auto *when = down_cast_nonnull<pm_when_node_t>(node);
+            if (auto *stmts = when->statements) {
+                rewriteBody(stmts);
+            }
+            break;
+        }
+        case PM_CALL_NODE: {
+            auto *call = down_cast_nonnull<pm_call_node_t>(node);
+            if (auto *block = call->block) {
+                rewriteNode(block);
+            }
+            rewriteArgumentsNode(call->arguments);
+            break;
+        }
+        case PM_SUPER_NODE: {
+            auto *sup = down_cast_nonnull<pm_super_node_t>(node);
+            rewriteArgumentsNode(sup->arguments);
+            break;
+        }
+        case PM_RETURN_NODE: {
+            auto *ret = down_cast_nonnull<pm_return_node_t>(node);
+            rewriteArgumentsNode(ret->arguments);
+            break;
+        }
+        case PM_NEXT_NODE: {
+            auto *n = down_cast_nonnull<pm_next_node_t>(node);
+            rewriteArgumentsNode(n->arguments);
+            break;
+        }
+        case PM_BREAK_NODE: {
+            auto *b = down_cast_nonnull<pm_break_node_t>(node);
+            rewriteArgumentsNode(b->arguments);
+            break;
+        }
+        case PM_SPLAT_NODE: {
+            auto *s = down_cast_nonnull<pm_splat_node_t>(node);
+            rewriteNullableNode(s->expression);
+            break;
+        }
+        case PM_CONSTANT_WRITE_NODE: {
+            auto *write = down_cast_nonnull<pm_constant_write_node_t>(node);
+            // Check if this is a type alias assignment with synthetic marker
+            if (auto *constantRead = down_cast<pm_constant_read_node_t>(write->value)) {
+                if (constantRead->name == RBS_SYNTHETIC_TYPE_ALIAS_MARKER) {
+                    // Replace the value with the T.type_alias call
+                    write->value = replaceSyntheticTypeAlias(write->value);
+                    return;
+                }
+            }
+            rewriteNode(write->value);
+            break;
+        }
+        case PM_PROGRAM_NODE: {
+            auto *program = down_cast_nonnull<pm_program_node_t>(node);
+            rewriteBody(up_cast(program->statements));
+            break;
+        }
+        case PM_STATEMENTS_NODE: {
+            auto *statements = down_cast_nonnull<pm_statements_node_t>(node);
+            rewriteNodes(statements->body);
+            break;
+        }
+        default:
+            break;
     }
-
-    return rewriteNode(move(node));
 }
 
-unique_ptr<parser::Node> SigsRewriter::rewriteClass(unique_ptr<parser::Node> node) {
-    if (node == nullptr) {
-        return node;
-    }
-
-    auto comments = commentsForNode(node.get());
-    auto helpers = extractHelpers(ctx, comments.annotations);
-
-    if (helpers.empty() && comments.signatures.empty()) {
-        return node;
-    }
-
-    typecase(
-        node.get(),
-        [&](parser::Class *klass) {
-            klass->body = maybeWrapBody(node, move(klass->body));
-            if (!helpers.empty()) {
-                maybeInsertExtendTHelpers(&klass->body);
-                insertHelpers(&klass->body, move(helpers));
-            }
-            insertTypeParams(klass, &klass->body);
-        },
-        [&](parser::Module *module) {
-            module->body = maybeWrapBody(node, move(module->body));
-            if (!helpers.empty()) {
-                maybeInsertExtendTHelpers(&module->body);
-                insertHelpers(&module->body, move(helpers));
-            }
-            insertTypeParams(module, &module->body);
-        },
-        [&](parser::SClass *sclass) {
-            sclass->body = maybeWrapBody(node, move(sclass->body));
-            if (!helpers.empty()) {
-                maybeInsertExtendTHelpers(&sclass->body);
-                insertHelpers(&sclass->body, move(helpers));
-            }
-            insertTypeParams(sclass, &sclass->body);
-        },
-        [&](parser::Node *other) { Exception::raise("Unimplemented node type: {}", other->nodeName()); });
-
-    return node;
-}
-
-unique_ptr<parser::Node> SigsRewriter::rewriteNode(unique_ptr<parser::Node> node) {
-    if (node == nullptr) {
-        return node;
-    }
-
-    unique_ptr<parser::Node> result;
-
-    typecase(
-        node.get(),
-        // Using the same order as Desugar.cc
-        [&](parser::Block *block) {
-            block->body = rewriteBody(move(block->body));
-            result = move(node);
-        },
-        [&](parser::Begin *begin) {
-            node = rewriteBegin(move(node));
-            result = move(node);
-        },
-        [&](parser::Assign *assign) {
-            assign->rhs = rewriteNode(move(assign->rhs));
-            result = move(node);
-        },
-        [&](parser::AndAsgn *andAsgn) {
-            andAsgn->right = rewriteNode(move(andAsgn->right));
-            result = move(node);
-        },
-        [&](parser::OrAsgn *orAsgn) {
-            orAsgn->right = rewriteNode(move(orAsgn->right));
-            result = move(node);
-        },
-        [&](parser::OpAsgn *opAsgn) {
-            opAsgn->right = rewriteNode(move(opAsgn->right));
-            result = move(node);
-        },
-        [&](parser::Kwbegin *kwbegin) {
-            kwbegin->stmts = rewriteNodes(move(kwbegin->stmts));
-            result = move(node);
-        },
-        [&](parser::Module *module) {
-            module->body = rewriteBody(move(module->body));
-            result = rewriteClass(move(node));
-        },
-        [&](parser::Class *klass) {
-            klass->body = rewriteBody(move(klass->body));
-            result = rewriteClass(move(node));
-        },
-        [&](parser::DefMethod *def) {
-            def->body = rewriteBody(move(def->body));
-            result = move(node);
-        },
-        [&](parser::DefS *def) {
-            def->body = rewriteBody(move(def->body));
-            result = move(node);
-        },
-        [&](parser::SClass *sclass) {
-            sclass->body = rewriteBody(move(sclass->body));
-            result = rewriteClass(move(node));
-        },
-        [&](parser::For *for_) {
-            for_->body = rewriteBody(move(for_->body));
-            result = move(node);
-        },
-        [&](parser::Array *array) {
-            array->elts = rewriteNodes(move(array->elts));
-            result = move(node);
-        },
-        [&](parser::Rescue *rescue) {
-            rescue->body = rewriteBody(move(rescue->body));
-            rescue->rescue = rewriteNodes(move(rescue->rescue));
-            rescue->else_ = rewriteBody(move(rescue->else_));
-            result = move(node);
-        },
-        [&](parser::Resbody *resbody) {
-            resbody->body = rewriteBody(move(resbody->body));
-            result = move(node);
-        },
-        [&](parser::Ensure *ensure) {
-            ensure->body = rewriteBody(move(ensure->body));
-            ensure->ensure = rewriteBody(move(ensure->ensure));
-            result = move(node);
-        },
-        [&](parser::If *if_) {
-            if_->then_ = rewriteBody(move(if_->then_));
-            if_->else_ = rewriteBody(move(if_->else_));
-            result = move(node);
-        },
-        [&](parser::Masgn *masgn) {
-            masgn->rhs = rewriteNode(move(masgn->rhs));
-            result = move(node);
-        },
-        [&](parser::Case *case_) {
-            case_->whens = rewriteNodes(move(case_->whens));
-            case_->else_ = rewriteBody(move(case_->else_));
-            result = move(node);
-        },
-        [&](parser::When *when) {
-            when->body = rewriteBody(move(when->body));
-            result = move(node);
-        },
-        [&](parser::Send *send) {
-            send->args = rewriteNodes(move(send->args));
-            result = move(node);
-        },
-        [&](parser::RBSPlaceholder *placeholder) {
-            if (placeholder->kind == core::Names::Constants::RBSTypeAlias()) {
-                result = replaceSyntheticTypeAlias(move(node));
-            } else {
-                result = move(node);
-            }
-        },
-        [&](parser::Node *other) { result = move(node); });
-
-    return result;
-}
-
-unique_ptr<parser::Node> SigsRewriter::run(unique_ptr<parser::Node> node) {
+void SigsRewriter::run(pm_node_t *node) {
     // If there are no signature comments to process, we can skip the entire tree walk.
     if (commentsByNode.empty()) {
-        return node;
+        return;
     }
-    return rewriteBody(move(node));
+
+    rewriteBody(node);
+}
+
+// Helper method to create statements nodes with signatures
+pm_node_t *SigsRewriter::createStatementsWithSignatures(pm_node_t *originalNode,
+                                                        unique_ptr<vector<pm_node_t *>> signatures) {
+    if (!signatures || signatures->empty()) {
+        return originalNode;
+    }
+
+    // Build the body: signatures + original node
+    vector<pm_node_t *> body{};
+    body.reserve(signatures->size() + 1);
+
+    for (auto *sigCall : *signatures) {
+        body.push_back(sigCall);
+    }
+    body.push_back(originalNode);
+
+    auto loc = parser.translateLocation(originalNode->location);
+    return prism.StatementsNode(loc, absl::MakeSpan(body));
 }
 
 } // namespace sorbet::rbs

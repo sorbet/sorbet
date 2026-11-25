@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 # typed: false
 require_relative '../test_helper'
 

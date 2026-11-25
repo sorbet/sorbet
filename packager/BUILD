@@ -9,7 +9,7 @@ cc_library(
         exclude = ["flycheck_*"],
     ),
     hdrs = [
-        "VisibilityChecker.h",
+        "GenPackages.h",
         "packager.h",
     ],
     linkstatic = select({

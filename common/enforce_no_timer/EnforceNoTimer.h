@@ -13,10 +13,6 @@
     do {                                                                                                    \
         if (::sorbet::debug_mode) {                                                                         \
             if (!(x)) {                                                                                     \
-                ::sorbet::Exception::failInFuzzer();                                                        \
-                if (stopInDebugger()) {                                                                     \
-                    (void)!(x);                                                                             \
-                }                                                                                           \
                 ::sorbet::Exception::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__)); \
             }                                                                                               \
         }                                                                                                   \

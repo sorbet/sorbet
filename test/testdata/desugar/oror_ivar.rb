@@ -18,8 +18,8 @@ module Config
 
   sig {returns(String)}
   def self.initialized_to_nilable
-    @initialized_to_nilable ||= T.let(nil, T.nilable(String))
-  end # error: Expected `String` but found `T.nilable(String)` for method result type
+    @initialized_to_nilable ||= T.let(nil, T.nilable(String)) # error: Expected `String` but found `NilClass` for method result type
+  end
 
   sig {returns(Integer)}
   def self.initialized_with_qualified_let
@@ -46,12 +46,15 @@ module Config
     @suggest_t_let ||= ''
   # ^^^^^^^^^^^^^^ error: The singleton class instance variable `@suggest_t_let` must be declared using `T.let` when specifying `# typed: strict`
   # ^^^^^^^^^^^^^^ error: Use of undeclared variable `@suggest_t_let`
+  # ^^^^^^^^^^^^^^^^^^^^^ error: Expected `Integer` but found `String` for method result type
   end
 
   sig {returns(Integer)}
   def self.needs_cast
-    @needs_cast ||= T.let(two_tuple_looks_like_array.first, T.nilable(Integer)) # error: Expected `T.nilable(Integer)` but found `T.nilable(T.any(Integer, String))` for field
-  end # error: Expected `Integer` but found `T.nilable(Integer)` for method result type
+    @needs_cast ||= T.let(two_tuple_looks_like_array.first, T.nilable(Integer))
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `T.nilable(Integer)` but found `T.nilable(T.any(Integer, String))` for field
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `Integer` but found `T.nilable(Integer)` for method result type
+  end
 
   sig {returns(Integer)}
   def self.allows_cast

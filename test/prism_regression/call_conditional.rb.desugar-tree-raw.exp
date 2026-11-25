@@ -300,7 +300,7 @@ ClassDef{
           ]
         }
         elsep = Send{
-          flags = {}
+          flags = {bracesBlock}
           recv = UnresolvedIdent{
             kind = Local
             name = <D <U <assignTemp>> $6>

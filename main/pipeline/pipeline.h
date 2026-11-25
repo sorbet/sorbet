@@ -6,6 +6,7 @@
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/FileHash.h"
+#include "core/packages/Stratum.h"
 #include "main/options/options.h"
 
 namespace sorbet::core::lsp {
@@ -56,13 +57,23 @@ struct CondensationStratumInfo {
     absl::Span<core::FileRef> sourceFiles;
 };
 
+struct PackageStrata {
+    // The individual strata of the package graph traversal.
+    std::vector<CondensationStratumInfo> strata;
+
+    // The mapping of a core::FileRef to the stratum it occurs in. We identify individual strata with a uint16_t,
+    // because overflowing that value would require a dependency chain of length greater than 65535.
+    std::vector<core::packages::Stratum> fileToStratum;
+
+    // If present, the packages that we are restricting typechecking to.
+    std::unique_ptr<UnorderedSet<core::packages::MangledName>> focusedPackages;
+};
+
 // Using the condensation graph, sort the package and source files according to the stratum they would show up in a
-// parallel traversal of the condensation graph from its roots. The `packageFiles` vector will be mutated to include
-// non-test versions of the package files included originally.
-std::vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs,
-                                                          std::vector<ast::ParsedFile> &packageFiles,
-                                                          absl::Span<core::FileRef> files,
-                                                          const options::Options &opts);
+// parallel traversal of the condensation graph from its roots. The `packageFiles` vector will be reordered to contain
+// the package files in traversal order.
+PackageStrata computePackageStrata(core::GlobalState &gs, std::vector<ast::ParsedFile> &packageFiles,
+                                   absl::Span<core::FileRef> files, const options::Options &opts);
 
 void buildPackageDB(core::GlobalState &gs, absl::Span<ast::ParsedFile> what, absl::Span<core::FileRef> nonPackageFiles,
                     const options::Options &opts, WorkerPool &workers);
@@ -98,20 +109,30 @@ std::vector<ast::ParsedFile> incrementalResolve(
 // Note: `cancelable` and `preemption task manager` are only applicable to LSP.
 // If `intentionallyLeakASTs` is `true`, typecheck will leak the ASTs rather than pay the cost of deleting them
 // properly, which is a significant speedup on large codebases.
-void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> what, const options::Options &opts,
-               WorkerPool &workers, bool cancelable = false,
-               std::optional<std::shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager = std::nullopt,
-               bool presorted = false, bool intentionallyLeakASTs = false);
+void typecheck(const core::GlobalState &gs, std::vector<ast::ParsedFile> &&what, const options::Options &opts,
+               WorkerPool &workers, const UnorderedSet<core::packages::MangledName> *relevantPackages,
+               bool cancelable = false, core::packages::Stratum currentStratum = core::packages::Stratum(),
+               std::shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager = nullptr,
+               bool intentionallyLeakASTs = false);
 
 // ----- other ----------------------------------------------------------------
 
-void printFileTable(core::GlobalState &gs, const options::Options &opts, const UnorderedMap<long, long> &untypedUsages);
+void printGlobalTables(const core::GlobalState &gs, const options::Options &opts,
+                       const UnorderedMap<long, long> &untypedUsages);
 
 void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
                         const options::Options &opts);
 
-// Create a copy of `from` that has its symbol table reset to the payload.
-std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts);
+// Create a copy of `from` containing the requested contiguous prefix of its symbol table.
+// A request for stratum zero initializes the symbol table from the payload (or an empty state under --no-stdlib).
+std::unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts,
+                                                   core::packages::Stratum forStratum);
+
+// Sort files by size, so that larger files appear earlier than smaller files.
+//
+// Makes typechecking more performant, because it becomes less likely a single large file is
+// typechecked last while other workers are idle.
+void sortBySize(const core::GlobalState &gs, std::vector<ast::ParsedFile> &trees);
 
 } // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H

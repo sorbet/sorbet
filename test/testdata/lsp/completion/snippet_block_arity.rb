@@ -26,6 +26,17 @@ class A
   def self.arg0_arg1_blk(arg0, arg1, &blk)
     yield arg0, arg1
   end
+
+  def self.no_sig_no_block; end
+
+  sig { void }
+  def self.void_no_block; end
+
+  sig { params(blk: T.noreturn).void }
+  def self.noreturn_no_block(&blk); end
+
+  sig { params(blk: NilClass).void }
+  def self.nilclass_no_block(&blk); end
 end
 
 A.unary_bloc # error: does not exist
@@ -34,3 +45,11 @@ A.binary_bloc # error: does not exist
 #            ^ apply-completion: [B] item: 0
 A.arg0_arg1_bl # error: does not exist
 #             ^ apply-completion: [C] item: 0
+A.no_sig_no # error: does not exist
+#          ^ apply-completion: [D] item: 0
+A.void_no_b # error: does not exist
+#          ^ apply-completion: [E] item: 0
+A.noreturn_ # error: does not exist
+#          ^ apply-completion: [F] item: 0
+A.nilclass_ # error: does not exist
+#          ^ apply-completion: [G] item: 0

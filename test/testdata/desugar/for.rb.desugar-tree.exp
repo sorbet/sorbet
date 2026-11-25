@@ -1,4 +1,6 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
   class <emptyTree>::<C A><<C <todo sym>>> < (::<todo sym>)
     def self.each<<todo method>>(&blk)
       begin
@@ -55,7 +57,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
           end
         end
         <self>.puts("main")
-        <emptyTree>::<C A>.each() do ||
+        <emptyTree>::<C A>.each() do |forTemp$6|
           begin
             begin
               <assignTemp>$7 = forTemp$6
@@ -100,4 +102,105 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   <emptyTree>::<C Main>.main()
+
+  @ivar = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+
+  @@cvar = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+
+  $gvar = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+
+  <self>.sig() do ||
+    <self>.params(:arg, [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>]).void()
+  end
+
+  def call_target=<<todo method>>(arg, &<blk>)
+    <emptyTree>
+  end
+
+  <emptyTree>::<C ConstantTarget> = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+
+  <emptyTree>::<C ConstantPathTarget> = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+
+  module <emptyTree>::<C Nested><<C <todo sym>>> < ()
+    <emptyTree>::<C ConstantPathTarget> = <emptyTree>::<C T>.let([:x, 0], [<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>])
+  end
+
+  a = <emptyTree>::<C T>.let([], <emptyTree>::<C T>::<C Array>.[]([<emptyTree>::<C Symbol>, <emptyTree>::<C Integer>]))
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do |forTemp$2|
+    begin
+      @ivar = forTemp$2
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do |forTemp$3|
+    begin
+      @@cvar = forTemp$3
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do |forTemp$4|
+    begin
+      $gvar = forTemp$4
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do |forTemp$5|
+    begin
+      <self>.call_target=(forTemp$5)
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do |forTemp$6|
+    begin
+      <self>.call_target=(forTemp$6)
+      "loop body"
+    end
+  end
+
+  [].each() do |forTemp$7|
+    begin
+      <emptyTree>::<C E>.e=(forTemp$7)
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do |forTemp$8|
+    begin
+      <emptyTree>::<C ConstantTarget> = forTemp$8
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do |forTemp$9|
+    begin
+      ::<root>::<C ConstantPathTarget> = forTemp$9
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do |forTemp$10|
+    begin
+      <emptyTree>::<C Nested>::<C ConstantPathTarget> = forTemp$10
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do |forTemp$11|
+    begin
+      ::<root>::<C Nested>::<C ConstantPathTarget> = forTemp$11
+      "loop body"
+    end
+  end
+
+  [[:a, 1], [:b, 2], [:c, 3]].each() do |forTemp$12|
+    begin
+      a.[]=(123, forTemp$12)
+      "loop body"
+    end
+  end
 end

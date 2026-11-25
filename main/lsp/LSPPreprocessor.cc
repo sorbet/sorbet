@@ -20,7 +20,9 @@ string readFile(const string &path, const FileSystem &fs) {
         // NOTE: It is not appropriate to throw an error here. Sorbet does not differentiate between Watchman
         // updates that specify if a file has changed or has been deleted, so this is the 'golden path' for deleted
         // files.
-        // TODO(jvilk): Use Tombstone files instead.
+        // An alternative would be to track deleted files in the file table as tombstoned. If we go that direction,
+        // we'll need to make sure to update the handling of those files in the `workspaceFiles` vector that the
+        // LSPTypechecker manages.
         return "";
     }
 }
@@ -114,7 +116,7 @@ void LSPPreprocessor::mergeFileChanges() {
     taskQueue->getMutex()->AssertHeld();
     auto &logger = config->logger;
     // mergeFileChanges is the most expensive operation this thread performs while holding the mutex lock.
-    Timer timeit(logger, "lsp.mergeFileChanges");
+    Timer timeit(*logger, "lsp.mergeFileChanges");
     auto &pendingRequests = taskQueue->tasks();
     const int originalSize = pendingRequests.size();
     int requestsMergedCounter = 0;
@@ -266,9 +268,6 @@ unique_ptr<LSPTask> LSPPreprocessor::getTaskForMessage(LSPMessage &msg) {
                 return make_unique<CodeActionTask>(*config, id, move(get<unique_ptr<CodeActionParams>>(rawParams)));
             case LSPMethod::CodeActionResolve:
                 return make_unique<CodeActionResolveTask>(*config, id, move(get<unique_ptr<CodeAction>>(rawParams)));
-            case LSPMethod::TextDocumentFormatting:
-                return make_unique<DocumentFormattingTask>(*config, id,
-                                                           move(get<unique_ptr<DocumentFormattingParams>>(rawParams)));
             case LSPMethod::TextDocumentSignatureHelp:
                 return make_unique<SignatureHelpTask>(*config, id,
                                                       move(get<unique_ptr<TextDocumentPositionParams>>(rawParams)));
@@ -368,7 +367,7 @@ void LSPPreprocessor::preprocessAndEnqueue(unique_ptr<LSPMessage> msg) {
     task->latencyTimer = move(msg->latencyTimer);
 
     {
-        Timer timeit(config->logger, "LSPTask::preprocess");
+        Timer timeit(*config->logger, "LSPTask::preprocess");
         timeit.setTag("method", task->methodString());
         task->preprocess(*this);
     }
@@ -395,12 +394,12 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
         while (true) {
             unique_ptr<LSPMessage> msg;
             {
-                absl::MutexLock lck(&messageQueueMutex);
-                messageQueueMutex.Await(absl::Condition(
-                    +[](MessageQueueState *messageQueue) -> bool {
-                        return messageQueue->terminate || !messageQueue->pendingRequests.empty();
-                    },
-                    &messageQueue));
+                absl::MutexLock lck(&messageQueueMutex, absl::Condition(
+                                                            +[](MessageQueueState *messageQueue) -> bool {
+                                                                return messageQueue->terminate ||
+                                                                       !messageQueue->pendingRequests.empty();
+                                                            },
+                                                            &messageQueue));
                 // Only terminate once incoming queue is drained.
                 if (messageQueue.terminate && messageQueue.pendingRequests.empty()) {
                     config->logger->debug("Preprocessor terminating");
@@ -414,6 +413,7 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
                 }
             }
 
+            auto requestId = msg->id();
             preprocessAndEnqueue(move(msg));
 
             {
@@ -421,6 +421,12 @@ unique_ptr<Joinable> LSPPreprocessor::runPreprocessor(MessageQueueState &message
                 // Merge the counters from all of the worker threads with those stored in
                 // taskQueue.
                 taskQueue->getCounters() = mergeCounters(move(taskQueue->getCounters()));
+                if (taskQueue->preemptionTestHooks != nullptr && requestId.has_value() &&
+                    requestId->equals(taskQueue->preemptionTestHooks->requestId)) [[unlikely]] {
+                    // A test can acquire the queue mutex after this notification to ensure preprocessing has
+                    // finished touching it, so a later unlock here cannot hide a missing wakeup in finish().
+                    taskQueue->preemptionTestHooks->preprocessingFinished.Notify();
+                }
                 if (taskQueue->isTerminated()) {
                     // We must have processed an exit notification, or one of the downstream threads exited.
                     return;
@@ -506,8 +512,8 @@ LSPPreprocessor::canonicalizeEdits(uint32_t v, unique_ptr<WatchmanQueryResponse>
     }
     return edit;
 }
-vector<string_view> LSPPreprocessor::openFilePaths() const {
-    vector<string_view> paths;
+vector<string> LSPPreprocessor::openFilePaths() const {
+    vector<string> paths;
     paths.reserve(openFiles.size());
     for (auto const &[path, file] : openFiles) {
         paths.emplace_back(path);

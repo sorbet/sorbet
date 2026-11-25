@@ -9,8 +9,7 @@ namespace sorbet::autogen {
 
 class Autogen final {
 public:
-    static ParsedFile generate(core::Context ctx, ast::ParsedFile tree, const AutogenConfig &autogenCfg,
-                               const CRCBuilder &crcBuilder);
+    static ParsedFile generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder, bool leakTrees);
     Autogen() = delete;
 };
 

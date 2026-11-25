@@ -141,10 +141,7 @@ module T::Props::Serializable
       # If the prop was already missing during deserialization, that means the application
       # code already had to deal with a nil value, which means we wouldn't be accomplishing
       # much by raising here (other than causing an unnecessary breakage).
-      T::Configuration.log_info_handler(
-        "chalk-odm: missing required property in serialize",
-        prop: prop, class: self.class.name, id: self.class.decorator.get_id(self)
-      )
+      Kernel.warn("chalk-odm: missing required property in serialize prop=#{prop.inspect} class=#{self.class.name} id=#{self.class.decorator.get_id(self).inspect}")
     else
       raise TypeError.new("#{self.class.name}.#{prop} not set for non-optional prop")
     end
@@ -155,19 +152,6 @@ module T::Props::Serializable
     @_required_props_missing_from_deserialize ||= Set[]
     @_required_props_missing_from_deserialize << prop
     nil
-  end
-
-  private def raise_deserialization_error(prop_name, value, orig_error)
-    T::Configuration.soft_assert_handler(
-      'Deserialization error (probably unexpected stored type)',
-      storytime: {
-        klass: self.class,
-        prop: prop_name,
-        value: value,
-        error: orig_error.message,
-        notify: 'djudd'
-      }
-    )
   end
 end
 
@@ -226,13 +210,8 @@ module T::Props::Serializable::DecoratorMethods
     rules[:serialized_form] = serialized_form
     res = super
     prop_by_serialized_forms[serialized_form] = prop
-    if T::Configuration.use_vm_prop_serde?
-      enqueue_lazy_vm_method_definition!(:__t_props_generated_serialize) { generate_serialize2 }
-      enqueue_lazy_vm_method_definition!(:__t_props_generated_deserialize) { generate_deserialize2 }
-    else
-      enqueue_lazy_method_definition!(:__t_props_generated_serialize) { generate_serialize_source }
-      enqueue_lazy_method_definition!(:__t_props_generated_deserialize) { generate_deserialize_source }
-    end
+    enqueue_lazy_method_definition!(:__t_props_generated_serialize) { generate_serialize_source }
+    enqueue_lazy_method_definition!(:__t_props_generated_deserialize) { generate_deserialize_source }
     res
   end
 
@@ -242,18 +221,6 @@ module T::Props::Serializable::DecoratorMethods
 
   private def generate_deserialize_source
     T::Props::Private::DeserializerGenerator.generate(
-      props,
-      props_with_defaults || {},
-    )
-  end
-
-  private def generate_serialize2
-    T::Props::Private::SerializerGenerator.generate2(decorated_class, props)
-  end
-
-  private def generate_deserialize2
-    T::Props::Private::DeserializerGenerator.generate2(
-      decorated_class,
       props,
       props_with_defaults || {},
     )
@@ -299,26 +266,9 @@ module T::Props::Serializable::DecoratorMethods
   end
 
   def raise_nil_deserialize_error(hkey)
-    msg = "Tried to deserialize a required prop from a nil value. It's "\
-      "possible that a nil value exists in the database, so you should "\
-      "provide a `default: or factory:` for this prop (see go/optional "\
-      "for more details). If this is already the case, you probably "\
-      "omitted a required prop from the `fields:` option when doing a "\
-      "partial load."
-    storytime = {prop: hkey, klass: decorated_class.name}
-
-    # Notify the model owner if it exists, and always notify the API owner.
-    begin
-      if T::Configuration.class_owner_finder && (owner = T::Configuration.class_owner_finder.call(decorated_class))
-        T::Configuration.hard_assert_handler(
-          msg,
-          storytime: storytime,
-          project: owner
-        )
-      end
-    ensure
-      T::Configuration.hard_assert_handler(msg, storytime: storytime)
-    end
+    raise "Tried to deserialize a required prop from a nil value. " \
+      "You should provide a `default: or factory:` for this prop. " \
+      "prop=#{hkey} klass=#{decorated_class.name}"
   end
 
   def prop_validate_definition!(name, cls, rules, type)
@@ -334,6 +284,18 @@ module T::Props::Serializable::DecoratorMethods
 
     if !rules[:raise_on_nil_write].nil? && rules[:raise_on_nil_write] != true
       raise ArgumentError.new("The value of `raise_on_nil_write` if specified must be `true` (given: #{rules[:raise_on_nil_write]}).")
+    end
+
+    if rules[:raise_on_nil_write] && !rules[:_tnilable]
+      is_nilclass_parent = type.is_a?(T::Types::Simple) &&
+                           (type.raw_type.equal?(Object) || type.raw_type.equal?(BasicObject))
+      # Use `instance_of?` because modules can be mixed into NilClass, but classes cannot.
+      is_module = type.is_a?(T::Types::Simple) && type.raw_type.instance_of?(Module)
+      underspecified_type = type.equal?(T.untyped) || is_nilclass_parent || is_module
+
+      unless underspecified_type
+        raise ArgumentError.new("`raise_on_nil_write` requires that the type of `#{name}` be `T.nilable(...)` (given: #{type})")
+      end
     end
 
     result

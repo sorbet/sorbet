@@ -32,9 +32,9 @@ struct LocOffsets {
         return beginLoc == endLoc;
     }
 
-    LocOffsets() : beginLoc{INVALID_POS_LOC}, endLoc{INVALID_POS_LOC} {}
+    LocOffsets() noexcept : beginLoc{INVALID_POS_LOC}, endLoc{INVALID_POS_LOC} {}
 
-    LocOffsets(uint32_t beginLoc, uint32_t endLoc) : beginLoc{beginLoc}, endLoc{endLoc} {
+    LocOffsets(uint32_t beginLoc, uint32_t endLoc) noexcept : beginLoc{beginLoc}, endLoc{endLoc} {
         ENFORCE_NO_TIMER(beginLoc <= endLoc);
     }
 
@@ -58,9 +58,8 @@ struct LocOffsets {
     std::string showRaw(const GlobalState &gs, const FileRef file) const;
     std::string showRaw() const;
 
-    bool operator==(const LocOffsets &rhs) const;
-
-    bool operator!=(const LocOffsets &rhs) const;
+    bool operator==(const LocOffsets &rhs) const noexcept = default;
+    bool operator!=(const LocOffsets &rhs) const noexcept = default;
 };
 CheckSize(LocOffsets, 8, 4);
 

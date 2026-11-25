@@ -13,6 +13,7 @@ module A2
 end
 
 module A3
+  extend T::Generic
   has_attached_class!
  #^^^^^^^^^^^^^^^^^^^ error: does not exist
  #^^^^^^^^^^^^^^^^^^^ error: does not exist

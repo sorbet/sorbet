@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 require_relative '../../test_helper'
 
 class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
@@ -165,14 +166,14 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'inspects' do
       obj = a_serializable
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob">', str)
+      assert_equal("<Opus::Types::Test::Props::SerializableTest::MySerializable foo=#{obj.foo} name=\"Bob\">", str)
     end
 
     it 'inspects with extra props' do
       obj = a_serializable
       obj = obj.class.from_hash(obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob" @_extra_props=<not_a_prop="but_here_anyway">>', str)
+      assert_equal("<Opus::Types::Test::Props::SerializableTest::MySerializable foo=#{obj.foo} name=\"Bob\" @_extra_props=<not_a_prop=\"but_here_anyway\">>", str)
     end
 
     it 'inspects with custom extra props' do
@@ -185,17 +186,17 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     it 'inspects frozen structs' do
       obj = a_serializable.freeze
       str = obj.inspect
-      assert_equal('<Opus::Types::Test::Props::SerializableTest::MySerializable foo={"age"=>7, "color"=>"red"} name="Bob">', str)
+      assert_equal("<Opus::Types::Test::Props::SerializableTest::MySerializable foo=#{obj.foo} name=\"Bob\">", str)
     end
   end
 
   describe '.pretty_inspect' do
     it 'excludes extra props' do
-      obj = a_serializable
-      obj = obj.class.from_hash(obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
+      orig_obj = a_serializable
+      obj = orig_obj.class.from_hash(orig_obj.serialize.merge('not_a_prop' => 'but_here_anyway'))
       expected_result = <<~INSPECT
         <Opus::Types::Test::Props::SerializableTest::MySerializable
-         foo={"age"=>7, "color"=>"red"}
+         foo=#{orig_obj.foo}
          name="Bob">
       INSPECT
       str = obj.pretty_inspect
@@ -233,37 +234,22 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   end
 
   describe 'error message' do
-    it 'is only soft-assert by default for prop deserialize error' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+    it 'raises NoMethodError for prop deserialize error' do
+      e = assert_raises(NoMethodError) do
+        MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
 
-      result = MySerializable.from_hash({'foo' => "Won't respond like hash"})
-      assert_equal("Won't respond like hash", result.foo)
-
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
-      storytime = extra_hash[:storytime]
-      assert_equal(MySerializable, storytime[:klass])
-      assert_equal(:foo, storytime[:prop])
-      assert_equal("Won't respond like hash", storytime[:value])
+      assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
     end
 
     it 'includes relevant generated code on deserialize when we raise' do
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        raise "#{msg} #{extra.inspect}"
-      end
-
-      e = assert_raises(RuntimeError) do
+      e = assert_raises(NoMethodError) do
         MySerializable.from_hash({'foo' => "Won't respond like hash"})
       end
 
       assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
       assert_includes(e.message, "foo")
-      assert_includes(e.message, "val.transform_values {|v| T::Props::Utils.deep_clone_object(v)}")
+      assert_includes(e.message, "val.transform_values {|v| T::Props::Utils.deep_clone(v)}")
     end
 
     it 'includes relevant generated code on serialize' do
@@ -274,7 +260,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       end
 
       assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
-      assert_includes(e.message, 'h["foo"] = @foo.transform_values {|v| T::Props::Utils.deep_clone_object(v)}')
+      assert_includes(e.message, 'h["foo"] = @foo.transform_values {|v| T::Props::Utils.deep_clone(v)}')
     end
 
     it 'handles exceptions without a #backtrace_locations' do
@@ -290,7 +276,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       end
 
       assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
-      assert_includes(e.message, 'h["foo"] = @foo.transform_values {|v| T::Props::Utils.deep_clone_object(v)}')
+      assert_includes(e.message, 'h["foo"] = @foo.transform_values {|v| T::Props::Utils.deep_clone(v)}')
     end
   end
 
@@ -404,6 +390,26 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       end
     end
 
+    it 'requires the prop type to be nilable' do
+      assert_prop_error(/requires that the type of `foo` be `T.nilable\(\.\.\.\)` \(given: String\)/) do
+        prop :foo, String, raise_on_nil_write: true
+      end
+
+      assert_prop_error(/requires that the type of `foo` be `T.nilable\(\.\.\.\)` \(given: NilClass\)/) do
+        prop :foo, NilClass, raise_on_nil_write: true
+      end
+    end
+
+    it 'allows underspecified prop types' do
+      Class.new do
+        include T::Props::Serializable
+        prop :untyped, T.untyped, raise_on_nil_write: true
+        prop :object, Object, raise_on_nil_write: true
+        prop :basic_object, BasicObject, raise_on_nil_write: true
+        prop :interface, Kernel, raise_on_nil_write: true
+      end
+    end
+
     it 'forbids nil in setter' do
       struct = NilFieldStruct.new(foo: 1, bar: 'something')
       ex = assert_raises(TypeError) do
@@ -452,23 +458,16 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       struct = NilSingleFieldStruct.from_hash({})
       assert_nil(struct.foo)
 
-      msg_string = nil
-      extra_hash = nil
-
-      T::Configuration.log_info_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+      h = nil
+      _stdout, msg_string = capture_io do
+        h = struct.serialize
       end
-
-      h = struct.serialize
 
       assert_instance_of(Hash, h)
       assert(h.empty?)
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
       assert_includes(msg_string, "missing required property in serialize")
-      assert_equal(:foo, extra_hash[:prop])
-      assert_includes(extra_hash[:class], "NilSingleFieldStruct")
+      assert_includes(msg_string, "prop=:foo")
+      assert_includes(msg_string, "class=Opus::Types::Test::Props::SerializableTest::NilSingleFieldStruct")
     end
 
     describe 'with weak constructor' do
@@ -548,13 +547,13 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       e = assert_raises(ArgumentError) do
         a.with(non_bar: 10)
       end
-      assert_equal('Unexpected arguments: input({:non_bar=>10}), unexpected({"non_bar"=>10})', e.to_s)
+      assert_equal("Unexpected arguments: input(#{{non_bar: 10}}), unexpected(#{{'non_bar' => 10}})", e.to_s) # rubocop:disable Lint/LiteralInInterpolation
 
       a = WithModel1.from_hash({'foo' => 'foo', 'foo1' => 'foo1'})
       e = assert_raises(ArgumentError) do
         a.with(non_bar: 10)
       end
-      assert_equal('Unexpected arguments: input({:non_bar=>10}), unexpected({"non_bar"=>10})', e.to_s)
+      assert_equal("Unexpected arguments: input(#{{non_bar: 10}}), unexpected(#{{'non_bar' => 10}})", e.to_s) # rubocop:disable Lint/LiteralInInterpolation
     end
 
     it 'with overwrite fields' do
@@ -587,7 +586,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
   describe 'boolean props' do
     it 'are not cloned on serde' do
-      T::Props::Utils.expects(:deep_clone_object).never
+      T::Props::Utils.expects(:deep_clone).never
 
       s = BooleanStruct.new(prop: true)
       assert_equal(true, BooleanStruct.from_hash(s.serialize).prop)
@@ -600,7 +599,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
   describe 'heterogenous union props' do
     it 'are cloned on serde' do
-      T::Props::Utils.expects(:deep_clone_object).with('foo').at_least_once.returns('foo')
+      T::Props::Utils.expects(:deep_clone).with('foo').at_least_once.returns('foo')
 
       s = HeterogenousUnionStruct.new(prop: 'foo')
       assert_equal('foo', HeterogenousUnionStruct.from_hash(s.serialize).prop)
@@ -614,7 +613,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   describe 'unions of two different serializables' do
     it 'are just cloned on serde' do
       obj = MyNilableSerializable.new
-      T::Props::Utils.expects(:deep_clone_object).with(obj).at_least_once.returns(obj)
+      T::Props::Utils.expects(:deep_clone).with(obj).at_least_once.returns(obj)
 
       s = MultipleStructUnionStruct.new(prop: obj)
       assert_equal(obj, MultipleStructUnionStruct.from_hash(s.serialize).prop)
@@ -679,7 +678,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
           string_key_shape: {not_a_string: 0}
         )
       end
-      assert_includes(exn.message, '.string_key_shape to {:not_a_string=>0} (instance of Hash) - need a {"foo" => Integer}')
+      assert_includes(exn.message, ".string_key_shape to #{{not_a_string: 0}} (instance of Hash) - need a {\"foo\" => Integer}") # rubocop:disable Lint/LiteralInInterpolation
     end
 
     it 'roundtrips' do
@@ -783,24 +782,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'raises deserialize errors when props with an array of a custom subtype store the wrong datatype' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+      e = assert_raises(NoMethodError) do
+        CustomTypeStruct.from_hash({'array' => CustomType.new})
       end
 
-      obj = CustomType.new
-      result = CustomTypeStruct.from_hash({'array' => obj})
-      assert_equal(obj, result.array)
-
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
-      storytime = extra_hash[:storytime]
-      assert_equal(CustomTypeStruct, storytime[:klass])
-      assert_equal(:array, storytime[:prop])
-      assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'map'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'map'")
     end
 
     it 'round trips as hash key' do
@@ -819,24 +805,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'raises deserialize errors when props with a hash with keys of a custom subtype store the wrong datatype' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+      e = assert_raises(NoMethodError) do
+        CustomTypeStruct.from_hash({'hash_key' => 'not a hash'})
       end
 
-      obj = 'not a hash'
-      result = CustomTypeStruct.from_hash({'hash_key' => obj})
-      assert_equal('not a hash', result.hash_key)
-
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
-      storytime = extra_hash[:storytime]
-      assert_equal(CustomTypeStruct, storytime[:klass])
-      assert_equal(:hash_key, storytime[:prop])
-      assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'transform_keys'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'transform_keys'")
     end
 
     it 'round trips as hash value' do
@@ -855,24 +828,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'raises deserialize errors when props with a hash with values of a custom subtype store the wrong datatype' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+      e = assert_raises(NoMethodError) do
+        CustomTypeStruct.from_hash({'hash_value' => 'not a hash'})
       end
 
-      obj = 'not a hash'
-      result = CustomTypeStruct.from_hash({'hash_value' => obj})
-      assert_equal('not a hash', result.hash_value)
-
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
-      storytime = extra_hash[:storytime]
-      assert_equal(CustomTypeStruct, storytime[:klass])
-      assert_equal(:hash_value, storytime[:prop])
-      assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'transform_values'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'transform_values'")
     end
 
     it 'round trips as hash key and value' do
@@ -891,24 +851,11 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'raises deserialize errors when props with a hash with keys/values of a custom subtype store the wrong datatype' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
+      e = assert_raises(NoMethodError) do
+        CustomTypeStruct.from_hash({'hash_both' => 'not a hash'})
       end
 
-      obj = 'not a hash'
-      result = CustomTypeStruct.from_hash({'hash_both' => obj})
-      assert_equal('not a hash', result.hash_both)
-
-      refute_nil(msg_string)
-      refute_nil(extra_hash)
-      storytime = extra_hash[:storytime]
-      assert_equal(CustomTypeStruct, storytime[:klass])
-      assert_equal(:hash_both, storytime[:prop])
-      assert_equal(obj, storytime[:value])
-      assert_includes(storytime[:error].tr("`", "'"), "undefined method 'each_with_object'")
+      assert_includes(e.message.tr("`", "'"), "undefined method 'each_with_object'")
     end
   end
 
@@ -983,13 +930,6 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
     end
 
     it 'raises deserialize errors' do
-      msg_string = nil
-      extra_hash = nil
-      T::Configuration.soft_assert_handler = proc do |msg, extra|
-        msg_string = msg
-        extra_hash = extra
-      end
-
       obj = CustomType.new
       e = assert_raises(TypeError) do
         CustomSetPropStruct.from_hash({'set' => obj})
@@ -1182,7 +1122,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     it 'is cloned on serde by default' do
       val = ModulePropStruct::ConcreteNonScalar.new
-      T::Props::Utils.expects(:deep_clone_object).with(val).returns(val).at_least_once
+      T::Props::Utils.expects(:deep_clone).with(val).returns(val).at_least_once
 
       s = ModulePropStruct.new(nonscalar: val)
       assert_equal(val, ModulePropStruct.from_hash(s.serialize).nonscalar)
@@ -1190,7 +1130,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
 
     it 'is not cloned on serde if set as scalar' do
       val = ModulePropStruct::ConcreteScalar.new
-      T::Props::Utils.expects(:deep_clone_object).never
+      T::Props::Utils.expects(:deep_clone).never
 
       s = ModulePropStruct.new(scalar: val)
       assert_equal(val, ModulePropStruct.from_hash(s.serialize).scalar)
@@ -1232,7 +1172,7 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
   class DefaultStringProp
     include T::Props::Serializable
 
-    prop :stringprop, String, default: "default"
+    prop :stringprop, String, default: +"default"
   end
 
   describe 'with defaulted string props' do
@@ -1241,6 +1181,17 @@ class Opus::Types::Test::Props::SerializableTest < Critic::Unit::UnitTest
       obj1 = DefaultStringProp.from_hash(h)
       obj2 = DefaultStringProp.from_hash(h)
       refute_equal(obj1.stringprop.object_id, obj2.stringprop.object_id)
+    end
+
+    it 'returns mutable string defaults from the lazily-eval\'d deserializer' do
+      # The generated deserializer inlines the default as a bare string
+      # literal, and the lazily-eval'd source must not carry a
+      # frozen_string_literal prefix: that would freeze (and dedupe) the
+      # literal, so instances would share one frozen default.
+      obj1 = DefaultStringProp.from_hash({})
+      refute_predicate(obj1.stringprop, :frozen?)
+      obj1.stringprop << ' mutated'
+      assert_equal('default', DefaultStringProp.from_hash({}).stringprop)
     end
   end
 

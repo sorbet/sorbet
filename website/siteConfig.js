@@ -37,6 +37,11 @@ const users = [
     infoLink: 'https://www.chime.com/',
   },
   {
+    caption: 'Cobot',
+    image: 'img/cobot-logo.svg',
+    infoLink: 'https://www.cobot.me/',
+  },
+  {
     caption: 'Factorial',
     image: 'img/factorial-logo.png',
     infoLink: 'https://factorialhr.com/',

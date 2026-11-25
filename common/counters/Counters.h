@@ -8,7 +8,7 @@
 
 namespace sorbet {
 
-constexpr bool enable_counters = debug_mode;
+inline constexpr bool enable_counters = debug_mode;
 
 // A comment on the use of strings in this API
 //
@@ -36,7 +36,7 @@ struct CounterImpl;
 // implementation
 class StatsD;
 namespace core {
-class Proto;
+class JSON;
 }
 namespace web_tracer_framework {
 class Tracing;
@@ -68,7 +68,7 @@ struct CounterState {
 private:
     friend CounterState getAndClearThreadCounters();
     friend void counterConsume(CounterState cs);
-    friend class core::Proto;
+    friend class core::JSON;
     friend class StatsD;
     friend class sorbet::web_tracer_framework::Tracing;
     friend class sorbet::web_tracer_framework::TracingTestHelper;

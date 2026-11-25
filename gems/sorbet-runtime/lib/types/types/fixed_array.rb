@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 # https://jira.corp.stripe.com/browse/RUBYPLAT-1107
-# typed: false
+# typed: true
 
 module T::Types
   # Takes a list of types. Validates each item in an array using the type in the same position
@@ -20,19 +20,27 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      types.each { |type| build_inner_lazy_fields(type) }
+      nil
+    end
+
+    # overrides Base
     def name
       "[#{types.join(', ')}]"
     end
 
     # overrides Base
     def recursively_valid?(obj)
-      if obj.is_a?(Array) && obj.length == types.length
-        i = 0
-        while i < types.length
-          if !types[i].recursively_valid?(obj[i])
+      element_types = types
+      length = element_types.length
+      if obj.is_a?(Array) && obj.length == length
+        index = 0
+        while index < length
+          if !element_types.fetch(index).recursively_valid?(obj[index])
             return false
           end
-          i += 1
+          index += 1
         end
         true
       else
@@ -42,13 +50,15 @@ module T::Types
 
     # overrides Base
     def valid?(obj)
-      if obj.is_a?(Array) && obj.length == types.length
-        i = 0
-        while i < types.length
-          if !types[i].valid?(obj[i])
+      element_types = types
+      length = element_types.length
+      if obj.is_a?(Array) && obj.length == length
+        index = 0
+        while index < length
+          if !element_types.fetch(index).valid?(obj[index])
             return false
           end
-          i += 1
+          index += 1
         end
         true
       else

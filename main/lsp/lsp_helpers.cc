@@ -150,7 +150,6 @@ static const vector<core::NameRef> writerNames = {
 
 static const vector<core::NameRef> readerNames = {
     core::Names::const_(),
-    core::Names::merchantProp(),
     core::Names::attrReader(),
 };
 
@@ -187,6 +186,26 @@ bool definedByAccessorMethod(const core::GlobalState &gs, AccessorInfo &info) {
 }
 
 } // namespace
+
+vector<unique_ptr<TextDocumentEdit>> autocorrect2DocumentEdits(const LSPConfiguration &config,
+                                                               const core::GlobalState &gs,
+                                                               const vector<core::AutocorrectSuggestion::Edit> &edits) {
+    UnorderedMap<core::FileRef, vector<unique_ptr<TextEdit>>> editsByFile;
+    for (auto &edit : edits) {
+        auto range = Range::fromLoc(gs, edit.loc);
+        if (range != nullptr) {
+            editsByFile[edit.loc.file()].emplace_back(make_unique<TextEdit>(move(range), edit.replacement));
+        }
+    }
+
+    vector<unique_ptr<TextDocumentEdit>> documentEdits;
+    for (auto &[file, edits] : editsByFile) {
+        // TODO: Document version
+        documentEdits.emplace_back(make_unique<TextDocumentEdit>(
+            make_unique<VersionedTextDocumentIdentifier>(config.fileRef2Uri(gs, file), JSONNullObject()), move(edits)));
+    }
+    return documentEdits;
+}
 
 void addOtherAccessorSymbols(const core::GlobalState &gs, core::SymbolRef symbol,
                              core::lsp::Query::Symbol::STORAGE &symbols) {

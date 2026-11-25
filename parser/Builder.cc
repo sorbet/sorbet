@@ -102,13 +102,12 @@ std::optional<string> Dedenter::dedent(string_view str) {
 class Builder::Impl {
 public:
     Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {
-        this->maxOff_ = file.data(gs).source().size();
+        this->maxOff_ = file.data(gs).sourceSize();
         foreignNodes_.emplace_back();
     }
 
     GlobalState &gs_;
     core::FileRef file_;
-    uint16_t uniqueCounter_ = 1;
     uint32_t maxOff_;
     ruby_parser::base_driver *driver_;
 
@@ -238,7 +237,10 @@ public:
                 auto raw_numparam_stack = driver_->numparam_stack.stackCopy();
 
                 // ignore current block scope
-                raw_numparam_stack.pop_back();
+                // (the stack can be empty after error recovery leaves a block without its closing token)
+                if (!raw_numparam_stack.empty()) {
+                    raw_numparam_stack.pop_back();
+                }
 
                 std::reverse(raw_numparam_stack.begin(), raw_numparam_stack.end());
                 for (auto outer_scope : raw_numparam_stack) {
@@ -375,8 +377,6 @@ public:
     unique_ptr<Node> assign(unique_ptr<Node> lhs, const token *eql, unique_ptr<Node> rhs) {
         core::LocOffsets loc = lhs->loc.join(rhs->loc);
 
-        // In `x.foo = 1`, the behavior below currently does `foo =` for the methodLoc
-        // That might be wrong. Punting for now.
         if (auto *s = parser::cast_node<Send>(lhs.get())) {
             s->args.emplace_back(std::move(rhs));
             return make_unique<Send>(loc, std::move(s->receiver), s->method, s->methodLoc, std::move(s->args));
@@ -475,8 +475,6 @@ public:
         core::LocOffsets loc;
         if (begin != nullptr) {
             loc = tokLoc(begin).join(tokLoc(end));
-        } else if (auto *block = parser::cast_node<Block>(body.get())) {
-            loc = block->send->loc.join(block->loc);
         } else {
             loc = body->loc;
         }
@@ -492,6 +490,9 @@ public:
             }
         }
         if (parser::isa_node<Mlhs>(body.get())) {
+            if (begin != nullptr) { // If there's parentheses, include them in the location.
+                body->loc = loc;
+            }
             return body;
         }
 
@@ -519,12 +520,8 @@ public:
             }
             auto elseLoc = tokLoc(elseTok).join(maybe_loc(else_));
             stmts.emplace_back(make_unique<Begin>(elseLoc, NodeVec1(std::move(else_))));
-            auto loc = collectionLoc(stmts);
-            if (auto *block = parser::cast_node<Block>(body.get())) {
-                loc = block->send->loc.join(loc);
-            }
 
-            body = make_unique<Begin>(loc, std::move(stmts));
+            body = make_unique<Begin>(collectionLoc(stmts), std::move(stmts));
         }
 
         if (ensure_tok != nullptr) {
@@ -544,7 +541,11 @@ public:
     unique_ptr<Node> beginKeyword(const token *begin, unique_ptr<Node> body, const token *end) {
         core::LocOffsets loc = tokLoc(begin).join(tokLoc(end));
         if (body != nullptr) {
-            if (auto *b = parser::cast_node<Begin>(body.get())) {
+            auto *b = parser::cast_node<Begin>(body.get());
+            // Only flatten the `Begin` that `compstmt` synthesizes for `a; b`, which always has
+            // several statements. A `Begin` with fewer came from parens, like `begin (a; b) end`,
+            // and keeps the parens' loc.
+            if (b != nullptr && b->stmts.size() > 1) {
                 return make_unique<Kwbegin>(loc, std::move(b->stmts));
             } else {
                 return make_unique<Kwbegin>(loc, NodeVec1(std::move(body)));
@@ -588,10 +589,18 @@ public:
         }
 
         auto blockLoc = tokLoc(begin).join(tokLoc(end));
+
+        auto style = BlockStyle::Present;
+        ENFORCE(end != nullptr);
+        if (end != nullptr) {
+            style = end->type() == ruby_parser::token_type::tRCURLY ? BlockStyle::Braces : BlockStyle::DoEnd;
+        }
+
         Node &n = *methodCall;
         const type_info &ty = typeid(n);
         if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper)) {
-            return make_unique<Block>(blockLoc, std::move(methodCall), std::move(args), std::move(body));
+            auto loc = methodCall->loc.join(blockLoc);
+            return make_unique<Block>(loc, blockLoc, std::move(methodCall), std::move(args), std::move(body), style);
         }
 
         sorbet::parser::NodeVec *exprs;
@@ -605,7 +614,9 @@ public:
             [&](Node *n) { Exception::raise("Unexpected send node: {}", n->nodeName()); });
 
         auto &send = exprs->front();
-        unique_ptr<Node> block = make_unique<Block>(blockLoc, std::move(send), std::move(args), std::move(body));
+        auto loc = send->loc.join(blockLoc);
+        unique_ptr<Node> block =
+            make_unique<Block>(loc, blockLoc, std::move(send), std::move(args), std::move(body), style);
         exprs->front().swap(block);
         return methodCall;
     }
@@ -622,13 +633,13 @@ public:
         core::LocOffsets loc;
         core::NameRef nm;
 
-        if (name != nullptr) {
+        if (name != nullptr) { // A named block parameter, like `def foo(&block)`
             loc = tokLoc(name);
             nm = gs_.enterNameUTF8(name->view());
             checkReservedForNumberedParameters(name->view(), loc);
-        } else {
+        } else { // An anonymous block parameter, like `def foo(&)`
             loc = tokLoc(amper);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
+            nm = core::Names::ampersand();
         }
 
         return make_unique<BlockParam>(loc, nm);
@@ -734,13 +745,8 @@ public:
                 return nullptr;
             case 1:
                 return std::move(nodes.back());
-            default: {
-                auto loc = collectionLoc(nodes);
-                if (auto *block = parser::cast_node<Block>(nodes[0].get())) {
-                    loc = block->send->loc.join(loc);
-                }
-                return make_unique<Begin>(loc, std::move(nodes));
-            }
+            default:
+                return make_unique<Begin>(collectionLoc(nodes), std::move(nodes));
         }
     }
 
@@ -1186,13 +1192,13 @@ public:
         core::LocOffsets loc;
         core::NameRef nm;
 
-        if (name != nullptr) {
+        if (name != nullptr) { // A named keyword rest parameter, like `def foo(**kwargs)`
             loc = tokLoc(name);
             nm = gs_.enterNameUTF8(name->view());
             checkReservedForNumberedParameters(name->view(), loc);
-        } else {
+        } else { // An anonymous keyword rest parameter, like `def foo(**)`
             loc = tokLoc(dstar);
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
+            nm = core::Names::starStar();
         }
 
         return make_unique<Kwrestarg>(loc, nm);
@@ -1365,8 +1371,14 @@ public:
 
     unique_ptr<Node> multi_lhs1(const token *begin, unique_ptr<Node> item, const token *end) {
         if (parser::isa_node<Mlhs>(item.get())) {
+            if (begin != nullptr) { // If there's parentheses, include them in the location.
+                ENFORCE(end != nullptr, "If there's an open parenthesis, there should otherwise be a closing "
+                                        "parenthesis (otherwise the parser wouldn't end up here)");
+                item->loc = tokLoc(begin, end);
+            }
             return item;
         }
+
         auto args = NodeVec1(std::move(item));
         return make_unique<Mlhs>(collectionLoc(begin, args, end), std::move(args));
     }
@@ -1467,10 +1479,10 @@ public:
 
     unique_ptr<Node> pair_label(const token *key) {
         unique_ptr<Node> value;
-        if (islower(key->view().at(0))) {
-            value = ident(key);
-        } else {
+        if (isupper(key->view().at(0))) {
             value = const_(key);
+        } else {
+            value = ident(key);
         }
 
         auto keyLoc = tokLoc(key);
@@ -1516,12 +1528,6 @@ public:
         return make_unique<Rational>(tokLoc(tok), tok->view());
     }
 
-    unique_ptr<Node> rational_complex(const token *tok) {
-        // TODO(nelhage): We're losing this information that this was marked as
-        // a Rational in the source.
-        return make_unique<Complex>(tokLoc(tok), tok->view());
-    }
-
     unique_ptr<Node> regexp_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end,
                                     unique_ptr<Node> options) {
         core::LocOffsets loc = tokLoc(begin).join(tokLoc(end)).join(maybe_loc(options));
@@ -1552,13 +1558,12 @@ public:
         core::NameRef nm;
         core::LocOffsets nameLoc = loc;
 
-        if (name != nullptr) {
+        if (name != nullptr) { // A named rest parameter, like `def m(*rest)`
             nameLoc = tokLoc(name);
             loc = loc.join(nameLoc);
             nm = gs_.enterNameUTF8(name->view());
             checkReservedForNumberedParameters(name->view(), nameLoc);
-        } else {
-            // case like 'def m(*); end'
+        } else { // Anonymous rest parameter, like `def m(*)`
             nm = core::Names::star();
         }
 
@@ -2122,6 +2127,8 @@ ForeignPtr character(SelfPtr builder, const token *char_) {
 }
 
 ForeignPtr complex(SelfPtr builder, const token *tok) {
+    // The token can include include an 'r' suffix (e.g. "1r" for `1ri`),
+    // which later gets stripped out during desugar.
     auto build = cast_builder(builder);
     return build->toForeign(build->complex(tok));
 }
@@ -2278,6 +2285,8 @@ ForeignPtr float_(SelfPtr builder, const token *tok) {
 }
 
 ForeignPtr floatComplex(SelfPtr builder, const token *tok) {
+    // The token can include include an 'r' suffix (e.g. "1r" for `1ri`),
+    // which later gets stripped out during desugar.
     auto build = cast_builder(builder);
     return build->toForeign(build->floatComplex(tok));
 }
@@ -2645,11 +2654,6 @@ ForeignPtr rational(SelfPtr builder, const token *tok) {
     return build->toForeign(build->rational(tok));
 }
 
-ForeignPtr rational_complex(SelfPtr builder, const token *tok) {
-    auto build = cast_builder(builder);
-    return build->toForeign(build->rational_complex(tok));
-}
-
 ForeignPtr regexp_compose(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
                           ForeignPtr options) {
     auto build = cast_builder(builder);
@@ -2920,7 +2924,6 @@ struct ruby_parser::builder Builder::interface = {
     range_exclusive,
     range_inclusive,
     rational,
-    rational_complex,
     regexp_compose,
     regexp_options,
     rescue_body,

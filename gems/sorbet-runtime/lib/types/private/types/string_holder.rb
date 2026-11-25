@@ -14,6 +14,11 @@ class T::Private::Types::StringHolder < T::Types::Base
   end
 
   # overrides Base
+  def build_lazy_fields
+    nil
+  end
+
+  # overrides Base
   def name
     string
   end

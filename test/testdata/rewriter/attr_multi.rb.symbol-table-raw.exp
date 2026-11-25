@@ -7,35 +7,35 @@ class <C <U <root>>> < <C <U Object>> ()
     field <C <U Test>>#<U @b> -> Integer | NilClass @ Loc {file=test/testdata/rewriter/attr_multi.rb start=10:18 end=10:19}
     field <C <U Test>>#<U @c> -> Integer | NilClass @ Loc {file=test/testdata/rewriter/attr_multi.rb start=10:22 end=10:23}
     method <C <U Test>>#<U a> (<blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/attr_multi.rb start=7:3 end=7:19}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
     method <C <U Test>>#<U a=> (a, <blk>) -> String | NilClass @ Loc {file=test/testdata/rewriter/attr_multi.rb start=7:3 end=7:19}
       argument a<> -> T.nilable(String) @ Loc {file=test/testdata/rewriter/attr_multi.rb start=7:18 end=7:19}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
     method <C <U Test>>#<U b> (<blk>) -> Integer | NilClass @ Loc {file=test/testdata/rewriter/attr_multi.rb start=10:3 end=10:23}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
     method <C <U Test>>#<U b=> (b, <blk>) -> Integer | NilClass @ Loc {file=test/testdata/rewriter/attr_multi.rb start=10:3 end=10:23}
       argument b<> -> T.nilable(Integer) @ Loc {file=test/testdata/rewriter/attr_multi.rb start=10:18 end=10:19}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
     method <C <U Test>>#<U c> (<blk>) -> Integer | NilClass @ Loc {file=test/testdata/rewriter/attr_multi.rb start=10:3 end=10:23}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
     method <C <U Test>>#<U c=> (c, <blk>) -> Integer | NilClass @ Loc {file=test/testdata/rewriter/attr_multi.rb start=10:3 end=10:23}
       argument c<> -> T.nilable(Integer) @ Loc {file=test/testdata/rewriter/attr_multi.rb start=10:22 end=10:23}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
     method <C <U Test>>#<U d> (<blk>) -> String @ Loc {file=test/testdata/rewriter/attr_multi.rb start=13:3 end=13:17}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
     method <C <U Test>>#<U e> (<blk>) -> String @ Loc {file=test/testdata/rewriter/attr_multi.rb start=16:3 end=16:21}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
     method <C <U Test>>#<U f> (<blk>) -> String @ Loc {file=test/testdata/rewriter/attr_multi.rb start=16:3 end=16:21}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
     method <C <U Test>>#<U g=> (g, <blk>) -> String @ Loc {file=test/testdata/rewriter/attr_multi.rb start=19:3 end=19:17}
       argument g<> -> String @ Loc {file=test/testdata/rewriter/attr_multi.rb start=18:15 end=18:16}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
     method <C <U Test>>#<U h=> (h, <blk>) -> String @ Loc {file=test/testdata/rewriter/attr_multi.rb start=22:3 end=22:21}
       argument h<> -> String @ Loc {file=test/testdata/rewriter/attr_multi.rb start=21:15 end=21:16}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
     method <C <U Test>>#<U i=> (i, <blk>) -> String @ Loc {file=test/testdata/rewriter/attr_multi.rb start=22:3 end=22:21}
       argument i<> -> String @ Loc {file=test/testdata/rewriter/attr_multi.rb start=22:20 end=22:21}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/rewriter/attr_multi.rb start=??? end=???}
   class <S <C <U Test>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/rewriter/attr_multi.rb start=3:1 end=3:11}
     type-member(+) <S <C <U Test>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Test>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Test) @ Loc {file=test/testdata/rewriter/attr_multi.rb start=3:1 end=3:11}
     method <S <C <U Test>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/rewriter/attr_multi.rb start=3:1 end=23:4}

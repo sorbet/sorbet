@@ -28,5 +28,16 @@ public:
     ~UnfreezeFileTable();
 };
 
+// Forbids entering new symbols, while still allowing existing symbols to be found and updated. This is only checked
+// in debug builds.
+class ForbidNewSymbols {
+    GlobalState &gs;
+    bool old;
+
+public:
+    ForbidNewSymbols(GlobalState &gs);
+    ~ForbidNewSymbols();
+};
+
 } // namespace sorbet::core
 #endif // SORBET_UNFREEZING_H

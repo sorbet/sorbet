@@ -1,0 +1,13 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.lambda() do |; <missing_block_local_params>|
+    <emptyTree>
+  end
+
+  <self>.lambda() do |; <missing_block_local_params>|
+    <emptyTree>
+  end
+
+  ::Kernel.lambda() do |; <missing_block_local_params>|
+    <emptyTree>
+  end
+end

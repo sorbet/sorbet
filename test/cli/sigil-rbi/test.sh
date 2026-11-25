@@ -1,5 +1,6 @@
 #!/bin/bash
 main/sorbet --silence-dev-message \
+    --max-threads=0 \
     test/cli/sigil-rbi/no_type.rbi \
     test/cli/sigil-rbi/typed.rbi \
     test/cli/sigil-rbi/strict.rbi \

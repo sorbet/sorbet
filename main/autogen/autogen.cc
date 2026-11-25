@@ -1,9 +1,10 @@
 #include "main/autogen/autogen.h"
-#include "absl/strings/match.h"
+#include "absl/algorithm/container.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/common.h"
+#include "common/os/os.h"
 #include "common/strings/formatting.h"
 #include "main/autogen/crc_builder.h"
 
@@ -30,15 +31,10 @@ class AutogenWalk {
     };
 
     vector<NestingStackEntry> nestingStack;
-    const AutogenConfig *autogenCfg;
-
-    enum class ScopeType { Class, Block };
-    vector<const ast::Send *> ignoring;
-    vector<ScopeType> scopeTypes;
 
     UnorderedMap<const ast::ConstantLit *, ReferenceRef> refMap;
 
-    UnorderedSet<pair<core::LocOffsets, core::SymbolRef>> seenRefsByLoc;
+    UnorderedMap<pair<core::LocOffsets, core::SymbolRef>, ReferenceRef> refsByLoc;
 
     // Convert a symbol name into a fully qualified name
     vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
@@ -53,44 +49,49 @@ class AutogenWalk {
 
     // Convert a constant literal into a fully qualified name
     vector<core::NameRef> constantName(core::Context ctx, const ast::ConstantLit &cnstRef) {
-        vector<core::NameRef> out;
-        auto *cnst = &cnstRef;
-        while (cnst != nullptr && cnst->original() != nullptr) {
-            auto &original = *cnst->original();
-            out.emplace_back(original.cnst);
-            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
+        struct Walker {
+            core::Context ctx;
+            AutogenWalk &autogen;
+            vector<core::NameRef> names;
 
-            // If any part of the constant literal scope is a class alias, the final name should be scoped
-            // under the *dealiased* scope. This allows subconstants-of-aliases to be referenced
-            // correctly -- otherwise, we'd have missing edges in our static analysis dependency graphs, which
-            // drive pre-loading for our Ruby services at Stripe, and also have to jump hoops with complicated
-            // heuristics in our package generation tooling to determine whether something was resolved via an alias.
-            if (cnst != nullptr && cnst->original() != nullptr) {
-                auto scopeSym = cnst->symbol();
-                if (scopeSym.isStaticField(ctx) && scopeSym.asFieldRef().data(ctx)->isClassAlias()) {
-                    auto resolvedScopeName = symbolName(ctx, scopeSym);
+            bool onRoot(core::LocOffsets, core::SymbolRef, bool) {
+                return true;
+            }
+
+            bool onPart(core::LocOffsets, core::SymbolRef symbol, core::NameRef originalName, bool isOutermost) {
+                // If any part of the constant literal scope is a class alias, the final name should be scoped
+                // under the *dealiased* scope. This allows subconstants-of-aliases to be referenced
+                // correctly -- otherwise, we'd have missing edges in our static analysis dependency graphs, which
+                // drive pre-loading for our Ruby services at Stripe, and also have to jump hoops with complicated
+                // heuristics in our package generation tooling to determine whether something was resolved via an
+                // alias.
+                if (!isOutermost && symbol.isStaticField(ctx) && symbol.asFieldRef().data(ctx)->isClassAlias()) {
+                    auto resolvedScopeName = autogen.symbolName(ctx, symbol);
 
                     // append the name in reverse order to the hitherto-built name vector,
-                    // then break out of the loop.
-                    out.insert(out.end(), resolvedScopeName.rbegin(), resolvedScopeName.rend());
-                    break;
+                    // then stop walking.
+                    names.insert(names.end(), resolvedScopeName.rbegin(), resolvedScopeName.rend());
+                    return false;
                 }
-            }
-        }
 
-        reverse(out.begin(), out.end());
-        return out;
+                names.emplace_back(originalName);
+                return true;
+            }
+        } walker{ctx, *this, {}};
+        cnstRef.walkOriginalPath(walker);
+
+        reverse(walker.names.begin(), walker.names.end());
+        return move(walker.names);
     }
 
 public:
-    AutogenWalk(const AutogenConfig &autogenConfig) {
+    AutogenWalk() {
         auto &def = defs.emplace_back();
         def.id = 0;
         def.type = Definition::Type::Module;
         def.defines_behavior = false;
         def.is_empty = false;
         nestingStack.emplace_back(def.id);
-        autogenCfg = &autogenConfig;
     }
 
     void preTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
@@ -98,8 +99,6 @@ public:
         if (name == nullptr) {
             return;
         }
-        scopeTypes.emplace_back(ScopeType::Class);
-
         // create a new `Definition`
         auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
@@ -115,14 +114,9 @@ public:
         def.is_empty =
             absl::c_all_of(original.rhs, [](auto &tree) { return sorbet::ast::BehaviorHelpers::checkEmptyDeep(tree); });
 
-        // does it define behavior? It is impossible for .rbi files to define behavior (unless they are from the
-        // allow-listed set of RBI paths).
-        string_view filePath = ctx.file.data(ctx).path();
-        bool ignoreRBI = ctx.file.data(ctx).isRBI() &&
-                         !absl::c_any_of(autogenCfg->behaviorAllowedInRBIsPaths,
-                                         [&](auto &allowedPath) { return absl::StartsWith(filePath, allowedPath); });
-
-        def.defines_behavior = !ignoreRBI && sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(original);
+        // does it define behavior? It is impossible for .rbi files to define behavior.
+        def.defines_behavior =
+            !ctx.file.data(ctx).isRBI() && sorbet::ast::BehaviorHelpers::checkClassDefinesBehavior(original);
 
         // TODO: ref.parent_of, def.parent_ref
         // TODO: expression_range
@@ -142,49 +136,23 @@ public:
         refs[it->second.id()].is_defining_ref = true;
         refs[it->second.id()].definitionLoc = original.loc;
 
-        auto ait = original.ancestors.begin();
         // if this is a class, then the first ancestor is the parent class
         if (original.kind == ast::ClassDef::Kind::Class && !original.ancestors.empty()) {
             // we need to do name resolution for that class "outside" of the class body, so handle this before we've
             // modified the current scoping
-            ast::ConstTreeWalk::apply(ctx, *this, *ait);
-            ++ait;
+            ast::ConstTreeWalk::apply(ctx, *this, original.ancestors.front());
+            auto parent = ast::cast_tree<ast::ConstantLit>(original.ancestors.front());
+            if (parent != nullptr) {
+                auto it = refMap.find(parent);
+                if (it != refMap.end()) {
+                    refs[it->second.id()].parentKind = ClassKind::Class;
+                }
+            }
         }
 
-        // The rest of the ancestors are all references inside the class body (i.e. uses of `include` or `extend`) so
-        // add the current class to the scoping
+        // Mixins also appear naturally in the class body as arguments to `include` or `extend`. Let the normal tree
+        // walk find those references with the right scope.
         nestingStack.emplace_back(def.id);
-
-        // ...and then run the treemap over all the includes and extends
-        for (; ait != original.ancestors.end(); ++ait) {
-            ast::ConstTreeWalk::apply(ctx, *this, *ait);
-        }
-        for (auto &ancst : original.singletonAncestors) {
-            ast::ConstTreeWalk::apply(ctx, *this, ancst);
-        }
-
-        // and now that we've processed all the ancestors, we should have created references for them all, so traverse
-        // them once again...
-        for (auto &ancst : original.ancestors) {
-            auto cnst = ast::cast_tree<ast::ConstantLit>(ancst);
-            if (cnst == nullptr || cnst->original() == nullptr) {
-                // ignore them if they're not statically-known ancestors (i.e. not constants)
-                continue;
-            }
-
-            // ...find the references
-            auto it = refMap.find(cnst);
-            if (it == refMap.end()) {
-                continue;
-            }
-            // if it's the parent class, then we can set the parent_ref of the `Definition`
-            if (original.kind == ast::ClassDef::Kind::Class && &ancst == &original.ancestors.front()) {
-                // superclass
-                def.parent_ref = it->second;
-            }
-            // otherwise, make sure we know the ref is the parent of this `Definition`
-            refs[it->second.id()].parent_of = def.id;
-        }
     }
 
     void postTransformClassDef(core::Context ctx, const ast::ClassDef &original) {
@@ -194,30 +162,38 @@ public:
             return;
         }
 
-        // remove the stuff added to handle the class scope here
+        auto &def = defs[nestingStack.back().ref.id()];
+        for (auto &ancst : original.ancestors) {
+            auto cnst = ast::cast_tree<ast::ConstantLit>(ancst);
+            if (cnst == nullptr || cnst->original() == nullptr) {
+                continue;
+            }
+
+            auto it = refsByLoc.find(make_pair(cnst->loc(), cnst->symbol()));
+            if (it == refsByLoc.end()) {
+                continue;
+            }
+            if (original.kind == ast::ClassDef::Kind::Class && &ancst == &original.ancestors.front()) {
+                def.parent_ref = it->second;
+            }
+            refs[it->second.id()].parent_of = def.id;
+        }
+
         nestingStack.pop_back();
-        scopeTypes.pop_back();
-    }
-
-    void preTransformBlock(core::Context ctx, const ast::Block &block) {
-        scopeTypes.emplace_back(ScopeType::Block);
-    }
-
-    void postTransformBlock(core::Context ctx, const ast::Block &block) {
-        scopeTypes.pop_back();
     }
 
     // `true` if the constant is fully qualified and can be traced back to the root scope, `false` otherwise
     bool isCBaseConstant(const ast::ConstantLit &cnstRef) {
-        auto *cnst = &cnstRef;
-        while (cnst != nullptr && cnst->original() != nullptr) {
-            auto &original = *cnst->original();
-            cnst = ast::cast_tree<ast::ConstantLit>(original.scope);
-        }
-        if (cnst && cnst->symbol() == core::Symbols::root()) {
-            return true;
-        }
-        return false;
+        struct Walker {
+            bool onRoot(core::LocOffsets, core::SymbolRef symbol, bool isConstant) {
+                return isConstant && symbol == core::Symbols::root();
+            }
+
+            bool onPart(core::LocOffsets, core::SymbolRef, core::NameRef, bool) {
+                return true;
+            }
+        };
+        return cnstRef.walkOriginalPath(Walker{});
     }
 
     void setNestingAndScope(Reference &ref, const ast::ConstantLit &cnstRef) {
@@ -259,11 +235,6 @@ public:
     }
 
     void postTransformConstantLit(core::Context ctx, const ast::ConstantLit &original) {
-        if (!ignoring.empty()) {
-            // this is an `include` or an `extend` which already got handled in `preTransformClassDef`
-            // (in which case don't handle it again)
-            return;
-        }
         if (original.original() == nullptr) {
             return;
         }
@@ -274,10 +245,11 @@ public:
         }
 
         auto entry = make_pair(original.loc(), original.symbol());
-        if (seenRefsByLoc.contains(entry)) {
+        auto existing = refsByLoc.find(entry);
+        if (existing != refsByLoc.end()) {
+            refMap[&original] = existing->second;
             return;
         }
-        seenRefsByLoc.emplace(move(entry));
 
         // Create a new `Reference`
         auto &ref = refs.emplace_back();
@@ -296,14 +268,9 @@ public:
             ref.resolved = QualifiedName::fromFullName(symbolName(ctx, sym));
         }
         ref.is_defining_ref = false;
-        // if we're already in the scope of the class (which will be the newest-created one) then we're looking at the
-        // `ancestors` or `singletonAncestors` values. Otherwise, (at least for the parent relationships we care about)
-        // we're looking at the first `class Child < Parent` relationship, so we change `is_subclassing` to true.
-        if (!defs.empty() && !nestingStack.empty() && defs.back().id._id != nestingStack.back().ref._id) {
-            ref.parentKind = ClassKind::Class;
-        }
         // now, add it to the refmap
         refMap[&original] = ref.id;
+        refsByLoc.emplace(move(entry), ref.id);
     }
 
     void postTransformAssign(core::Context ctx, const ast::Assign &original) {
@@ -320,22 +287,9 @@ public:
         }
 
         if (ctx.file.data(ctx).isRBI()) {
-            string_view filePath = ctx.file.data(ctx).path();
-            // Mostly, we are only concerned with references in RBI files so that dependencies can be
-            // accurately tracked. Definitions of casgns are not needed.
-            //
-            // The exception to this case is RBIs generated by special plugins like the coinbase protoc plugin,
-            // which can define net-new casgns for proto messages that aren't present in the corresponding
-            // generated Ruby code itself.
-            //
-            // Hence, we capture RBI files specified in the behaviorAllowedInRBIsPaths list (also used in the classDef
-            // logic above) as allowed sources of casgn definitions.
-            bool ignoreRBI = !absl::c_any_of(autogenCfg->behaviorAllowedInRBIsPaths, [&](auto &allowedPath) {
-                return absl::StartsWith(filePath, allowedPath);
-            });
-            if (ignoreRBI) {
-                return;
-            }
+            // We are only concerned with references in RBI files so that dependencies can be accurately tracked.
+            // Definitions of casgns are not needed.
+            return;
         }
 
         // Create the Definition for it
@@ -376,14 +330,6 @@ public:
     }
 
     void preTransformSend(core::Context ctx, const ast::Send &original) {
-        bool inBlock = !scopeTypes.empty() && scopeTypes.back() == ScopeType::Block;
-        // Ignore include/extend sends iff they are directly at the class/module level.
-        // These cases are handled in `preTransformClassDef`.
-        // Do not ignore in block scope so that we a ref to the included module is still rendered.
-        if (!inBlock && original.recv.isSelfReference() &&
-            (original.fun == core::Names::include() || original.fun == core::Names::extend())) {
-            ignoring.emplace_back(&original);
-        }
         // This means it's a `require`; mark it as such
         if (original.flags.isPrivateOk && original.fun == core::Names::require() && original.numPosArgs() == 1) {
             auto lit = ast::cast_tree<ast::Literal>(original.getPosArg(0));
@@ -393,16 +339,7 @@ public:
         }
     }
 
-    void postTransformSend(core::Context ctx, const ast::Send &original) {
-        // if this send was something we were ignoring (i.e. an `include` or `require`) then pop this
-        if (!ignoring.empty() && ignoring.back() == &original) {
-            ignoring.pop_back();
-        }
-    }
-
     ParsedFile parsedFile() {
-        ENFORCE(scopeTypes.empty());
-
         ParsedFile out;
         out.nestings = move(nestings);
         out.refs = move(refs);
@@ -414,10 +351,15 @@ public:
 
 // Convert a Sorbet `ParsedFile` into an Autogen `ParsedFile` by walking it as above and also recording the checksum of
 // the current file
-ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const AutogenConfig &autogenCfg,
-                             const CRCBuilder &crcBuilder) {
-    AutogenWalk walk(autogenCfg);
+ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree, const CRCBuilder &crcBuilder, bool leakTrees) {
+    AutogenWalk walk;
     ast::ConstTreeWalk::apply(ctx, walk, tree.tree);
+
+    if (leakTrees) {
+        // Leak the tree, as we only run autogen in batch mode
+        intentionallyLeakMemory(tree.tree.release());
+    }
+
     auto pf = walk.parsedFile();
     pf.path = string(tree.file.data(ctx).path());
     auto src = tree.file.data(ctx).source();

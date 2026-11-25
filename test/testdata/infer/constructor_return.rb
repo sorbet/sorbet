@@ -3,11 +3,25 @@ class A
   extend T::Sig
 
   sig {void}
-  def initialize()
-    yield
+  def initialize() # error: uses `yield` but does not mention a block parameter
+    yield # error: Method `call` does not exist on `NilClass`
     1
   end
 end
 
 b = A.new {}
+#         ^^ error: Method `A#initialize` does not take a block
 T.assert_type!(b, A)
+
+class B
+  extend T::Sig
+
+  sig {params(blk: T.untyped).void}
+  def initialize(&blk)
+    yield
+    1
+  end
+end
+
+b = B.new {}
+T.assert_type!(b, B)

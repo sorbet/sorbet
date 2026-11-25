@@ -27,6 +27,7 @@ core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp
 bool typeTestReferencesVar(const InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> &typeTest, cfg::LocalRef var) {
     return absl::c_any_of(typeTest, [var](auto &test) { return test.first == var; });
 }
+
 } // namespace
 
 void TypeTestReverseIndex::addToIndex(cfg::LocalRef from, cfg::LocalRef to) {
@@ -58,24 +59,6 @@ void TypeTestReverseIndex::cloneFrom(const TypeTestReverseIndex &index) {
 
 const InlinedVector<cfg::LocalRef, 1> TypeTestReverseIndex::empty;
 
-/**
- * Encode things that we know hold and don't hold.
- */
-struct KnowledgeFact {
-    bool isDead = false;
-    /* the following type tests are known to be true */
-    InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
-    /* the following type tests are known to be false */
-    InlinedVector<pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
-
-    /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
-    void min(core::Context ctx, const KnowledgeFact &other);
-
-    void sanityCheck() const;
-
-    string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
-};
-
 KnowledgeFilter::KnowledgeFilter(core::Context ctx, cfg::CFG &cfg) {
     used_vars.resize(cfg.numLocalVariables());
     for (auto &bb : cfg.basicBlocks) {
@@ -97,15 +80,15 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, cfg::CFG &cfg) {
                     }
                 } else if (auto send = cfg::cast_instruction<cfg::Send>(bind.value)) {
                     if (send->fun == core::Names::bang()) {
-                        if (send->args.empty()) {
+                        if (send->argRefs().empty()) {
                             if (isNeeded(bind.bind.variable) && !isNeeded(send->recv.variable)) {
                                 used_vars[send->recv.variable.id()] = true;
                                 changed = true;
                             }
                         }
                     } else if (send->fun == core::Names::eqeq()) {
-                        if (send->args.size() == 1) {
-                            auto arg0 = send->args[0].variable;
+                        if (send->argRefs().size() == 1) {
+                            auto arg0 = send->argRefs()[0];
                             if (isNeeded(arg0) && !isNeeded(send->recv.variable)) {
                                 used_vars[send->recv.variable.id()] = true;
                                 changed = true;
@@ -245,7 +228,7 @@ string KnowledgeFact::toString(const core::GlobalState &gs, const cfg::CFG &cfg)
     return fmt::format("{}{}", fmt::join(buf1, ""), fmt::join(buf2, ""));
 }
 
-KnowledgeRef::KnowledgeRef() : knowledge(make_shared<KnowledgeFact>()) {}
+KnowledgeRef::KnowledgeRef() : knowledge(core::makeRefPtr<KnowledgeFact>()) {}
 
 const KnowledgeFact &KnowledgeRef::operator*() const {
     return *knowledge.get();
@@ -255,11 +238,19 @@ const KnowledgeFact *KnowledgeRef::operator->() const {
     return knowledge.get();
 }
 
+KnowledgeFact::KnowledgeFact(bool isDead, const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &yesTypeTests,
+                             const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &noTypeTests)
+    : isDead(isDead), yesTypeTests(yesTypeTests), noTypeTests(noTypeTests) {}
+
+core::RefPtr<KnowledgeFact> KnowledgeFact::freshCopy() {
+    return core::makeRefPtr<KnowledgeFact>(isDead, yesTypeTests, noTypeTests);
+}
+
 KnowledgeFact &KnowledgeRef::mutate() {
-    if (knowledge.use_count() > 1) {
-        knowledge = make_shared<KnowledgeFact>(*knowledge);
+    if (knowledge->hasMultipleRefs()) {
+        knowledge = knowledge->freshCopy();
     }
-    ENFORCE(knowledge.use_count() == 1);
+    ENFORCE(!knowledge->hasMultipleRefs());
     return *knowledge.get();
 }
 
@@ -401,27 +392,47 @@ bool Environment::hasType(core::Context ctx, cfg::LocalRef symbol) const {
     return fnd->second.typeAndOrigins.type != nullptr;
 }
 
-const core::TypeAndOrigins &Environment::getTypeAndOrigin(cfg::LocalRef symbol) const {
+Environment::VariableInfo Environment::getRefInfo(cfg::LocalRef symbol) const {
     auto fnd = _vars.find(symbol);
     if (fnd == _vars.end()) {
-        return uninitialized;
+        return VariableInfo{
+            uninitialized,
+            TestedKnowledge::empty,
+            false,
+            false,
+        };
     }
-    ENFORCE(fnd->second.typeAndOrigins.type != nullptr);
-    return fnd->second.typeAndOrigins;
+
+    return VariableInfo{
+        fnd->second.typeAndOrigins,
+        fnd->second.knowledge,
+        fnd->second.knownTruthy,
+        true,
+    };
 }
 
-const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::VariableUseSite &symbol) const {
-    const auto &ret = getTypeAndOrigin(symbol.variable);
-    symbol.type = ret.type;
+const core::TypeAndOrigins &Environment::getTypeAndOrigin(cfg::LocalRef symbol) const {
+    auto info = getRefInfo(symbol);
+
+    if (info.wasFound) {
+        ENFORCE(info.typeAndOrigins.type != nullptr);
+    }
+
+    return info.typeAndOrigins;
+}
+
+const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::LocalRef symbol, core::TypePtr &ty) const {
+    const auto &ret = getTypeAndOrigin(symbol);
+    ty = ret.type;
     return ret;
 }
 
+const core::TypeAndOrigins &Environment::getAndFillTypeAndOrigin(cfg::VariableUseSite &symbol) const {
+    return getAndFillTypeAndOrigin(symbol.variable, symbol.type);
+}
+
 bool Environment::getKnownTruthy(cfg::LocalRef var) const {
-    auto fnd = _vars.find(var);
-    if (fnd == _vars.end()) {
-        return false;
-    }
-    return fnd->second.knownTruthy;
+    return getRefInfo(var).knownTruthy;
 }
 
 void Environment::propagateKnowledge(core::Context ctx, cfg::LocalRef to, cfg::LocalRef from,
@@ -603,36 +614,26 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     if (send->fun == core::Names::blank_p()) {
         // Note that this assumes that .blank? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
-        auto &originalType = send->recv.type;
-        auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
-
-        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
-            whoKnows.falsy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
-            whoKnows.sanityCheck();
-        }
+        whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
+        whoKnows.sanityCheck();
         return;
     }
 
     if (send->fun == core::Names::present_p()) {
         // Note that this assumes that .present? is a rails-compatible monkey patch.
         // In other cases this flow analysis might make incorrect assumptions.
-        auto &originalType = send->recv.type;
-        auto knowledgeTypeWithoutFalsy = core::Types::approximateSubtract(ctx, originalType, core::Types::falsyTypes());
-
-        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalsy, originalType)) {
-            whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, send->recv.variable, knowledgeTypeWithoutFalsy);
-            whoKnows.sanityCheck();
-        }
+        whoKnows.truthy().addNoTypeTest(local, typeTestsWithVar, send->recv.variable, core::Types::falsyTypes());
+        whoKnows.sanityCheck();
         return;
     }
 
-    if (send->args.empty()) {
+    if (send->argRefs().empty()) {
         return;
     }
 
     if (send->fun == core::Names::kindOf_p() || send->fun == core::Names::isA_p() ||
         send->fun == core::Names::instanceOf_p()) {
-        const auto &klassType = send->args[0].type;
+        const auto &klassType = send->argTypes()[0];
         auto ref = send->recv.variable;
         updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter, send->fun);
         whoKnows.sanityCheck();
@@ -640,7 +641,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p() || send->fun == core::Names::neq()) {
-        const auto &argType = send->args[0].type;
+        const auto &argType = send->argTypes()[0];
         const auto &recvType = send->recv.type;
 
         auto funIsEq = send->fun == core::Names::eqeq() || send->fun == core::Names::equal_p();
@@ -658,7 +659,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
         }
 
         if (!recvType.isUntyped()) {
-            auto arg0 = send->args[0].variable;
+            auto arg0 = send->argRefs()[0];
             truthy.addYesTypeTest(local, typeTestsWithVar, arg0, recvType);
             if (isSingleton(ctx, recvType, includeSingletonClasses)) {
                 falsy.addNoTypeTest(local, typeTestsWithVar, arg0, recvType);
@@ -671,7 +672,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
 
     if (send->fun == core::Names::tripleEq()) {
         const auto &klassType = send->recv.type;
-        const auto ref = send->args[0].variable;
+        const auto ref = send->argRefs()[0];
         // `when` against class literal
         updateKnowledgeKindOf(ctx, local, loc, klassType, ref, knowledgeFilter, send->fun);
 
@@ -694,7 +695,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::lessThan() || send->fun == core::Names::leq()) {
-        auto argType = send->args[0].type;
+        auto argType = send->argTypes()[0];
         if (argType.isUntyped() ||
             (!core::isa_type<core::ClassType>(argType) && !core::isa_type<core::AppliedType>(argType))) {
             return;
@@ -734,7 +735,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
     }
 
     if (send->fun == core::Names::checkMatchArray()) {
-        auto tupleType = core::cast_type<core::TupleType>(send->args[1].type);
+        auto tupleType = core::cast_type<core::TupleType>(send->argTypes()[1]);
         if (tupleType == nullptr) {
             return;
         }
@@ -758,7 +759,7 @@ void Environment::updateKnowledge(core::Context ctx, cfg::LocalRef local, core::
             }
         }
 
-        auto ref = send->args[0].variable;
+        auto ref = send->argRefs()[0];
         whoKnows.truthy().addYesTypeTest(local, typeTestsWithVar, ref, typeTestType);
         whoKnows.falsy().addNoTypeTest(local, typeTestsWithVar, ref, typeTestType);
 
@@ -866,7 +867,8 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
     this->isDead |= other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        const auto &otherTO = other.getTypeAndOrigin(var);
+        const auto &otherInfo = other.getRefInfo(var);
+        const auto &otherTO = otherInfo.typeAndOrigins;
         auto &thisTO = pair.second.typeAndOrigins;
         if (thisTO.type != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
@@ -876,22 +878,22 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
                     thisTO.origins.emplace_back(origin);
                 }
             }
-            pair.second.knownTruthy = pair.second.knownTruthy && other.getKnownTruthy(var);
+            pair.second.knownTruthy = pair.second.knownTruthy && otherInfo.knownTruthy;
         } else {
             thisTO = otherTO;
-            pair.second.knownTruthy = other.getKnownTruthy(var);
+            pair.second.knownTruthy = otherInfo.knownTruthy;
         }
 
         if (bb->flags.isLoopHeader && bb->outerLoops <= var.maxLoopWrite(inWhat)) {
             continue;
         }
-        bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !other.getKnownTruthy(var);
+        bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type) && !otherInfo.knownTruthy;
         bool canBeTruthy = core::Types::canBeTruthy(ctx, otherTO.type);
 
         if (canBeTruthy) {
             auto &thisKnowledge = pair.second.knowledge;
             auto otherTruthy =
-                other.getKnowledge(var, false).truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
+                otherInfo.knowledge.truthy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherTruthy->isDead) {
                 if (!thisKnowledge.seenTruthyOption) {
                     thisKnowledge.seenTruthyOption = true;
@@ -904,8 +906,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, cfg::CF
 
         if (canBeFalsy) {
             auto &thisKnowledge = pair.second.knowledge;
-            auto otherFalsy =
-                other.getKnowledge(var, false).falsy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
+            auto otherFalsy = otherInfo.knowledge.falsy().under(ctx, other, inWhat, bb, knowledgeFilter.isNeeded(var));
             if (!otherFalsy->isDead) {
                 if (!thisKnowledge.seenFalsyOption) {
                     thisKnowledge.seenFalsyOption = true;
@@ -929,7 +930,8 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
         core::TypeAndOrigins tp;
 
         auto bindMinLoops = var.minLoops(inWhat);
-        if (bb->outerLoops == bindMinLoops || bindMinLoops == var.maxLoopWrite(inWhat)) {
+        if (bindMinLoops.pin == cfg::MinLoops::Pin::None &&
+            (bb->outerLoops == bindMinLoops.level || bindMinLoops.level == var.maxLoopWrite(inWhat))) {
             continue;
         }
 
@@ -963,9 +965,10 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->isDead = other.isDead;
     for (auto &pair : _vars) {
         auto var = pair.first;
-        pair.second.typeAndOrigins = other.getTypeAndOrigin(var);
-        pair.second.knowledge.replace(var, typeTestsWithVar, other.getKnowledge(var, false));
-        pair.second.knownTruthy = other.getKnownTruthy(var);
+        auto info = other.getRefInfo(var);
+        pair.second.typeAndOrigins = info.typeAndOrigins;
+        pair.second.knowledge.replace(var, typeTestsWithVar, info.knowledge);
+        pair.second.knownTruthy = info.knownTruthy;
     }
 
     this->pinnedTypes = other.pinnedTypes;
@@ -1010,11 +1013,70 @@ core::TypePtr flatmapHack(core::Context ctx, const core::TypePtr &receiver, cons
     return mapType;
 }
 
-core::TypePtr
-Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
-                            int bindMinLoops, KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
-                            const core::TypePtr &methodReturnType,
-                            const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver) {
+namespace {
+
+// Reports an error if the write `bind` changes the type of a variable inside a loop or block.
+void checkLoopTypeChange(core::Context ctx, const cfg::CFG &inWhat, const cfg::Binding &bind, core::TypeAndOrigins &tp,
+                         const core::TypeAndOrigins &cur, bool asGoodAs,
+                         core::ErrorSection::Collector &errorDetailsCollector, core::Loc ownerLoc) {
+    if (!asGoodAs || (tp.type.isUntyped() && !cur.type.isUntyped())) {
+        if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value)) {
+            // See cfg/builder/builder_walk.cc for an explanation of why this is here.
+            if (ident->what.data(inWhat)._name == core::Names::blockBreakAssign()) {
+                return;
+            }
+
+            if (ident->what.data(inWhat)._name == core::Names::selfRestore()) {
+                // this is a restoration of `self` variable.
+                // our current analysis isn't smart enough to see that it's safe to do this by
+                // construction either https://github.com/sorbet/sorbet/issues/222 or
+                // https://github.com/sorbet/sorbet/issues/224 should allow us to remove this
+                // case
+                return;
+            }
+        }
+        if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
+            e.setHeader("Changing the type of a variable is not permitted in loops and blocks");
+            e.addErrorSection(
+                core::ErrorSection(core::ErrorColors::format("Existing variable has type: `{}`", cur.type.show(ctx))));
+            e.addErrorSection(core::ErrorSection(
+                core::ErrorColors::format("Attempting to change type to: `{}`\n", tp.type.show(ctx))));
+
+            if (cur.origins.size() == 1 && cur.origins[0].exists() &&
+                // sometimes a variable has a given type because of a constant outside this method
+                ctx.locAt(inWhat.loc).contains(cur.origins[0]) &&
+                // don't attempt to insert a `T.let` into the method params list
+                (inWhat.symbol.data(ctx)->name.isAnyStaticInitName(ctx) ||
+                 !ctx.locAt(inWhat.declLoc).contains(cur.origins[0]))) {
+                auto suggest = core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
+                auto replacement = suggest.show(ctx, core::ShowOptions().withUseValidSyntax());
+                e.replaceWith(fmt::format("Initialize as `{}`", replacement), cur.origins[0], "T.let({}, {})",
+                              cur.origins[0].source(ctx).value(), replacement);
+            } else {
+                e.addErrorSection(core::ErrorSection("Original type from:", cur.origins2Explanations(ctx, ownerLoc)));
+            }
+            e.addErrorSections(move(errorDetailsCollector));
+
+            if (!cur.origins.empty() && !tp.origins.empty() &&
+                absl::c_any_of(cur.origins, [&](auto loc) { return loc.source(ctx) == "rescue"; }) &&
+                absl::c_any_of(tp.origins, [&](auto loc) { return loc.source(ctx) == "rescue"; })) {
+                e.addErrorNote("The exception variables of two `{}` blocks conflict with each other because\n"
+                               "    the second is inside a loop. Either use `{}` to initialize the exception\n"
+                               "    variable before the first `{}`, or pick unique variable names.\n",
+                               "rescue", "T.let", "rescue");
+            }
+        }
+
+        tp.type = core::Types::untypedUntracked();
+    }
+}
+
+} // namespace
+
+core::TypePtr Environment::processBinding(
+    core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, cfg::MinLoops bindMinLoops,
+    KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr, const core::TypePtr &methodReturnType,
+    const optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver, bool deadOnEntry) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value) ||
@@ -1037,17 +1099,17 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                 InlinedVector<const core::TypeAndOrigins *, 2> args;
 
-                args.reserve(send.args.size());
-                for (cfg::VariableUseSite &arg : send.args) {
-                    args.emplace_back(&getAndFillTypeAndOrigin(arg));
+                args.reserve(send.numArgs);
+                for (auto [var, type] : send.argSpan()) {
+                    args.emplace_back(&getAndFillTypeAndOrigin(var, type));
                 }
 
                 const core::TypeAndOrigins &recvType = getAndFillTypeAndOrigin(send.recv);
-                if (send.link) {
+                if (send.link.exists()) {
                     checkFullyDefined = false;
                 }
                 core::CallLocs locs{
-                    ctx.file, bind.loc, send.receiverLoc, send.funLoc, send.argLocs,
+                    ctx.file, bind.loc, send.receiverLoc, send.funLoc, send.argLocs(),
                 };
 
                 // This is the main place where we type check a method, so we default by assuming
@@ -1056,7 +1118,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 core::DispatchArgs dispatchArgs{send.fun,        locs,
                                                 send.numPosArgs, args,
                                                 recvType.type,   recvType,
-                                                recvType.type,   send.link.get(),
+                                                recvType.type,   send.link.data(inWhat).get(),
                                                 ownerLoc,        send.isPrivateOk,
                                                 suppressErrors,  inWhat.symbol.data(ctx)->name};
                 auto dispatched = recvType.type.dispatchCall(ctx, dispatchArgs);
@@ -1129,12 +1191,14 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
 
                     if (it->main.method.exists() && it->main.method.data(ctx)->flags.isPackagePrivate) {
                         core::ClassOrModuleRef klass = it->main.method.data(ctx)->owner;
-                        if (klass.exists()) {
-                            ENFORCE(klass.data(ctx)->package.exists(),
-                                    "should not mark method package private unless it has a package");
-                            auto curPkg = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+                        // Namer reports an error for a package-private method whose owner has no package,
+                        // but still sets the flag.
+                        if (klass.exists() && klass.data(ctx)->package.exists()) {
+                            auto &db = ctx.state.packageDB();
+                            auto curPkg = db.getPackageNameForFile(ctx.file);
                             if (curPkg.exists()) {
-                                if (klass.data(ctx)->package != curPkg) {
+                                auto &info = db.getPackageInfo(curPkg);
+                                if (!info.canAccessInternalsOf(klass.data(ctx)->package)) {
                                     if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PackagePrivateMethod)) {
                                         e.setHeader("Method `{}` on `{}` is package-private and cannot be called from "
                                                     "package `{}`",
@@ -1152,16 +1216,16 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     it = it->secondary.get();
                 }
                 shared_ptr<core::DispatchResult> retainedResult;
-                if (send.link) {
+                if (send.link.exists()) {
                     // this type should never be used, thus we put a useless type
                     tp.type = core::Types::void_();
                 } else {
                     tp.type = dispatched.returnType;
                 }
-                if (send.link || lspQueryMatch) {
+                if (send.link.exists() || lspQueryMatch) {
                     retainedResult = make_shared<core::DispatchResult>(std::move(dispatched));
                 }
-                if (send.link) {
+                if (send.link.exists()) {
                     // This should eventually become ENFORCEs but currently they are wrong
                     if (!retainedResult->main.blockReturnType) {
                         // TODO(jez) This only looks at the main component!
@@ -1198,15 +1262,16 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         fun = lit.name;
                     }
                     core::lsp::QueryResponse::pushQueryResponse(
-                        ctx, core::lsp::SendResponse(
-                                 retainedResult, send.argLocs, fun, send.fun, ctx.owner.asMethodRef(), send.isPrivateOk,
-                                 send.numPosArgs, ctx.file, bind.loc, send.receiverLoc, send.funLoc, locWithoutBlock));
+                        ctx,
+                        core::lsp::SendResponse(retainedResult, send.argLocs(), send.argTypes(), fun, send.fun,
+                                                ctx.owner.asMethodRef(), send.isPrivateOk, send.numPosArgs, ctx.file,
+                                                bind.loc, send.receiverLoc, send.funLoc, locWithoutBlock));
                 }
-                if (send.link) {
-                    send.link->result = move(retainedResult);
+                if (send.link.exists()) {
+                    send.link.data(inWhat)->result = move(retainedResult);
                 }
                 if (send.fun == core::Names::toHashDup()) {
-                    ENFORCE(send.args.size() == 1, "Desugar invariant");
+                    ENFORCE(send.numArgs == 1, "Desugar invariant");
                     tp.origins = args[0]->origins;
                 }
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
@@ -1241,9 +1306,13 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::Alias &a) {
                 core::SymbolRef symbol = a.what.dealias(ctx);
                 if (symbol.isClassOrModule()) {
-                    auto singletonClass = symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
-                    ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
-                    tp.type = singletonClass.data(ctx)->externalType();
+                    if (symbol == core::Symbols::StubModule()) {
+                        tp.type = core::Types::untyped(a.what);
+                    } else {
+                        auto singletonClass = symbol.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
+                        ENFORCE(singletonClass.exists(), "Every class should have a singleton class by now.");
+                        tp.type = singletonClass.data(ctx)->externalType();
+                    }
                     tp.origins.emplace_back(ctx.locAt(bind.loc));
                 } else if (symbol.isField(ctx) ||
                            (symbol.isStaticField(ctx) &&
@@ -1264,10 +1333,10 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             }
                         } else if (symbol.isField(ctx)) {
                             auto field = symbol.asFieldRef();
-                            tp.type = core::Types::resultTypeAsSeenFrom(
-                                ctx, field.data(ctx)->resultType, symbol.owner(ctx).asClassOrModuleRef(),
-                                ctx.owner.enclosingClass(ctx),
-                                ctx.owner.enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
+                            auto enclosingClass = ctx.owner.enclosingClass(ctx);
+                            tp.type = core::Types::resultTypeAsSeenFrom(ctx, field.data(ctx)->resultType,
+                                                                        field.data(ctx)->owner, enclosingClass,
+                                                                        enclosingClass.data(ctx)->selfTypeArgs(ctx));
                         } else {
                             tp.type = resultType;
                         }
@@ -1306,7 +1375,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::SolveConstraint &i) {
                 core::TypePtr type;
                 // TODO: this should repeat the same dance with Or and And components that dispatchCall does
-                const auto &main = i.link->result->main;
+                auto &link = i.link.data(inWhat);
+                const auto &main = link->result->main;
                 if (main.constr) {
                     if (!main.constr->solve(ctx)) {
                         if (auto e = ctx.beginError(bind.loc, core::errors::Infer::GenericMethodConstraintUnsolved)) {
@@ -1322,12 +1392,12 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                     // Write back into the DispatchResult so that retained results affect LSP queries.
                     // (Note that the SendResponse has already been pushed, with a shared_ptr to the
                     // DispatchResult we're mutating here)
-                    i.link->result->returnType = type;
+                    link->result->returnType = type;
                 } else {
-                    type = i.link->result->returnType;
+                    type = link->result->returnType;
                 }
                 auto loc = ctx.locAt(bind.loc);
-                type = flatmapHack(ctx, main.receiver, type, i.link->fun, loc, inWhat.symbol.data(ctx)->name);
+                type = flatmapHack(ctx, main.receiver, type, link->fun, loc, inWhat.symbol.data(ctx)->name);
                 tp.type = std::move(type);
                 tp.origins.emplace_back(loc);
             },
@@ -1392,18 +1462,26 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadYieldParams &insn) {
-                ENFORCE(insn.link);
-                ENFORCE(insn.link->result);
-                ENFORCE(insn.link->result->main.blockPreType);
+                auto &link = insn.link.data(inWhat);
+                ENFORCE(link);
+                ENFORCE(link->result);
+                ENFORCE(link->result->main.blockPreType);
 
-                auto &procType = insn.link->result->main.blockPreType;
-                auto params = procType.getCallArguments(ctx, core::Names::call());
-                auto it = insn.link->result->secondary.get();
+                // Drop nil before asking for call arguments. `blockPreType` keeps nilability so
+                // optional blocks type-check correctly at the call site, but once we're inside a
+                // block body the block was definitely provided. Leaving NilClass in the union makes
+                // getCallArguments glb against NilClass#call (often inherited from a polluted
+                // Object#call, e.g. via Class.new), which can produce T.noreturn and mark the block
+                // unreachable. See https://github.com/sorbet/sorbet/issues/8304
+                auto &procType = link->result->main.blockPreType;
+                auto params = core::Types::dropNil(ctx, procType).getCallArguments(ctx, core::Names::call());
+                auto it = link->result->secondary.get();
                 while (it != nullptr) {
                     auto &secondaryProcType = it->main.blockPreType;
                     if (secondaryProcType != nullptr) {
-                        auto secondaryParams = secondaryProcType.getCallArguments(ctx, core::Names::call());
-                        switch (insn.link->result->secondaryKind) {
+                        auto secondaryParams =
+                            core::Types::dropNil(ctx, secondaryProcType).getCallArguments(ctx, core::Names::call());
+                        switch (link->result->secondaryKind) {
                             case core::DispatchResult::Combinator::OR:
                                 params = core::Types::any(ctx, params, secondaryParams);
                                 break;
@@ -1430,7 +1508,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 // TODO(nelhage): If this block is a lambda, not a proc, this
                 // rule doesn't apply. We don't model the distinction accurately
                 // yet.
-                auto &blkParams = insn.link->paramFlags;
+                auto &blkParams = link->paramFlags;
                 auto tuple = core::cast_type<core::TupleType>(params);
                 if (blkParams.size() > 1 && !blkParams.front().isRepeated && tuple && tuple->elems.size() == 1 &&
                     tuple->elems.front().derivesFrom(ctx, core::Symbols::Array())) {
@@ -1536,7 +1614,11 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             core::TypeAndOrigins::explainExpected(ctx, expectedReturnType, owner.loc(ctx), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         e.addErrorSections(move(errorDetailsCollector));
-                        if (i.whatLoc != inWhat.implicitReturnLoc) {
+                        // Don't offer to wrap the `end` keyword of an implicit return, or the whole
+                        // method definition, which is what a method synthesized by a DSL (e.g.,
+                        // `attr_writer`) uses as the loc of its return value.
+                        if (i.whatLoc != inWhat.implicitReturnLoc && i.whatLoc != inWhat.loc &&
+                            i.whatLoc != inWhat.declLoc) {
                             auto replaceLoc = ctx.locAt(i.whatLoc);
                             core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, expectedReturnType,
                                                                          typeAndOrigin.type);
@@ -1545,6 +1627,16 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 } else if (!expectedReturnType.isUntyped() && !expectedReturnType.isTop() &&
                            typeAndOrigin.type.isUntyped()) {
                     auto what = core::errors::Infer::errorClassForUntyped(ctx, ctx.file, typeAndOrigin.type);
+
+                    // Computing the precise loc for reporting requires line breaks, which
+                    // in turn requires the source of the file.  In a world where we don't
+                    // always keep the source around, materializing that source can be
+                    // expensive, and the untyped error being reported here only matters
+                    // at `typed: strong`.  To avoid materializing that source, we check
+                    // whether the error would even matter in the first place.
+                    if (!ctx.state.shouldReportErrorOn(ctx.file, what)) {
+                        return;
+                    }
                     auto errLoc = ctx.locAt(bind.loc).truncateToFirstLine(ctx);
                     if (auto e = ctx.state.beginError(errLoc, what)) {
                         e.setHeader("Value returned from method `{}` is `{}`", ctx.owner.name(ctx).show(ctx),
@@ -1554,19 +1646,20 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 }
             },
             [&](cfg::BlockReturn &i) {
-                ENFORCE(i.link);
-                ENFORCE(i.link->result->main.blockReturnType != nullptr);
+                auto &link = i.link.data(inWhat);
+                ENFORCE(link);
+                ENFORCE(link->result->main.blockReturnType != nullptr);
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(i.what);
-                auto expectedType = i.link->result->main.blockReturnType;
+                auto expectedType = link->result->main.blockReturnType;
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
                     expectedType = core::Types::top();
                 }
                 bool isSubtype;
                 core::ErrorSection::Collector errorDetailsCollector;
-                if (i.link->result->main.constr) {
+                if (link->result->main.constr) {
                     isSubtype = core::Types::isSubTypeUnderConstraint(
-                        ctx, *i.link->result->main.constr, typeAndOrigin.type, expectedType,
+                        ctx, *link->result->main.constr, typeAndOrigin.type, expectedType,
                         core::UntypedMode::AlwaysCompatible, errorDetailsCollector);
                 } else {
                     isSubtype = core::Types::isSubType(ctx, typeAndOrigin.type, expectedType, errorDetailsCollector);
@@ -1576,7 +1669,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                         e.setHeader("Expected `{}` but found `{}` for block result type", expectedType.show(ctx),
                                     typeAndOrigin.type.show(ctx));
 
-                        const auto &bspec = i.link->result->main.method.data(ctx)->parameters.back();
+                        const auto &bspec = link->result->main.method.data(ctx)->parameters.back();
                         ENFORCE(bspec.flags.isBlock, "The last symbol must be the block arg");
                         e.addErrorSection(
                             core::TypeAndOrigins::explainExpected(ctx, expectedType, bspec.loc, "block result type"));
@@ -1607,14 +1700,21 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
             [&](cfg::TAbsurd &i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(i.what.variable);
 
-                if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
-                    if (typeAndOrigin.type.isUntyped()) {
-                        e.setHeader("Control flow could reach `{}` because argument was `{}`", "T.absurd", "T.untyped");
-                    } else {
-                        e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled", "T.absurd",
-                                    typeAndOrigin.type.show(ctx));
+                // Dead-entry blocks may be checked using types from before an impossible condition.
+                // In a live-entry block, however, a preceding noreturn call must not hide a
+                // non-exhaustive argument.
+                auto absurdIsUnreachable = deadOnEntry || typeAndOrigin.type.isBottom();
+                if (!absurdIsUnreachable) {
+                    if (auto e = ctx.beginError(bind.loc, core::errors::Infer::NotExhaustive)) {
+                        if (typeAndOrigin.type.isUntyped()) {
+                            e.setHeader("Control flow could reach `{}` because argument was `{}`", "T.absurd",
+                                        "T.untyped");
+                        } else {
+                            e.setHeader("Control flow could reach `{}` because the type `{}` wasn't handled",
+                                        "T.absurd", typeAndOrigin.type.show(ctx));
+                        }
+                        e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                     }
-                    e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                 }
 
                 tp.type = core::Types::bottom();
@@ -1630,12 +1730,13 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                 tp.origins.emplace_back(ctx.locAt(bind.loc));
             },
             [&](cfg::LoadSelf &l) {
-                ENFORCE(l.link);
-                auto tpo = getTypeFromRebind(ctx, l.link->result->main, l.fallback);
-                auto it = l.link->result->secondary.get();
+                auto &link = l.link.data(inWhat);
+                ENFORCE(link);
+                auto tpo = getTypeFromRebind(ctx, link->result->main, l.fallback);
+                auto it = link->result->secondary.get();
                 while (it != nullptr) {
                     auto secondaryTpo = getTypeFromRebind(ctx, it->main, l.fallback);
-                    switch (l.link->result->secondaryKind) {
+                    switch (link->result->secondaryKind) {
                         case core::DispatchResult::Combinator::OR:
                             tpo.type = core::Types::any(ctx, tpo.type, secondaryTpo.type);
                             break;
@@ -1762,7 +1863,7 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
         }
         ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
 
-        if (!noLoopChecking && loopCount != bindMinLoops) {
+        if (!noLoopChecking && (bindMinLoops.pin != cfg::MinLoops::Pin::None || loopCount != bindMinLoops.level)) {
             auto pin = pinnedTypes.find(bind.bind.variable);
             const core::TypeAndOrigins &cur =
                 (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(bind.bind.variable);
@@ -1773,8 +1874,8 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                                                    core::Types::dropLiteral(ctx, cur.type), errorDetailsCollector);
 
             {
-                switch (bindMinLoops) {
-                    case cfg::CFG::MIN_LOOP_FIELD:
+                switch (bindMinLoops.pin) {
+                    case cfg::MinLoops::Pin::Field:
                         if (!asGoodAs) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::FieldReassignmentTypeMismatch)) {
                                 e.setHeader("Expected `{}` but found `{}` for field", cur.type.show(ctx),
@@ -1794,7 +1895,17 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             tp = cur;
                         }
                         break;
-                    case cfg::CFG::MIN_LOOP_LET:
+                    case cfg::MinLoops::Pin::Let:
+                        if (pin == pinnedTypes.end()) {
+                            // No `T.let` has pinned this variable on the path to this write yet, so check it
+                            // like a write to a variable without a `T.let`.
+                            if (loopCount != bindMinLoops.level) {
+                                checkLoopTypeChange(ctx, inWhat, bind, tp, cur, asGoodAs, errorDetailsCollector,
+                                                    ownerLoc);
+                            }
+                            break;
+                        }
+
                         if (!asGoodAs) {
                             if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
                                 e.setHeader("Incompatible assignment to variable declared via `{}`: `{}` is not a "
@@ -1805,63 +1916,9 @@ Environment::processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Bind
                             tp = cur;
                         }
                         break;
-                    default: {
-                        if (!asGoodAs || (tp.type.isUntyped() && !cur.type.isUntyped())) {
-                            if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value)) {
-                                // See cfg/builder/builder_walk.cc for an explanation of why this is here.
-                                if (ident->what.data(inWhat)._name == core::Names::blockBreakAssign()) {
-                                    break;
-                                }
-
-                                if (ident->what.data(inWhat)._name == core::Names::selfRestore()) {
-                                    // this is a restoration of `self` variable.
-                                    // our current analysis isn't smart enough to see that it's safe to do this by
-                                    // construction either https://github.com/sorbet/sorbet/issues/222 or
-                                    // https://github.com/sorbet/sorbet/issues/224 should allow us to remove this
-                                    // case
-                                    break;
-                                }
-                            }
-                            if (auto e = ctx.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
-                                e.setHeader("Changing the type of a variable is not permitted in loops and blocks");
-                                e.addErrorSection(core::ErrorSection(
-                                    core::ErrorColors::format("Existing variable has type: `{}`", cur.type.show(ctx))));
-                                e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
-                                    "Attempting to change type to: `{}`\n", tp.type.show(ctx))));
-
-                                if (cur.origins.size() == 1 && cur.origins[0].exists() &&
-                                    // sometimes a variable has a given type because of a constant outside this method
-                                    ctx.locAt(inWhat.loc).contains(cur.origins[0]) &&
-                                    // don't attempt to insert a `T.let` into the method params list
-                                    (inWhat.symbol.data(ctx)->name.isAnyStaticInitName(ctx) ||
-                                     !ctx.locAt(inWhat.declLoc).contains(cur.origins[0]))) {
-                                    auto suggest =
-                                        core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
-                                    auto replacement = suggest.show(ctx, core::ShowOptions().withUseValidSyntax());
-                                    e.replaceWith(fmt::format("Initialize as `{}`", replacement), cur.origins[0],
-                                                  "T.let({}, {})", cur.origins[0].source(ctx).value(), replacement);
-                                } else {
-                                    e.addErrorSection(core::ErrorSection("Original type from:",
-                                                                         cur.origins2Explanations(ctx, ownerLoc)));
-                                }
-                                e.addErrorSections(move(errorDetailsCollector));
-
-                                if (!cur.origins.empty() && !tp.origins.empty() &&
-                                    absl::c_any_of(cur.origins,
-                                                   [&](auto loc) { return loc.source(ctx) == "rescue"; }) &&
-                                    absl::c_any_of(tp.origins, [&](auto loc) { return loc.source(ctx) == "rescue"; })) {
-                                    e.addErrorNote(
-                                        "The exception variables of two `{}` blocks conflict with each other because\n"
-                                        "    the second is inside a loop. Either use `{}` to initialize the exception\n"
-                                        "    variable before the first `{}`, or pick unique variable names.\n",
-                                        "rescue", "T.let", "rescue");
-                                }
-                            }
-
-                            tp.type = core::Types::untypedUntracked();
-                        }
+                    case cfg::MinLoops::Pin::None:
+                        checkLoopTypeChange(ctx, inWhat, bind, tp, cur, asGoodAs, errorDetailsCollector, ownerLoc);
                         break;
-                    }
                 }
             }
         }
@@ -1901,6 +1958,34 @@ void Environment::cloneFrom(const Environment &rhs) {
     this->typeTestsWithVar.cloneFrom(rhs.typeTestsWithVar);
 }
 
+namespace {
+
+core::TypeMemberRef extractAttachedClass(const core::GlobalState &gs, const core::TypePtr &type) {
+    if (auto appliedType = core::cast_type<core::AppliedType>(type)) {
+        auto attachedClass = appliedType->klass.data(gs)->findMember(gs, core::Names::Constants::AttachedClass());
+        ENFORCE(attachedClass.exists(), "Indicates we should have reported a type syntax parsing error earlier");
+        return attachedClass.asTypeMemberRef();
+    }
+
+    if (auto andType = core::cast_type<core::AndType>(type)) {
+        auto left = extractAttachedClass(gs, andType->left);
+        if (left.exists()) {
+            // We can short circuit because we know that only one half of the AndType will have a
+            // symbol with `AttachedClass`. If there were two, we would have had two whole
+            // DispatchComponent--the only time we have an `AndType` that's the receiver but a
+            // single `main.rebind`/`main.method` is when the `AndType::dispatchCall` only found a
+            // valid dispatch target on one half of the intersection type.
+            return left;
+        }
+        return extractAttachedClass(gs, andType->right);
+    }
+
+    ENFORCE(false, "Unexpected type, please add a test");
+    return core::Symbols::noTypeMember();
+}
+
+} // namespace
+
 core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const core::DispatchComponent &main,
                                                     cfg::LocalRef fallback) {
     auto rebind = main.rebind;
@@ -1910,12 +1995,9 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
         if (rebind == core::Symbols::MagicBindToSelfType()) {
             result.type = main.receiver;
         } else if (rebind == core::Symbols::MagicBindToAttachedClass()) {
-            auto appliedType = core::cast_type<core::AppliedType>(main.receiver);
-            auto attachedClass = appliedType->klass.data(ctx)->findMember(ctx, core::Names::Constants::AttachedClass());
-
-            auto lambdaParam =
-                core::cast_type<core::LambdaParam>(attachedClass.asTypeMemberRef().data(ctx)->resultType);
-
+            auto attachedClass = extractAttachedClass(ctx, main.receiver);
+            ENFORCE_NO_TIMER(attachedClass.exists(), "MagicBindToAttachedClass rebind requires an AttachedClass");
+            auto lambdaParam = core::cast_type<core::LambdaParam>(attachedClass.data(ctx)->resultType);
             result.type = lambdaParam->upperBound;
         } else {
             result.type = rebind.data(ctx)->externalType();
@@ -1929,13 +2011,13 @@ core::TypeAndOrigins Environment::getTypeFromRebind(core::Context ctx, const cor
 }
 
 const TestedKnowledge &Environment::getKnowledge(cfg::LocalRef symbol, bool shouldFail) const {
-    auto fnd = _vars.find(symbol);
-    if (fnd == _vars.end()) {
+    auto info = getRefInfo(symbol);
+    if (!info.wasFound) {
         ENFORCE(!shouldFail, "Missing knowledge?");
-        return TestedKnowledge::empty;
+    } else {
+        info.knowledge.sanityCheck();
     }
-    fnd->second.knowledge.sanityCheck();
-    return fnd->second.knowledge;
+    return info.knowledge;
 }
 
 void Environment::initializeBasicBlockArgs(const cfg::BasicBlock &bb) {
@@ -1964,5 +2046,5 @@ core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
 
 Environment::Environment(core::Loc ownerLoc) : uninitialized(nilTypesWithOriginWithLoc(ownerLoc)), ownerLoc(ownerLoc) {}
 
-TestedKnowledge TestedKnowledge::empty;
+thread_local TestedKnowledge TestedKnowledge::empty;
 } // namespace sorbet::infer

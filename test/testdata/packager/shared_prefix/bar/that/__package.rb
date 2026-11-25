@@ -3,5 +3,4 @@
 # enable-packager: true
 
 class Project::Bar::That < PackageSpec
-  export Project::Bar::That::Thing
 end

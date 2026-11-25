@@ -42,24 +42,25 @@ public:
         return send;
     }
 
-    static ExpressionPtr Send0(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc) {
+    static ExpressionPtr Send0(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc,
+                               Send::Flags flags = {}) {
         Send::ARGS_store nargs;
-        return Send(loc, std::move(recv), fun, funLoc, 0, std::move(nargs));
+        return Send(loc, std::move(recv), fun, funLoc, 0, std::move(nargs), flags);
     }
 
     static ExpressionPtr Send0Block(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun,
                                     core::LocOffsets funLoc, ExpressionPtr blk, Send::Flags flags = {}) {
         Send::ARGS_store nargs;
         if (blk != nullptr) {
-            flags.hasBlock = true;
+            flags.blockType = Send::BlockType::Present;
             nargs.emplace_back(std::move(blk));
         }
         return Send(loc, std::move(recv), fun, funLoc, 0, std::move(nargs), flags);
     }
 
     static ExpressionPtr Send1(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc,
-                               ExpressionPtr arg1) {
-        return Send(loc, std::move(recv), fun, funLoc, 1, SendArgs(std::move(arg1)));
+                               ExpressionPtr arg1, Send::Flags flags = {}) {
+        return Send(loc, std::move(recv), fun, funLoc, 1, SendArgs(std::move(arg1)), flags);
     }
 
     static ExpressionPtr Send2(core::LocOffsets loc, ExpressionPtr recv, core::NameRef fun, core::LocOffsets funLoc,
@@ -135,7 +136,10 @@ public:
         return make_expression<UnresolvedIdent>(loc, UnresolvedIdent::Kind::Instance, name);
     }
 
+    // Create a new "read" node for the given reference read node.
     static ExpressionPtr cpRef(ExpressionPtr &name) {
+        ENFORCE(isa_reference(name), "Can only copy reference-like nodes with cpRef");
+
         if (auto nm = cast_tree<UnresolvedIdent>(name)) {
             return make_expression<UnresolvedIdent>(nm->loc, nm->kind, nm->name);
         } else if (auto nm = cast_tree<ast::Local>(name)) {
@@ -143,7 +147,8 @@ public:
         } else if (auto self = cast_tree<ast::Self>(name)) {
             return make_expression<ast::Self>(self->loc);
         }
-        Exception::notImplemented();
+
+        unreachable("MK::cpRef should handle every type that passes `isa_reference()`.");
     }
 
     static ExpressionPtr Assign(core::LocOffsets loc, ExpressionPtr lhs, ExpressionPtr rhs) {
@@ -550,11 +555,14 @@ public:
         // A ZSuper call can have a block argument. Don't include it in the location.
         const uint32_t length = "super"sv.size();
         auto superKeywordLoc = core::LocOffsets{loc.beginPos(), loc.beginPos() + length};
+        if (superKeywordLoc.endPos() > loc.endPos()) {
+            superKeywordLoc = loc.copyWithZeroLength();
+        }
 
         Send::Flags flags;
         flags.isPrivateOk = true;
-        return Send(loc, Self(superKeywordLoc.copyWithZeroLength()), method, loc, 1,
-                    SendArgs(make_expression<ast::ZSuperArgs>(superKeywordLoc.copyEndWithZeroLength())), flags);
+        return Send1(loc, Self(superKeywordLoc.copyWithZeroLength()), method, superKeywordLoc,
+                     make_expression<ast::ZSuperArgs>(superKeywordLoc.copyEndWithZeroLength()), flags);
     }
 
     static ExpressionPtr Magic(core::LocOffsets loc) {
@@ -677,8 +685,8 @@ public:
                 [&](const class BlockParam &blk) { cursor = &blk.expr; },
                 [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
-                [&](const ast::Local &opt) { ENFORCE(false, "Should only be called before local_vars.cc"); },
-                [&](const ExpressionPtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+                [&](const ast::Local &opt) { unreachable("Should only be called before local_vars.cc"); },
+                [&](const ExpressionPtr &expr) { unreachable("Unexpected node type in parameter position."); });
         }
     }
 
@@ -698,8 +706,8 @@ public:
                 [&](const class BlockParam &blk) { cursor = &blk.expr; },
                 [&](const class ShadowArg &shadow) { cursor = &shadow.expr; },
                 // ENFORCES are last so that we don't pay the price of casting in the fast path.
-                [&](const UnresolvedIdent &opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
-                [&](const ExpressionPtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+                [&](const UnresolvedIdent &opt) { unreachable("Namer should have created a Local for this arg."); },
+                [&](const ExpressionPtr &expr) { unreachable("Unexpected node type in parameter position."); });
         }
     }
 };

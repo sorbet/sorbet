@@ -8,7 +8,7 @@ ClassDef{
     }]
   rhs = [
     Send{
-      flags = {}
+      flags = {bracesBlock}
       recv = Array{
         elems = [
           Literal{ value = 1 }

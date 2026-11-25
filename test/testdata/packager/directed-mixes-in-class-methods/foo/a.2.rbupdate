@@ -1,0 +1,9 @@
+# typed: true
+# assert-slow-path: true
+
+class Root::Foo::A
+  include Root::Mixin
+  module Inner; end
+end
+
+Root::Foo::A.hello

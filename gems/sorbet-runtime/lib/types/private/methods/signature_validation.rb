@@ -67,7 +67,9 @@ module T::Private::Methods::SignatureValidation
     super_method = signature.method.super_method
 
     if super_method && super_method.owner != signature.method.owner
-      Methods.maybe_run_sig_block_for_method(super_method)
+      # No need to run the sig block for super_method explicitly:
+      # signature_for_method forces it internally (via signature_for_key ->
+      # maybe_run_sig_block_for_key on the identical registry key).
       super_signature = Methods.signature_for_method(super_method)
 
       # If the super_method has any kwargs we can't build a
@@ -92,15 +94,15 @@ module T::Private::Methods::SignatureValidation
         validate_override_visibility(signature, super_signature)
       end
     else
-      validate_non_override_mode(signature)
+      validate_non_override_mode(signature.mode, signature.method_name, signature.method)
     end
   end
 
-  private_class_method def self.pretty_mode(signature)
-    if signature.mode == Modes.overridable_override
-      '.overridable.override'
+  private_class_method def self.pretty_mode(mode)
+    if mode == Modes.overridable_override
+      'overridable.override'
     else
-      ".#{signature.mode}"
+      mode
     end
   end
 
@@ -126,22 +128,22 @@ module T::Private::Methods::SignatureValidation
         # Peaceful
       elsif super_signature.mode == Modes.abstract
         raise "You must use `.override` when overriding the abstract method `#{signature.method_name}`.\n" \
-              "  Abstract definition: #{method_loc_str(super_signature.method)}\n" \
-              "  Implementation definition: #{method_loc_str(signature.method)}\n"
+              "  Abstract definition: #{super_signature.method_desc}\n" \
+              "  Implementation definition: #{signature.method_desc}\n"
       elsif super_signature.mode != Modes.untyped
         raise "You must use `.override` when overriding the existing method `#{signature.method_name}`.\n" \
-              "  Parent definition: #{method_loc_str(super_signature.method)}\n" \
-              "  Child definition:  #{method_loc_str(signature.method)}\n"
+              "  Parent definition: #{super_signature.method_desc}\n" \
+              "  Child definition:  #{signature.method_desc}\n"
       end
     else
       raise "Unexpected mode: #{signature.mode}. Please report this bug at https://github.com/sorbet/sorbet/issues"
     end
   end
 
-  def self.validate_non_override_mode(signature)
-    case signature.mode
+  def self.validate_non_override_mode(mode, method_name, method, source_loc=method.source_location)
+    case mode
     when Modes.override
-      if signature.method_name == :each && signature.method.owner < Enumerable
+      if method_name == :each && method.owner < Enumerable
         # Enumerable#each is the only method in Sorbet's RBI payload that defines an abstract method.
         # Enumerable#each does not actually exist at runtime, but it is required to be implemented by
         # any class which includes Enumerable. We want to declare Enumerable#each as abstract so that
@@ -151,25 +153,25 @@ module T::Private::Methods::SignatureValidation
         # This is a one-off hack, and we should think carefully before adding more methods here.
         nil
       else
-        raise "You marked `#{signature.method_name}` as #{pretty_mode(signature)}, but that method doesn't already exist in this class/module to be overridden.\n" \
+        raise "You marked `#{method_name}` as #{pretty_mode(mode)}, but that method doesn't already exist in this class/module to be overridden.\n" \
           "  Either check for typos and for missing includes or super classes to make the parent method shows up\n" \
-          "  ... or remove #{pretty_mode(signature)} here: #{method_loc_str(signature.method)}\n"
+          "  ... or remove #{pretty_mode(mode)} here: #{T::Private::Methods::Signature.method_desc(method, method_name, source_loc)}\n"
       end
     when Modes.standard, *Modes::NON_OVERRIDE_MODES
       # Peaceful
       nil
     else
-      raise "Unexpected mode: #{signature.mode}. Please report this bug at https://github.com/sorbet/sorbet/issues"
+      raise "Unexpected mode: #{mode}. Please report this bug at https://github.com/sorbet/sorbet/issues"
     end
 
     # Given a singleton class, we can check if it belongs to a
     # module by looking at its superclass; given `module M`,
     # `M.singleton_class.superclass == Module`, which is not true
     # for any class.
-    owner = signature.method.owner
-    if (signature.mode == Modes.abstract || Modes::OVERRIDABLE_MODES.include?(signature.mode)) &&
-        owner.singleton_class? && owner.superclass == Module
-      raise "Defining an overridable class method (via #{pretty_mode(signature)}) " \
+    owner = method.owner
+    if (mode == Modes.abstract || Modes::OVERRIDABLE_MODES.include?(mode)) &&
+        owner.singleton_class? && Class === owner && owner.superclass == Module
+      raise "Defining an overridable class method (via #{pretty_mode(mode)}) " \
             "on a module is not allowed. Class methods on " \
             "modules do not get inherited and thus cannot be overridden."
     end
@@ -182,13 +184,13 @@ module T::Private::Methods::SignatureValidation
     method_name = signature.method_name
     mode_verb = super_signature.mode == Modes.abstract ? 'implements' : 'overrides'
 
-    if !signature.has_rest && signature.arg_count < super_signature.arg_count
+    if signature.rest_type.nil? && signature.arg_count < super_signature.arg_count
       raise "Your definition of `#{method_name}` must accept at least #{super_signature.arg_count} " \
             "positional arguments to be compatible with the method it #{mode_verb}: " \
             "#{base_override_loc_str(signature, super_signature)}"
     end
 
-    if !signature.has_rest && super_signature.has_rest
+    if signature.rest_type.nil? && !super_signature.rest_type.nil?
       raise "Your definition of `#{method_name}` must have `*#{super_signature.rest_name}` " \
             "to be compatible with the method it #{mode_verb}: " \
             "#{base_override_loc_str(signature, super_signature)}"
@@ -200,7 +202,10 @@ module T::Private::Methods::SignatureValidation
             "#{base_override_loc_str(signature, super_signature)}"
     end
 
-    if !signature.has_keyrest
+    # The kwarg_types.empty? guard is an exact implication (an empty super
+    # kwarg set can never yield missing kwargs) that skips two fresh
+    # `.keys` arrays plus the Array#- for the common kwarg-free method.
+    if signature.keyrest_type.nil? && !super_signature.kwarg_types.empty?
       # O(nm), but n and m are tiny here
       missing_kwargs = super_signature.kwarg_names - signature.kwarg_names
       if !missing_kwargs.empty?
@@ -210,44 +215,74 @@ module T::Private::Methods::SignatureValidation
       end
     end
 
-    if !signature.has_keyrest && super_signature.has_keyrest
+    if signature.keyrest_type.nil? && !super_signature.keyrest_type.nil?
       raise "Your definition of `#{method_name}` must have `**#{super_signature.keyrest_name}` " \
             "to be compatible with the method it #{mode_verb}: " \
             "#{base_override_loc_str(signature, super_signature)}"
     end
 
-    # O(nm), but n and m are tiny here
-    extra_req_kwargs = signature.req_kwarg_names - super_signature.req_kwarg_names
-    if !extra_req_kwargs.empty?
-      raise "Your definition of `#{method_name}` has extra required keyword arg(s) " \
-            "#{extra_req_kwargs} relative to the method it #{mode_verb}, making it incompatible: " \
-            "#{base_override_loc_str(signature, super_signature)}"
+    # Guard on the minuend: an empty req_kwarg_names can never yield extras.
+    if !signature.req_kwarg_names.empty?
+      # O(nm), but n and m are tiny here
+      extra_req_kwargs = signature.req_kwarg_names - super_signature.req_kwarg_names
+      if !extra_req_kwargs.empty?
+        raise "Your definition of `#{method_name}` has extra required keyword arg(s) " \
+              "#{extra_req_kwargs} relative to the method it #{mode_verb}, making it incompatible: " \
+              "#{base_override_loc_str(signature, super_signature)}"
+      end
     end
 
-    if super_signature.block_name && !signature.block_name
+    # block_type is set exactly when the method declares a block param, and
+    # unlike block_name, reading it doesn't rebuild `method.parameters`.
+    if !super_signature.block_type.nil? && signature.block_type.nil?
       raise "Your definition of `#{method_name}` must accept a block parameter to be compatible " \
             "with the method it #{mode_verb}: " \
             "#{base_override_loc_str(signature, super_signature)}"
     end
   end
 
+  # Evaluation order matters: check_tests? must only run for a :tests-checked
+  # sig (it side-effectfully arms the @wrapped_tests_with_validation trapdoor
+  # in RuntimeLevels).
+  private_class_method def self.check_level_active?(sig)
+    sig.check_level == :always || (sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
+  end
+
   def self.validate_override_types(signature, super_signature)
     return if signature.override_allow_incompatible == true
     return if super_signature.mode == Modes.untyped
-    return unless [signature, super_signature].all? do |sig|
-      sig.check_level == :always || (sig.check_level == :tests && T::Private::RuntimeLevels.check_tests?)
-    end
+    return unless check_level_active?(signature) && check_level_active?(super_signature)
     mode_noun = super_signature.mode == Modes.abstract ? 'implementation' : 'override'
 
     # arg types must be contravariant
-    super_signature.arg_types.zip(signature.arg_types).each_with_index do |((_super_name, super_type), (name, type)), index|
+    #
+    # An index loop avoids allocating a pair array per positional arg.
+    # Iterating to super's length is deliberate: extra override positionals
+    # go unchecked, and when the override folds the remaining base positionals
+    # into a rest param, each is checked against the rest param's type
+    # (validate_override_shape guarantees such a rest param exists here).
+    super_arg_types = super_signature.arg_types
+    arg_types = signature.arg_types
+    rest_type = signature.rest_type
+    index = 0
+    while index < super_arg_types.length
+      super_type = super_arg_types.fetch(index)[1]
+      pair = arg_types[index]
+      if pair
+        name = pair[0]
+        type = pair[1]
+      else
+        name = signature.rest_name
+        type = rest_type
+      end
       if !super_type.subtype_of?(type)
         raise "Incompatible type for arg ##{index + 1} (`#{name}`) in signature for #{mode_noun} of method " \
               "`#{signature.method_name}`:\n" \
-              "* Base: `#{super_type}` (in #{method_loc_str(super_signature.method)})\n" \
-              "* #{mode_noun.capitalize}: `#{type}` (in #{method_loc_str(signature.method)})\n" \
+              "* Base: `#{super_type}` (in #{super_signature.method_desc})\n" \
+              "* #{mode_noun.capitalize}: `#{type}` (in #{signature.method_desc})\n" \
               "(The types must be contravariant.)"
       end
+      index += 1
     end
 
     # kwarg types must be contravariant
@@ -255,24 +290,24 @@ module T::Private::Methods::SignatureValidation
       type = signature.kwarg_types[name]
       if !super_type.subtype_of?(type)
         raise "Incompatible type for arg `#{name}` in signature for #{mode_noun} of method `#{signature.method_name}`:\n" \
-              "* Base: `#{super_type}` (in #{method_loc_str(super_signature.method)})\n" \
-              "* #{mode_noun.capitalize}: `#{type}` (in #{method_loc_str(signature.method)})\n" \
+              "* Base: `#{super_type}` (in #{super_signature.method_desc})\n" \
+              "* #{mode_noun.capitalize}: `#{type}` (in #{signature.method_desc})\n" \
               "(The types must be contravariant.)"
       end
     end
 
     # return types must be covariant
-    super_signature_return_type = super_signature.return_type
+    super_signature_return_type = super_signature.effective_return_type
 
     if super_signature_return_type == T::Private::Types::Void::Private::INSTANCE
       # Treat `.void` as `T.anything` (see corresponding comment in definition_valitor for more)
       super_signature_return_type = T::Types::Anything::Private::INSTANCE
     end
 
-    if !signature.return_type.subtype_of?(super_signature_return_type)
+    if !signature.effective_return_type.subtype_of?(super_signature_return_type)
       raise "Incompatible return type in signature for #{mode_noun} of method `#{signature.method_name}`:\n" \
-            "* Base: `#{super_signature.return_type}` (in #{method_loc_str(super_signature.method)})\n" \
-            "* #{mode_noun.capitalize}: `#{signature.return_type}` (in #{method_loc_str(signature.method)})\n" \
+            "* Base: `#{super_signature.effective_return_type}` (in #{super_signature.method_desc})\n" \
+            "* #{mode_noun.capitalize}: `#{signature.effective_return_type}` (in #{signature.method_desc})\n" \
             "(The types must be covariant.)"
     end
   end
@@ -297,14 +332,14 @@ module T::Private::Methods::SignatureValidation
 
     if visibility_strength(vis) > visibility_strength(super_vis)
       raise "Incompatible visibility for #{mode_noun} of method #{method.name}\n" \
-            "* Base: #{super_vis} (in #{method_loc_str(super_method)})\n" \
-            "* #{mode_noun.capitalize}: #{vis} (in #{method_loc_str(method)})\n" \
+            "* Base: #{super_vis} (in #{super_signature.method_desc})\n" \
+            "* #{mode_noun.capitalize}: #{vis} (in #{signature.method_desc})\n" \
             "(The override must be at least as permissive as the supermethod)" \
     end
   end
 
   private_class_method def self.method_visibility(method)
-    T::Private::Methods.visibility_method_name(method.owner, method.name)
+    T::Private::ClassUtils.visibility_method_name(method.owner, method.name)
   end
 
   # Higher = more restrictive.
@@ -312,21 +347,12 @@ module T::Private::Methods::SignatureValidation
   private_constant :METHOD_VISIBILITIES
 
   private_class_method def self.visibility_strength(vis)
-    METHOD_VISIBILITIES.find_index(vis)
+    METHOD_VISIBILITIES.find_index(vis) || raise("Unexpected visibility `#{vis}`")
   end
 
   private_class_method def self.base_override_loc_str(signature, super_signature)
     mode_noun = super_signature.mode == Modes.abstract ? 'Implementation' : 'Override'
-    "\n * Base definition: in #{method_loc_str(super_signature.method)}" \
-    "\n * #{mode_noun}: in #{method_loc_str(signature.method)}"
-  end
-
-  private_class_method def self.method_loc_str(method)
-    loc = if method.source_location
-      method.source_location.join(':')
-    else
-      "<unknown location>"
-    end
-    "#{method.owner} at #{loc}"
+    "\n * Base definition: in #{super_signature.method_desc}" \
+    "\n * #{mode_noun}: in #{signature.method_desc}"
   end
 end

@@ -62,9 +62,15 @@ module T::Props
       # We don't need to check for val's included modules in
       # T::Configuration.scalar_types, because T::Configuration.scalar_types
       # are all classes.
+      #
+      # `name` rather than `to_s`: identical for real classes, but returns the
+      # cached frozen string (Ruby 3.2+) where to_s allocates per call.
+      # Anonymous classes yield nil, and `include?(nil)` is false (an
+      # anonymous class can never be a registered scalar type).
+      scalar_types = T::Configuration.scalar_types
       klass = val.class
       until klass.nil?
-        return true if T::Configuration.scalar_types.include?(klass.to_s)
+        return true if scalar_types.include?(klass.name)
         klass = klass.superclass
       end
       false

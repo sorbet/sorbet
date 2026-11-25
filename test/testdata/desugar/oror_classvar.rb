@@ -30,5 +30,6 @@ class Config
     @@suggest_t_let_method ||= ''
   # ^^^^^^^^^^^^^^^^^^^^^^ error: The class variable `@@suggest_t_let_method` must be declared using `T.let` when specifying `# typed: strict`
   # ^^^^^^^^^^^^^^^^^^^^^^ error: Use of undeclared variable `@@suggest_t_let_method`
+  # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected `Integer` but found `String` for method result type
   end
 end

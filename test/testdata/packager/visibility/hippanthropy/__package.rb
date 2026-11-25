@@ -3,6 +3,5 @@
 # enable-packager: true
 
 class Hippanthropy < PackageSpec
-  # this import will be okay because `Foo` includes `visible_to "tests"`
-  test_import Foo
+  import Foo # error: Package `Foo` includes explicit visibility modifiers and cannot be imported from `Hippanthropy`
 end

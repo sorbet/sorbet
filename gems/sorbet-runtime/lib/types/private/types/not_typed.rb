@@ -11,6 +11,11 @@ class T::Private::Types::NotTyped < T::Types::Base
   end
 
   # overrides Base
+  def build_lazy_fields
+    nil
+  end
+
+  # overrides Base
   def name
     "<NOT-TYPED>"
   end

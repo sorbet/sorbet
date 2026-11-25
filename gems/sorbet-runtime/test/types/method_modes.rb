@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 require_relative '../test_helper'
 
 class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
@@ -164,7 +165,7 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
       assert_includes(
         err.message,
         "You must use `.override` when overriding the abstract method `foo`.\n" \
-        "  Abstract definition: #{AbstractMixin} at #{__FILE__}"
+        "  Abstract definition: #{AbstractMixin}#foo at #{__FILE__}"
       )
     end
   end
@@ -184,7 +185,7 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
       assert_includes(
         err.message,
-        "You marked `foo` as .override, but that method doesn't already exist"
+        "You marked `foo` as override, but that method doesn't already exist"
       )
     end
 
@@ -202,7 +203,7 @@ class Opus::Types::Test::MethodModesTest < Critic::Unit::UnitTest
 
       assert_includes(
         err.message,
-        "You marked `foo` as .override, but that method doesn't already exist in this class/module to be overridden"
+        "You marked `foo` as override, but that method doesn't already exist in this class/module to be overridden"
       )
     end
 

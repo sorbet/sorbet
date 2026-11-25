@@ -1,0 +1,176 @@
+root/root.rb:17: `Root` cannot be generic, because packages are nested under `Root` https://srb.help/4016
+    17 |  X = type_member
+              ^^^^^^^^^^^
+    root/__package.rb:3: Package `Root` defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: `Root::A::B` is nested under `Root`
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the `type_member`, or move the packages nested under `Root` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Root` to `import Root`
+
+root/root.rb:19: `T.class_of(Root)` cannot be generic, because packages are nested under `Root` https://srb.help/4016
+    19 |  Y = type_template
+              ^^^^^^^^^^^^^
+    root/__package.rb:3: Package `Root` defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: `Root::A::B` is nested under `Root`
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the `type_template`, or move the packages nested under `Root` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Root` to `import Root`
+
+root/root.rb:3: `Root` cannot have a superclass, because packages are nested under `Root` https://srb.help/5083
+     3 |class Root < Prelude::A
+                     ^^^^^^^^^^
+    root/__package.rb:3: Package `Root` defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: `Root::A::B` is nested under `Root`
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the superclass, or move the packages nested under `Root` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Root` to `import Root`
+
+root/root.rb:15: `Root` cannot have ancestors, because packages are nested under `Root` https://srb.help/5083
+    15 |  include ClassMethods
+                  ^^^^^^^^^^^^
+    root/__package.rb:3: Package `Root` defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: `Root::A::B` is nested under `Root`
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the `include`, or move the packages nested under `Root` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Root` to `import Root`
+
+root/root.rb:12: `T.class_of(Root)` cannot have ancestors, because packages are nested under `Root` https://srb.help/5083
+    12 |  extend ClassMethods
+                 ^^^^^^^^^^^^
+    root/__package.rb:3: Package `Root` defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: `Root::A::B` is nested under `Root`
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the `extend`, or move the packages nested under `Root` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Root` to `import Root`
+
+root/a.rb:4: `T.class_of(Root::A)` cannot have ancestors, because packages are nested under `Root::A` https://srb.help/5083
+     4 |  extend T::Generic
+                 ^^^^^^^^^^
+    root/__package.rb:3: Package `Root` defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: `Root::A::B` is nested under `Root::A`
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the `extend`, or move the packages nested under `Root::A` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Root` to `import Root`
+
+root/a.rb:6: Method `type_member` does not exist on `T.class_of(T)` https://srb.help/7003
+     6 |  X = T.type_member
+                ^^^^^^^^^^^
+  Got `T.class_of(T)` originating from:
+    root/a.rb:6:
+     6 |  X = T.type_member
+              ^
+
+root/root.rbi:4: `Root` cannot be generic, because packages are nested under `Root` https://srb.help/4016
+     4 |  X = type_member
+              ^^^^^^^^^^^
+    root/__package.rb:3: Package `Root` defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: `Root::A::B` is nested under `Root`
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the `type_member`, or move the packages nested under `Root` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Root` to `import Root`
+
+root/root.rbi:5: `T.class_of(Root)` cannot be generic, because packages are nested under `Root` https://srb.help/4016
+     5 |  Y = type_template
+              ^^^^^^^^^^^^^
+    root/__package.rb:3: Package `Root` defined here
+     3 |class Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    root/a/b/__package.rb:3: `Root::A::B` is nested under `Root`
+     3 |class Root::A::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the `type_template`, or move the packages nested under `Root` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Root` to `import Root`
+
+root/test/root.rb:17: `Test::Root` cannot be generic, because packages are nested under `Test::Root` https://srb.help/4016
+    17 |  X = type_member
+              ^^^^^^^^^^^
+    root/test/__package.rb:3: Package `Test::Root` defined here
+     3 |class Test::Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/test/__package.rb:3: `Test::Root::Subpackage` is nested under `Test::Root`
+     3 |class Test::Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the `type_member`, or move the packages nested under `Test::Root` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Test::Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Test::Root` to `import Test::Root`
+
+root/test/root.rb:19: `T.class_of(Test::Root)` cannot be generic, because packages are nested under `Test::Root` https://srb.help/4016
+    19 |  Y = type_template
+              ^^^^^^^^^^^^^
+    root/test/__package.rb:3: Package `Test::Root` defined here
+     3 |class Test::Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/test/__package.rb:3: `Test::Root::Subpackage` is nested under `Test::Root`
+     3 |class Test::Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the `type_template`, or move the packages nested under `Test::Root` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Test::Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Test::Root` to `import Test::Root`
+
+root/test/root.rb:15: `Test::Root` cannot have ancestors, because packages are nested under `Test::Root` https://srb.help/5083
+    15 |  include ClassMethods
+                  ^^^^^^^^^^^^
+    root/test/__package.rb:3: Package `Test::Root` defined here
+     3 |class Test::Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/test/__package.rb:3: `Test::Root::Subpackage` is nested under `Test::Root`
+     3 |class Test::Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the `include`, or move the packages nested under `Test::Root` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Test::Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Test::Root` to `import Test::Root`
+
+root/test/root.rb:12: `T.class_of(Test::Root)` cannot have ancestors, because packages are nested under `Test::Root` https://srb.help/5083
+    12 |  extend ClassMethods
+                 ^^^^^^^^^^^^
+    root/test/__package.rb:3: Package `Test::Root` defined here
+     3 |class Test::Root < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    root/subpackage/test/__package.rb:3: `Test::Root::Subpackage` is nested under `Test::Root`
+     3 |class Test::Root::Subpackage < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Note:
+    Either remove the `extend`, or move the packages nested under `Test::Root` elsewhere.
+    Defining behavior on a namespace that other packages are nested under is discouraged, because it slows down code loading in large codebases.
+    If it's unavoidable, package `Test::Root` can opt out of this restriction with `imported_by_nested_packages!`, which requires every package nested under `Test::Root` to `import Test::Root`
+Errors: 13

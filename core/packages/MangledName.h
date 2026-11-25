@@ -29,13 +29,16 @@ public:
     // (might not exist)
     static MangledName lookupMangledName(const core::GlobalState &gs, const std::vector<std::string> &parts);
 
-    bool operator==(const MangledName &rhs) const {
-        return owner == rhs.owner;
-    }
+    // Returns the MangledName that owns the package named by the string. The result might not exist if there's no
+    // package that matches the name.
+    static MangledName parse(const core::GlobalState &gs, std::string_view pkgName);
 
-    bool operator!=(const MangledName &rhs) const {
-        return !(rhs == *this);
-    }
+    // Returns the set of MangledNames that result from parsing each string. If one or more names fail to match a
+    // package, there will only be a single name in the resulting set that doesn't exist.
+    static UnorderedSet<MangledName> parseNames(const core::GlobalState &gs, absl::Span<const std::string> pkgNames);
+
+    bool operator==(const MangledName &rhs) const noexcept = default;
+    bool operator!=(const MangledName &rhs) const noexcept = default;
 
     bool exists() const {
         return this->owner.exists();

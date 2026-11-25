@@ -509,7 +509,7 @@ ClassDef{
               localVariable = <U <blk>>
             } }]
           rhs = Send{
-            flags = {}
+            flags = {doEndBlock}
             recv = Literal{ value = 1 }
             fun = <U times>
             block = Block {

@@ -88,4 +88,16 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   else
     42
   end, <todo sym>, ::<root>::<C T>.nilable(<emptyTree>::<C Integer>))
+
+  <cast:let>(if <emptyTree>::<C ARGV>.empty?()
+    1
+  else
+    2
+  end, <todo sym>, <emptyTree>::<C Integer>)
+
+  <cast:let>(if <emptyTree>::<C ARGV>.empty?()
+    <emptyTree>
+  else
+    <emptyTree>
+  end, <todo sym>, <emptyTree>::<C NilClass>)
 end

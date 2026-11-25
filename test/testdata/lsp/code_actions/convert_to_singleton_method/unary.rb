@@ -15,7 +15,8 @@ class A
     unary # error: Not enough arguments provided
     unary(0)
     unary(0) {}
-    unary(0) do
+    #        ^^ error: does not take a block
+    unary(0) do # error: does not take a block
     end
   end
 
@@ -28,7 +29,7 @@ A.new.unary(0)
 A.new.unary(
   0
 )
-A.new.unary(0) do
+A.new.unary(0) do # error: does not take a block
 end
 
 (T.unsafe(A.new)).unary(0)
@@ -36,3 +37,50 @@ end
 (A.new + A.new).unary(0)
 
 (A.new ; A.new).unary(0)
+
+(A.new
+ A.new).unary(0)
+
+(A.new.tap { 1; 2 } rescue A.new).unary(0)
+
+(A.new rescue A.new).unary(0)
+
+begin (A.new; A.new) end.unary(0)
+
+((A.new; A.new); A.new).unary(0)
+
+((A.new rescue A.new)).unary(0)
+
+( A.new rescue A.new ).unary(0)
+
+(
+  A.new rescue A.new
+).unary(0)
+
+((A.new).itself rescue A.new).unary(0)
+
+(A.new.tap { |a| a.unary(0) } rescue A.new).unary(1)
+
+(A.new.tap { <<~EOS } rescue A.new).unary(0)
+  heredoc
+EOS
+
+begin (A.new rescue A.new) end.unary(0)
+
+begin; A.new; end.unary(0)
+
+( # comment
+  A.new rescue A.new).unary(0)
+
+( # (
+  A.new rescue A.new).unary(0)
+
+(
+=begin
+=end (
+  A.new rescue A.new).unary(0)
+
+begin # comment
+  (A.new rescue A.new) end.unary(0)
+
+"#"; (A.new rescue A.new).unary(0)

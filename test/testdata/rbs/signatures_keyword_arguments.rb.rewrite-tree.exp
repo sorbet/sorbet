@@ -1,0 +1,47 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module <emptyTree>::<C RbsKeywordArgumentSignatures><<C <todo sym>>> < ()
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:mod, ::<root>::<C T>::<C Module>.<syntheticSquareBrackets>(::<root>::<C T>.anything())).void()
+    end
+
+    def self.take<<todo method>>(mod, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:mod, ::<root>::<C T>::<C Module>.<syntheticSquareBrackets>(::<root>::<C T>.anything())).void()
+    end
+
+    def self.take_kw<<todo method>>(mod:, &<blk>)
+      <emptyTree>
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:name, <emptyTree>::<C String>).void()
+    end
+
+    def from_positional<<todo method>>(name, &<blk>)
+      <emptyTree>::<C T>.reveal_type(name)
+    end
+
+    ::T::Sig::WithoutRuntime.sig() do ||
+      <self>.params(:name, <emptyTree>::<C String>).void()
+    end
+
+    def from_keyword<<todo method>>(name, &<blk>)
+      <emptyTree>::<C T>.reveal_type(name)
+    end
+
+    <runtime method definition of self.take>
+
+    <runtime method definition of self.take_kw>
+
+    <self>.take(<emptyTree>::<C Module>.new() do ||
+        <runtime method definition of from_positional>
+      end)
+
+    <self>.take_kw(:mod, <emptyTree>::<C Module>.new() do ||
+        <runtime method definition of from_keyword>
+      end)
+  end
+end

@@ -47,10 +47,11 @@ public:
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
     std::string_view parameterName(const GlobalState &gs) const;
-    ParamInfo(const ParamInfo &) = delete;
-    ParamInfo() = default;
+    ParamInfo() noexcept = default;
     ParamInfo(ParamInfo &&) noexcept = default;
     ParamInfo &operator=(ParamInfo &&) noexcept = default;
+    ParamInfo(const ParamInfo &) = delete;
+    ParamInfo &operator=(const ParamInfo &) = delete;
     ParamInfo deepCopy() const;
 };
 CheckSize(ParamInfo, 32, 8);
@@ -438,7 +439,7 @@ template <> inline ClassType cast_type_nonnull<ClassType>(const TypePtr &what) {
  * this variable has been bound by "something" but we don't know exactly what (see the SelfTypeParam
  * docs below).
  */
-TYPE(LambdaParam) final : public Refcounted {
+TYPE(LambdaParam) final : public Refcountable {
 public:
     TypeMemberRef definition;
 
@@ -677,7 +678,7 @@ template <> inline NamedLiteralType cast_type_nonnull<NamedLiteralType>(const Ty
     }
 }
 
-TYPE(IntegerLiteralType) final : public Refcounted {
+TYPE(IntegerLiteralType) final : public Refcountable {
 public:
     const int64_t value;
 
@@ -711,7 +712,7 @@ template <> inline TypePtr make_type<IntegerLiteralType, long long &>(long long 
     return make_type<IntegerLiteralType>(static_cast<int64_t>(val));
 }
 
-TYPE(FloatLiteralType) final : public Refcounted {
+TYPE(FloatLiteralType) final : public Refcountable {
 public:
     const double value;
 
@@ -745,7 +746,7 @@ template <> inline TypePtr make_type<FloatLiteralType, float &&>(float &&val) {
  * TypeVars are the used for the type parameters of generic methods, e.g. T.type_parameter(:U)
  * Note: These are mutated post-construction and cannot be inlined.
  */
-TYPE(TypeVar) final : public Refcounted {
+TYPE(TypeVar) final : public Refcountable {
 public:
     TypeParameterRef sym;
     TypeVar(TypeParameterRef sym);
@@ -766,7 +767,7 @@ public:
 };
 CheckSize(TypeVar, 8, 8);
 
-TYPE(OrType) final : public Refcounted {
+TYPE(OrType) final : public Refcountable {
 public:
     TypePtr left;
     TypePtr right;
@@ -813,7 +814,7 @@ private:
     friend TypePtr lubGround(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::lub(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
     friend TypePtr Types::glb(const GlobalState &gs, const TypePtr &t1, const TypePtr &t2);
-    friend TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<TypePtr, 4> &typeFilter);
+    friend TypePtr filterOrComponents(const TypePtr &originalType, absl::Span<const TypePtr> typeFilter);
     friend TypePtr Types::dropSubtypesOf(const GlobalState &gs, const TypePtr &from,
                                          absl::Span<const ClassOrModuleRef> klasses);
     friend TypePtr Types::unwrapSelfTypeParam(Context ctx, const TypePtr &t1);
@@ -824,7 +825,7 @@ private:
 };
 CheckSize(OrType, 24, 8);
 
-TYPE(AndType) final : public Refcounted {
+TYPE(AndType) final : public Refcountable {
 public:
     TypePtr left;
     TypePtr right;
@@ -873,7 +874,7 @@ private:
 };
 CheckSize(AndType, 24, 8);
 
-TYPE(ShapeType) final : public Refcounted {
+TYPE(ShapeType) final : public Refcountable {
 public:
     std::vector<TypePtr> keys; // TODO: store sorted by whatever
     std::vector<TypePtr> values;
@@ -897,10 +898,10 @@ public:
     bool derivesFrom(const GlobalState &gs, core::ClassOrModuleRef klass) const;
 
     ZippedPairSpan<TypePtr, TypePtr> kviter() {
-        return ZippedPairSpan<TypePtr, TypePtr>{absl::MakeSpan(keys), absl::MakeSpan(values)};
+        return ZipSpans(absl::MakeSpan(keys), absl::MakeSpan(values));
     }
     ZippedPairSpan<const TypePtr, const TypePtr> kviter() const {
-        return ZippedPairSpan<const TypePtr, const TypePtr>{absl::MakeSpan(keys), absl::MakeSpan(values)};
+        return ZipSpans(absl::MakeSpan(keys), absl::MakeSpan(values));
     }
 
     std::optional<size_t> indexForKey(const TypePtr &t) const;
@@ -910,7 +911,7 @@ public:
 };
 CheckSize(ShapeType, 56, 8);
 
-TYPE(TupleType) final : public Refcounted {
+TYPE(TupleType) final : public Refcountable {
 private:
     TupleType() = delete;
 
@@ -941,7 +942,7 @@ public:
 };
 CheckSize(TupleType, 32, 8);
 
-TYPE(AppliedType) final : public Refcounted {
+TYPE(AppliedType) final : public Refcountable {
 public:
     ClassOrModuleRef klass;
     std::vector<TypePtr> targs;
@@ -975,7 +976,7 @@ CheckSize(AppliedType, 32, 8);
 //
 // These are used within the inferencer in places where we need to track
 // user-written types in the source code.
-TYPE(MetaType) final : public Refcounted {
+TYPE(MetaType) final : public Refcountable {
 public:
     TypePtr wrapped;
 
@@ -1038,7 +1039,7 @@ struct CallLocs final {
     LocOffsets call;
     LocOffsets receiver;
     LocOffsets fun;
-    InlinedVector<LocOffsets, 2> &args;
+    absl::Span<const LocOffsets> args;
 };
 
 struct DispatchArgs {
@@ -1158,13 +1159,13 @@ struct DispatchResult {
     DispatchResult(TypePtr returnType, TypePtr receiverType, core::MethodRef method)
         : returnType(returnType),
           main(DispatchComponent{
-              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, {}, {}, nullptr}){};
+              std::move(receiverType), method, {}, std::move(returnType), nullptr, nullptr, {}, {}, nullptr}) {};
     DispatchResult(TypePtr returnType, DispatchComponent comp)
-        : returnType(std::move(returnType)), main(std::move(comp)){};
+        : returnType(std::move(returnType)), main(std::move(comp)) {};
     DispatchResult(TypePtr returnType, DispatchComponent comp, std::unique_ptr<DispatchResult> secondary,
                    Combinator secondaryKind)
         : returnType(std::move(returnType)), main(std::move(comp)), secondary(std::move(secondary)),
-          secondaryKind(secondaryKind){};
+          secondaryKind(secondaryKind) {};
 
     // Combine two dispatch results, preferring the left as the `main`.
     static DispatchResult merge(const GlobalState &gs, Combinator kind, DispatchResult &&left, DispatchResult &&right);
@@ -1187,7 +1188,7 @@ template <> inline BlamedUntyped cast_type_nonnull<BlamedUntyped>(const TypePtr 
     return BlamedUntyped(core::SymbolRef::fromRaw(what.inlinedValue()));
 }
 
-TYPE(UnresolvedClassType) final : public Refcounted, public ClassType {
+TYPE(UnresolvedClassType) final : public Refcountable, public ClassType {
 public:
     const core::SymbolRef scope;
     const std::vector<core::NameRef> names;
@@ -1203,7 +1204,7 @@ public:
     uint32_t hash(const GlobalState &gs) const;
 };
 
-TYPE(UnresolvedAppliedType) final : public Refcounted, public ClassType {
+TYPE(UnresolvedAppliedType) final : public Refcountable, public ClassType {
 public:
     const core::ClassOrModuleRef klass;
     const std::vector<TypePtr> targs;

@@ -11,17 +11,18 @@ class TypeConstraint;
 class SendResponse final {
 public:
     SendResponse(std::shared_ptr<core::DispatchResult> dispatchResult, absl::Span<const core::LocOffsets> argLocOffsets,
-                 core::NameRef callerSideName, core::NameRef originalName, core::MethodRef enclosingMethod,
-                 bool isPrivateOk, uint16_t numPosArgs, core::FileRef file, core::LocOffsets termLocOffsets,
-                 core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets,
+                 absl::Span<const core::TypePtr> argTypes, core::NameRef callerSideName, core::NameRef originalName,
+                 core::MethodRef enclosingMethod, bool isPrivateOk, uint16_t numPosArgs, core::FileRef file,
+                 core::LocOffsets termLocOffsets, core::LocOffsets receiverLocOffsets, core::LocOffsets funLocOffsets,
                  core::LocOffsets locOffsetsWithoutBlock)
         : dispatchResult(std::move(dispatchResult)), argLocOffsets(argLocOffsets.begin(), argLocOffsets.end()),
-          callerSideName(callerSideName), originalName(originalName), enclosingMethod(enclosingMethod),
-          isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), file(file), termLocOffsets(termLocOffsets),
-          receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets),
-          locOffsetsWithoutBlock(locOffsetsWithoutBlock){};
+          argTypes(argTypes.begin(), argTypes.end()), callerSideName(callerSideName), originalName(originalName),
+          enclosingMethod(enclosingMethod), isPrivateOk(isPrivateOk), numPosArgs(numPosArgs), file(file),
+          termLocOffsets(termLocOffsets), receiverLocOffsets(receiverLocOffsets), funLocOffsets(funLocOffsets),
+          locOffsetsWithoutBlock(locOffsetsWithoutBlock) {};
     const std::shared_ptr<core::DispatchResult> dispatchResult;
     const InlinedVector<core::LocOffsets, 2> argLocOffsets;
+    const InlinedVector<core::TypePtr, 2> argTypes;
     // The actual name we wind up invoking; in the case of `<Magic>` methods
     // like `<call-with-splat>`, this is the name that would be invoked.
     const core::NameRef callerSideName;
@@ -52,7 +53,7 @@ public:
 
     const std::optional<core::Loc> getMethodNameLoc(const core::GlobalState &gs) const;
 };
-CheckSize(SendResponse, 96, 8);
+CheckSize(SendResponse, 120, 8);
 
 class IdentResponse final {
 public:
@@ -72,7 +73,7 @@ CheckSize(IdentResponse, 72, 8);
 
 class LiteralResponse final {
 public:
-    LiteralResponse(core::Loc termLoc, core::TypeAndOrigins retType) : termLoc(termLoc), retType(std::move(retType)){};
+    LiteralResponse(core::Loc termLoc, core::TypeAndOrigins retType) : termLoc(termLoc), retType(std::move(retType)) {};
     const core::Loc termLoc;
     const core::TypeAndOrigins retType;
 };
@@ -95,7 +96,7 @@ public:
     using Scopes = InlinedVector<core::SymbolRef, 1>;
     ConstantResponse(core::SymbolRef symbolBeforeDealias, core::Loc termLoc, Scopes scopes, core::NameRef name,
                      core::TypeAndOrigins retType, core::MethodRef enclosingMethod)
-        : symbolBeforeDealias(symbolBeforeDealias), termLoc(termLoc), scopes(scopes), name(name),
+        : symbolBeforeDealias(symbolBeforeDealias), termLoc(termLoc), scopes(std::move(scopes)), name(name),
           enclosingMethod(enclosingMethod), retType(std::move(retType)) {}
     const core::SymbolRef symbolBeforeDealias;
     const core::Loc termLoc;
@@ -109,7 +110,7 @@ CheckSize(ConstantResponse, 80, 8);
 class FieldResponse final {
 public:
     FieldResponse(core::FieldRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
-        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
+        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)) {};
     const core::FieldRef symbol;
     const core::Loc termLoc;
     const core::NameRef name;
@@ -119,25 +120,48 @@ CheckSize(FieldResponse, 56, 8);
 
 class MethodDefResponse final {
 public:
-    MethodDefResponse(core::MethodRef symbol, core::Loc termLoc, core::NameRef name, core::TypeAndOrigins retType)
-        : symbol(symbol), termLoc(termLoc), name(name), retType(std::move(retType)){};
+    MethodDefResponse(core::MethodRef symbol, core::FileRef file, core::LocOffsets termLocOffsets,
+                      core::LocOffsets declLocOffsets, core::NameRef name, bool isAttrBestEffortUIOnly,
+                      core::TypeAndOrigins retType)
+        : symbol(symbol), file(file), termLocOffsets(termLocOffsets), declLocOffsets(declLocOffsets), name(name),
+          isAttrBestEffortUIOnly(isAttrBestEffortUIOnly), retType(std::move(retType)) {};
     const core::MethodRef symbol;
-    const core::Loc termLoc;
+    const core::FileRef file;
+    const core::LocOffsets termLocOffsets;
+    const core::LocOffsets declLocOffsets;
     const core::NameRef name;
+    const bool isAttrBestEffortUIOnly;
     const core::TypeAndOrigins retType;
+
+    core::Loc termLoc() const {
+        return core::Loc(file, termLocOffsets);
+    }
+    core::Loc declLoc() const {
+        return core::Loc(file, declLocOffsets);
+    }
 };
-CheckSize(MethodDefResponse, 56, 8);
+CheckSize(MethodDefResponse, 64, 8);
+
+class ClassDefResponse final {
+public:
+    ClassDefResponse(core::ClassOrModuleRef symbol, core::Loc termLoc, core::Loc declLoc)
+        : symbol(symbol), termLoc(termLoc), declLoc(declLoc) {};
+    const core::ClassOrModuleRef symbol;
+    const core::Loc termLoc;
+    const core::Loc declLoc;
+};
+CheckSize(ClassDefResponse, 28, 4);
 
 class EditResponse final {
 public:
-    EditResponse(core::Loc loc, std::string replacement) : loc(loc), replacement(std::move(replacement)){};
+    EditResponse(core::Loc loc, std::string replacement) : loc(loc), replacement(std::move(replacement)) {};
     const core::Loc loc;
     const std::string replacement;
 };
 CheckSize(EditResponse, 40, 8);
 
 using QueryResponseVariant = std::variant<SendResponse, IdentResponse, LiteralResponse, ConstantResponse, FieldResponse,
-                                          MethodDefResponse, EditResponse, KeywordArgResponse>;
+                                          MethodDefResponse, ClassDefResponse, EditResponse, KeywordArgResponse>;
 
 /**
  * Represents a response to a LSP query. Wraps a variant that contains one of several response types.
@@ -190,9 +214,14 @@ public:
     const FieldResponse *isField() const;
 
     /**
-     * Returns nullptr unless this is a Definition.
+     * Returns nullptr unless this is a MethodDef.
      */
     const MethodDefResponse *isMethodDef() const;
+
+    /**
+     * Returns nullptr unless this is a ClassDef.
+     */
+    const ClassDefResponse *isClassDef() const;
 
     /**
      * Returns nullptr unless this is an Edit.

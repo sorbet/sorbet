@@ -72,6 +72,11 @@ template <typename KeyT, typename ValueT> struct ZippedPairSpan {
     }
 };
 
+template <typename KeyT, typename ValueT>
+ZippedPairSpan<KeyT, ValueT> ZipSpans(absl::Span<KeyT> keys, absl::Span<ValueT> values) {
+    return ZippedPairSpan<KeyT, ValueT>{keys, values};
+}
+
 } // namespace sorbet::core
 
 #endif // SORBET_ZIPPED_PAIR_H

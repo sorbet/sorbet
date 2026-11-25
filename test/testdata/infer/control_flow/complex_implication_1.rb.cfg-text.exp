@@ -40,8 +40,11 @@ bb0[firstDead=-1]():
 # - bb6
 # - bb7
 # - bb8
-# - bb24
-bb1[firstDead=-1]():
+# - bb20
+# - bb21
+# - bb22
+bb1[firstDead=-1](<returnMethodTemp>$2):
+    <finalReturn> = return <returnMethodTemp>$2
     <unconditional> -> bb1
 
 # backedges
@@ -135,28 +138,23 @@ bb19[firstDead=-1](is_successful: T::Boolean):
 # - bb13
 # - bb15
 # - bb16
-bb20[firstDead=-1]():
+bb20[firstDead=2]():
     <returnMethodTemp>$2: NilClass = nil
-    <unconditional> -> bb24
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
+    <unconditional> -> bb1
 
 # backedges
 # - bb19
-bb21[firstDead=-1]():
+bb21[firstDead=2]():
     <returnMethodTemp>$2: Integer(1) = 1
-    <unconditional> -> bb24
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)
+    <unconditional> -> bb1
 
 # backedges
 # - bb19
-bb22[firstDead=-1]():
+bb22[firstDead=2]():
     <returnMethodTemp>$2: NilClass = nil
-    <unconditional> -> bb24
-
-# backedges
-# - bb20
-# - bb21
-# - bb22
-bb24[firstDead=1](<returnMethodTemp>$2: T.nilable(Integer)):
-    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)
+    <finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass
     <unconditional> -> bb1
 
 }

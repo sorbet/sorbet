@@ -36,6 +36,8 @@ protected:
     UnorderedMap<std::string, std::shared_ptr<core::File>> sourceFileContents;
     // Currently active diagnostics, specifically using map to enforce sort order on filename.
     std::map<std::string, std::vector<std::unique_ptr<Diagnostic>>> diagnostics;
+    // Files known to have stale diagnostics present.
+    std::set<std::string> staleFiles;
     // Emulated file system.
     std::shared_ptr<sorbet::test::MockFileSystem> fs;
 
@@ -100,6 +102,9 @@ protected:
     void sendAsync(const LSPMessage &message);
 
     std::unique_ptr<LSPMessage> readAsync();
+
+    // Assert that all of the following files are marked as having stale diagnostics.
+    void assertStale(absl::Span<const std::string> files) const;
 
     void assertErrorDiagnostics(std::vector<std::unique_ptr<LSPMessage>> messages,
                                 std::vector<ExpectedDiagnostic> expected);

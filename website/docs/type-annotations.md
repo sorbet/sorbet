@@ -44,9 +44,11 @@ Sorbet does _very_ minimal inference for types of constants. These are the cases
 
 - Array literals are inferred to have type `T::Array[...]` where `...` is a [union type](union-types.md) of all the types of elements in the array. If the array literal is also frozen with the `.freeze` method, the inferred type will be a [tuple type](tuples.md) instead. This array vs tuple decision is not recursive, because `.freeze` is not recursive. To have Sorbet infer array of tuples types, call `.freeze` on each array nested inside the top-level array.
 
-- Constants initialized with a call to `SomeClass.new` will have their type inferred to `SomeClass`. Importantly, this assumption happens **regardless** of whether the `new` method actually returns an instance of `SomeClass`, which might not be the case if the `new` method has been overridden.
+- Constants initialized with a call to `SomeClass.new` (or `SomeClass.new.freeze`) will have their type inferred to `SomeClass`. Importantly, this assumption happens **regardless** of whether the `new` or `freeze` methods actually return an instance of `SomeClass`, which might not be the case if either method has been overridden.
 
   In these cases, Sorbet reports an error stating that it requires an explicit type annotation to correct the faulty assumption. This only applies at the top-level (e.g., not inside arrays).
+
+  Within a class body, `X = new` and `X = self.new` also infer the enclosing class as the type of `X`. Both forms support `.freeze` as well.
 
 In all other cases, Sorbet does not infer the types of constants, and will assume a type of `T.untyped`. In [`# typed: strict`](static.md) files, Sorbet reports an error requiring that a type be specified, so that Sorbet does not assume `T.untyped`.
 

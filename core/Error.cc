@@ -21,6 +21,7 @@ using namespace std;
 namespace {
 
 constexpr auto ERROR_COLOR = rang::fg::red;
+constexpr auto SUCCESS_COLOR = rang::fg::green;
 constexpr auto LOW_NOISE_COLOR = rang::fgB::black;
 constexpr auto DETAIL_COLOR = rang::fg::yellow;
 constexpr auto RESET_COLOR = rang::fg::reset;
@@ -87,7 +88,7 @@ string ErrorLine::toString(const GlobalState &gs, bool color) const {
     }
 
     if (loc.exists()) {
-        auto fileLength = loc.file().data(gs).source().size();
+        auto fileLength = loc.file().data(gs).sourceSize();
         if (loc.beginPos() > fileLength || loc.endPos() > fileLength) {
             fatalLogger->error(R"(msg="Bad ErrorLine::toString loc" path="{}" loc="{}" formattedMessage={}")",
                                absl::CEscape(loc.file().data(gs).path()), loc.showRaw(gs), formattedMessage);
@@ -116,7 +117,8 @@ string ErrorSection::toString(const GlobalState &gs) const {
         } else {
             formattedHeader = this->header;
         }
-        buf << indent << DETAIL_COLOR << restoreColors(formattedHeader, DETAIL_COLOR) << RESET_COLOR;
+        auto color = gs.autocorrect ? SUCCESS_COLOR : DETAIL_COLOR;
+        buf << indent << color << restoreColors(formattedHeader, color) << RESET_COLOR;
     } else {
         skipEOL = true;
     }
@@ -156,11 +158,34 @@ optional<ErrorSection> ErrorSection::Collector::toErrorSection() const {
 
 string Error::toString(const GlobalState &gs) const {
     stringstream buf;
-    buf << RESET_STYLE << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
-        << restoreColors(header, ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR << " " << gs.errorUrlBase << what.code
-        << RESET_COLOR;
+    buf << RESET_STYLE;
+
+    if (gs.packageDB().enabled() && gs.packageDB().packageAttributedErrors()) {
+        auto pkgName = "<none>"s;
+        if (loc.file().exists() && !loc.file().isPackage(gs)) {
+            // If there are errors in `__package.rb` files themselves, it's not clear whether we
+            // have a fully-functional package graph or whether we've somehow recovered from an
+            // error, giving a false appearance that we do. Let's be defensive, and say that errors
+            // in __package.rb files equate to "unpackaged" (`<none>`) errors.
+            auto pkg = gs.packageDB().getPackageNameForFile(loc.file());
+            if (pkg.exists()) {
+                pkgName = pkg.owner.show(gs);
+            }
+        }
+
+        buf << "[" << pkgName << "] ";
+    }
+
+    // Sorbet was called with -a, and this error has autocorrects for it. In that case, let's not render the error
+    // header in red, so the user can focus on the errors that don't have an autocorrect associated with them.
+    // TODO(neil): We might also want to reorder how the error and autocorrect is presented to make it even more
+    // obvious. For example, showing the autocorrect at the top level and nesting the error underneath.
+    auto autocorrectApplied = gs.autocorrect && !autocorrects.empty();
+    buf << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
+        << restoreColors(header, autocorrectApplied ? RESET_COLOR : ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR
+        << " " << gs.errorUrlBase << what.code << RESET_COLOR;
     if (loc.exists()) {
-        auto fileLength = loc.file().data(gs).source().size();
+        auto fileLength = loc.file().data(gs).sourceSize();
         if (loc.beginPos() > fileLength || loc.endPos() > fileLength) {
             fatalLogger->error(R"(msg="Bad Error::toString loc" path="{}" loc="{}" header={}")",
                                absl::CEscape(loc.file().data(gs).path()), loc.showRaw(gs), header);
@@ -214,21 +239,37 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
     }
 
     vector<ErrorLine> messages;
-    for (auto &edit : autocorrect.edits) {
-        auto isInsert = edit.replacement == "";
-        uint32_t n = edit.loc.length();
-        if (gs.autocorrect) {
-            auto line = isInsert ? ErrorLine::from(edit.loc, "Deleted")
-                                 : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Inserted" : "Replaced with",
-                                                   prettyPrintEditReplacement(edit.replacement));
+    if (!autocorrect.hideEdit) {
+        for (auto &edit : autocorrect.edits) {
+            auto isDeletion = edit.replacement == "";
+            uint32_t n = edit.loc.length();
+            auto locWithoutLeadingNewLine = edit.loc;
+            auto source = locWithoutLeadingNewLine.source(gs);
+            uint32_t leadingNewLines = 0;
+            if (source.has_value()) {
+                auto sv = source.value();
+                while (leadingNewLines < sv.size() && sv[leadingNewLines] == '\n') {
+                    leadingNewLines++;
+                }
+            }
+            if (leadingNewLines > 0) {
+                locWithoutLeadingNewLine = locWithoutLeadingNewLine.adjust(gs, leadingNewLines, 0);
+            }
+            if (gs.autocorrect) {
+                auto line = isDeletion ? ErrorLine::from(locWithoutLeadingNewLine, "Deleted")
+                                       : ErrorLine::from(locWithoutLeadingNewLine, "{} `{}`",
+                                                         n == 0 ? "Inserted" : "Replaced with",
+                                                         prettyPrintEditReplacement(edit.replacement));
 
-            messages.emplace_back(std::move(line));
-        } else {
-            auto line = isInsert ? ErrorLine::from(edit.loc, "Delete")
-                                 : ErrorLine::from(edit.loc, "{} `{}`", n == 0 ? "Insert" : "Replace with",
-                                                   prettyPrintEditReplacement(edit.replacement));
+                messages.emplace_back(std::move(line));
+            } else {
+                auto line = isDeletion ? ErrorLine::from(locWithoutLeadingNewLine, "Delete")
+                                       : ErrorLine::from(locWithoutLeadingNewLine, "{} `{}`",
+                                                         n == 0 ? "Insert" : "Replace with",
+                                                         prettyPrintEditReplacement(edit.replacement));
 
-            messages.emplace_back(std::move(line));
+                messages.emplace_back(std::move(line));
+            }
         }
     }
     auto errorSection = ErrorSection{sectionTitle, std::move(messages)};

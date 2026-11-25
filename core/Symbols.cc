@@ -20,11 +20,11 @@ namespace sorbet::core {
 
 using namespace std;
 
-const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 214;
-const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 52;
+const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 211;
+const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 54;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS = 6;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 106;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 103;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -37,54 +37,6 @@ string showInternal(const GlobalState &gs, core::SymbolRef owner, core::NameRef 
     return absl::StrCat(owner.show(gs), separator, name.show(gs));
 }
 } // namespace
-
-bool SymbolRef::operator==(const SymbolRef &rhs) const {
-    return _id == rhs._id;
-}
-
-bool SymbolRef::operator!=(const SymbolRef &rhs) const {
-    return !(rhs == *this);
-}
-
-bool ClassOrModuleRef::operator==(const ClassOrModuleRef &rhs) const {
-    return rhs._id == this->_id;
-}
-
-bool ClassOrModuleRef::operator!=(const ClassOrModuleRef &rhs) const {
-    return rhs._id != this->_id;
-}
-
-bool MethodRef::operator==(const MethodRef &rhs) const {
-    return rhs._id == this->_id;
-}
-
-bool MethodRef::operator!=(const MethodRef &rhs) const {
-    return rhs._id != this->_id;
-}
-
-bool FieldRef::operator==(const FieldRef &rhs) const {
-    return rhs._id == this->_id;
-}
-
-bool FieldRef::operator!=(const FieldRef &rhs) const {
-    return rhs._id != this->_id;
-}
-
-bool TypeMemberRef::operator==(const TypeMemberRef &rhs) const {
-    return rhs._id == this->_id;
-}
-
-bool TypeMemberRef::operator!=(const TypeMemberRef &rhs) const {
-    return rhs._id != this->_id;
-}
-
-bool TypeParameterRef::operator==(const TypeParameterRef &rhs) const {
-    return rhs._id == this->_id;
-}
-
-bool TypeParameterRef::operator!=(const TypeParameterRef &rhs) const {
-    return rhs._id != this->_id;
-}
 
 vector<TypePtr> ClassOrModule::selfTypeArgs(const GlobalState &gs) const {
     vector<TypePtr> targs;
@@ -623,15 +575,7 @@ bool ClassOrModuleRef::isOnlyDefinedInFile(const GlobalState &gs, core::FileRef 
 // Documented in SymbolRef.h
 bool ClassOrModuleRef::isPackageSpecSymbol(const GlobalState &gs) const {
     auto sym = *this;
-    while (sym.exists() && sym != core::Symbols::root()) {
-        if (sym == core::Symbols::PackageSpecRegistry()) {
-            return true;
-        }
-
-        sym = sym.data(gs)->owner;
-    }
-
-    return false;
+    return sym.exists() && sym.data(gs)->packageRegistryOwner == sym;
 }
 
 bool ClassOrModuleRef::isBuiltinGenericForwarder() const {
@@ -830,7 +774,7 @@ SymbolRef ClassOrModule::findMemberTransitiveInternal(const GlobalState &gs, Nam
     return findParentMemberTransitiveInternal(gs, name, maxDepth, dealias);
 }
 
-vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(const GlobalState &gs, NameRef name,
+vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMethodFuzzyMatch(const GlobalState &gs, NameRef name,
                                                                              int betterThan) const {
     vector<ClassOrModule::FuzzySearchResult> res;
     // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
@@ -842,7 +786,7 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
 
     if (name.kind() == NameKind::UTF8) {
         Levenstein levenstein;
-        auto sym = findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
+        auto sym = findMethodFuzzyMatchUTF8(gs, name, levenstein, betterThan);
         if (sym.symbol.exists()) {
             res.emplace_back(sym);
         } else {
@@ -850,7 +794,7 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
             // singleton one
             auto singleton = lookupSingletonClass(gs);
             if (singleton.exists()) {
-                sym = singleton.data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
+                sym = singleton.data(gs)->findMethodFuzzyMatchUTF8(gs, name, levenstein, betterThan);
                 if (sym.symbol.exists()) {
                     res.emplace_back(sym);
                 }
@@ -858,30 +802,28 @@ vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findMemberFuzzyMatch(con
                 // For the error when you use a singleton method but wanted the
                 // instance one
                 auto attached = attachedClass(gs);
-                sym = attached.data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, betterThan);
+                sym = attached.data(gs)->findMethodFuzzyMatchUTF8(gs, name, levenstein, betterThan);
                 if (sym.symbol.exists()) {
                     res.emplace_back(sym);
                 }
             }
         }
-        auto shortName = name.shortName(gs);
-        if (!shortName.empty() && std::isupper(shortName.front())) {
-            vector<ClassOrModule::FuzzySearchResult> constant_matches =
-                findMemberFuzzyMatchConstant(gs, name, betterThan);
-            res.insert(res.end(), constant_matches.begin(), constant_matches.end());
-        }
-    } else if (name.kind() == NameKind::CONSTANT) {
-        res = findMemberFuzzyMatchConstant(gs, name, betterThan);
     }
     return res;
 }
 
-vector<ClassOrModule::FuzzySearchResult>
-ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name, int betterThan) const {
+vector<ClassOrModule::FuzzySearchResult> ClassOrModule::findConstantFuzzyMatch(Context ctx, NameRef name,
+                                                                               packages::MangledName filterToPackage,
+                                                                               int betterThan) const {
+    const auto &gs = ctx.state;
+    vector<ClassOrModule::FuzzySearchResult> result;
+    // Don't run under the fuzzer, as otherwise fuzzy match dominates runtime.
+    if constexpr (fuzz_mode) {
+        return result;
+    }
+
     // This function is somewhat expensive, as it will crawl all owners to determine if there's a reasonable match for
     // `name`.
-    vector<ClassOrModule::FuzzySearchResult> result;
-
     FuzzySearchResult best;
     best.symbol = Symbols::noSymbol();
     best.name = NameRef::noName();
@@ -892,6 +834,10 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
     }
 
     bool onlySuggestPackageSpecs = ref(gs).isPackageSpecSymbol(gs);
+    const packages::PackageInfo *withinPackage = nullptr;
+    if (filterToPackage.exists()) {
+        withinPackage = &gs.packageDB().getPackageInfo(filterToPackage);
+    }
     Levenstein levenstein;
     vector<ClassOrModuleRef> candidateScopes;
     vector<ClassOrModule::FuzzySearchResult> scopeBest;
@@ -929,11 +875,22 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
             scopeBest.clear();
             for (auto member : scope.data(gs)->members()) {
                 if (member.first.kind() == NameKind::CONSTANT &&
-                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists()) {
+                    member.first.dataCnst(gs)->original.kind() == NameKind::UTF8 && member.second.exists() &&
+                    member.second != core::Symbols::todo()) {
                     if (onlySuggestPackageSpecs) {
                         if (!member.second.isClassOrModule() ||
                             !member.second.asClassOrModuleRef().isPackageSpecSymbol(gs)) {
                             continue;
+                        }
+                    }
+
+                    if (withinPackage != nullptr) {
+                        auto memberPkg = member.second.enclosingClass(gs).data(gs)->package;
+                        if (memberPkg.exists() && memberPkg != filterToPackage) {
+                            auto *import = withinPackage->importsPackage(memberPkg);
+                            if (import == nullptr) {
+                                continue;
+                            }
                         }
                     }
 
@@ -978,7 +935,7 @@ ClassOrModule::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
     return result;
 }
 
-ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name,
+ClassOrModule::FuzzySearchResult ClassOrModule::findMethodFuzzyMatchUTF8(const GlobalState &gs, NameRef name,
                                                                          Levenstein &levenstein, int betterThan) const {
     FuzzySearchResult result;
     result.symbol = Symbols::noSymbol();
@@ -992,7 +949,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
 
     for (auto pair : members()) {
         auto thisName = pair.first;
-        if (thisName.kind() != NameKind::UTF8) {
+        if (thisName.kind() != NameKind::UTF8 || !pair.second.isMethod()) {
             continue;
         }
         auto utf8 = thisName.dataUtf8(gs)->utf8;
@@ -1008,7 +965,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
     for (auto it = this->mixins().rbegin(); it != this->mixins().rend(); ++it) {
         ENFORCE(it->exists());
 
-        auto subResult = it->data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, result.distance);
+        auto subResult = it->data(gs)->findMethodFuzzyMatchUTF8(gs, name, levenstein, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.kind() == NameKind::UTF8);
@@ -1016,7 +973,7 @@ ClassOrModule::FuzzySearchResult ClassOrModule::findMemberFuzzyMatchUTF8(const G
         }
     }
     if (this->superClass().exists()) {
-        auto subResult = this->superClass().data(gs)->findMemberFuzzyMatchUTF8(gs, name, levenstein, result.distance);
+        auto subResult = this->superClass().data(gs)->findMethodFuzzyMatchUTF8(gs, name, levenstein, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.kind() == NameKind::UTF8);
@@ -1266,7 +1223,7 @@ string_view TypeMemberRef::showKind(const GlobalState &gs) const {
 }
 
 string_view TypeParameterRef::showKind(const GlobalState &gs) const {
-    return "type-argument"sv;
+    return "type-parameter"sv;
 }
 
 string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showFull, bool showRaw) const {
@@ -1302,8 +1259,28 @@ string ClassOrModuleRef::toStringWithOptions(const GlobalState &gs, int tabs, bo
                        return showRaw ? name.showRaw(gs) : name.show(gs);
                    }));
 
+    auto classFlags = InlinedVector<string_view, 4>{};
     if (sym->flags.isPrivate) {
-        fmt::format_to(std::back_inserter(buf), " : private");
+        classFlags.emplace_back("private");
+    }
+    if (sym->flags.isPackagePrivate) {
+        classFlags.emplace_back("package_private");
+    }
+    if (sym->flags.isAbstract) {
+        classFlags.emplace_back("abstract");
+    }
+    if (sym->flags.isInterface) {
+        classFlags.emplace_back("interface");
+    }
+    if (sym->flags.isFinal) {
+        classFlags.emplace_back("final");
+    }
+    if (sym->flags.isSealed) {
+        classFlags.emplace_back("sealed");
+    }
+    if (!classFlags.empty()) {
+        fmt::format_to(std::back_inserter(buf), " : {}",
+                       fmt::map_join(classFlags, "|", [](const auto &flag) { return flag; }));
     }
     // root should have no locs. We used to have special handling here to hide locs on root
     // when censorForSnapshotTests was passed, but it's not needed anymore.
@@ -1433,12 +1410,19 @@ string FieldRef::toStringWithOptions(const GlobalState &gs, int tabs, bool showF
 
     string_view type = showKind(gs);
 
-    string_view access;
+    auto fieldFlags = InlinedVector<string_view, 2>{};
     if (sym->flags.isStaticField && sym->flags.isStaticFieldPrivate) {
-        access = " : private"sv;
+        fieldFlags.emplace_back("private");
+    }
+    if (sym->flags.isStaticField && sym->flags.isPackagePrivate) {
+        fieldFlags.emplace_back("package_private");
     }
 
-    fmt::format_to(std::back_inserter(buf), "{} {}{}", type, showRaw ? toStringFullName(gs) : showFullName(gs), access);
+    fmt::format_to(std::back_inserter(buf), "{} {}", type, showRaw ? toStringFullName(gs) : showFullName(gs));
+    if (!fieldFlags.empty()) {
+        fmt::format_to(std::back_inserter(buf), " : {}",
+                       fmt::map_join(fieldFlags, "|", [](const auto &flag) { return flag; }));
+    }
 
     printResultType(gs, buf, sym->resultType, tabs, showRaw);
     printLocs(gs, buf, sym->locs(), showRaw);
@@ -1723,11 +1707,11 @@ ClassOrModuleRef ClassOrModule::singletonClass(GlobalState &gs) {
     ClassOrModuleRef selfRef = this->ref(gs);
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
-    singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
+    singleton = gs.enterClassOrModuleSymbol(this->loc(), this->owner, singletonName);
     ClassOrModuleData singletonInfo = singleton.data(gs);
 
     // --------
-    // Call to enterClassSymbol might have reallocated the memory that `*this` pointed to
+    // Call to enterClassOrModuleSymbol might have reallocated the memory that `*this` pointed to
     // It's not safe to use `this` anymore.
     // --------
     const auto &self = selfRef.data(gs);
@@ -2223,7 +2207,7 @@ void ClassOrModule::sanityCheck(const GlobalState &gs) const {
     ClassOrModuleRef current = this->ref(gs);
     if (current != Symbols::root()) {
         ClassOrModuleRef current2 =
-            const_cast<GlobalState &>(gs).enterClassSymbol(this->loc(), this->owner, this->name);
+            const_cast<GlobalState &>(gs).enterClassOrModuleSymbol(this->loc(), this->owner, this->name);
         ENFORCE_NO_TIMER(current == current2);
         for (auto &e : members()) {
             ENFORCE_NO_TIMER(e.first.exists(), "{} has a member symbol without a name", name.toString(gs));
@@ -2273,6 +2257,7 @@ void Field::sanityCheck(const GlobalState &gs) const {
         ENFORCE_NO_TIMER(!flags.isStaticFieldTypeAlias);
         ENFORCE_NO_TIMER(!flags.isStaticField);
         ENFORCE_NO_TIMER(!flags.isStaticFieldPrivate);
+        ENFORCE_NO_TIMER(!flags.isPackagePrivate);
     } else {
         current2 = const_cast<GlobalState &>(gs).enterStaticFieldSymbol(this->loc(), this->owner, this->name);
     }
@@ -2334,7 +2319,7 @@ ClassOrModuleRef SymbolRef::enclosingClass(const GlobalState &gs) const {
     return result;
 }
 
-uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) const {
+uint32_t ClassOrModule::hash(const GlobalState &gs, bool shapeHash) const {
     uint32_t result = _hash(name.shortName(gs));
 
     // Bit of a hack to ensure that the isBehaviorDefining flag is not serialized.
@@ -2383,7 +2368,7 @@ uint32_t ClassOrModule::hash(const GlobalState &gs, bool skipTypeMemberNames) co
                 }
             }
 
-            if (skipTypeMemberNames && e.second.isTypeMember()) {
+            if (shapeHash && e.second.isTypeMember()) {
                 // skipTypeMemberNames is currently the difference between `hash` and `classOrModuleShapeHash`
                 // (It felt wasteful to dupe this whole method.) Type member names have to be in the
                 // full hash so that a change to a type member name causes the right downstream
@@ -2476,7 +2461,7 @@ uint32_t Method::methodShapeHash(const GlobalState &gs) const {
     result = mix(result, this->methodArityHash(gs)._hashValue);
 
     if (name == Names::unresolvedAncestors() || name == Names::requiredAncestors() ||
-        name == Names::requiredAncestorsLin()) {
+        name == Names::requiredAncestorsLin() || name == Names::mixedInClassMethods()) {
         // These are synthetic methods that encode information about the class hierarchy in their types.
         // If the types change, ancestor information changed, and we must take the slow path.
         ENFORCE(resultType);

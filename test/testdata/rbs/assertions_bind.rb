@@ -79,6 +79,42 @@ else
   T.reveal_type(self) # error: Revealed type: `T.untyped`
 end
 
+# Test that `self as` works in both branches of an if/else
+if ARGV.first == "foo"
+  proc do
+    #: self as Foo
+    T.reveal_type(self) # error: Revealed type: `Foo`
+  end
+else
+  # Same as the `if` branch, to confirm that both
+  # branches get rewritten correctly.
+  proc do
+    #: self as Foo
+    T.reveal_type(self) # error: Revealed type: `Foo`
+  end
+end
+
+# Test bind inside a block with args in if/else branches inside a method
+class BindInMethod
+  def call(arg)
+    yield
+  end
+
+  def example
+    if ARGV.empty?
+      call(1) do
+        #: self as Foo
+        T.reveal_type(self) # error: Revealed type: `Foo`
+      end
+    else
+      call(2) do
+        #: self as Foo
+        T.reveal_type(self) # error: Revealed type: `Foo`
+      end
+    end
+  end
+end
+
 begin
   #: self as Foo
   T.reveal_type(self) # error: Revealed type: `Foo`

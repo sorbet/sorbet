@@ -3,6 +3,7 @@
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "token.hh"
@@ -57,8 +58,8 @@ public:
     const char *saved_herebody_s;
     const char *heredoc_e;
 
-    literal(lexer &lexer, literal_type type, std::string delimiter, const char *str_s, const char *heredoc_e = nullptr,
-            bool indent = false, bool dedent_body = false, bool label_allowed = false);
+    literal(lexer &lexer, literal_type type, std::string_view delimiter, const char *str_s,
+            const char *heredoc_e = nullptr, bool indent = false, bool dedent_body = false, bool label_allowed = false);
 
     // delete copy constructor to prevent accidental copies. we never
     // legitimately need to copy literal.

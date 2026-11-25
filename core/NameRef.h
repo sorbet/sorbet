@@ -2,8 +2,11 @@
 #define RUBY_TYPER_NAMEREF_H
 #include "common/common.h"
 #include "core/DebugOnlyCheck.h"
+#include <compare>
+
 namespace sorbet::core {
 class GlobalState;
+class NameTable;
 class NameSubstitution;
 struct UniqueName;
 struct ConstantName;
@@ -19,7 +22,6 @@ enum class NameKind : uint8_t {
 CheckSize(NameKind, 1, 1);
 
 enum class UniqueNameKind : uint8_t {
-    Parser,
     Desugar,
     Namer,
     MangleRename,
@@ -74,13 +76,13 @@ constexpr size_t alignof__UniqueName = alignof(UniqueName *);
 CheckSize(UniqueNameData, sizeof__UniqueName, alignof__UniqueName);
 
 struct NameRefDebugCheck {
-    int globalStateId;
+    int nameTableId;
 
-    constexpr NameRefDebugCheck() : globalStateId(-1) {}
+    constexpr NameRefDebugCheck() : nameTableId(-1) {}
 
-    NameRefDebugCheck(const GlobalState &gs, NameKind kind, uint32_t id);
+    NameRefDebugCheck(const NameTable &names, NameKind kind, uint32_t id);
 
-    void check(const GlobalState &gs, NameKind kind, uint32_t id) const;
+    void check(const NameTable &names, NameKind kind, uint32_t id) const;
     void check(const NameSubstitution &subst) const;
 };
 
@@ -101,7 +103,7 @@ private:
 public:
     // The value `0` implies that there is no NameKind tag present (NameKind begin at 1) and is a special-value used to
     // indicate a non-existent NameRef.
-    constexpr NameRef() : _id(0){};
+    constexpr NameRef() noexcept : _id(0) {};
 
     // WellKnown is a tag to statically indicate that the caller is deliberately
     // constructing a well-known name, whose ID is stable across all
@@ -117,6 +119,8 @@ public:
     NameRef(const GlobalState &gs, NameKind kind, uint32_t id);
 
     NameRef(const GlobalState &gs, NameRef ref);
+
+    NameRef(const NameTable &names, NameRef ref);
 
     NameRef(const NameRef &nm) = default;
 
@@ -134,12 +138,15 @@ public:
 
     NameRef &operator=(const NameRef &rhs) = default;
 
-    bool operator==(const NameRef &rhs) const {
-        return _id == rhs._id;
+    auto operator<=>(const NameRef &rhs) const noexcept {
+        return this->_id <=> rhs._id;
     }
 
-    bool operator!=(const NameRef &rhs) const {
-        return !(rhs == *this);
+    inline bool operator==(const NameRef &rhs) const noexcept {
+        return std::is_eq(*this <=> rhs);
+    }
+    inline bool operator!=(const NameRef &rhs) const noexcept {
+        return std::is_neq(*this <=> rhs);
     }
 
     constexpr uint32_t rawId() const {
@@ -218,6 +225,10 @@ public:
     // (This is a small hack, because Sorbet should really use Symbols not names for that purpose:
     // https://github.com/sorbet/sorbet/issues/1747)
     bool isUpdateKnowledgeName() const;
+
+    // Returns true if this name is one of the "keywords" that can modify a method `def`,
+    // like private/protected/public, etc.
+    bool isMethodDefModifierName() const;
 
     std::string_view shortName(const GlobalState &gs) const;
     std::string showRaw(const GlobalState &gs) const;

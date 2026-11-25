@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 require_relative '../test_helper'
 
 module Opus::Types::Test
@@ -23,10 +24,10 @@ module Opus::Types::Test
       mod.fn(1) # executes the sig block
 
       assert(builder)
-      assert_equal(mod, builder.decl.mod)
+      assert_equal(mod.singleton_class, builder.decl.mod)
       assert_equal({x: Integer}, builder.decl.params)
       assert_equal(String, builder.decl.returns)
-      assert_equal(:always, builder.decl.checked)
+      assert_nil(builder.decl.checked)
       assert_equal('standard', builder.decl.mode)
       assert_equal(true, builder.decl.finalized)
     end
@@ -335,6 +336,68 @@ module Opus::Types::Test
             assert_raises(TypeError) do
               a.foo('')
             end
+          end
+
+          it 'void with explicit checked(:tests) only changes the effective return type of signature' do
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+
+            a = Module.new do
+              extend T::Sig
+              sig { void.checked(:tests) }
+              def self.foo
+                "actual_value"
+              end
+            end
+
+            assert_equal("actual_value", a.foo)
+
+            sig = T::Utils.signature_for_method(a.method(:foo))
+            assert_instance_of(T::Types::Anything, sig.effective_return_type)
+            assert_instance_of(T::Private::Types::Void, sig.return_type)
+          end
+
+          it 'void with explicit checked(:tests) skips void replacement' do
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+
+            a = Module.new do
+              extend T::Sig
+              sig { void.checked(:tests) }
+              def self.foo
+                "actual_value"
+              end
+            end
+
+            assert_equal("actual_value", a.foo)
+          end
+
+          it 'void with default_checked_level :tests skips void replacement' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+
+            a = Module.new do
+              extend T::Sig
+              sig { void }
+              def self.foo
+                "actual_value"
+              end
+            end
+
+            assert_equal("actual_value", a.foo)
+          end
+
+          it 'void with default_checked_level :tests but explicit checked(:always) still replaces void' do
+            T::Private::RuntimeLevels.instance_variable_set(:@default_checked_level, :tests)
+            T::Private::RuntimeLevels._toggle_checking_tests(true)
+
+            a = Module.new do
+              extend T::Sig
+              sig { void.checked(:always) }
+              def self.foo
+                "actual_value"
+              end
+            end
+
+            assert_equal(T::Private::Types::Void::VOID, a.foo)
           end
 
           it 'override default checked level to :never but opt in with .checked(:always)' do

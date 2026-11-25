@@ -39,3 +39,8 @@ __package.rb:5: Found `layer` annotation, but `--packager-layers` was not passed
   Note:
     Use `--packager-layers=foo,bar` to define the valid layers, or `--packager-layers` to use the default layers of `library` and `application`
 Errors: 2
+__package.rb:5: Argument to `layer` must be one of: `test_infra`, `test_helper`, or `test_unit` https://srb.help/3725
+     5 |  layer 'fake'
+                ^^^^^^
+Errors: 1
+--packager-layers must contain items that are alphanumeric or underscores.

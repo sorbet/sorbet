@@ -4,6 +4,4 @@
 
 class Package < PackageSpec
   import Dep
-
-  export Package::A
 end

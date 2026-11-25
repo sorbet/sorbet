@@ -4,10 +4,10 @@ module RootPkg
   class Example
     A::Thing # allowed
 
-    B::Thing # not allowed---test import
-  # ^^^^^^^^ error: Used `test_import` constant `B::Thing` in non-test file
+    B::Thing
+  # ^ error: `B` is not imported
 
-    C::Thing # not allowed---test import
-  # ^^^^^^^^ error: Used `test_import` constant `C::Thing` in non-test file
+    C::Thing
+  # ^ error: `C` is not imported
   end
 end

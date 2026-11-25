@@ -59,3 +59,13 @@ end
 
 42 if ARGV.any? #: Integer?
 42 unless ARGV.empty? #: Integer?
+
+if ARGV.empty?
+  1
+else
+  2
+end #: Integer
+
+if ARGV.empty?
+else
+end #: NilClass

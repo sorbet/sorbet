@@ -7,6 +7,9 @@ SomeConstant = PackageSpec # error: Invalid expression in package: `Assign`
 #              ^^^^^^^^^^^ error: Unable to resolve constant `PackageSpec`
 
 class MyPackage < PackageSpec
+  # Mark this as a prelude package so that it's allowed to reopen PackageSpec
+  prelude!
+
   extend T::Helpers # error: Invalid expression in package: `extend` is not allowed
   include T::Helpers # error: Invalid expression in package: `include` is not allowed
 
@@ -33,7 +36,7 @@ class MyPackage < PackageSpec
   #   ^^^^^^ error: Invalid expression in package: `Block` not allowed
   def package_method; end
 # ^^^^^^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `MethodDef`
-# ^^^^^^^^^^^^^^^^^^      error: Invalid expression in package: `RuntimeMethodDefinition`
+# ^^^^^^^^^^^^^^^^^^ error: Invalid expression in package: `RuntimeMethodDefinition`
 
   sig {void}
   #   ^^^^^^ error: Invalid expression in package: `Block` not allowed

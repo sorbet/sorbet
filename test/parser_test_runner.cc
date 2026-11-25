@@ -2,9 +2,6 @@
 #include <cxxopts.hpp>
 // has to go first as it violates our requirements
 
-// has to go first, as it violates poisons
-#include "core/proto/proto.h"
-
 #include "absl/strings/match.h"
 #include "absl/strings/str_split.h"
 #include "ast/ast.h"
@@ -175,7 +172,8 @@ TEST_CASE("WhitequarkParserTest") {
             auto path = error->loc.file().data(gs).path();
             diagnostics[string(path.begin(), path.end())].push_back(std::move(diag));
         }
-        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics);
+        ErrorAssertion::checkAll(test.sourceFileContents, RangeAssertion::getAssertions<ErrorAssertion>(assertions),
+                                 diagnostics);
     }
 
     MESSAGE("errors OK");

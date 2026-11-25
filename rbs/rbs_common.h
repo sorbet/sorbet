@@ -7,6 +7,7 @@ extern "C" {
 #include "include/rbs.h"
 }
 
+#include "absl/container/inlined_vector.h"
 #include "core/LocOffsets.h"
 #include "rbs/Parser.h"
 
@@ -38,10 +39,12 @@ template <typename Type> struct RBSNodeTypeHelper {
         static constexpr enum rbs_node_type TypeID = type_enum; \
     }
 
+DEF_RBS_TYPE_HELPER(rbs_ast_bool_t, RBS_AST_BOOL);
 DEF_RBS_TYPE_HELPER(rbs_ast_symbol_t, RBS_AST_SYMBOL);
 DEF_RBS_TYPE_HELPER(rbs_ast_type_param_t, RBS_AST_TYPE_PARAM);
 DEF_RBS_TYPE_HELPER(rbs_types_function_t, RBS_TYPES_FUNCTION);
 DEF_RBS_TYPE_HELPER(rbs_types_function_param_t, RBS_TYPES_FUNCTION_PARAM);
+DEF_RBS_TYPE_HELPER(rbs_types_literal_t, RBS_TYPES_LITERAL);
 
 #undef DEF_RBS_TYPE_HELPER
 
@@ -76,14 +79,20 @@ struct Comment {
  */
 class RBSDeclaration {
 public:
+    using CommentsVector = absl::InlinedVector<Comment, 1>;
+
     /**
      * All the comments into a single string.
      */
     std::string string;
 
-    RBSDeclaration(std::vector<Comment> comments) : comments(std::move(comments)) {
+    RBSDeclaration(CommentsVector comments) : comments(std::move(comments)) {
         std::string result;
         for (const auto &comment : this->comments) {
+            // Preserve line boundaries so RBS comments end before the next continuation.
+            if (&comment != &this->comments.front()) {
+                result += '\n';
+            }
             result += comment.string;
         }
         this->string = std::move(result);
@@ -140,10 +149,28 @@ public:
      *       ^ ends here
      * ```
      */
-    core::LocOffsets typeLocFromRange(const rbs_range_t &range) const;
+    core::LocOffsets typeLocFromRange(const rbs_location_range &range) const;
+
+    /**
+     * Returns the type location of the RBS declaration that covers the given token range.
+     *
+     * ```
+     * #: (Integer) ->
+     *    v starts from here
+     * #| void
+     *       ^ ends here
+     * ```
+     */
+    core::LocOffsets typeLocFromTokenRange(const rbs_range_t &range) const {
+        rbs_location_range locRange = {.start_char = range.start.char_pos,
+                                       .start_byte = range.start.byte_pos,
+                                       .end_char = range.end.char_pos,
+                                       .end_byte = range.end.byte_pos};
+        return typeLocFromRange(locRange);
+    }
 
 private:
-    std::vector<Comment> comments;
+    CommentsVector comments;
 };
 
 } // namespace sorbet::rbs

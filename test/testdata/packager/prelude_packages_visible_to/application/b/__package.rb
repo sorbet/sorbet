@@ -3,6 +3,4 @@
 
 class Application::B < PackageSpec
   import Prelude # error: cannot be imported
-
-  export Application::B::Foo
 end

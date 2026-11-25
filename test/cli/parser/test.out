@@ -1,0 +1,18 @@
+==== Original parser is the default ====
+Integer {
+  val = "123"
+}
+==== '--parser=original' ====
+Integer {
+  val = "123"
+}
+==== '--parser=prism' ====
+@ ProgramNode (location: (0,0)-(0,3))
++-- locals: []
++-- statements:
+    @ StatementsNode (location: (0,0)-(0,3))
+    +-- body: (length: 1)
+        +-- @ IntegerNode (location: (0,0)-(0,3))
+            +-- IntegerBaseFlags: decimal
+            +-- value: 123
+

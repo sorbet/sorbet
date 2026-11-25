@@ -75,7 +75,7 @@ class String < Object
   #
   # If the string is not frozen, then return the string itself.
   sig do
-    returns(String)
+    returns(T.self_type)
   end
   def +@; end
 
@@ -83,9 +83,7 @@ class String < Object
   #
   # The string will be deduplicated as long as it does not have any instance
   # variables set on it.
-  sig do
-    returns(String)
-  end
+  sig { returns(T.self_type) }
   def -@; end
 
   # Appends the given object to *str*. If the object is an
@@ -105,7 +103,7 @@ class String < Object
     params(
         arg0: Object,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def <<(arg0); end
 
@@ -199,7 +197,7 @@ class String < Object
   #
   # If the string is not frozen, then return the string itself.
   sig do
-    returns(String)
+    returns(T.self_type)
   end
   def +@; end
 
@@ -208,7 +206,7 @@ class String < Object
   # The string will be deduplicated as long as it does not have any instance
   # variables set on it.
   sig do
-    returns(String)
+    returns(T.self_type)
   end
   def -@; end
 
@@ -324,6 +322,31 @@ class String < Object
   # [`IndexError`](https://docs.ruby-lang.org/en/2.7.0/IndexError.html) on
   # negative match.
   def []=(*_); end
+
+  # Concatenates each object in `objects` into `self` without any encoding
+  # validation or conversion and returns `self`. For each given object that is
+  # an [`Integer`](https://docs.ruby-lang.org/en/3.4/Integer.html), the value is
+  # considered a Byte. If the
+  # [`Integer`](https://docs.ruby-lang.org/en/3.4/Integer.html) is bigger than
+  # one byte, only the lower byte is considered, similar to
+  # [`String#setbyte`](https://docs.ruby-lang.org/en/3.4/String.html#method-i-setbyte).
+  #
+  # ```ruby
+  # s = ""
+  # s.append_as_bytes("foo \xE2\x82") # => "foo \xE2\x82"
+  # s.valid_encoding?                 # => false
+  # s.append_as_bytes("\xAC 12")
+  # s.valid_encoding?                 # => true
+  #
+  # s = ""
+  # s.append_as_bytes(0, 257)         # =>  "\u0000\u0001"
+  # ```
+  #
+  # see also [`String#<<`](https://docs.ruby-lang.org/en/3.4/String.html#method-i-3C-3C)
+  # and [`String#concat`](https://docs.ruby-lang.org/en/3.4/String.html#method-i-concat)
+  # for encoding-aware concatenation.
+  sig {params(objects: T.any(String, Integer)).returns(T.self_type)}
+  def append_as_bytes(*objects); end
 
   # Returns true for a string which has only ASCII characters.
   #
@@ -545,14 +568,14 @@ class String < Object
       arg1: Integer,
       arg2: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig do
     params(
       arg0: T::Range[Integer],
       arg1: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def bytesplice(arg0, arg1, arg2=T.unsafe(nil)); end
 
@@ -741,7 +764,7 @@ class String < Object
   # a = "abcde"
   # a.clear    #=> ""
   # ```
-  sig {returns(String)}
+  sig {returns(T.self_type)}
   def clear(); end
 
   # Returns an array of the
@@ -782,7 +805,7 @@ class String < Object
     params(
         arg0: T.any(Integer, Object),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def concat(arg0); end
 
@@ -1035,7 +1058,7 @@ class String < Object
     params(
         blk: T.proc.params(arg0: Integer).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig {returns(T::Enumerator[Integer])}
   def each_byte(&blk); end
@@ -1056,7 +1079,7 @@ class String < Object
     params(
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig {returns(T::Enumerator[String])}
   def each_char(&blk); end
@@ -1082,7 +1105,7 @@ class String < Object
     params(
         blk: T.proc.params(arg0: Integer).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig {returns(T::Enumerator[Integer])}
   def each_codepoint(&blk); end
@@ -1144,7 +1167,7 @@ class String < Object
         chomp: T::Boolean,
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig do
     params(
@@ -1227,7 +1250,7 @@ class String < Object
       arg1: T.any(String, Encoding),
       arg2: T.untyped
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def encode(arg0=T.unsafe(nil), arg1=T.unsafe(nil), **arg2); end
 
@@ -1249,7 +1272,7 @@ class String < Object
       arg1: T.any(String, Encoding),
       arg2: T.untyped
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def encode!(arg0, arg1=T.unsafe(nil), **arg2); end
 
@@ -1284,11 +1307,11 @@ class String < Object
     params(
         arg0: T.any(String, Encoding),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def force_encoding(arg0); end
 
-  sig {returns(String)}
+  sig {returns(T.self_type)}
   def freeze; end
 
   # returns the *index*th byte as an integer.
@@ -1507,7 +1530,7 @@ class String < Object
         arg0: Integer,
         arg1: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def insert(arg0, arg1); end
 
@@ -1724,7 +1747,7 @@ class String < Object
   # Equivalent to
   # [`String#succ`](https://docs.ruby-lang.org/en/2.7.0/String.html#method-i-succ),
   # but modifies the receiver in place.
-  sig {returns(String)}
+  sig {returns(T.self_type)}
   def next!(); end
 
   # Treats leading characters of *str* as a string of octal digits (with an
@@ -1782,7 +1805,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def prepend(arg0); end
 
@@ -1797,7 +1820,7 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def replace(arg0); end
 
@@ -1986,14 +2009,14 @@ class String < Object
     params(
         arg0: String,
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   sig do
     params(
         arg0: String,
         blk: T.proc.params(arg0: T.untyped).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def scrub!(arg0=T.unsafe(nil), &blk); end
 
@@ -2842,7 +2865,7 @@ class String < Object
         arg1: T.type_parameter(:Bool),
         blk: T.proc.params(arg0: String).returns(BasicObject),
     )
-    .returns(String)
+    .returns(T.self_type)
   end
   def upto(arg0, arg1=T.unsafe(nil), &blk); end
 
@@ -2873,6 +2896,13 @@ class String < Object
     .returns(T.nilable(String))
   end
   def self.try_convert(obj); end
+
+  # Returns a frozen, possibly pre-existing copy of the string.
+  #
+  # The string will be deduplicated as long as it does not have any instance
+  # variables set on it.
+  sig { returns(T.self_type) }
+  def dedup; end
 
   # Element Reference --- If passed a single `index`, returns a substring of one
   # character at that index. If passed a `start` index and a `length`, returns a

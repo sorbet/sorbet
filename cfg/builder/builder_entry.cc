@@ -78,6 +78,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
     LocalRef retSym;
     BasicBlock *entry = res->entry();
     BasicBlock *cont;
+    // The loc of the expression whose value the method returns, if it has a body.
+    core::LocOffsets finalExprLoc;
     {
         CFG::UnfreezeCFGLocalVariables unfreezeVars(*res);
         retSym = cctx.newTemporary(core::Names::returnMethodTemp());
@@ -157,8 +159,12 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
                 }
             }
             cont = walk(cctx.withTarget(retSym), stats[lastStat], cont);
+            finalExprLoc = stats[lastStat].loc();
         } else {
-            cont = walk(cctx.withTarget(retSym), expr, cont);
+            auto bodyCctx = cctx.withTarget(retSym);
+            bodyCctx.isTailPosition = true;
+            cont = walk(bodyCctx, expr, cont);
+            finalExprLoc = expr.loc();
         }
     }
     // Past this point, res->localVariables is a fixed size.
@@ -175,6 +181,10 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
         } else {
             rvLoc = res->loc;
         }
+    } else if (auto lastLoc = cont->exprs.back().loc; lastLoc.exists() && lastLoc.empty() && finalExprLoc.exists()) {
+        // The last instruction has no source of its own (e.g., the `nil` of a missing `else`), so
+        // the value comes from the final expression as a whole.
+        rvLoc = finalExprLoc;
     } else {
         rvLoc = cont->exprs.back().loc;
     }
@@ -187,7 +197,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
         LocalRef local = kv.second;
         aliasesPrefix.emplace_back(local, core::LocOffsets::none(), make_insn<Alias>(global));
         if (global.isFieldOrStaticField()) {
-            res->minLoops[local.id()] = CFG::MIN_LOOP_FIELD;
+            res->minLoops[local.id()].pin = MinLoops::Pin::Field;
         } else {
             // We used to have special handling here for "MIN_LOOP_GLOBAL" but it was meaningless,
             // because it only happened for type members, and we already prohibit re-assigning type
@@ -200,7 +210,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(CFGContext cctx, unique_ptr<CFG> res, absl:
     for (auto kv : cctx.discoveredUndeclaredFields) {
         aliasesPrefix.emplace_back(kv.second, core::LocOffsets::none(),
                                    make_insn<Alias>(core::Symbols::Magic_undeclaredFieldStub(), kv.first));
-        res->minLoops[kv.second.id()] = CFG::MIN_LOOP_FIELD;
+        res->minLoops[kv.second.id()].pin = MinLoops::Pin::Field;
     }
     histogramInc("cfgbuilder.aliases", aliasesPrefix.size());
     auto basicBlockCreated = res->basicBlocks.size();
@@ -246,9 +256,7 @@ void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
                 bb->bexit.elseb->backEdges.end());
         }
     }
-    cfg.basicBlocks.erase(remove_if(cfg.basicBlocks.begin(), cfg.basicBlocks.end(),
-                                    [&forwardsIds](auto &bb) -> bool { return forwardsIds[bb->id] == -1; }),
-                          cfg.basicBlocks.end());
+    erase_if(cfg.basicBlocks, [&forwardsIds](auto &bb) -> bool { return forwardsIds[bb->id] == -1; });
 
     // needed to find loop headers.
     for (auto &bb : cfg.basicBlocks) {
@@ -287,9 +295,9 @@ CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakSco
     return ret;
 }
 
-CFGContext CFGContext::withSendAndBlockLink(shared_ptr<core::SendAndBlockLink> &link) {
+CFGContext CFGContext::withSendAndBlockLink(LinkRef link) {
     auto ret = CFGContext(*this);
-    ret.link = &link;
+    ret.link = link;
     return ret;
 }
 

@@ -1,3 +1,0 @@
-This module contains proto files were copied from pay-server.
-
-In order to update them, please update them first in pay-server and then copy them from /proto in pay-server.

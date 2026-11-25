@@ -19,6 +19,12 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      types.each_value { |type| build_inner_lazy_fields(type) }
+      nil
+    end
+
+    # overrides Base
     def name
       serialize_hash(types)
     end
@@ -26,16 +32,30 @@ module T::Types
     # overrides Base
     def recursively_valid?(obj)
       return false unless obj.is_a?(Hash)
-      return false if types.any? { |key, type| !type.recursively_valid?(obj[key]) }
-      return false if obj.any? { |key, _| !types[key] }
+      field_types = types
+      field_types.each_pair do |key, type|
+        return false unless type.recursively_valid?(obj[key])
+      end
+      # Pigeonhole: more entries than declared keys guarantees an undeclared key.
+      return false if obj.size > field_types.size
+      obj.each_key do |key|
+        return false unless field_types.key?(key)
+      end
       true
     end
 
     # overrides Base
     def valid?(obj)
       return false unless obj.is_a?(Hash)
-      return false if types.any? { |key, type| !type.valid?(obj[key]) }
-      return false if obj.any? { |key, _| !types[key] }
+      field_types = types
+      field_types.each_pair do |key, type|
+        return false unless type.valid?(obj[key])
+      end
+      # Pigeonhole: more entries than declared keys guarantees an undeclared key.
+      return false if obj.size > field_types.size
+      obj.each_key do |key|
+        return false unless field_types.key?(key)
+      end
       true
     end
 

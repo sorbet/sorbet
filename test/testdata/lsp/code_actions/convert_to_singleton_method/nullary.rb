@@ -15,10 +15,12 @@ class A
     nullary
     nullary()
     nullary {}
+    #       ^^ error: does not take a block
     nullary() {}
-    nullary do
+    #         ^^ error: does not take a block
+    nullary do # error: does not take a block
     end
-    nullary() do
+    nullary() do # error: does not take a block
     end
   end
 
@@ -26,10 +28,11 @@ class A
   def +(other); self; end
 end
 
-A.new.nullary do
+A.new.nullary do # error: does not take a block
 end
 A.new.nullary {}
-A.new.nullary() do
+#             ^^ error: does not take a block
+A.new.nullary() do # error: does not take a block
 end
 
 (T.unsafe(A.new)).nullary

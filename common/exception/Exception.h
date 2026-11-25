@@ -75,5 +75,12 @@ template <typename... TArgs> [[noreturn]] bool Exception::raise(fmt::format_stri
     stopInDebugger();
     throw SorbetException(message);
 }
+
+// Indicates that a particular code path should never be reached, with an explanation of why.
+// Throws a `sorbet::SorbetException` when triggered to help with debugging.
+template <typename... TArgs>
+[[noreturn]] void unreachable(fmt::format_string<TArgs...> reasonFormatStr, TArgs &&...args) {
+    Exception::raise(reasonFormatStr, std::forward<TArgs>(args)...);
+}
 } // namespace sorbet
 #endif // SORBET_ERRO_H

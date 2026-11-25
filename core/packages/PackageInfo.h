@@ -3,15 +3,18 @@
 
 #include "absl/types/span.h"
 
+#include "core/Context.h"
 #include "core/Loc.h"
 #include "core/NameRef.h"
 #include "core/StrictLevel.h"
 #include "core/SymbolRef.h"
 #include "core/packages/MangledName.h"
+#include "core/packages/Stratum.h"
 #include <optional>
 #include <vector>
 
 namespace sorbet::core {
+class ErrorBuilder;
 struct AutocorrectSuggestion;
 class NameRef;
 class Loc;
@@ -22,12 +25,6 @@ class Context;
 namespace sorbet::core::packages {
 
 class PackageDB;
-
-enum class ImportType : uint8_t {
-    Normal,
-    TestHelper,
-    TestUnit,
-};
 
 enum class VisibleToType {
     Normal,
@@ -46,32 +43,16 @@ std::string_view strictDependenciesLevelToString(StrictDependenciesLevel level);
 
 struct Import {
     MangledName mangledName;
-    ImportType type;
     core::LocOffsets loc;
 
-    Import(MangledName mangledName, ImportType type, core::LocOffsets loc)
-        : mangledName(mangledName), type(type), loc(loc) {}
+    bool usesInternals = false;
 
-    // Generate a prelude import, with the given origin.
-    // NOTE: the origin must point to something to hang any errors related to the implicit import off of. Currently this
-    // is the declLoc_ of the package that is getting the implicit import, and because of this it's important to not use
-    // these locs when computing locations for autocorrects.
-    static Import prelude(MangledName mangledName, core::LocOffsets implicitLoc);
+    Import(MangledName mangledName, core::LocOffsets loc) : mangledName(mangledName), loc(loc) {}
 
     Import(Import &&other) = default;
     Import(const Import &other) = default;
     Import &operator=(Import &&other) = default;
     Import &operator=(const Import &other) = default;
-
-    bool isTestImport() const {
-        return type != ImportType::Normal;
-    }
-};
-
-struct Export {
-    core::LocOffsets loc;
-
-    explicit Export(core::LocOffsets loc) : loc(loc) {}
 };
 
 struct VisibleTo {
@@ -80,7 +61,7 @@ struct VisibleTo {
     core::LocOffsets loc;
 
     VisibleTo(MangledName mangledName, VisibleToType type, core::LocOffsets loc)
-        : mangledName(mangledName), type(type), loc(loc){};
+        : mangledName(mangledName), type(type), loc(loc) {};
 };
 
 struct PackageReferenceInfo {
@@ -121,15 +102,16 @@ public:
         return visibleToTests_;
     }
 
+    bool visibleToEverything() const {
+        ENFORCE(exists());
+        return visibleTo().empty() && !visibleToTests();
+    }
+
     // The possible path prefixes associated with files in the package, including path separator at end.
     std::vector<std::string> packagePathPrefixes = {};
 
     // The names of each package imported by this package.
     std::vector<Import> importedPackageNames = {};
-
-    // List of exported items that form the body of this package's public API.
-    // These are copied into every package that imports this package.
-    std::vector<Export> exports_ = {};
 
     // The other packages to which this package is visible. If this vector is empty, then it means
     // the package is fully public and can be imported by anything.
@@ -153,32 +135,51 @@ public:
         core::LocOffsets layer;
         core::LocOffsets strictDependenciesLevel;
         core::LocOffsets minTypedLevel;
-        core::LocOffsets testsMinTypedLevel;
 
-        // Set to non-none loc when this package should just export everything
-        core::LocOffsets exportAll;
+        // Set to non-none loc when this package is marked `test!`
+        core::LocOffsets testPackage;
+
+        // Set to non-none loc when this package is marked `prelude!`
+        core::LocOffsets preludePackage;
+
+        // Set to non-none loc when this package is marked `imported_by_nested_packages!`
+        core::LocOffsets importedByNestedPackages;
     } locs;
 
     core::FileRef file;
 
     core::NameRef layer;
 
+    // Source stratum assigned by computePackageStrata. Monolithic processing assigns zero.
+    // Recomputed for each traversal and copied with the package database, including when
+    // restoring a canceled slow path. This is independent of the package AST's stratum.
+    Stratum stratum = Stratum::NONE;
+
     // ID of the strongly-connected component that this package is in, according to its graph of import dependencies
     int sccID_ = -1;
 
-    // ID of the strongly-connected component that this package's tests are in, according to its graph of import
-    // dependencies
-    int testSccID_ = -1;
-
     MangledName mangledName_;
 
-    // Whether `visible_to` directives should be ignored for test code
+    // Whether `visible_to` directives should be ignored for `test!` packages
     bool visibleToTests_ = false;
 
-    bool isPreludePackage_ = false;
+    // Whether or not this package has other packages underneath its namespace.
+    //
+    // We're caching this value for performance, to avoid consulting the symbol hierarchy when deciding if this package
+    // has subpackages. An alternative implementation that wouldn't require keeping this flag up-to-date would be to
+    // check if the corresponding symbol in the PackageSpecRegistry tree has any members. That approach would aovid
+    // maintaining this field as it becomes a property of symbol nesting, but would involve following more memory
+    // indirections.
+    bool hasSubPackages = false;
+
+    // An arbitrary package nested under this one that doesn't meet this package's
+    // `imported_by_nested_packages!` requirement, if such a package exists.
+    //
+    // While one exists, the annotation has no effect, to avoid mutating a prefix of the symbol
+    // table in package-directed mode.
+    MangledName nestedPackageMissingImport;
 
     core::StrictLevel minTypedLevel = core::StrictLevel::None;
-    core::StrictLevel testsMinTypedLevel = core::StrictLevel::None;
 
     StrictDependenciesLevel strictDependenciesLevel = StrictDependenciesLevel::None;
 
@@ -186,6 +187,10 @@ public:
     // a modularity error}]
     // TODO(neil): once we track a list of files in this package, we can `.reserve(files.size())` in the constructor
     UnorderedMap<core::FileRef, std::vector<std::pair<MangledName, PackageReferenceInfo>>> packagesReferencedByFile;
+
+    // The number of files associated with this package while building the package DB, including the package file
+    // itself.
+    uint32_t numFilesInPackage = 0;
 
     // The id of the SCC that this package's normal imports belong to.
     //
@@ -195,20 +200,6 @@ public:
         ENFORCE(exists());
         return sccID_ == -1 ? std::nullopt : std::make_optional(sccID_);
     }
-
-    // The ID of the SCC that this package's tests belong to. This ID is only useful in the context of the package graph
-    // condensation graph.
-    //
-    // WARNING: Modifying the contents of the package DB after ComputePackageSCCs will cause this id to go out of
-    // date.
-    std::optional<int> testSccID() const {
-        ENFORCE(exists());
-        return testSccID_ == -1 ? std::nullopt : std::make_optional(testSccID_);
-    }
-
-    static PackageInfo &from(core::GlobalState &gs, MangledName pkg);
-
-    static const PackageInfo &from(const core::GlobalState &gs, MangledName pkg);
 
     std::unique_ptr<PackageInfo> deepCopy() const;
 
@@ -221,31 +212,80 @@ public:
     explicit PackageInfo(const PackageInfo &) = default;
     PackageInfo &operator=(const PackageInfo &) = delete;
 
-    int orderImports(const core::GlobalState &gs, const PackageInfo &a, bool aIsTestImport, const PackageInfo &b,
-                     bool bIsTestImport) const;
+    int orderImports(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b,
+                     const std::optional<StrictDependenciesLevel> aStrictnessOverride = std::nullopt,
+                     const std::optional<StrictDependenciesLevel> bStrictnessOverride = std::nullopt) const;
 
-    int orderByStrictness(const PackageDB &packageDB, const PackageInfo &a, const PackageInfo &b) const;
+    int orderByStrictness(const PackageDB &packageDB, const PackageInfo &a, const StrictDependenciesLevel aStrictness,
+                          const PackageInfo &b, const StrictDependenciesLevel bStrictness) const;
 
     int orderByAlphabetical(const core::GlobalState &gs, const PackageInfo &a, const PackageInfo &b) const;
 
     // autocorrects
 
-    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &info,
-                                                         ImportType importType) const;
+    std::optional<core::AutocorrectSuggestion> addImport(const core::GlobalState &gs, const PackageInfo &info) const;
 
-    std::optional<core::AutocorrectSuggestion> addExport(const core::GlobalState &gs,
-                                                         const core::SymbolRef newExport) const;
+    std::optional<core::AutocorrectSuggestion> addVisibleToTests(const core::GlobalState &gs) const;
 
-    std::vector<VisibleTo> visibleTo() const {
+    std::optional<core::AutocorrectSuggestion> addVisibleTo(const core::GlobalState &gs,
+                                                            const MangledName &targetPackage) const;
+
+    absl::Span<const VisibleTo> visibleTo() const {
         return visibleTo_;
     }
 
-    std::optional<ImportType> importsPackage(MangledName mangledName) const;
+    // The list of known direct sub-packages of this package.
+    std::vector<MangledName> directSubPackages(const core::GlobalState &gs,
+                                               ClassOrModuleRef startFrom = ClassOrModuleRef()) const;
+
+    // Describe a `CanModifyResult::Subpackages`-style error: `subject` (the namespace `namespaceName` that this
+    // package owns, with `<PackageSpecRegistry>` node `packageRegistryOwner`, or its singleton class) can't
+    // `restriction` (e.g. "be generic"). Sets the header, points at a package nested under the namespace, and says
+    // how to fix it: `alternative`, or making this package's `imported_by_nested_packages!` take effect.
+    void explainSubpackageNamespaceError(const core::GlobalState &gs, ErrorBuilder &e, std::string_view subject,
+                                         std::string_view restriction, ClassOrModuleRef packageRegistryOwner,
+                                         std::string_view namespaceName, std::string_view alternative) const;
+
+    const Import *importsPackage(MangledName mangledName) const;
+
+    // The packages enclosing this one (at any depth) that are marked `imported_by_nested_packages!`, but whose
+    // import requirement this package doesn't meet, nearest first.
+    //
+    // Consider something like this:
+    //
+    //     M1              # marked `imported_by_nested_packages!`
+    //     M1::M2          # also marked
+    //     M1::M2::Curr    # the current package
+    //
+    // A marked packge like M1 or M2 requires that each package nested under it either import that
+    // package (e.g., M2 must import M1) or some package between the marked package and the current
+    // package (e.g., Curr can import either M2 or M1).
+    //
+    // In particular, it's sufficient for `Curr` to only `import M2`, because `M2` must necessarily
+    // `import M1` (as it's also nested under `M1`). Thus for `Curr`, `import M2` implies `import M1`.
+    //
+    // Thus the autocorrect to import a missing import in `Curr` only needs `enclosingPackagesMissingImport(gs)[0]`,
+    // but we have to compute the full list because the packager needs all of them, so it can record on the
+    // enclosing ones that their `imported_by_nested_packages!` marker was not satisfied.
+    std::vector<MangledName> enclosingPackagesMissingImport(const core::GlobalState &gs) const;
+
+    // A variant of `enclosingPackagesMissingImport` for package `pkg` that takes its imports as parameters,
+    // for callers that check a set of imports they've just computed (e.g., GenPackages).
+    //
+    // A package counts as imported if it's in either `imports` or `moreImports`.
+    static std::vector<MangledName> enclosingPackagesMissingImport(const core::GlobalState &gs, MangledName pkg,
+                                                                   absl::Span<const Import> imports,
+                                                                   const UnorderedSet<MangledName> &moreImports);
 
     // Is it a layering violation to import otherPkg from this package?
     bool causesLayeringViolation(const PackageDB &packageDB, const PackageInfo &otherPkg) const;
 
     bool causesLayeringViolation(const PackageDB &packageDB, core::NameRef otherPkgLayer) const;
+
+    // Returns `std::nullopt` if it's okay to reference the package from this file.
+    // Returns a `PackageReferenceInfo` if the usage was not okay (e.g. missing import, modularity error, etc.)
+    std::optional<core::packages::PackageReferenceInfo>
+    checkReferenceAgainstImports(core::Context ctx, core::LocOffsets errLoc, MangledName otherPackage) const;
 
     // What is the minimum strict dependencies level that this package's imports must have?
     StrictDependenciesLevel minimumStrictDependenciesLevel() const;
@@ -254,21 +294,101 @@ public:
     // looks at non-test imports.
     std::optional<std::string> pathTo(const core::GlobalState &gs, const MangledName dest) const;
 
-    // True when the package is marked with a `prelude_package` annotation. This requires that the package only import
+    // True when the package is marked with a `prelude!` annotation. This requires that the package only import
     // other prelude packages and markes it as an implicit dependency of all non-prelude packages.
     bool isPreludePackage() const {
-        return this->isPreludePackage_;
+        return this->locs.preludePackage.exists();
     }
 
-    // Track that `file` references the packages in `references`, along with some metadata about each reference
-    void trackPackageReferences(const core::FileRef file,
-                                std::vector<std::pair<core::packages::MangledName, PackageReferenceInfo>> &references);
+    // True if this package was marked as a `test!` package.
+    bool testPackage() const {
+        return this->locs.testPackage.exists();
+    }
+
+    // True when this package is marked `imported_by_nested_packages!` AND every package nested
+    // under it meets that import requirement.
+    //
+    // (Only then does the annotation take effect, because otherwise a nested package might be typechecked before it.)
+    bool importedByNestedPackagesSatisfied() const {
+        return this->importedByNestedPackages() && !this->nestedPackageMissingImport.exists();
+    }
+
+    // Do this package's visible_to rules allow `importingPkg` to import this package?
+    bool isVisibleTo(const core::GlobalState &gs, const PackageInfo &importingPkgInfo) const;
+
+    enum class CanModifyResult : uint8_t {
+        // This symbol can be modified.
+        CanModify,
+
+        // The symbol is in the PackageSpecRegistry hierarchy, and cannot be modified.
+        PackageSpec,
+
+        // The symbol is a namespace on the path to a subpackage, and this package's `imported_by_nested_packages!`
+        // doesn't take effect (see `importedByNestedPackagesSatisfied`).
+        Subpackages,
+
+        // The symbol belongs to another package.
+        NotOwner,
+
+        // The symbol is unpackaged, and the context is not a prelude package.
+        UnpackagedSymbol,
+
+    };
+
+    // True when it's safe to modify this symbol from the context of a file owned by this package. Modification in this
+    // case is something that fundamentally changes the meaning of the symbol (adding type members or mixins, for
+    // example).
+    CanModifyResult canModifySymbol(core::Context ctx, ClassOrModuleRef sym) const;
+
+    // Whether a constant with this package metadata is on this package's namespace path. Class and module symbols can
+    // be prefixes of a package namespace; other constants must belong to the package exactly.
+    bool ownsNamespace(const core::GlobalState &gs, MangledName namespacePackage,
+                       ClassOrModuleRef packageRegistryOwner) const;
+
+    enum class CanOpenScopeResult : uint8_t {
+        // The scope is part of this package (this package owns the symbol),
+        // or it is another package that this package imports.
+        CanOpen,
+
+        // The symbol belongs to another package that this package does NOT import.
+        // (e.g. opening a parent package `A::B` from `A::B::C` without importing it)
+        NotImported,
+    };
+
+    // True when it's legal for a file owned by this package to *open* (define a
+    // class/module scope named after) `sym`, per the package-scope-nesting rule.
+    CanOpenScopeResult canOpenScope(Context ctx, ClassOrModuleRef sym) const;
+
+    // It's okay to access the internals of `other` if it's this package, or if this test package imported `other` with
+    // `uses_internals: true`.
+    bool canAccessInternalsOf(MangledName other) const;
+
+    // Track that `file` references `package`, along with some metadata about the reference
+    void trackPackageReference(const core::FileRef file, MangledName package, PackageReferenceInfo referenceInfo);
+    void resetPackageReferences(const core::FileRef file);
 
     std::optional<core::AutocorrectSuggestion> aggregateMissingImports(const core::GlobalState &gs) const;
-    std::optional<core::AutocorrectSuggestion> aggregateMissingExports(const core::GlobalState &gs,
-                                                                       std::vector<core::SymbolRef> &toExport) const;
+    std::optional<core::AutocorrectSuggestion> aggregateMissingImportsForFile(const core::GlobalState &gs,
+                                                                              const core::FileRef fref) const;
+    std::optional<core::AutocorrectSuggestion>
+    aggregateMissingVisibleTo(const core::GlobalState &gs, UnorderedSet<core::packages::MangledName> &visibleTos,
+                              bool visibleToTests) const;
+
+    std::string
+    renderPackageRbContents(const core::GlobalState &gs, std::vector<Import> newImports,
+                            const UnorderedMap<core::packages::MangledName, core::packages::StrictDependenciesLevel>
+                                &newStrictnessByPkg) const;
+
+private:
+    // True when the package is marked `imported_by_nested_packages!`.
+    //
+    // Whether the annotation takes effect also depends on the packages nested under this one, so code deciding what
+    // to allow on this package's namespaces must use `importedByNestedPackagesSatisfied` instead.
+    bool importedByNestedPackages() const {
+        return this->locs.importedByNestedPackages.exists();
+    }
 };
-CheckSize(PackageInfo, 240, 8);
+CheckSize(PackageInfo, 232, 8);
 
 } // namespace sorbet::core::packages
 #endif

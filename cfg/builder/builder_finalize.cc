@@ -46,7 +46,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
 
             if (thenb == elseb) {
                 // Remove condition from unconditional jumps
-                bb->bexit.cond = LocalRef::unconditional();
+                bb->bexit.cond.variable = LocalRef::unconditional();
 
                 // These two simplifications only apply on unconditional jumps that:
                 //
@@ -247,14 +247,14 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 if (auto v = cast_instruction<Ident>(bind.value)) {
                     v->what = maybeDealias(ctx, cfg, v->what, current);
                 } else if (auto v = cast_instruction<Send>(bind.value)) {
-                    v->recv = maybeDealias(ctx, cfg, v->recv.variable, current);
-                    for (auto &arg : v->args) {
-                        arg = maybeDealias(ctx, cfg, arg.variable, current);
+                    v->recv.variable = maybeDealias(ctx, cfg, v->recv.variable, current);
+                    for (auto &arg : v->argRefs()) {
+                        arg = maybeDealias(ctx, cfg, arg, current);
                     }
                 } else if (auto v = cast_instruction<TAbsurd>(bind.value)) {
-                    v->what = maybeDealias(ctx, cfg, v->what.variable, current);
+                    v->what.variable = maybeDealias(ctx, cfg, v->what.variable, current);
                 } else if (auto v = cast_instruction<Return>(bind.value)) {
-                    v->what = maybeDealias(ctx, cfg, v->what.variable, current);
+                    v->what.variable = maybeDealias(ctx, cfg, v->what.variable, current);
                 }
             }
 
@@ -265,7 +265,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
             }
         }
         if (bb->bexit.cond.variable != LocalRef::unconditional()) {
-            bb->bexit.cond = maybeDealias(ctx, cfg, bb->bexit.cond.variable, current);
+            bb->bexit.cond.variable = maybeDealias(ctx, cfg, bb->bexit.cond.variable, current);
         }
     }
 }
@@ -290,32 +290,28 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
     Timer timeit(ctx.state.tracer(), "removeDeadAssigns");
     for (auto &it : cfg.basicBlocks) {
         /* remove dead variables */
-        it->exprs.erase(
-            remove_if(it->exprs.begin(), it->exprs.end(),
-                      [&ctx, &cfg, &RnW, &blockArgs, &it](auto &bind) -> bool {
-                          if (bind.bind.variable.isAliasForGlobal(ctx, cfg)) {
-                              return false;
-                          }
-                          bool wasRead =
-                              RnW.reads[it->id].contains(bind.bind.variable.id()) || // read in the same block
-                              blockArgs[it->bexit.thenb->id].contains(bind.bind.variable.id()) ||
-                              blockArgs[it->bexit.elseb->id].contains(bind.bind.variable.id());
+        erase_if(it->exprs, [&ctx, &cfg, &RnW, &blockArgs, &it](auto &bind) -> bool {
+            if (bind.bind.variable.isAliasForGlobal(ctx, cfg)) {
+                return false;
+            }
+            bool wasRead = RnW.reads[it->id].contains(bind.bind.variable.id()) || // read in the same block
+                           blockArgs[it->bexit.thenb->id].contains(bind.bind.variable.id()) ||
+                           blockArgs[it->bexit.elseb->id].contains(bind.bind.variable.id());
 
-                          if (!wasRead) {
-                              // These are all instructions with no side effects, which can be
-                              // deleted if the assignment is dead. It would be slightly
-                              // shorter to list the converse set -- those which *do* have
-                              // side effects -- but doing it this way is more robust to us
-                              // adding more instruction types in the future.
-                              if (isa_instruction<Ident>(bind.value) || isa_instruction<Literal>(bind.value) ||
-                                  isa_instruction<LoadSelf>(bind.value) || isa_instruction<LoadArg>(bind.value) ||
-                                  isa_instruction<LoadYieldParams>(bind.value)) {
-                                  return true;
-                              }
-                          }
-                          return false;
-                      }),
-            it->exprs.end());
+            if (!wasRead) {
+                // These are all instructions with no side effects, which can be
+                // deleted if the assignment is dead. It would be slightly
+                // shorter to list the converse set -- those which *do* have
+                // side effects -- but doing it this way is more robust to us
+                // adding more instruction types in the future.
+                if (isa_instruction<Ident>(bind.value) || isa_instruction<Literal>(bind.value) ||
+                    isa_instruction<LoadSelf>(bind.value) || isa_instruction<LoadArg>(bind.value) ||
+                    isa_instruction<LoadYieldParams>(bind.value)) {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 }
 
@@ -325,12 +321,12 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
             continue;
         }
 
+        ENFORCE(bb->outerLoops <= MinLoops::MAX_LEVEL);
         RnW.reads[bb->id].forEach([&cfg, &bb](uint32_t local) {
-            auto curMin = cfg.minLoops[local];
-            if (curMin > bb->outerLoops) {
-                curMin = bb->outerLoops;
+            auto &curMin = cfg.minLoops[local];
+            if (curMin.level > bb->outerLoops) {
+                curMin.level = bb->outerLoops;
             }
-            cfg.minLoops[local] = curMin;
         });
     }
     for (const auto &bb : cfg.basicBlocks) {
@@ -340,15 +336,14 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
 
         for (const auto &expr : bb->exprs) {
             auto what = expr.bind.variable;
-            int curMin = cfg.minLoops[what.id()];
+            auto &curMin = cfg.minLoops[what.id()];
             int curMax = cfg.maxLoopWrite[what.id()];
-            if (curMin > bb->outerLoops) {
-                curMin = bb->outerLoops;
+            if (curMin.level > bb->outerLoops) {
+                curMin.level = bb->outerLoops;
             }
             if (curMax < bb->outerLoops) {
                 curMax = bb->outerLoops;
             }
-            cfg.minLoops[what.id()] = curMin;
             cfg.maxLoopWrite[what.id()] = curMax;
         }
     }
@@ -402,7 +397,8 @@ vector<UIntSet> CFGBuilder::fillInBlockArguments(core::Context ctx, const CFG::R
                         // to how our "pinning" type inference works. We can remove this
                         // inner condition when we get a better type inference
                         // algorithm.
-                        if (bb->outerLoops <= cfg.minLoops[local]) {
+                        const auto &minLoops = cfg.minLoops[local];
+                        if (minLoops.pin == MinLoops::Pin::None && bb->outerLoops <= minLoops.level) {
                             toRemove.add(local);
                         }
                     });

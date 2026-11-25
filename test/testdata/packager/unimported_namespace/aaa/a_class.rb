@@ -3,10 +3,10 @@
 
 class AAA::AClass
   BBB
-# ^^^ error: `BBB` resolves but is not exported from `BBB` and `BBB` is not imported
+# ^^^ error: `BBB` is not imported
 
   CCC
-# ^^^ error: Unable to resolve constant `CCC`
+# ^^^ error: `CCC` is not imported
 
   C
 # ^ error: Unable to resolve constant `C`

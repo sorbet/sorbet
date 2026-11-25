@@ -1,0 +1,8 @@
+# typed: true
+# enable-experimental-requires-ancestor: true
+# assert-slow-path: true
+
+module M
+  extend T::Helpers
+  requires_ancestor { Needed }
+end

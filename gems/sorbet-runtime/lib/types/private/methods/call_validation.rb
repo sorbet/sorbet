@@ -1,9 +1,14 @@
 # frozen_string_literal: true
-# typed: false
+# typed: true
 
 module T::Private::Methods::CallValidation
   CallValidation = T::Private::Methods::CallValidation
   Modes = T::Private::Methods::Modes
+
+  KERNEL_TO_S = Kernel.instance_method(:to_s)
+  MODULE_TO_S = Module.instance_method(:to_s)
+  METHOD_NAME_FOR_EVAL = /\A[A-Za-z_][A-Za-z0-9_]*[!?]?\z/
+  private_constant(:KERNEL_TO_S, :MODULE_TO_S, :METHOD_NAME_FOR_EVAL)
 
   # Wraps a method with a layer of validation for the given type signature.
   # This wrapper is meant to be fast, and is applied by a previous wrapper,
@@ -12,9 +17,9 @@ module T::Private::Methods::CallValidation
   # @param method_sig [T::Private::Methods::Signature]
   # @return [UnboundMethod] the new wrapper method (or the original one if we didn't wrap it)
   def self.wrap_method_if_needed(mod, method_sig, original_method)
-    original_visibility = T::Private::Methods.visibility_method_name(mod, method_sig.method_name)
+    original_visibility = T::Private::ClassUtils.visibility_method_name(mod, method_sig.method_name)
     if method_sig.mode == T::Private::Methods::Modes.abstract
-      create_abstract_wrapper(mod, method_sig, original_method, original_visibility)
+      create_abstract_wrapper(mod, method_sig.method_name, original_visibility)
     # Do nothing in this case; this method was not wrapped in _on_method_added.
     elsif method_sig.defined_raw
     # Note, this logic is duplicated (intentionally, for micro-perf) at `Methods._on_method_added`,
@@ -45,47 +50,100 @@ module T::Private::Methods::CallValidation
     @is_allowed_to_have_fast_path = false
   end
 
-  def self.create_abstract_wrapper(mod, method_sig, original_method, original_visibility)
+  def self.create_abstract_wrapper(mod, method_name, original_visibility)
     T::Configuration.without_ruby_warnings do
       T::Private::DeclState.current.without_on_method_added do
-        mod.module_eval(<<~METHOD, __FILE__, __LINE__ + 1)
-          #{original_visibility}
+        if METHOD_NAME_FOR_EVAL.match?(method_name)
+          mod.module_eval(<<~METHOD, __FILE__, __LINE__ + 1)
+            #{original_visibility}
 
-          def #{method_sig.method_name}(...)
+            def #{method_name}(...)
+              # We allow abstract methods to be implemented by things further down the ancestor chain.
+              # So, if a super method exists, call it.
+              if defined?(super)
+                super
+              else
+                raise NotImplementedError.new(
+                  "The method `#{method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
+                )
+              end
+            end
+          METHOD
+        else
+          T::Private::ClassUtils.def_with_visibility(mod, method_name, original_visibility) do |*args, &blk|
             # We allow abstract methods to be implemented by things further down the ancestor chain.
             # So, if a super method exists, call it.
             if defined?(super)
-              super
+              super(*args, &blk)
             else
               raise NotImplementedError.new(
-                "The method `#{method_sig.method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
+                "The method `#{method_name}` on #{mod} is declared as `abstract`. It does not have an implementation."
               )
             end
           end
-        METHOD
+        end
       end
     end
   end
 
   def self.create_validator_method(mod, original_method, method_sig, original_visibility)
-    has_fixed_arity = method_sig.kwarg_types.empty? && !method_sig.has_rest && !method_sig.has_keyrest &&
-      original_method.parameters.all? { |(kind, _name)| kind == :req || kind == :block }
-    can_skip_block_type = method_sig.block_type.nil? || method_sig.block_type.valid?(nil)
+    # Wrapper-shape decisions must read the parameters of the method actually being wrapped, not
+    # `method_sig.parameters` (captured at sig-build time). The two diverge when a sig'd method is
+    # re-wrapped over a different implementation: a stub redefined as `def m(*args, **kwargs, &blk)`
+    # then re-validated against the original fixed-arity sig would otherwise pick a fixed-arity wrapper,
+    # which binds args to named positionals and forwards them without the `ruby2_keywords` flag, turning
+    # a trailing `key: val` into a positional hash. Reading from `original_method` costs one array per
+    # wrap, off the hot path.
+    parameters = original_method.parameters
+    has_fixed_arity = method_sig.kwarg_types.empty? && method_sig.rest_type.nil? && method_sig.keyrest_type.nil? &&
+      parameters.all? { |(kind, _name)| kind == :req || kind == :block }
+
+    # nil implies block_type.nil?
+    # true implies !block_type.nil? and block_type.valid?(nil)
+    # false implies !block_type.nil? and !block_type.valid?(nil)
+    # This formulation avoids a type error without introducing extra method calls or local vars
+    can_skip_block_type = method_sig.block_type&.valid?(nil) != false
+
     ok_for_fast_path = has_fixed_arity && can_skip_block_type && !method_sig.bind && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
 
+    # Like `ok_for_fast_path`, but for the specialized wrappers below, each of
+    # which supports exactly one extra call shape (kwargs, a required block, or
+    # optional positional args) on top of what the fast/medium wrappers support.
+    ok_for_specialized_path = !ok_for_fast_path && !method_sig.bind && method_sig.rest_type.nil? &&
+      method_sig.keyrest_type.nil? && method_sig.arg_types.length < 5 && is_allowed_to_have_fast_path
+
+    # Restricted to methods with no positional args. The kwargs wrapper's `|**kwargs, &blk|` declares a
+    # keyword-rest, which would capture a bare `key: val` hash that a method with a positional parameter
+    # expects to receive positionally, starving that parameter. All-kwargs methods have no such parameter,
+    # so the wrapper matches a direct call. (Most kwargs-shaped sigs take only kwargs.)
+    kwargs_path = ok_for_specialized_path && can_skip_block_type && !method_sig.kwarg_types.empty? &&
+      method_sig.arg_types.empty? &&
+      parameters.all? { |(kind, _name)| kind == :key || kind == :keyreq || kind == :block }
+
+    required_block_path = ok_for_specialized_path && !can_skip_block_type && has_fixed_arity
+
+    # At least one param is `:opt` here (otherwise `ok_for_fast_path` would hold). The wrapper forwards
+    # through a `ruby2_keywords`-flagged `|*args, &blk|` splat (see below), not named optional parameters:
+    # named params have no `*rest` for `def_with_visibility` to flag, so a trailing `key: val` that Ruby
+    # packs into an optional positional would lose the keyword flag the slow path preserves.
+    optional_args_path = ok_for_specialized_path && can_skip_block_type && method_sig.kwarg_types.empty? &&
+      parameters.all? { |(kind, _name)| kind == :req || kind == :opt || kind == :block }
+
     all_args_are_simple = ok_for_fast_path && method_sig.arg_types.all? { |_name, type| type.is_a?(T::Types::Simple) }
-    simple_method = all_args_are_simple && method_sig.return_type.is_a?(T::Types::Simple)
-    simple_procedure = all_args_are_simple && method_sig.return_type.is_a?(T::Private::Types::Void)
+
+    effective_return_type = method_sig.effective_return_type
+    simple_method = all_args_are_simple && effective_return_type.is_a?(T::Types::Simple)
+    simple_procedure = all_args_are_simple && effective_return_type.is_a?(T::Private::Types::Void)
 
     # All the types for which valid? unconditionally returns `true`
     return_is_ignorable =
-      method_sig.return_type.equal?(T::Types::Untyped::Private::INSTANCE) ||
-      method_sig.return_type.equal?(T::Types::Anything::Private::INSTANCE) ||
-      method_sig.return_type.equal?(T::Types::AttachedClassType::Private::INSTANCE) ||
-      method_sig.return_type.equal?(T::Types::SelfType::Private::INSTANCE) ||
-      method_sig.return_type.is_a?(T::Types::TypeParameter) ||
-      method_sig.return_type.is_a?(T::Types::TypeVariable) ||
-      (method_sig.return_type.is_a?(T::Types::Simple) && method_sig.return_type.raw_type.equal?(BasicObject))
+      effective_return_type.equal?(T::Types::Untyped::Private::INSTANCE) ||
+      effective_return_type.equal?(T::Types::Anything::Private::INSTANCE) ||
+      effective_return_type.equal?(T::Types::AttachedClassType::Private::INSTANCE) ||
+      effective_return_type.equal?(T::Types::SelfType::Private::INSTANCE) ||
+      effective_return_type.is_a?(T::Types::TypeParameter) ||
+      effective_return_type.is_a?(T::Types::TypeVariable) ||
+      (effective_return_type.is_a?(T::Types::Simple) && effective_return_type.raw_type.equal?(BasicObject))
 
     returns_anything_method = all_args_are_simple && return_is_ignorable
 
@@ -97,12 +155,18 @@ module T::Private::Methods::CallValidation
           create_validator_method_skip_return_fast(mod, original_method, method_sig, original_visibility)
         elsif simple_procedure
           create_validator_procedure_fast(mod, original_method, method_sig, original_visibility)
-        elsif ok_for_fast_path && method_sig.return_type.is_a?(T::Private::Types::Void)
+        elsif ok_for_fast_path && effective_return_type.is_a?(T::Private::Types::Void)
           create_validator_procedure_medium(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path && return_is_ignorable
           create_validator_method_skip_return_medium(mod, original_method, method_sig, original_visibility)
         elsif ok_for_fast_path
           create_validator_method_medium(mod, original_method, method_sig, original_visibility)
+        elsif kwargs_path
+          create_validator_method_kwargs(mod, original_method, method_sig, original_visibility)
+        elsif required_block_path
+          create_validator_method_with_block(mod, original_method, method_sig, original_visibility)
+        elsif optional_args_path
+          create_validator_method_optional_args(mod, original_method, method_sig, original_visibility)
         elsif can_skip_block_type
           # The Ruby VM already validates that any block passed to a method
           # must be either `nil` or a `Proc` object, so there's no need to also
@@ -127,7 +191,7 @@ module T::Private::Methods::CallValidation
     # reduce number of allocations that happen here.
 
     if method_sig.bind
-      message = method_sig.bind.error_message_for_obj(instance)
+      message = method_sig.bind&.error_message_for_obj(instance)
       if message
         CallValidation.report_error(
           method_sig,
@@ -180,17 +244,17 @@ module T::Private::Methods::CallValidation
 
     # The only type that is allowed to change the return value is `.void`.
     # It ignores what you returned and changes it to be a private singleton.
-    if method_sig.return_type.is_a?(T::Private::Types::Void)
+    if method_sig.effective_return_type.is_a?(T::Private::Types::Void)
       T::Private::Types::Void::VOID
     else
-      message = method_sig.return_type.error_message_for_obj(return_value)
+      message = method_sig.effective_return_type.error_message_for_obj(return_value)
       if message
         CallValidation.report_error(
           method_sig,
           message,
           'Return value',
           nil,
-          method_sig.return_type,
+          method_sig.effective_return_type,
           return_value,
         )
       end
@@ -283,21 +347,31 @@ module T::Private::Methods::CallValidation
 
     # The only type that is allowed to change the return value is `.void`.
     # It ignores what you returned and changes it to be a private singleton.
-    if method_sig.return_type.is_a?(T::Private::Types::Void)
+    if method_sig.effective_return_type.is_a?(T::Private::Types::Void)
       T::Private::Types::Void::VOID
     else
-      message = method_sig.return_type.error_message_for_obj(return_value)
+      message = method_sig.effective_return_type.error_message_for_obj(return_value)
       if message
         CallValidation.report_error(
           method_sig,
           message,
           'Return value',
           nil,
-          method_sig.return_type,
+          method_sig.effective_return_type,
           return_value,
         )
       end
       return_value
+    end
+  end
+
+  # Get the name of a method owner via its `.to_s`, but fallback if its implementation raises or returns `nil`.
+  private_class_method def self.safe_method_owner_to_s(method_owner)
+    case method_owner
+    when Module # methods are usually owned by a Class or Module...
+      MODULE_TO_S.bind_call(method_owner)
+    else # ... but could be a singleton method on any kind of Object.
+      KERNEL_TO_S.bind_call(method_owner)
     end
   end
 
@@ -310,13 +384,13 @@ module T::Private::Methods::CallValidation
     pretty_method_name =
       if owner.singleton_class? && owner.respond_to?(:attached_object)
         # attached_object is new in Ruby 3.2
-        "#{owner.attached_object}.#{method.name}"
+        "#{safe_method_owner_to_s(owner.attached_object)}.#{method.name}"
       else
-        "#{owner}##{method.name}"
+        "#{safe_method_owner_to_s(owner)}##{method.name}"
       end
 
     pretty_message = "#{kind}#{name ? " '#{name}'" : ''}: #{error_message}\n" \
-      "Caller: #{caller_loc.path}:#{caller_loc.lineno}\n" \
+      "Caller: #{caller_loc&.path}:#{caller_loc&.lineno}\n" \
       "Definition: #{definition_file}:#{definition_line} (#{pretty_method_name})"
 
     T::Configuration.call_validation_error_handler(

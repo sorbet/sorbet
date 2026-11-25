@@ -1,14 +1,13 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   class <emptyTree>::<C A><<C <todo sym>>> < (<emptyTree>::<C T>::<C Struct>)
     ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:name, <emptyTree>::<C String>, :age, <emptyTree>::<C Integer>, :"foo \'bar", <emptyTree>::<C Integer>).void()
+      <self>.params(:name, <emptyTree>::<C String>, :age, <emptyTree>::<C Integer>).void()
     end
 
-    def initialize<<todo method>>(name:, age:, foo 'bar:, &<blk>)
+    def initialize<<todo method>>(name:, age:, &<blk>)
       begin
         @name = <cast:let>(name, <todo sym>, <emptyTree>::<C String>)
         @age = <cast:let>(age, <todo sym>, <emptyTree>::<C Integer>)
-        @foo 'bar = <cast:let>(foo 'bar, <todo sym>, <emptyTree>::<C Integer>)
         nil
       end
     end
@@ -37,22 +36,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       @age = arg0
     end
 
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.returns(<emptyTree>::<C Integer>)
-    end
-
-    def foo 'bar<<todo method>>(&<blk>)
-      @foo 'bar
-    end
-
-    ::T::Sig::WithoutRuntime.sig() do ||
-      <self>.params(:arg0, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
-    end
-
-    def foo 'bar=<<todo method>>(arg0, &<blk>)
-      @foo 'bar = arg0
-    end
-
     <runtime method definition of initialize>
 
     <self>.const(:name, <emptyTree>::<C String>)
@@ -72,10 +55,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.const(:age, <emptyTree>::<C Float>)
 
     <self>.prop(:"foo \'bar", <emptyTree>::<C Integer>)
-
-    <runtime method definition of foo 'bar>
-
-    <runtime method definition of foo 'bar=>
 
     <self>.prop(:"foo \'bar", <emptyTree>::<C Integer>)
   end

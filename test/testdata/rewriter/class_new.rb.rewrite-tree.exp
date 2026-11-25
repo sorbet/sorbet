@@ -52,6 +52,19 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   module <emptyTree>::<C Top><<C <todo sym>>> < ()
     class <emptyTree>::<C Parent><<C <todo sym>>> < (::<todo sym>)
+      <self>.sig() do ||
+        <self>.abstract().void()
+      end
+
+      def foo<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      <self>.extend(<emptyTree>::<C T>::<C Helpers>)
+
+      <self>.abstract!()
+
+      <runtime method definition of foo>
     end
   end
 

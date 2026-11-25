@@ -3,7 +3,4 @@
 
 class Project::Foo < PackageSpec
   import Project::Bar
-
-  export Project::Foo::Foo
-  export Project::Foo::CallsBar
 end

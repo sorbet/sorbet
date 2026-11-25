@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 require_relative '../test_helper'
 
 module Opus::Types::Test
@@ -92,6 +93,42 @@ module Opus::Types::Test
       end
 
       assert_includes(err.message, "Incompatible type for arg `kw` in signature for override of method `foo`")
+    end
+
+    it "succeeds if an override folds extra base positionals into a contravariant rest param" do
+      base = Class.new do
+        extend T::Sig
+        sig { overridable.params(a: BaseFoo1, b: SubFoo2).returns(BaseFoo3) }
+        def foo(a, b); end
+      end
+      klass = Class.new(base) do
+        extend T::Sig
+        sig { override.params(a: BaseFoo1, rest: BaseFoo2).returns(BaseFoo3) }
+        def foo(a, *rest)
+          BaseFoo3.new
+        end
+      end
+
+      klass.new.foo(BaseFoo1.new, SubFoo2.new)
+    end
+
+    it "raises if an override's rest param type is not a supertype of a folded base positional" do
+      base = Class.new do
+        extend T::Sig
+        sig { overridable.params(a: BaseFoo1, b: BaseFoo2).returns(BaseFoo3) }
+        def foo(a, b); end
+      end
+      klass = Class.new(base) do
+        extend T::Sig
+        sig { override.params(a: BaseFoo1, rest: SubFoo2).returns(BaseFoo3) }
+        def foo(a, *rest); end
+      end
+
+      err = assert_raises(RuntimeError) do
+        klass.new.foo(BaseFoo1.new, BaseFoo2.new)
+      end
+
+      assert_includes(err.message, "Incompatible type for arg #2 (`rest`) in signature for override of method `foo`")
     end
 
     it "raises if the return type is contravariant" do

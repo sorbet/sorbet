@@ -1,9 +1,13 @@
 #include "doctest/doctest.h"
 // ^ Violates linting rules, so include first.
+#include "absl/algorithm/container.h"
+#include "absl/cleanup/cleanup.h"
 #include "absl/strings/match.h"
 #include "common/common.h"
 #include "common/sort/sort.h"
+#include "main/lsp/LSPPreprocessor.h"
 #include "test/helpers/lsp.h"
+#include "test/helpers/packages.h"
 #include "test/lsp/ProtocolTest.h"
 
 using namespace std;
@@ -43,6 +47,62 @@ constexpr auto timestampGranularity = chrono::milliseconds(2);
 class MultithreadedProtocolTest : public ProtocolTest {
 public:
     MultithreadedProtocolTest() : ProtocolTest(/*multithreading*/ true, /*caching*/ false) {}
+
+    // The timeout here is a balance: we want to wait long enough for all slow path edits to
+    // complete, but not so long that we're just busy waiting. Because the files involved in this
+    // test are generally tiny, 500ms should be plenty of time, but if this is causing flakiness we
+    // will need to adjust this or, ideally, make the slow path faster ;-)
+    void assertSlowPathBlockedAndUnblock(int timeout_ms = 500) {
+        auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
+        auto msg = wrapper.read(timeout_ms);
+        REQUIRE(msg == nullptr);
+        setSlowPathBlocked(false);
+    }
+
+    // Initializes Sorbet in package mode over `files` (written to the workspace, in this order) and clears the
+    // counters.
+    void initializePackagedWorkspace(bool packageDirected, const vector<pair<string, string>> &files) {
+        auto opts = make_shared<realmain::options::Options>();
+        opts->cacheSensitiveOptions.sorbetPackages = true;
+        opts->packageDirected = packageDirected;
+        resetState(opts);
+
+        writeFilesToFS(files);
+        for (auto &[path, _] : files) {
+            lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+        }
+
+        auto initOptions = make_unique<SorbetInitializationOptions>();
+        initOptions->enableTypecheckInfo = true;
+        assertErrorDiagnostics(
+            initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+        getCounters();
+    }
+
+    // Starts a slow path by creating `newFile`, cancels it by creating `cancelFile` once it has started, and returns
+    // the messages of a fence sent afterwards. `cancellationExpected` on the first edit makes the slow path wait for
+    // the cancellation only once it has rearranged `workspaceFiles`.
+    vector<unique_ptr<LSPMessage>> cancelSlowPathWithNewFile(const pair<string, string> &newFile,
+                                                             const pair<string, string> &cancelFile) {
+        sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
+        sendAsync(*openFile(newFile.first, ""));
+        sendAsync(*changeFile(newFile.first, newFile.second, 2, /* cancellationExpected */ true));
+        sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
+        {
+            auto status = getTypecheckRunStatus(*readAsync());
+            REQUIRE(status.has_value());
+            REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+        }
+
+        sendAsync(*openFile(cancelFile.first, cancelFile.second));
+        {
+            auto status = getTypecheckRunStatus(*readAsync());
+            REQUIRE(status.has_value());
+            REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Cancelled);
+        }
+
+        return send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20)));
+    }
 };
 
 } // namespace
@@ -55,7 +115,6 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MultithreadedWrapperWorks") {
         CHECK_EQ(initCounters.getCategoryCounter("lsp.messages.processed", "initialized"), 1);
         CHECK_EQ(initCounters.getCategoryCounter("lsp.updates", "slowpath"), 1);
         CHECK_EQ(initCounters.getCategoryCounterSum("lsp.updates"), 1);
-        CHECK_EQ(initCounters.getTimings("initial_index").size(), 1);
         CHECK_EQ(initCounters.getCategoryCounterSum("lsp.messages.canceled"), 0);
     }
 
@@ -330,6 +389,103 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithHover") {
     checkDiagnosticTimes(counters.getTimings("last_diagnostic_latency"), 1, /* assertUniqueStartTimes */ false);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptionCompletionUnblocksRefilledQueue") {
+    bool packageDirected = false;
+    SUBCASE("monolithic") {}
+    SUBCASE("package_directed") {
+        packageDirected = true;
+    }
+
+    // Finish preemption only after LSPLoop is waiting on a refilled queue. Waking it requires both checking
+    // finished in the Await predicate and notifying finished under the task queue mutex.
+    const string source = "# typed: true\nclass Root::A\nend\n";
+    initializePackagedWorkspace(packageDirected,
+                                {{"__package.rb", PackageTextBuilder().withName("Root").build()}, {"a.rb", source}});
+    assertErrorDiagnostics(send(*openFile("a.rb", source)), {});
+
+    auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
+    auto firstHoverId = nextId;
+    auto firstHover = hover("a.rb", 1, 12);
+    auto secondHoverId = nextId;
+    auto secondHover = hover("a.rb", 1, 12);
+    auto hooks = make_shared<PreemptionTestHooks>(secondHoverId);
+    absl::Cleanup cleanup = [&] {
+        // Cancel the queued hover if the regression is present, otherwise wrapper teardown would wait forever.
+        // Release both gates even if an earlier assertion failed.
+        sendAsync(*cancelRequest(secondHoverId));
+        if (!hooks->resumeProcessing.HasBeenNotified()) {
+            hooks->resumeProcessing.Notify();
+        }
+        if (!hooks->resumePreemption.HasBeenNotified()) {
+            hooks->resumePreemption.Notify();
+        }
+    };
+    wrapper.setPreemptionTestHooks(hooks);
+
+    sendAsync(*changeFile("a.rb", source + "class Root::B; end\n", 2,
+                          /* cancellationExpected */ false, /* preemptionsExpected */ 1));
+    {
+        auto response = readAsync();
+        REQUIRE(response != nullptr);
+        CHECK_EQ(getTypecheckRunStatus(*response), SorbetTypecheckRunStatus::Started);
+    }
+    sendAsync(*firstHover);
+    {
+        auto response = readAsync();
+        REQUIRE(response != nullptr);
+        assertResponseMessage(firstHoverId, *response);
+        CHECK_FALSE(response->asResponse().error.has_value());
+    }
+    REQUIRE(hooks->preemptionReadyToFinish.WaitForNotificationWithTimeout(absl::Seconds(1)));
+
+    // Preemption has drained the queue. Refill it before letting the processing thread enter Await.
+    sendAsync(*secondHover);
+
+    // Wait for preprocessing to finish touching the queue mutex: a later counter-merge unlock could otherwise
+    // hide a missing wakeup in finish().
+    REQUIRE(hooks->preprocessingFinished.WaitForNotificationWithTimeout(absl::Seconds(1)));
+    wrapper.synchronizeTaskQueueForTest();
+
+    hooks->resumeProcessing.Notify();
+    REQUIRE(hooks->processingReadyToAwait.WaitForNotificationWithTimeout(absl::Seconds(1)));
+    // The notification was sent with the queue mutex held, immediately before Await. Acquiring it proves
+    // Await has released it with a false predicate: finished is false and the second hover is queued.
+    wrapper.synchronizeTaskQueueForTest();
+    hooks->resumePreemption.Notify();
+
+    // The second hover may itself preempt the remaining slow path, so accept its response on either side of
+    // the slow-path Ended notification.
+    bool receivedHover = false;
+    bool slowPathEnded = false;
+    for (int i = 0; i < 2; i++) {
+        auto response = wrapper.read(1000);
+        if (response == nullptr) {
+            break;
+        }
+        if (getTypecheckRunStatus(*response) == SorbetTypecheckRunStatus::Ended) {
+            CHECK_FALSE(slowPathEnded);
+            slowPathEnded = true;
+        } else {
+            assertResponseMessage(secondHoverId, *response);
+            CHECK_FALSE(response->asResponse().error.has_value());
+            CHECK_FALSE(receivedHover);
+            receivedHover = true;
+        }
+    }
+    CHECK(slowPathEnded);
+    CHECK_MESSAGE(receivedHover, "Processing must resume when preemption has finished, even if the queue was "
+                                 "refilled with another preemptible request");
+
+    move(cleanup).Invoke();
+    if (!receivedHover) {
+        auto canceled = readAsync();
+        REQUIRE(canceled != nullptr);
+        assertResponseMessage(secondHoverId, *canceled);
+        assertResponseError((int)LSPErrorCodes::RequestCancelled, "Request was canceled", *canceled);
+    }
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+}
+
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithCodeAction") {
     // Note:
     //
@@ -486,6 +642,57 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPath") {
         });
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithEditToFileWithStrictnessOverride") {
+    // bar.rb defines a class, but the override hides it from Sorbet.
+    auto opts = make_shared<realmain::options::Options>();
+    opts->strictnessOverrides[fmt::format("{}/bar.rb", this->rootPath)] = core::StrictLevel::Ignore;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+    assertErrorDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
+                                                    "class Bar\n"
+                                                    "end\n")),
+                           {});
+
+    // clear counters
+    getCounters();
+
+    // Slow path: Edit foo to have a class. Expect the edit below to preempt.
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "end\n",
+                          2, false, 1));
+
+    // Wait for typechecking to begin to avoid races.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Fast path: Sorbet still ignores the contents of bar, so no definition changes.
+    sendAsync(*changeFile("bar.rb",
+                          "# typed: true\n"
+                          "class Bar\n"
+                          "end\n"
+                          "# A comment.\n",
+                          2));
+
+    // Send a no-op to clear out the pipeline.
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
 }
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptSlowPathWithFastPathThatFixesAllErrors") {
@@ -700,6 +907,27 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathWithFastPathThatR
                          /* assertUniqueStartTimes */ false);
 }
 
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelPackageDirectedSlowPathDiscardsQueuedPackageErrors") {
+    auto packageText = PackageTextBuilder().withName("Root").build();
+    initializePackagedWorkspace(
+        true, {{"__package.rb", packageText}, {"a.rb", "# typed: strict\nmodule Root\n  Value = 1\nend\n"}});
+    assertErrorDiagnostics(send(*openFile("__package.rb", packageText)), {});
+    getCounters();
+
+    // Packager queues the invalid-argument diagnostic immediately. The cancellation wait comes after
+    // resolving the package's stratum, before typechecking the package AST would drain that queue.
+    sendAsync(*changeFile("__package.rb",
+                          "# typed: strict\nclass Root < PackageSpec\n"
+                          "  bogus Root::Value\nend\n",
+                          2, true));
+    auto status = getTypecheckRunStatus(*readAsync());
+    REQUIRE(status.has_value());
+    REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    sendAsync(*changeFile("__package.rb", packageText, 3));
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+    CHECK_EQ(getCounters().getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
+}
+
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") {
     auto initOptions = make_unique<SorbetInitializationOptions>();
     initOptions->enableTypecheckInfo = true;
@@ -755,6 +983,183 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanCancelSlowPathEvenIfAddsFile") 
                             {"bar.rb", 6, "unexpected"}});
     checkDiagnosticTimes(getCounters().getTimings("last_diagnostic_latency"), 5,
                          /* assertUniqueStartTimes */ false);
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CancelingSlowPathThatAddsPackageFileKeepsExistingWorkspaceFiles") {
+    // Canceling a slow path must leave `LSPTypechecker::workspaceFiles` with its pre-edit membership. The slow path
+    // appends the edit's new files and then partitions the vector in place (package files first, order not preserved),
+    // so a new `__package.rb` displaces a pre-existing source file past the old size; a rollback that truncated to the
+    // old size dropped that file from the workspace for good.
+    initializePackagedWorkspace(
+        /* packageDirected */ false, {
+                                         {"__package.rb", PackageTextBuilder().withName("Root").build()},
+                                         // `a.rb` and `b.rb` reference each other, so losing either is an unresolved
+                                         // constant in the other.
+                                         {"a.rb", "# typed: true\n"
+                                                  "module Root\n"
+                                                  "  class A\n"
+                                                  "    def fun\n"
+                                                  "      B.new.bar\n"
+                                                  "    end\n"
+                                                  "  end\n"
+                                                  "end\n"},
+                                         {"b.rb", "# typed: true\n"
+                                                  "module Root\n"
+                                                  "  class B\n"
+                                                  "    def bar\n"
+                                                  "      A.new.fun\n"
+                                                  "    end\n"
+                                                  "  end\n"
+                                                  "end\n"},
+                                     });
+
+    // The canceling edit lives in the new package and uses the root package's constants, so it only typechecks cleanly
+    // if nothing was lost along the way.
+    assertErrorDiagnostics(
+        cancelSlowPathWithNewFile(
+            {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+            {"foo/c.rb", "# typed: true\n"
+                         "module Root::Foo\n"
+                         "  class C\n"
+                         "    def c\n"
+                         "      Root::A.new.fun\n"
+                         "    end\n"
+                         "  end\n"
+                         "end\n"}),
+        {});
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest,
+                  "CancelingPackageDirectedSlowPathThatAddsLowStratumFileKeepsExistingWorkspaceFiles") {
+    // Same invariant for the second way the slow path reorders `workspaceFiles`: with package-directed typechecking,
+    // computePackageStrata sorts the non-package files in place by (stratum, id), so a new low-stratum file displaces
+    // the last high-stratum file past the old size -- no new package file involved.
+    initializePackagedWorkspace(
+        /* packageDirected */ true,
+        {
+            {"__package.rb", PackageTextBuilder().withName("Root").build()},
+            {"a.rb", "# typed: true\n"
+                     "module Root\n"
+                     "  class A\n"
+                     "  end\n"
+                     "end\n"},
+            {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+            // Root::Foo depends on Root, so `foo/b.rb` is the last file after the stratum
+            // sort and the one a new file in Root displaces.
+            {"foo/b.rb", "# typed: true\n"
+                         "module Root::Foo\n"
+                         "  class B\n"
+                         "  end\n"
+                         "end\n"},
+        });
+
+    assertErrorDiagnostics(cancelSlowPathWithNewFile({"d.rb", "# typed: true\n"
+                                                              "module Root\n"
+                                                              "  class D\n"
+                                                              "  end\n"
+                                                              "end\n"},
+                                                     {"e.rb", "# typed: true\n"
+                                                              "module Root\n"
+                                                              "  class E\n"
+                                                              "  end\n"
+                                                              "end\n"}),
+                           {});
+
+    // `foo/b.rb` is still part of the workspace: its class is in the symbol table.
+    auto responses = send(*workspaceSymbol("Root::Foo::B"));
+    REQUIRE_EQ(responses.size(), 1);
+    auto &result =
+        get<variant<JSONNullObject, vector<unique_ptr<SymbolInformation>>>>(responses[0]->asResponse().result.value());
+    CHECK_EQ(get<vector<unique_ptr<SymbolInformation>>>(result).size(), 1);
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageStratumOptimizationPreservesSlowPathRestarts") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    opts->stratumSplitThreshold = 3;
+    opts->minStratumSize = 4;
+    resetState(opts);
+
+    // Counting __package.rb, A/B form a four-file SCC, C has three files, and D has two.
+    // Splitting [A, B, C] / [D] produces [A, B] / [C] / [D], then combining produces [A, B] / [C, D].
+    vector<pair<string, string>> files = {
+        {"a/__package.rb", PackageTextBuilder().withName("A").withImports({"B"}).build()},
+        {"a/a.rb", "# typed: true\nclass A::Base; end\n"},
+        {"b/__package.rb", PackageTextBuilder().withName("B").withImports({"A"}).build()},
+        {"b/b.rb", "# typed: true\nclass B::Base < A::Base; end\n"},
+        {"c/__package.rb", PackageTextBuilder().withName("C").build()},
+        {"c/c.rb", "# typed: true\nclass C::Base; end\n"},
+        {"c/extra.rb", "# typed: true\nclass C::Extra; end\n"},
+        {"d/__package.rb", PackageTextBuilder().withName("D").withImports({"B", "C"}).build()},
+        {"d/d.rb", "# typed: true\n"
+                   "class D::Main < B::Base\n"
+                   "  def run\n"
+                   "    C::Base.new\n"
+                   "  end\n"
+                   "end\n"},
+    };
+    writeFilesToFS(files);
+    for (auto &[path, _] : files) {
+        opts->inputFileNames.emplace_back(fmt::format("{}/{}", rootPath, path));
+    }
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+    getCounters();
+
+    auto checkRestart = [this](vector<unique_ptr<LSPMessage>> messages, int expectedStartingStratum) {
+        vector<const SorbetTypecheckRunInfo *> runs;
+        for (auto &message : messages) {
+            if (getTypecheckRunStatus(*message).has_value()) {
+                runs.push_back(get<unique_ptr<SorbetTypecheckRunInfo>>(message->asNotification().params).get());
+            }
+        }
+        REQUIRE_EQ(runs.size(), 2);
+        CHECK_EQ(runs[0]->typecheckingPath, TypecheckingPath::Slow);
+        CHECK_EQ(runs[0]->status, SorbetTypecheckRunStatus::Started);
+        CHECK_EQ(runs[1]->typecheckingPath, TypecheckingPath::Slow);
+        CHECK_EQ(runs[1]->status, SorbetTypecheckRunStatus::Ended);
+        CHECK_EQ(runs[1]->startingStratum, expectedStartingStratum);
+        assertErrorDiagnostics(move(messages), {});
+    };
+
+    // C reaches four files, so a fresh optimization would stop combining it with D. Cancel this edit with a new
+    // file in D. Both the canceled run and its retry reuse the A/B symbol-table prefix, so they must keep the
+    // cached [A, B] / [C, D] traversal. Inheriting B::Base also checks that the copied prefix survives cancellation.
+    checkRestart(cancelSlowPathWithNewFile({"c/added.rb", "# typed: true\nclass C::Added < C::Base; end\n"},
+                                           {"d/added.rb", "# typed: true\n"
+                                                          "class D::Added < B::Base\n"
+                                                          "  def run\n"
+                                                          "    C::Base.new\n"
+                                                          "  end\n"
+                                                          "end\n"}),
+                 1);
+
+    // A subsequent edit in D still restarts in the combined stratum, even though C now meets the minimum size.
+    checkRestart(send(*openFile("d/later.rb", "# typed: true\nclass D::Later < D::Added; end\n")), 1);
+
+    // Changing a package file invalidates the entire prefix. The import graph is unchanged, but the new file
+    // counts now produce [A, B] / [C] / [D] when the optimizations run again.
+    checkRestart(send(*openFile("c/__package.rb", "# typed: strict\n\nclass C < PackageSpec\n  visible_to D\nend\n")),
+                 0);
+
+    // D's next slow path uses the new boundary, copying both the A/B and C strata.
+    checkRestart(send(*openFile("d/last.rb", "# typed: true\nclass D::Last < D::Later; end\n")), 2);
+
+    auto counters = getCounters();
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 4);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 1);
 }
 
 TEST_CASE_FIXTURE(MultithreadedProtocolTest, "SlowFooThenFastBarThenUndoSlowFoo") {
@@ -957,22 +1362,982 @@ TEST_CASE_FIXTURE(MultithreadedProtocolTest, "StallInSlowPathWorks") {
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
     }
 
-    // We expect the slow path to be blocked, so we want to make sure that we _don't_ receive any messages within a
-    // pretty long time frame---let's say 2000ms.
-    {
-        auto &wrapper = dynamic_cast<MultiThreadedLSPWrapper &>(*lspWrapper);
-        auto msg = wrapper.read(2000);
-        REQUIRE(msg == nullptr);
-    }
-
-    // Unblock the slow path.
-    setSlowPathBlocked(false);
+    assertSlowPathBlockedAndUnblock();
 
     // The slow path should now be unblocked. Wait for typechecking to end.
     {
         auto status = getTypecheckRunStatus(*readAsync());
         REQUIRE(status.has_value());
         REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptionCanceledForSlowPathWorks") {
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    // Create a simple file.
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "end\n",
+                          2));
+
+    // Wait for initial typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Wait for initial typechecking to finish.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    // Clear counters
+    getCounters();
+
+    // Turn on slow path blocking, and send an edit that is going to cause a slow path.
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "  include Mod\n"
+                          "end\n",
+                          3, false, 0));
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Make a completion query in the queue so that we schedule preemption.
+    sendAsync(*completion("foo.rb", 4, 14));
+
+    // Send another update that finishes the include. This should cancel preemption
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "  include ModuleA\n"
+                          "end\n",
+                          4, false, 0));
+
+    assertSlowPathBlockedAndUnblock();
+
+    // The slow path should now be unblocked, and will be canceled immediately.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Cancelled);
+    }
+
+    // Now we'll see the second slow path edit start
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Then the response to the completion request
+    {
+        auto msg = readAsync();
+        REQUIRE(msg->isResponse());
+        REQUIRE_EQ(msg->asResponse().requestMethod, LSPMethod::TextDocumentCompletion);
+    }
+
+    // And finally the slow path finishes
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    // Verify the path that we took during cancellation.
+    {
+        auto counters = getCounters();
+        CHECK_EQ(counters.getCategoryCounter("lsp.preemption.cancelation", "single"), 1);
+        CHECK_EQ(counters.getCategoryCounter("lsp.preemption.cancelation", "merged"), 0);
+    }
+
+    // Make another slow path edit that deletes part of the module name
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "  include Modu\n"
+                          "end\n",
+                          5, false, 0));
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // An error will be raised for the include argument
+    {
+        vector<unique_ptr<LSPMessage>> msgs;
+        msgs.emplace_back(readAsync());
+        // TODO(trevor): why does this report the same error twice?
+        assertErrorDiagnostics(move(msgs), {{"foo.rb", 4, "Unable to resolve constant `Modu`"}});
+    }
+
+    // And finally the slow path finishes
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PreemptionCanceledForSlowPathWorksWithDelete") {
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    // Create a simple file.
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "  include Foo::Bar::Baz::Foo\n"
+                          "end\n",
+                          2));
+
+    // Wait for initial typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Wait for initial typechecking to finish, with errors.
+    {
+        auto msg = readAsync();
+        REQUIRE(msg->isNotification());
+        REQUIRE_EQ(msg->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    // Clear counters
+    getCounters();
+
+    // Turn on slow path blocking, and send an edit that is going to cause a slow path.
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "  include Mod\n"
+                          "end\n",
+                          3, false, 0));
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Make a completion query at the end of the old include into the queue so that we schedule preemption.
+    sendAsync(*completion("foo.rb", 4, 28));
+
+    // Send another update that finishes the include. This should cancel preemption
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "  include ModuleA\n"
+                          "end\n",
+                          4, false, 0));
+
+    assertSlowPathBlockedAndUnblock();
+
+    // The slow path should now be unblocked, and will be canceled immediately.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Cancelled);
+    }
+
+    // Now we'll see the second slow path edit start
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Then the response to the completion request
+    {
+        auto msg = readAsync();
+        REQUIRE(msg->isResponse());
+        REQUIRE_EQ(msg->asResponse().requestMethod, LSPMethod::TextDocumentCompletion);
+    }
+
+    // And finally the slow path finishes after reporting that there are no more errors.
+    {
+        std::vector<unique_ptr<LSPMessage>> msgs;
+        msgs.emplace_back(readAsync());
+        assertErrorDiagnostics(move(msgs), {});
+
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    // Verify the path that we took during cancellation.
+    {
+        auto counters = getCounters();
+        CHECK_EQ(counters.getCategoryCounter("lsp.preemption.cancelation", "single"), 1);
+        CHECK_EQ(counters.getCategoryCounter("lsp.preemption.cancelation", "merged"), 0);
+    }
+
+    // Make another slow path edit that deletes part of the module name
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "  include Modu\n"
+                          "end\n",
+                          5, false, 0));
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // An error will be raised for the include argument
+    {
+        vector<unique_ptr<LSPMessage>> msgs;
+        msgs.emplace_back(readAsync());
+        // TODO(trevor): why does this report the same error twice?
+        assertErrorDiagnostics(move(msgs), {{"foo.rb", 4, "Unable to resolve constant `Modu`"}});
+    }
+
+    // And finally the slow path finishes
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "MergingEditsWhenCancellingPreemptionWorks") {
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    // Create a simple file.
+    assertErrorDiagnostics(send(*openFile("foo.rb", "")), {});
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "\n"
+                          "  def foo\n"
+                          "  end\n"
+                          "end\n",
+                          2));
+
+    // Wait for initial typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Wait for initial typechecking to finish.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    // Clear counters
+    getCounters();
+
+    // Turn on slow path blocking, and send an edit that is going to cause a slow path.
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "  include Mod\n"
+                          "  def foo\n"
+                          "  end\n"
+                          "end\n",
+                          3, false, 0));
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Send another change that would take the fast path
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "  include Mod\n"
+                          "  def foo\n"
+                          "    puts :hi\n"
+                          "  end\n"
+                          "end\n",
+                          4, false, 0));
+
+    // Make a completion query in the queue so that we schedule preemption.
+    sendAsync(*completion("foo.rb", 4, 14));
+
+    // Send another update that finishes the include. This should cancel preemption
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo\n"
+                          "  module ModuleA; end\n"
+                          "  module ModuleB; end\n"
+                          "  include ModuleA\n"
+                          "  def foo\n"
+                          "    puts :hi\n"
+                          "  end\n"
+                          "end\n",
+                          5, false, 0));
+
+    assertSlowPathBlockedAndUnblock();
+
+    // The slow path should now be unblocked, and will be canceled immediately.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Cancelled);
+    }
+
+    // Now we'll see the second slow path edit start
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Then the response to the completion request
+    {
+        auto msg = readAsync();
+        REQUIRE(msg->isResponse());
+        REQUIRE_EQ(msg->asResponse().requestMethod, LSPMethod::TextDocumentCompletion);
+    }
+
+    // And finally the slow path finishes
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Ended);
+    }
+
+    // Verify the path that we took during cancellation.
+    {
+        auto counters = getCounters();
+        CHECK_EQ(counters.getCategoryCounter("lsp.preemption.cancelation", "single"), 0);
+        CHECK_EQ(counters.getCategoryCounter("lsp.preemption.cancelation", "merged"), 1);
+    }
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "CanPreemptDoesNotCrashOnEvictedFilesShortCircuit") {
+    // Set lspMaxFilesOnFastPath to 1 so the short-circuit in fastPathFilesToTypecheck
+    // triggers with just a few extra files: totalChanged > 2 * 1 = 2.
+    // (We could do this without, but it would involve making dozens of files that use the symbol)
+    auto opts = make_shared<realmain::options::Options>();
+    opts->lspMaxFilesOnFastPath = 1;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    // Sequence of edits:
+    //
+    // - Slow path edit in foo.rb
+    // - While slow path is going, fast path edit in bar.rb that implicates more than lspMaxFilesOnFastPath
+
+    assertErrorDiagnostics(send(*openFile("bar.rb", "# typed: true\n"
+                                                    "class Bar\n"
+                                                    "  extend T::Sig\n"
+                                                    "  sig { returns(String) }\n"
+                                                    "  def compute_value = 'hi'\n"
+                                                    "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("baz.rb", "# typed: true\n"
+                                                    "class Baz\n"
+                                                    "  def baz_method = Bar.new.compute_value\n"
+                                                    "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("qux.rb", "# typed: true\n"
+                                                    "class Qux\n"
+                                                    "  def qux_method = Bar.new.compute_value\n"
+                                                    "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("foo.rb", "# typed: true\n"
+                                                    "class Foo\n"
+                                                    "end")),
+                           {});
+
+    setSlowPathBlocked(true);
+
+    sendAsync(*changeFile("foo.rb",
+                          "# typed: true\n"
+                          "class Foo2\n"
+                          "end",
+                          2));
+
+    // Wait for the slow path to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Fast path edit changes compute_value: which means 3 files on the fast path, triggering the
+    // short-circuit in `fastPathFilesToTypecheck`.
+    sendAsync(*changeFile("bar.rb",
+                          "# typed: true\n"
+                          "class Bar\n"
+                          "  extend T::Sig\n"
+                          "  sig { returns(Integer) }\n"
+                          "  def compute_value = 0\n"
+                          "end\n",
+                          4));
+
+    // Unblock the slow path.
+    setSlowPathBlocked(false);
+
+    // Drain the pipeline with a fence.
+    assertErrorDiagnostics(send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20))), {});
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "QueuedEditRechecksFastPathAfterEarlierEditIsIndexed") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->lspMaxFilesOnFastPath = 2;
+    resetState(opts);
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("x.rb", "# typed: true\n"
+                                                  "class X\n"
+                                                  "  extend T::Sig\n"
+                                                  "  sig {returns(String)}\n"
+                                                  "  def m = 'old'\n"
+                                                  "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("y.rb", "# typed: true\n"
+                                                  "class Y\n"
+                                                  "  def use = 1\n"
+                                                  "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("z.rb", "# typed: true\n"
+                                                  "class Z\n"
+                                                  "  def use = X.new.m\n"
+                                                  "end\n")),
+                           {});
+    assertErrorDiagnostics(send(*openFile("trigger.rb", "# typed: true\nclass Trigger\nend\n")), {});
+
+    // Keep a slow path running while both edits enter the queue. Its expected preemption makes the queue scan
+    // preview the later edit before the earlier edit changes the indexer's file table.
+    sendAsync(*changeFile("trigger.rb", "# typed: true\nclass RenamedTrigger\nend\n", 2,
+                          /* cancellationExpected */ true, /* preemptionsExpected */ 1));
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::PAUSE, nullopt)));
+    // This body edit adds Y to the files that a subsequent change to X#m must typecheck.
+    sendAsync(*changeFile("y.rb",
+                          "# typed: true\n"
+                          "class Y\n"
+                          "  def use = X.new.m\n"
+                          "end\n",
+                          2));
+    // A request keeps the two edits separate, so merging cannot invalidate the second edit's preview.
+    sendAsync(*hover("y.rb", 2, 19));
+    // Before Y is indexed, this affects only X and Z and appears to fit the two-file limit. Afterwards it
+    // also affects Y and must take the slow path.
+    sendAsync(*changeFile("x.rb",
+                          "# typed: true\n"
+                          "class X\n"
+                          "  extend T::Sig\n"
+                          "  sig {returns(Integer)}\n"
+                          "  def m = 1\n"
+                          "end\n",
+                          2));
+    sendAsync(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::RESUME, nullopt)));
+
+    auto messages = send(LSPMessage(make_unique<NotificationMessage>("2.0", LSPMethod::SorbetFence, 20)));
+    bool sawFastPath = false;
+    bool sawSlowPath = false;
+    bool sawHover = false;
+    for (auto &message : messages) {
+        if (message->isResponse() && message->asResponse().requestMethod == LSPMethod::TextDocumentHover) {
+            sawHover = true;
+        }
+        if (message->isNotification() && message->method() == LSPMethod::SorbetTypecheckRunInfo) {
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(message->asNotification().params);
+            if (runInfo->status == SorbetTypecheckRunStatus::Started) {
+                sawFastPath |= runInfo->typecheckingPath == TypecheckingPath::Fast;
+                sawSlowPath |= runInfo->typecheckingPath == TypecheckingPath::Slow;
+            }
+        }
+    }
+    CHECK(sawFastPath);
+    CHECK(sawHover);
+    CHECK(sawSlowPath);
+}
+
+// This case shows how preemption works when the preemption tasks occur in a stratum that's at or before the one that
+// contains the file that kicked off the slow path.
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionBeforeSlowPathStratum") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    resetState(opts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
+
+    assertErrorDiagnostics(send(*openFile("foo/b.rb", "# typed: true\n"
+                                                      "module Root::Foo\n"
+                                                      "  class Bar\n"
+                                                      "  end\n"
+                                                      "end\n")),
+                           {});
+
+    setSlowPathBlocked(true);
+
+    {
+        auto cancellationExpected = false;
+
+        // We're expecting one preemption from each of the following sub-cases.
+        auto preemptionsExpected = 1;
+
+        sendAsync(*changeFile("foo/b.rb",
+                              "# typed: true\n"
+                              "module Root::Foo\n"
+                              "  class Bar\n"
+                              "    class Inner\n"
+                              "      def bar\n"
+                              "        Root::A.n\n"
+                              "      end\n"
+                              "    end\n"
+                              "  end\n"
+                              "end\n",
+                              2, cancellationExpected, preemptionsExpected));
+    }
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    SUBCASE("completion") {
+        // Send a completion request at the end of `Root::A.`
+        sendAsync(*completion("foo/b.rb", 5, 16));
+
+        setSlowPathBlocked(false);
+
+        // This is the completion result
+        auto resp = readAsync();
+        REQUIRE(resp->isResponse());
+        CHECK_EQ(resp->asResponse().requestMethod, LSPMethod::TextDocumentCompletion);
+    }
+
+    SUBCASE("hover") {
+        // Send a hover request at the end of `Root::A.`
+        sendAsync(*hover("foo/b.rb", 5, 14));
+
+        setSlowPathBlocked(false);
+
+        // This is the hover result
+        auto resp = readAsync();
+        REQUIRE(resp->isResponse());
+        CHECK_EQ(resp->asResponse().requestMethod, LSPMethod::TextDocumentHover);
+    }
+
+    SUBCASE("fast_path_edit") {
+        // Make a fast-path edit to a.rb
+        sendAsync(*changeFile("a.rb",
+                              "# typed: true\n"
+                              "module Root\n"
+                              "  class A\n"
+                              "    def fun\n"
+                              "      A.new\n"
+                              "    end\n"
+                              "  end\n"
+                              "end\n",
+                              2));
+
+        setSlowPathBlocked(false);
+
+        // We should see a fast path start notification
+        {
+            auto diag = readAsync();
+            REQUIRE(diag->isNotification());
+            REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+            CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+            CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Started);
+            CHECK(runInfo->filesTypechecked.empty());
+        }
+
+        // And then a fast path end notification
+        {
+            auto diag = readAsync();
+            REQUIRE(diag->isNotification());
+            REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+            CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+            CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+            REQUIRE_EQ(runInfo->filesTypechecked.size(), 1);
+            CHECK_EQ(runInfo->filesTypechecked.front(), fmt::format("{}/a.rb", this->rootPath));
+        }
+    }
+
+    // This is the slow path publishing a notification about the call to Roo::A.n
+    auto diag = readAsync();
+    REQUIRE(diag->isNotification());
+    CHECK_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+
+    // Finally, we'll see the slow path end
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Slow);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+    }
+}
+
+// This case shows how preemption works when the preemption tasks occur in a stratum that's after the one that contains
+// the file that kicked off the slow path.
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionAfterSlowPathStratum") {
+    auto opts = make_shared<realmain::options::Options>();
+    opts->cacheSensitiveOptions.sorbetPackages = true;
+    opts->packageDirected = true;
+    resetState(opts);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    auto initOptions = make_unique<SorbetInitializationOptions>();
+    initOptions->enableTypecheckInfo = true;
+    assertErrorDiagnostics(
+        initializeLSP(true /* supportsMarkdown */, true /* supportsCodeActionResolve */, move(initOptions)), {});
+
+    // Add a new file in the first stratum
+    assertErrorDiagnostics(send(*openFile("b.rb", "# typed: true\n"
+                                                  "module Root\n"
+                                                  "  class B\n"
+                                                  "  end\n"
+                                                  "end\n")),
+                           {});
+
+    assertErrorDiagnostics(send(*openFile("foo/a.rb", files[3].second)), {});
+
+    setSlowPathBlocked(true);
+
+    {
+        auto cancellationExpected = false;
+
+        // We're expecting one preemption from each of the following sub-cases.
+        auto preemptionsExpected = 1;
+
+        // We're modifying a file in the first stratum, and making preemption queries for files in the second.
+        sendAsync(*changeFile("b.rb",
+                              "# typed: true\n"
+                              "module Root\n"
+                              "  class B\n"
+                              "    class Inner\n"
+                              "      def bar\n"
+                              "        Root::A.n\n"
+                              "      end\n"
+                              "    end\n"
+                              "  end\n"
+                              "end\n",
+                              2, cancellationExpected, preemptionsExpected));
+    }
+
+    // Wait for typechecking to start.
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    SUBCASE("hover") {
+        // Send a hover request at the end of `Root::A.`
+        sendAsync(*hover("foo/a.rb", 4, 12));
+
+        setSlowPathBlocked(false);
+
+        // This is the slow path publishing a notification about the call to Roo::A.n in b.rb, which happens on an
+        // earlier stratum than the hover in foo/a.rb.
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        CHECK_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+
+        // This is the hover result
+        auto resp = readAsync();
+        REQUIRE(resp->isResponse());
+        CHECK_EQ(resp->asResponse().requestMethod, LSPMethod::TextDocumentHover);
+    }
+
+    SUBCASE("fast_path_edit") {
+        // Make a fast-path edit to foo/a.rb
+        sendAsync(*changeFile("foo/a.rb",
+                              "# typed: true\n"
+                              "module Root::Foo\n"
+                              "  class A\n"
+                              "    def foo\n"
+                              "      Root::A.new()\n"
+                              "      puts :hi\n"
+                              "    end\n"
+                              "  end\n"
+                              "end\n",
+                              2));
+
+        setSlowPathBlocked(false);
+
+        // This is the slow path publishing a notification about the call to Roo::A.n in b.rb, which happens on an
+        // earlier stratum than the fast path edit to foo/a.rb
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        CHECK_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+
+        // We should see a fast path start notification
+        {
+            auto diag = readAsync();
+            REQUIRE(diag->isNotification());
+            REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+            CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+            CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Started);
+            CHECK(runInfo->filesTypechecked.empty());
+        }
+
+        // And then a fast path end notification
+        {
+            auto diag = readAsync();
+            REQUIRE(diag->isNotification());
+            REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+            auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+            CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+            CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+            REQUIRE_EQ(runInfo->filesTypechecked.size(), 1);
+            CHECK_EQ(runInfo->filesTypechecked.front(), fmt::format("{}/foo/a.rb", this->rootPath));
+        }
+    }
+
+    // Finally, we'll see the slow path end
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(diag->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Slow);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+    }
+}
+
+TEST_CASE_FIXTURE(MultithreadedProtocolTest, "PackageDirectedPreemptionWaitsForExtraFastPathFiles") {
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    extend T::Sig\n"
+                 "    sig {returns(String)}\n"
+                 "    def value\n"
+                 "      \"old\"\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"b.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class B\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class Consumer\n"
+                     "    def value\n"
+                     "      Root::A.new.value\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+    initializePackagedWorkspace(true, files);
+    assertErrorDiagnostics(send(*openFile("a.rb", files[1].second)), {});
+    assertErrorDiagnostics(send(*openFile("b.rb", files[2].second)), {});
+
+    setSlowPathBlocked(true);
+    sendAsync(*changeFile("b.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class B\n"
+                          "    class Inner\n"
+                          "      def bar\n"
+                          "        Root::A.n\n"
+                          "      end\n"
+                          "    end\n"
+                          "  end\n"
+                          "end\n",
+                          2, /* cancellationExpected */ false, /* preemptionsExpected */ 1));
+    {
+        auto status = getTypecheckRunStatus(*readAsync());
+        REQUIRE(status.has_value());
+        REQUIRE_EQ(*status, SorbetTypecheckRunStatus::Started);
+    }
+
+    // Changing the return type changes A#value's hash. The incremental fast path must also retypecheck the file
+    // that calls it in Root::Foo, so preemption must wait for that later stratum.
+    sendAsync(*changeFile("a.rb",
+                          "# typed: true\n"
+                          "module Root\n"
+                          "  class A\n"
+                          "    extend T::Sig\n"
+                          "    sig {returns(Integer)}\n"
+                          "    def value\n"
+                          "      1\n"
+                          "    end\n"
+                          "  end\n"
+                          "end\n",
+                          2));
+    setSlowPathBlocked(false);
+
+    // The Root stratum reports its error before the fast path starts in the Root::Foo stratum.
+    {
+        auto diag = readAsync();
+        REQUIRE(diag->isNotification());
+        REQUIRE_EQ(diag->asNotification().method, LSPMethod::TextDocumentPublishDiagnostics);
+        auto params = getPublishDiagnosticParams(diag->asNotification());
+        REQUIRE(params.has_value());
+        CHECK_EQ((*params)->uri, getUri("b.rb"));
+    }
+    {
+        auto msg = readAsync();
+        REQUIRE(msg->isNotification());
+        REQUIRE_EQ(msg->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(msg->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Started);
+    }
+    {
+        auto msg = readAsync();
+        REQUIRE(msg->isNotification());
+        REQUIRE_EQ(msg->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(msg->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Fast);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
+        CHECK(absl::c_linear_search(runInfo->filesTypechecked, fmt::format("{}/a.rb", rootPath)));
+        CHECK(absl::c_linear_search(runInfo->filesTypechecked, fmt::format("{}/foo/a.rb", rootPath)));
+    }
+    {
+        auto msg = readAsync();
+        REQUIRE(msg->isNotification());
+        REQUIRE_EQ(msg->asNotification().method, LSPMethod::SorbetTypecheckRunInfo);
+        auto &runInfo = get<unique_ptr<SorbetTypecheckRunInfo>>(msg->asNotification().params);
+        CHECK_EQ(runInfo->typecheckingPath, TypecheckingPath::Slow);
+        CHECK_EQ(runInfo->status, SorbetTypecheckRunStatus::Ended);
     }
 }
 

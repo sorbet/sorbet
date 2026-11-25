@@ -1,0 +1,14 @@
+# typed: true
+# selective-apply-code-action: quickfix
+# omit-apply-all-quickfix: false
+
+x = T.let(1, T.nilable(Integer))
+
+T.must(x) + 1
+# ^ error: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)`
+# ^ apply-code-action: [A] Wrap in `T.must`
+# ^ apply-code-action: [B] Apply all Sorbet fixes for file
+T.must(x) + 1
+# ^ error: Method `+` does not exist on `NilClass` component of `T.nilable(Integer)`
+# ^ apply-code-action: [C] Wrap in `T.must`
+# ^ apply-code-action: [D] Apply all Sorbet fixes for file

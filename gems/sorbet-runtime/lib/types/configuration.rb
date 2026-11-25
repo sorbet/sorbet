@@ -1,5 +1,5 @@
-# typed: true
 # frozen_string_literal: true
+# typed: true
 
 module T::Configuration
   # Announces to Sorbet that we are currently in a test environment, so it
@@ -68,38 +68,6 @@ module T::Configuration
   # (Including values in type errors is the default)
   def self.include_value_in_type_errors
     @include_value_in_type_errors = true
-  end
-
-  # Whether VM-defined prop serialization/deserialization routines can be enabled.
-  #
-  # @return [T::Boolean]
-  def self.can_enable_vm_prop_serde?
-    T::Props::Private::DeserializerGenerator.respond_to?(:generate2)
-  end
-
-  @use_vm_prop_serde = false
-  # Whether to use VM-defined prop serialization/deserialization routines.
-  #
-  # The default is to use runtime codegen inside sorbet-runtime itself.
-  #
-  # @return [T::Boolean]
-  def self.use_vm_prop_serde?
-    @use_vm_prop_serde || false
-  end
-
-  # Enable using VM-defined prop serialization/deserialization routines.
-  #
-  # This method is likely to break things outside of Stripe's systems.
-  def self.enable_vm_prop_serde
-    if !can_enable_vm_prop_serde?
-      hard_assert_handler('Ruby VM is not setup to use VM-defined prop serde')
-    end
-    @use_vm_prop_serde = true
-  end
-
-  # Disable using VM-defined prop serialization/deserialization routines.
-  def self.disable_vm_prop_serde
-    @use_vm_prop_serde = false
   end
 
   # Configure the default checked level for a sig with no explicit `.checked`
@@ -302,38 +270,6 @@ module T::Configuration
     nil
   end
 
-  @log_info_handler = nil
-  # Set a handler for logging
-  #
-  # @param [Lambda, Proc, Object, nil] value Proc that handles the error
-  #   report (pass nil to reset to default behavior)
-  #
-  # Parameters passed to value.call:
-  #
-  #  @param [String] str Message to be logged
-  #  @param [Hash] extra A hash containing additional parameters to be passed along to the logger.
-  #
-  # @example
-  #   T::Configuration.log_info_handler = lambda do |str, extra|
-  #     puts "#{str}, context: #{extra}"
-  #   end
-  def self.log_info_handler=(value)
-    validate_lambda_given!(value)
-    @log_info_handler = value
-  end
-
-  private_class_method def self.log_info_handler_default(str, extra)
-    puts "#{str}, extra: #{extra}"
-  end
-
-  def self.log_info_handler(str, extra)
-    if @log_info_handler
-      @log_info_handler.call(str, extra)
-    else
-      log_info_handler_default(str, extra)
-    end
-  end
-
   @soft_assert_handler = nil
   # Set a handler for soft assertions
   #
@@ -366,41 +302,6 @@ module T::Configuration
       @soft_assert_handler.call(str, extra)
     else
       soft_assert_handler_default(str, extra)
-    end
-  end
-
-  @hard_assert_handler = nil
-  # Set a handler for hard assertions
-  #
-  # These generally should stop execution of the program, and optionally inform
-  # some party of the assertion.
-  #
-  # @param [Lambda, Proc, Object, nil] value Proc that handles the error
-  #   report (pass nil to reset to default behavior)
-  #
-  # Parameters passed to value.call:
-  #
-  #  @param [String] str Assertion message
-  #  @param [Hash] extra A hash containing additional parameters to be passed along to the handler.
-  #
-  # @example
-  #   T::Configuration.hard_assert_handler = lambda do |str, extra|
-  #     raise "#{str}, context: #{extra}"
-  #   end
-  def self.hard_assert_handler=(value)
-    validate_lambda_given!(value)
-    @hard_assert_handler = value
-  end
-
-  private_class_method def self.hard_assert_handler_default(str, _)
-    raise str
-  end
-
-  def self.hard_assert_handler(str, extra={})
-    if @hard_assert_handler
-      @hard_assert_handler.call(str, extra)
-    else
-      hard_assert_handler_default(str, extra)
     end
   end
 
@@ -491,20 +392,6 @@ module T::Configuration
 
   def self.redaction_handler
     @redaction_handler
-  end
-
-  @class_owner_finder = nil
-  # Set to a function which can get the 'owner' of a class. This is
-  # used in reporting deserialization errors
-  #
-  # @param [Lambda, Proc, nil] handler Proc that takes a class and
-  # produces its owner, or `nil` if it does not have one.
-  def self.class_owner_finder=(handler)
-    @class_owner_finder = handler
-  end
-
-  def self.class_owner_finder
-    @class_owner_finder
   end
 
   # Temporarily disable ruby warnings while executing the given block. This is

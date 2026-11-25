@@ -2,9 +2,13 @@
 #define SORBET_PARSER_PARSER_H
 
 #include "Node.h"
-#include "ParseResult.h"
 
 namespace sorbet::parser {
+
+struct ParseResult {
+    std::unique_ptr<Node> tree;
+    std::vector<core::LocOffsets> commentLocations;
+};
 
 class Parser final {
 public:

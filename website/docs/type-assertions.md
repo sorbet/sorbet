@@ -1,16 +1,17 @@
 ---
 id: type-assertions
 title: Type Assertions
-sidebar_label: T.let, T.cast, T.must, T.bind
+sidebar_label: T.let, T.cast, T.must, T.assert_type!, T.bind
 ---
 
-There are five ways to assert the types of expressions in Sorbet:
+Sorbet provides several ways to assert the types of expressions:
 
 - `T.let(expr, Type)`
 - `T.cast(expr, Type)`
-- `T.must(expr)` / `T.must_because(expr) {msg}`
+- `T.must(expr)` / `T.must_because(expr) { reason }`
 - `T.assert_type!(expr, Type)`
 - `T.bind(self, Type)`
+- `T.absurd(expr)` (see [Exhaustiveness](exhaustiveness.md))
 
 > There is also `T.unsafe` which is not a "type assertion" so much as an [Escape Hatch](troubleshooting.md#escape-hatches).
 
@@ -41,7 +42,7 @@ Caller: test.rb:8
 
 ## `T.cast`
 
-Sometimes we the programmer are aware of an invariant in the code that isn't currently expressible in the Sorbet type system:
+Sometimes we as programmers are aware of an invariant in the code that isn't currently expressible in the Sorbet type system:
 
 ```ruby
 extend T::Sig
@@ -64,7 +65,7 @@ In this case, we know (through careful test cases / confidence in our production
 
 Ideally we'd refactor the code to express this invariant in the types. To reiterate: the **preferred** solution is to refactor this code. The time spent adjusting this code now will make it easier and safer to refactor the code in the future. Even still, we don't always have the time _right now_, so let's see how we can work around the issue.
 
-We can use `T.cast` to explicitly tell our invariant to Sorbet:
+We can use `T.cast` to explicitly communicate this invariant to Sorbet:
 
 ```ruby
   case label
@@ -191,7 +192,7 @@ This is annoying:
 
 If we tried to clean this up with something like `self = T.cast(self, ...)`, the Ruby VM rejects our code with a syntax error: `self` is not a variable, and can't be used as the name of one.
 
-Thus, Sorbet provides `T.bind` for this specific usecase instead:
+Thus, Sorbet provides `T.bind` for this specific use case instead:
 
 ```ruby
 T.bind(self, MyClass)
@@ -200,21 +201,23 @@ self.method_on_my_class
 
 `T.bind` is the only type assertion that does not require assigning the assertion result into a variable, and it can only be used on `self`.
 
-`T.bind` can be used anywhere `self` is used (i.e., methods, blocks, lambdas, etc.), though it is most usually useful within blocks. See [Blocks, Procs, and Lambda Types](procs.md) for more real-world usage examples.
+`T.bind` can be used anywhere `self` is used (i.e., methods, blocks, lambdas, etc.), though it is most useful within blocks. See [Blocks, Procs, and Lambda Types](procs.md) for more real-world usage examples.
 
 ## Static vs Runtime Checking
 
-At runtime, all of these assertions verify the `expr` they are passed matches the `Type` they are passed.
+At runtime, all of these assertions check that the value they are passed satisfies their respective constraint.
 
 Statically, e.g., when type checking with `srb tc`, some of them are **assumed** to hold, but not statically checked.
 
-| Assertion                    | Static      | Runtime |
-| ---------------------------- | ----------- | ------- |
-| `T.let(expr, Type)`          | checked     | checked |
-| `T.cast(expr, Type)`         | **assumed** | checked |
-| `T.must(expr)`               | **assumed** | checked |
-| `T.assert_type!(expr, Type)` | checked     | checked |
-| `T.bind(self, Type)`         | **assumed** | checked |
+| Assertion                         | Static      | Runtime |
+| --------------------------------- | ----------- | ------- |
+| `T.absurd(expr)`                  | checked     | checked |
+| `T.assert_type!(expr, Type)`      | checked     | checked |
+| `T.bind(self, Type)`              | **assumed** | checked |
+| `T.cast(expr, Type)`              | **assumed** | checked |
+| `T.let(expr, Type)`               | checked     | checked |
+| `T.must(expr)`                    | **assumed** | checked |
+| `T.must_because(expr) { reason }` | **assumed** | checked |
 
 When an assertion is assumed to hold statically, Sorbet will only use it for the purpose of updating its internal understanding of the types, and will never attempt to alert the programmer that an assumption might not hold. In this sense, those assertions can be considered [Escape Hatches](troubleshooting.md#escape-hatches) for getting something to typecheck that might not otherwise.
 
@@ -222,7 +225,7 @@ When an assertion is assumed to hold statically, Sorbet will only use it for the
 
 These assertions are also subject to the `T::Configuration` hooks that `sorbet-runtime` provides for controlling runtime type checking. See [Runtime Configuration](tconfiguration.md) for more. By default, all of these assertions will raise a `TypeError` if they are violated at runtime.
 
-It's possible to opt out of runtime checking for individual calls to `T.let`, `T.cast`, and `T.bind` by adding `checked: false`, e.g. `x = T.let(y, Foo, checked: false)`. This isn't recommended in most circumstances, even in performance-critical code; while adding `checked(:never)` to a method signature is an easy way to remove performance overhead, doing the same for `T.let` removes neither the method call overhead nor the overhead of constructing any type argument. For more effective options, see below.
+It's possible to opt out of runtime checking for individual calls to `T.let`, `T.cast`, `T.assert_type!`, and `T.bind` by adding `checked: false`, e.g. `x = T.let(y, Foo, checked: false)`. This isn't recommended in most circumstances, even in performance-critical code; while adding `checked(:never)` to a method signature is an easy way to remove performance overhead, doing the same for `T.let` removes neither the method call overhead nor the overhead of constructing any type argument. For more effective options, see below.
 
 ## Comparison of type assertions
 
@@ -280,7 +283,7 @@ Here are some other ways to think of the behavior of the individual type asserti
 
 ## Performance considerations
 
-Unlike `sig` annotations, type assertions _always_ have a performance cost, even if runtime checks are globally disabled or `checked: false` is used at individual callsites. `T.let` and friends are ordinary Ruby method calls, which have intrisic overhead, in addition to the overhead of constructing any type arguments.
+Unlike `sig` annotations, type assertions _always_ have a performance cost, even if runtime checks are globally disabled or `checked: false` is used at individual callsites. `T.let` and friends are ordinary Ruby method calls, which have intrinsic overhead, in addition to the overhead of constructing any type arguments.
 
 This overhead isn't normally worth worrying about, but in code where you are already micro-optimizing to reduce method calls or object allocations, there are a few patterns that may be helpful:
 
@@ -337,7 +340,7 @@ end
 
 ### Avoid constructing type objects
 
-The construction of an non-trivial type object is typically the most expensive part of a type assertion at runtime. One can usually mitigate this with the use of `T.type_alias`.
+The construction of a non-trivial type object is typically the most expensive part of a type assertion at runtime. One can usually mitigate this with the use of `T.type_alias`.
 
 For example, rather than:
 

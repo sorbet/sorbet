@@ -1,0 +1,25 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    EmptyTree
+
+    MethodDef{
+      flags = {}
+      name = <U f><<U <todo method>>>
+      params = [UnresolvedIdent{
+          kind = Local
+          name = <U x>
+        }, BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = EmptyTree
+    }
+  ]
+}

@@ -3,9 +3,21 @@
 
 #include "common/common.h"
 #include "parser/parser.h"
+#include "parser/prism/Factory.h"
+#include "parser/prism/Helpers.h"
+#include "parser/prism/Parser.h"
 #include <memory>
 #include <regex>
 #include <string_view>
+
+extern "C" {
+#include "prism.h"
+}
+
+// Synthetic node markers for RBS comments
+// We repurpose PM_CONSTANT_READ_NODE with special constant IDs to mark synthetic nodes
+#define RBS_SYNTHETIC_BIND_MARKER PM_CONSTANT_ID_UNSET
+#define RBS_SYNTHETIC_TYPE_ALIAS_MARKER (PM_CONSTANT_ID_UNSET + 1)
 
 namespace sorbet::rbs {
 
@@ -15,16 +27,19 @@ struct CommentNode {
 };
 
 struct CommentMap {
-    std::map<parser::Node *, std::vector<CommentNode>> signaturesForNode;
-    std::map<parser::Node *, std::vector<CommentNode>> assertionsForNode;
+    UnorderedMap<pm_node_t *, std::vector<CommentNode>> signaturesForNode;
+    UnorderedMap<pm_node_t *, std::vector<CommentNode>> assertionsForNode;
 };
+
+bool isMethodDefSignatureTarget(pm_node_t *node, const parser::Prism::Parser &parser, const core::GlobalState &gs);
 
 class CommentsAssociator {
 public:
     static const std::string_view RBS_PREFIX;
 
-    CommentsAssociator(core::MutableContext ctx, std::vector<core::LocOffsets> commentLocations);
-    CommentMap run(std::unique_ptr<parser::Node> &tree);
+    CommentsAssociator(core::MutableContext ctx, parser::Prism::Parser &parser,
+                       std::vector<core::LocOffsets> commentLocations);
+    CommentMap run(pm_node_t *node);
 
 private:
     static const std::string_view ANNOTATION_PREFIX;
@@ -32,27 +47,40 @@ private:
     static const std::string_view BIND_PREFIX;
 
     core::MutableContext ctx;
+    parser::Prism::Parser &parser;
+    parser::Prism::Factory prism;
     std::vector<core::LocOffsets> commentLocations;
     std::map<int, CommentNode> commentByLine;
-    std::map<parser::Node *, std::vector<CommentNode>> signaturesForNode;
-    std::map<parser::Node *, std::vector<CommentNode>> assertionsForNode;
+    UnorderedMap<pm_node_t *, std::vector<CommentNode>> signaturesForNode;
+    UnorderedMap<pm_node_t *, std::vector<CommentNode>> assertionsForNode;
     std::vector<std::pair<bool, core::LocOffsets>> contextAllowingTypeAlias;
     int lastLine;
 
-    void walkNode(parser::Node *node);
-    void walkNodes(parser::NodeVec &nodes);
-    void walkStatements(parser::NodeVec &nodes);
-    std::unique_ptr<parser::Node> walkBody(parser::Node *node, std::unique_ptr<parser::Node> body);
-    void processTrailingComments(parser::Node *node, parser::NodeVec &nodes);
-    void associateAssertionCommentsToNode(parser::Node *node, bool adjustLocForHeredoc);
-    void associateSignatureCommentsToNode(parser::Node *node);
-    void consumeCommentsInsideNode(parser::Node *node, std::string kind);
-    void consumeCommentsBetweenLines(int startLine, int endLine, std::string kind);
+    void walkNode(pm_node_t *node);
+    void walkNodes(pm_node_list_t &nodes);
+    void walkArgumentsNode(pm_arguments_node_t *args);
+    void walkStatements(pm_node_list_t &nodes);
+    pm_node_t *walkBody(pm_node_t *node, pm_node_t *body);
+    void processTrailingComments(pm_node_t *node, pm_node_list_t &nodes);
+    template <typename PrismNode> void walkAssignmentNode(pm_node_t *anyNode);
+    template <typename PrismNode> void walkCallAssignmentNode(pm_node_t *untypedNode, std::string_view label);
+    template <typename PrismNode> void walkIndexAssignmentNode(pm_node_t *untypedNode, std::string_view label);
+    void walkConditionalNode(pm_node_t *node, pm_node_t *predicate, pm_statements_node_t *&statements,
+                             pm_node_t *&elsePart, std::string_view kind);
+    void associateAssertionCommentsToNode(pm_node_t *node, bool adjustLocForHeredoc = false);
+    void associateSignatureCommentsToNode(pm_node_t *node);
+    void consumeCommentsInsideNode(pm_node_t *node, std::string_view kind);
+    void consumeCommentsBetweenLines(int startLine, int endLine, std::string_view kind);
+    void consumeOrphanedSignatureComments(int startLine, int endLine);
     void consumeCommentsUntilLine(int line);
-    std::optional<uint32_t> locateTargetLine(parser::Node *node);
+    std::optional<uint32_t> locateTargetLine(pm_node_t *node);
+    core::LocOffsets translateLocation(pm_location_t location);
+    uint32_t posToLine(uint32_t pos);
+    bool isOnOwnLine(const CommentNode &comment);
 
-    int maybeInsertStandalonePlaceholders(parser::NodeVec &nodes, int index, int lastLine, int currentLine);
-    bool nestingAllowsTypeAlias();
+    bool typeAliasAllowedInContext() const;
+    int maybeInsertStandalonePlaceholders(pm_node_list_t &nodes, int index, int lastLine, int currentLine);
+    pm_node_t *createSyntheticPlaceholder(const CommentNode &comment, pm_constant_id_t marker);
 };
 
 } // namespace sorbet::rbs

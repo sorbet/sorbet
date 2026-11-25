@@ -11,3 +11,11 @@ end
 
 A::C
 B
+
+# Qualified constant access where both parts are unresolved
+::X::Y.foo
+W::Z.bar
+
+# Constant access through a type alias
+TypeAlias = T.type_alias { Integer }
+TypeAlias::Missing

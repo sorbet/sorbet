@@ -1,0 +1,22 @@
+# -- test/testdata/resolver/missing_extend_t_generic.rb --
+# typed: true
+
+class HasTypeMember
+  extend T::Generic
+  Elem = type_member
+#        ^^^^^^^^^^^ error: Method `type_member` does not exist on `T.class_of(HasTypeMember)`
+end
+
+class HasTypeTemplate
+  extend T::Generic
+  Elem = type_template
+#        ^^^^^^^^^^^^^ error: Method `type_template` does not exist on `T.class_of(HasTypeTemplate)[T.attached_class (of HasTypeTemplate), T.class_of(HasTypeTemplate)::Elem]`
+end
+
+module HasAttachedClass
+  extend T::Generic
+  has_attached_class!
+# ^^^^^^^^^^^^^^^^^^^ error: Method `has_attached_class!` does not exist on `T.class_of(HasAttachedClass)`
+# ^^^^^^^^^^^^^^^^^^^ error: Method `type_member` does not exist on `T.class_of(HasAttachedClass)`
+end
+# ------------------------------

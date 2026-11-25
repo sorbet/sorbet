@@ -327,8 +327,6 @@ Covariant type variables preserve the subtyping relationship. Specifically, if t
 Child <: Parent  ==>  M[Child] <: M[Parent]
 ```
 
-Note that only a Ruby `module` (not a `class`) may have a covariant `type_member`. (See the docs for error code [5016](error-reference.md#5016) for more information.) Note that since `type_template` creates a type variable scoped to a singleton class, `type_template` can never be covariant (because all singleton classes are classes, even singleton classes of modules).
-
 Here's an example of a module that has a covariant type member:
 
 ```ruby
@@ -394,7 +392,7 @@ end
 
 [→ View on sorbet.run][covariant-ibox]
 
-Note how in the above example, `Box` includes `IBox`, meaning that `Box` is a child of `IBox`. Children of generic classes or modules must always redeclare any type members declared by the parent, in the same order. The child must either copy the parent's specified variance or redeclare it as invariant. When the child is a `class` (not a `module`), redeclaring it as invariant is the **only** option.
+Note how in the above example, `Box` includes `IBox`, meaning that `Box` is a child of `IBox`. Children of generic classes or modules must always redeclare any type members declared by the parent, in the same order. The child must either copy the parent's specified variance or redeclare it as invariant. Here, `Box` redeclares `Elem` as invariant so that it can define `value=`, which uses `Elem` in an input position.
 
 ### Contravariance (`:in`)
 

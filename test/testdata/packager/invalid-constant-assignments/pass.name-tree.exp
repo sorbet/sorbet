@@ -1,0 +1,32 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Base<<C Base>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Consumer<<C Consumer>> < (::Sorbet::Private::Static::PackageSpec)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  class ::<PackageSpecRegistry>::Producer<<C Producer>> < (::Sorbet::Private::Static::PackageSpec)
+    <self>.import(<emptyTree>::<C Base>)
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  module ::Consumer<<C Consumer>> < ()
+    <emptyTree>::<C FromRuby>
+
+    <emptyTree>::<C FromRBI>
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::FromRuby = 1
+
+  ::FromRuby = 2
+
+  module ::Producer<<C Producer>> < ()
+    ::Consumer::Injected = 3
+  end
+end
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  ::FromRBI = <cast:let>(1, <todo sym>, <emptyTree>::<C Integer>)
+end

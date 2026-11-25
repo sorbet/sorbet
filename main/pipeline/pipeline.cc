@@ -1,18 +1,16 @@
 #ifdef SORBET_REALMAIN_MIN
 // minimal build to speedup compilation. Remove extra features
 #else
-// has to go first, as it violates poisons
-#include "core/proto/proto.h"
-// ^^ has to go first
-#include "common/json2msgpack/json2msgpack.h"
+#include "core/json/json.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
-#include <sstream>
 #endif
 #include "ProgressIndicator.h"
 #include "absl/strings/match.h"
 #include "ast/Helpers.h"
 #include "ast/desugar/Desugar.h"
-#include "ast/desugar/PrismDesugar.h"
+#include "ast/desugar/prism/Desugar.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
@@ -27,6 +25,7 @@
 #include "core/Unfreeze.h"
 #include "core/errors/infer.h"
 #include "core/errors/namer.h"
+#include "core/errors/packager.h"
 #include "core/errors/parser.h"
 #include "core/errors/resolver.h"
 #include "core/lsp/PreemptionTaskManager.h"
@@ -40,15 +39,9 @@
 #include "packager/packager.h"
 #include "parser/parser.h"
 #include "parser/prism/Parser.h"
-#include "parser/prism/Translator.h"
 #include "payload/binary/binary.h"
 #include "pipeline.h"
-#include "rbs/AssertionsRewriter.h"
-#include "rbs/CommentsAssociator.h"
-#include "rbs/SigsRewriter.h"
-#include "rbs/prism/AssertionsRewriterPrism.h"
-#include "rbs/prism/CommentsAssociatorPrism.h"
-#include "rbs/prism/SigsRewriterPrism.h"
+#include "rbs/RBSRewriter.h"
 #include "resolver/resolver.h"
 #include "rewriter/rewriter.h"
 
@@ -84,6 +77,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
         gs.includeErrorSections = false;
     }
     gs.parseWithPrism = opts.cacheSensitiveOptions.usePrismParser;
+    gs.experimentalMethodModifiers = opts.experimentalMethodModifiers;
     gs.ruby3KeywordArgs = opts.ruby3KeywordArgs;
     gs.suppressPayloadSuperclassRedefinitionFor = opts.suppressPayloadSuperclassRedefinitionFor;
     if (!opts.uniquelyDefinedBehavior) {
@@ -100,9 +94,7 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     }
 
     gs.trackUntyped = opts.trackUntyped;
-    gs.printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled ||
-                           opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled ||
-                           opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled;
+    gs.printingFileTable = opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled;
 
     if (opts.suggestTyped) {
         gs.ignoreErrorClassForSuggestTyped(core::errors::Infer::SuggestTyped.code);
@@ -117,28 +109,35 @@ void setGlobalStateOptions(core::GlobalState &gs, const options::Options &opts) 
     if (opts.cacheSensitiveOptions.sorbetPackages) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(gs);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = gs.unfreezePackages();
-        gs.setPackagerOptions(
-            opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-            opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-            opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackages);
+        gs.setPackagerOptions(opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                              opts.extraPackageFilesDirectorySlashPrefixes, opts.allowRelaxedPackagerChecksFor,
+                              opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
+                              opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors);
     }
 #endif
 }
 
-unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts) {
-    if (opts.cacheSensitiveOptions.noStdlib) {
+unique_ptr<core::GlobalState> copyForSlowPath(const core::GlobalState &from, const options::Options &opts,
+                                              core::packages::Stratum forStratum) {
+    if (opts.cacheSensitiveOptions.noStdlib && forStratum == core::packages::Stratum(0)) {
         auto result = make_unique<core::GlobalState>(from.errorQueue, from.epochManager);
         result->initEmpty();
         return result;
     }
 
     auto result = from.copyForSlowPath(
-        opts.extraPackageFilesDirectoryUnderscorePrefixes, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-        opts.extraPackageFilesDirectorySlashPrefixes, opts.packageSkipRBIExportEnforcementDirs,
-        opts.allowRelaxedPackagerChecksFor, opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackages);
+        opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
+        opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor, opts.packagerLayers, opts.sorbetPackagesHint,
+        opts.genPackagesMode, opts.allowRelaxingTestVisibility, opts.packageAttributedErrors, forStratum);
 
-    core::serialize::Serializer::loadSymbolTable(*result, PAYLOAD_SYMBOL_TABLE);
+    // Fall back on initializing from the payload if we're not copying part of from's symbol table.
+    if (forStratum == core::packages::Stratum(0)) {
+        core::serialize::Serializer::loadSymbolTable(*result, PAYLOAD_SYMBOL_TABLE);
+    }
 
+    ENFORCE(result->contiguousStrataUntil() == forStratum,
+            "Requested a symbol table prefix ending at stratum {}, but copied one ending at stratum {}",
+            forStratum.rawId(), result->contiguousStrataUntil().rawId());
     return result;
 }
 
@@ -200,14 +199,17 @@ core::StrictLevel decideStrictLevel(const core::GlobalState &gs, const core::Fil
         level = core::StrictLevel::False;
     }
 
+    if (gs.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled &&
+        level < core::StrictLevel::False) {
+        // In gen-packages mode, we want to ensure we see all definitions and references, even if they're in
+        // # typed: ignore files, so that we can generate accurate __package.rb files
+        level = core::StrictLevel::False;
+    }
+
     return level;
 }
 
 namespace {
-
-pm_node_t *runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node_t *node,
-                              const vector<core::LocOffsets> &commentLocations, const options::Printers &print,
-                              core::MutableContext &ctx, const parser::Prism::Parser &parser);
 
 ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref, core::File &file,
                                       const unique_ptr<const OwnedKeyValueStore> &kvstore) {
@@ -227,19 +229,25 @@ ast::ExpressionPtr fetchTreeFromCache(core::GlobalState &gs, core::FileRef fref,
         return nullptr;
     }
 
+    auto tree = core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
+    if (tree == nullptr) {
+        prodCounterInc("types.input.files.kvstore.miss");
+        return nullptr;
+    }
+
     prodCounterInc("types.input.files.kvstore.hit");
-    return core::serialize::Serializer::loadTree(gs, file, maybeCached.data);
+    return tree;
 }
 
 parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
                               bool traceLexer, bool traceParser) {
-    Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
     parser::ParseResult result;
     {
+        Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
         core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
-        auto indentationAware = false;               // Don't start in indentation-aware error recovery mode
-        auto collectComments = gs.cacheSensitiveOptions.rbsEnabled; // Collect comments for RBS signature translation
-        auto settings = parser::Parser::Settings{traceLexer, traceParser, indentationAware, collectComments};
+
+        auto indentationAware = false; // Don't start in indentation-aware error recovery mode
+        auto settings = parser::Parser::Settings{traceLexer, traceParser, indentationAware};
         result = parser::Parser::run(gs, file, settings);
     }
 
@@ -258,98 +266,44 @@ parser::ParseResult runParser(core::GlobalState &gs, core::FileRef file, const o
     return result;
 }
 
-parser::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Printers &print,
-                                   const options::Options &opts, bool preserveConcreteSyntax = false) {
+parser::Prism::ParseResult runPrismParser(core::GlobalState &gs, core::FileRef file, const options::Options &opts,
+                                          bool preserveConcreteSyntax = false) {
     Timer timeit(gs.tracer(), "runParser", {{"file", string(file.data(gs).path())}});
+    core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
 
-    parser::ParseResult parseResult;
-    {
-        core::MutableContext ctx(gs, core::Symbols::root(), file);
-        core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
-        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
-        // `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
-        auto source = file.data(ctx).source();
-        parser::Prism::Parser parser{source};
-        bool collectComments = gs.cacheSensitiveOptions.rbsEnabled;
-        parser::Prism::ParseResult prismResult = parser.parseWithoutTranslation(collectComments);
-
-        if (opts.stopAfterPhase == options::Phase::PARSER) {
-            return parser::ParseResult{nullptr, prismResult.getCommentLocations()};
-        }
-
-        auto node = prismResult.getRawNodePointer();
-
-        // TODO: Remove `&& false` once RBS rewriter with Prism AST migration is complete
-        // https://github.com/sorbet/sorbet/issues/9065
-        if (gs.cacheSensitiveOptions.rbsEnabled && false) {
-            node = runPrismRBSRewrite(gs, file, node, prismResult.getCommentLocations(), print, ctx, parser);
-        }
-
-        bool directlyDesugar = !gs.cacheSensitiveOptions.rbsEnabled;
-        auto translatedTree = parser::Prism::Translator(parser, ctx, prismResult.getParseErrors(), directlyDesugar,
-                                                        preserveConcreteSyntax)
-                                  .translate(node);
-
-        parseResult = parser::ParseResult{move(translatedTree), prismResult.getCommentLocations()};
-    }
-
-    if (parseResult.tree) {
-        if (print.ParseTree.enabled) {
-            print.ParseTree.fmt("{}\n", parseResult.tree->toStringWithTabs(gs, 0));
-        }
-        if (print.ParseTreeJson.enabled) {
-            print.ParseTreeJson.fmt("{}\n", parseResult.tree->toJSON(gs, 0));
-        }
-        if (print.ParseTreeJsonWithLocs.enabled) {
-            print.ParseTreeJson.fmt("{}\n", parseResult.tree->toJSONWithLocs(gs, file, 0));
-        }
-        if (print.ParseTreeWhitequark.enabled) {
-            print.ParseTreeWhitequark.fmt("{}\n", parseResult.tree->toWhitequark(gs, 0));
-        }
-    }
-
-    return parseResult;
+    core::MutableContext ctx(gs, core::Symbols::root(), file);
+    return parser::Prism::Parser::run(ctx);
 }
 
-unique_ptr<parser::Node> runRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::ParseResult &&parseResult,
-                                       const options::Printers &print) {
-    auto node = move(parseResult.tree);
-    auto commentLocations = move(parseResult.commentLocations);
-
+void runRBSRewrite(core::GlobalState &gs, core::FileRef file, parser::Prism::ParseResult &parseResult,
+                   const options::Printers &print) {
     if (gs.cacheSensitiveOptions.rbsEnabled) {
         Timer timeit(gs.tracer(), "runRBSRewrite", {{"file", string(file.data(gs).path())}});
         core::MutableContext ctx(gs, core::Symbols::root(), file);
         core::UnfreezeNameTable nameTableAccess(gs);
 
-        auto associator = rbs::CommentsAssociator(ctx, commentLocations);
-        auto commentMap = associator.run(node);
-
-        auto sigsRewriter = rbs::SigsRewriter(ctx, commentMap.signaturesForNode);
-        node = sigsRewriter.run(move(node));
-
-        auto assertionsRewriter = rbs::AssertionsRewriter(ctx, commentMap.assertionsForNode);
-        node = assertionsRewriter.run(move(node));
-
-        if (print.RBSRewriteTree.enabled) {
-            print.RBSRewriteTree.fmt("{}\n", node->toStringWithTabs(gs, 0));
-        }
+        auto &parser = parseResult.getParser();
+        rbs::runRBSRewrite(gs, file, parseResult.getRawNodePointer(), parseResult.getCommentLocations(), ctx, parser);
     }
-    return node;
+
+    if (print.RBSRewriteTree.enabled) {
+        print.RBSRewriteTree.fmt("{}\n", parseResult.prettyPrint());
+    }
 }
 
 ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_ptr<parser::Node> parseTree,
                               const options::Printers &print, bool preserveConcreteSyntax = false) {
-    Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
+    ENFORCE(parseTree);
+
     ast::ExpressionPtr ast;
-    core::MutableContext ctx(gs, core::Symbols::root(), file);
     {
         core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
-        // The RBS rewriter produces plain Whitequark nodes and not `NodeWithExpr` which causes errors in
-        // `PrismDesugar.cc`. For now, disable all direct translation, and fallback to `Desugar.cc`.
-        auto directlyDesugar = gs.parseWithPrism && !gs.cacheSensitiveOptions.rbsEnabled;
-        ast = directlyDesugar ? ast::prismDesugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax)
-                              : ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
+        core::MutableContext ctx(gs, core::Symbols::root(), file);
+
+        Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
+        ast = ast::desugar::node2Tree(ctx, move(parseTree), preserveConcreteSyntax);
     }
+
     if (print.DesugarTree.enabled) {
         print.DesugarTree.fmt("{}\n", ast.toStringWithTabs(gs, 0));
     }
@@ -359,6 +313,31 @@ ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_
     if (print.DesugarTreeRawWithLocs.enabled) {
         print.DesugarTreeRawWithLocs.fmt("{}\n", ast.showRawWithLocs(gs, file));
     }
+
+    return ast;
+}
+
+ast::ExpressionPtr runPrismDesugar(core::GlobalState &gs, core::FileRef file, parser::Prism::ParseResult parseResult,
+                                   const options::Printers &print) {
+    ast::ExpressionPtr ast;
+    {
+        core::UnfreezeNameTable nameTableAccess(gs);
+        core::MutableContext ctx(gs, core::Symbols::root(), file);
+
+        Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
+        ast = ast::Desugar::Prism::node2Tree(ctx, move(parseResult));
+    }
+
+    if (print.DesugarTree.enabled) {
+        print.DesugarTree.fmt("{}\n", ast.toStringWithTabs(gs, 0));
+    }
+    if (print.DesugarTreeRaw.enabled) {
+        print.DesugarTreeRaw.fmt("{}\n", ast.showRaw(gs));
+    }
+    if (print.DesugarTreeRawWithLocs.enabled) {
+        print.DesugarTreeRawWithLocs.fmt("{}\n", ast.showRawWithLocs(gs, file));
+    }
+
     return ast;
 }
 
@@ -380,27 +359,6 @@ ast::ParsedFile emptyParsedFile(core::FileRef file) {
     return {ast::MK::EmptyTree(), file};
 }
 
-pm_node_t *runPrismRBSRewrite(core::GlobalState &gs, core::FileRef file, pm_node_t *node,
-                              const vector<core::LocOffsets> &commentLocations, const options::Printers &print,
-                              core::MutableContext &ctx, const parser::Prism::Parser &parser) {
-    Timer timeit(gs.tracer(), "runPrismRBSRewrite", {{"file", string(file.data(gs).path())}});
-
-    auto associator = rbs::CommentsAssociatorPrism(ctx, parser, commentLocations);
-    auto commentMap = associator.run(node);
-
-    auto sigsRewriter = rbs::SigsRewriterPrism(ctx, parser, commentMap.signaturesForNode);
-    node = sigsRewriter.run(node);
-
-    auto assertionsRewriter = rbs::AssertionsRewriterPrism(ctx, commentMap.assertionsForNode);
-    node = assertionsRewriter.run(node);
-
-    if (print.RBSRewriteTree.enabled) {
-        print.RBSRewriteTree.fmt("{}\n", parser.prettyPrint(node));
-    }
-
-    return node;
-}
-
 } // namespace
 
 ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &gs, core::FileRef file,
@@ -414,9 +372,9 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
         }
         auto parseResult = runParser(gs, file, print, opts.traceLexer, opts.traceParser);
 
-        auto parseTree = runRBSRewrite(gs, file, move(parseResult), print);
+        ENFORCE(!gs.cacheSensitiveOptions.rbsEnabled, "RBS mode is only supported with the Prism parser");
 
-        return runDesugar(gs, file, move(parseTree), print, preserveConcreteSyntax);
+        return runDesugar(gs, file, move(parseResult.tree), print, preserveConcreteSyntax);
     } catch (SorbetException &) {
         Exception::failInFuzzer();
         if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
@@ -442,7 +400,6 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                 return emptyParsedFile(file);
             }
 
-            unique_ptr<parser::Node> parseTree;
             switch (parser) {
                 case options::Parser::ORIGINAL: {
                     auto parseResult = runParser(lgs, file, print, opts.traceLexer, opts.traceParser);
@@ -450,29 +407,42 @@ ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, c
                         return emptyParsedFile(file);
                     }
 
-                    parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
-
-                    break;
-                }
-                case options::Parser::PRISM: {
-                    auto parseResult = runPrismParser(lgs, file, print, opts);
-
-                    // parseResult is null if runPrismParser stopped after an intermediate phase
-                    if (parseResult.tree == nullptr) {
+                    ENFORCE(!lgs.cacheSensitiveOptions.rbsEnabled, "RBS mode is only supported with the Prism parser");
+                    if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
                         return emptyParsedFile(file);
                     }
 
-                    // TODO: Remove this check once runPrismRBSRewrite is no longer no-oped inside of runPrismParser
-                    // https://github.com/sorbet/sorbet/issues/9065
-                    parseTree = runRBSRewrite(lgs, file, move(parseResult), print);
+                    tree = runDesugar(lgs, file, move(parseResult.tree), print, false);
+                    if (opts.stopAfterPhase == options::Phase::DESUGARER) {
+                        return emptyParsedFile(file);
+                    }
 
                     break;
                 }
-            }
 
-            tree = runDesugar(lgs, file, move(parseTree), print);
-            if (opts.stopAfterPhase == options::Phase::DESUGARER) {
-                return emptyParsedFile(file);
+                case options::Parser::PRISM: {
+                    auto parseResult = runPrismParser(lgs, file, opts);
+
+                    if (print.ParseTree.enabled) {
+                        print.ParseTree.fmt("{}\n", parseResult.prettyPrint());
+                    }
+
+                    if (opts.stopAfterPhase == options::Phase::PARSER) {
+                        return emptyParsedFile(file);
+                    }
+
+                    runRBSRewrite(lgs, file, parseResult, print);
+                    if (opts.stopAfterPhase == options::Phase::RBS_REWRITER) {
+                        return emptyParsedFile(file);
+                    }
+
+                    tree = runPrismDesugar(lgs, file, move(parseResult), print);
+                    if (opts.stopAfterPhase == options::Phase::DESUGARER) {
+                        return emptyParsedFile(file);
+                    }
+
+                    break;
+                }
             }
 
             tree = runRewriter(lgs, file, move(tree));
@@ -594,7 +564,6 @@ ast::ExpressionPtr readFileWithStrictnessOverrides(core::GlobalState &gs, core::
         }
         case core::File::Type::PayloadGeneration:
         case core::File::Type::Payload:
-        case core::File::Type::TombStone:
             return nullptr;
     }
 
@@ -746,10 +715,10 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
     }
 
     shared_ptr<const core::GlobalState> emptyGs = baseGs.copyForIndexThread(
-        opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
-        opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
-        opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.packagerLayers,
-        opts.sorbetPackagesHint, opts.genPackages);
+        opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+        opts.extraPackageFilesDirectorySlashPrefixes, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
+        opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
+        opts.packageAttributedErrors);
 
     workers.multiplexJob("indexSuppliedFiles", [emptyGs, &opts, fileq, resultq, &kvstore, cancelable]() {
         Timer timeit(emptyGs->tracer(), "indexSuppliedFilesWorker");
@@ -757,10 +726,10 @@ ast::ParsedFilesOrCancelled indexSuppliedFiles(core::GlobalState &baseGs, absl::
         // clone the empty global state to avoid manually re-entering everything, and copy the base filetable so that
         // file sources are available.
         auto localGs = emptyGs->copyForIndexThread(
-            opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectoryUnderscorePrefixes,
-            opts.extraPackageFilesDirectorySlashDeprecatedPrefixes, opts.extraPackageFilesDirectorySlashPrefixes,
-            opts.packageSkipRBIExportEnforcementDirs, opts.allowRelaxedPackagerChecksFor, opts.packagerLayers,
-            opts.sorbetPackagesHint, opts.genPackages);
+            opts.cacheSensitiveOptions.sorbetPackages, opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            opts.extraPackageFilesDirectorySlashPrefixes, opts.allowRelaxedPackagerChecksFor, opts.updateVisibilityFor,
+            opts.packagerLayers, opts.sorbetPackagesHint, opts.genPackagesMode, opts.allowRelaxingTestVisibility,
+            opts.packageAttributedErrors);
         auto &epochManager = *localGs->epochManager;
 
         IndexThreadResultPack threadResult;
@@ -806,8 +775,6 @@ ast::ParsedFilesOrCancelled index(core::GlobalState &gs, absl::Span<const core::
     if (opts.stopAfterPhase == options::Phase::INIT) {
         return empty;
     }
-
-    gs.sanityCheck();
 
     if (files.size() < 3) {
         // Run singlethreaded if only using 2 files
@@ -864,121 +831,202 @@ void unpartitionPackageFiles(vector<ast::ParsedFile> &packageFiles, vector<ast::
     }
 }
 
-vector<CondensationStratumInfo> computePackageStrata(const core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
-                                                     absl::Span<core::FileRef> sourceFiles,
-                                                     const options::Options &opts) {
+namespace {
+unique_ptr<UnorderedSet<core::packages::MangledName>> focusedPackages(core::GlobalState &gs,
+                                                                      const options::Options &opts) {
+    auto &db = gs.packageDB();
+    if (!db.enabled() || opts.focusPackages.empty()) {
+        return nullptr;
+    }
+
+    bool invalidPackage = false;
+    bool preludePackage = false;
+    UnorderedSet<core::packages::MangledName> result;
+
+    for (auto &pkgStr : opts.focusPackages) {
+        ENFORCE(!pkgStr.empty());
+
+        auto pkgName = core::packages::MangledName::parse(gs, pkgStr);
+        if (!pkgName.exists()) {
+            if (auto e = gs.beginError(core::Loc::none(), core::errors::Packager::PackageNotFound)) {
+                e.setHeader("Unknown package `{}` in --focus-package", pkgStr);
+            }
+            invalidPackage = true;
+            continue;
+        }
+
+        // The mangled name might point to a valid point in the package-registry namespace, but might not point to a
+        // valid package.
+        auto &info = db.getPackageInfo(pkgName);
+        if (!info.exists()) {
+            if (auto e = gs.beginError(core::Loc::none(), core::errors::Packager::PackageNotFound)) {
+                e.setHeader("Unknown package `{}` in --focus-package", pkgStr);
+            }
+            invalidPackage = true;
+            continue;
+        }
+
+        // Prelude packages are implicit dependencies of everything, so restricting to dependencies of one would be the
+        // same as typechecking the whole codebase.
+        if (info.isPreludePackage()) {
+            preludePackage = true;
+            continue;
+        }
+
+        result.insert(pkgName);
+    }
+
+    if (invalidPackage || preludePackage) {
+        return nullptr;
+    }
+
+    return make_unique<UnorderedSet<core::packages::MangledName>>(move(result));
+}
+} // namespace
+
+PackageStrata computePackageStrata(core::GlobalState &gs, vector<ast::ParsedFile> &packageFiles,
+                                   absl::Span<core::FileRef> sourceFiles, const options::Options &opts) {
     Timer timeit(gs.tracer(), "computePackageStrata");
 
+    PackageStrata result;
+
+    result.fileToStratum = vector<core::packages::Stratum>(gs.filesUsed(), core::packages::Stratum(0));
+    result.focusedPackages = focusedPackages(gs, opts);
+
     if (!opts.packageDirected) {
-        return vector{CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
+        for (auto name : gs.packageDB().packages()) {
+            gs.packageDB().getPackageInfoNonConst(name)->stratum = core::packages::Stratum(0);
+        }
+        result.strata = {CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
+        return result;
     }
 
     auto &db = gs.packageDB();
+
+    auto traversal = db.condensation().computeTraversal(gs, result.focusedPackages.get(), opts.focusExtent);
+
+    // The result focused package set represents the set that we will typecheck in focused mode. As we want to
+    // explicilty skip the upstream dependencies during infer, we don't include them here.
+    if (result.focusedPackages) {
+        if (!opts.focusAssumePackageDependenciesTypecheck) {
+            result.focusedPackages->merge(traversal.focusedUpstream);
+        }
+        result.focusedPackages->merge(traversal.focusedDownstream);
+    }
+
+    // This can happen if we enabled packages and package-directed mode, but there were no packages defined.
+    if (traversal.strata.empty()) {
+        result.strata = {CondensationStratumInfo{absl::MakeSpan(packageFiles), sourceFiles}};
+        return result;
+    }
 
     auto numPackageFiles = packageFiles.size();
 
     // We move all the package files into a map, so that it's easy to go from package name to package file while
     // processing the strata of the traversal.
     UnorderedMap<core::packages::MangledName, ast::ParsedFile> packagesToPackageRb;
-    for (auto &ast : packageFiles) {
+    erase_if(packageFiles, [&db, &packagesToPackageRb](auto &ast) {
         auto pkgName = db.getPackageNameForFile(ast.file);
-        ENFORCE(pkgName.exists());
+        if (!pkgName.exists()) {
+            return false;
+        }
 
         packagesToPackageRb[pkgName] = move(ast);
+        return true;
+    });
+
+    // We can't optimize a cached traversal, as we're most likely copying a prefix of the symbol table for the LSP slow
+    // path. Applying optimizations at this point might invalidate the symbol table offsets that we use to determine
+    // checkpoints in the global state.
+    if (!traversal.cached) {
+        traversal.optimize(db, opts.stratumSplitThreshold, opts.minStratumSize);
+
+        // This is very unlikely, but would cause a lot of confusing errors later on in the pipeline.
+        if (traversal.strata.size() > static_cast<size_t>(core::packages::Stratum::NONE.rawId())) [[unlikely]] {
+            Exception::raise("Too many strata in resulting traversal: {}", traversal.strata.size());
+        }
     }
 
-    // We'll generate non-test variants of each package, so we need to double the storage of this vector.
-    packageFiles.clear();
-    packageFiles.reserve(numPackageFiles * 2);
+    // Spans into this vector must remain valid as we append the sole AST for each package.
+    packageFiles.reserve(numPackageFiles);
 
-    auto traversal = db.condensation().computeTraversal(gs);
-    ENFORCE(!traversal.strata.empty());
-
-    vector<uint32_t> fileToStratum(gs.filesUsed());
     {
         Timer timeit(gs.tracer(), "computePackageStrata.stratumMapping");
 
-        auto stratumMapping = traversal.buildStratumMapping(gs);
+        traversal.recordStrata(gs);
 
-        int ix = 0;
-        for (auto &file : gs.getFiles().subspan(1)) {
-            ++ix;
+        auto numFiles = gs.getFiles().size();
+        for (int ix = 1; ix < numFiles; ix++) {
             core::FileRef fref(ix);
             auto pkgName = db.getPackageNameForFile(fref);
             if (!pkgName.exists()) {
                 // This is a file with no package, so we unconditionally put it in the first stratum. This means that
                 // it'll be checked at the same time as the first stratum of packaged code.
-                fileToStratum[ix] = 0;
+                result.fileToStratum[ix] = core::packages::Stratum(0);
                 continue;
             }
 
-            ENFORCE(stratumMapping.find(pkgName) != stratumMapping.end(),
-                    "All packages must be present in the condensation graph");
-            auto &info = stratumMapping[pkgName];
-            if (file->isPackagedTest() || file->isPackagedTestHelper()) {
-                fileToStratum[ix] = info.testStratum;
-            } else {
-                fileToStratum[ix] = info.applicationStratum;
-            }
+            auto stratum = db.getPackageInfo(pkgName).stratum;
+            ENFORCE(result.focusedPackages != nullptr || stratum != core::packages::Stratum::NONE,
+                    "All packages must be present in the condensation graph unless checking a focused set");
+            result.fileToStratum[ix] = stratum;
         }
 
-        fast_sort(sourceFiles, [&fileToStratum = as_const(fileToStratum)](core::FileRef l, core::FileRef r) -> bool {
-            auto lid = l.id();
-            auto rid = r.id();
-            auto lStratum = fileToStratum[lid];
-            auto rStratum = fileToStratum[rid];
-            return std::tie(lStratum, lid) < std::tie(rStratum, rid);
-        });
+        fast_sort(sourceFiles,
+                  [&fileToStratum = as_const(result.fileToStratum)](core::FileRef l, core::FileRef r) -> bool {
+                      auto lid = l.id();
+                      auto rid = r.id();
+                      auto lStratum = fileToStratum[lid];
+                      auto rStratum = fileToStratum[rid];
+                      return std::tie(lStratum, lid) < std::tie(rStratum, rid);
+                  });
     }
 
     // Reserve enough space for all the strata of the condensation traversal, plus one more for unpackaged code.
     auto maxStrata = traversal.strata.size() + 1;
 
-    vector<CondensationStratumInfo> result;
-    result.reserve(maxStrata);
+    result.strata.reserve(maxStrata);
 
     auto sourceSpan = sourceFiles;
+
+    // We want to capture any package files that didn't associate with a real package in the initial stratum, so we
+    // explicitly start it at zero and track it outside of the loop, rather than using `packageFiles.size()` inside of
+    // the loop.
+    auto packageFilesStart = 0;
 
     int currentStratum = -1;
     for (auto &stratum : traversal.strata) {
         ++currentStratum;
 
-        auto &resultStratum = result.emplace_back();
+        auto &resultStratum = result.strata.emplace_back();
 
         {
-            auto start = packageFiles.size();
             for (auto &scc : stratum) {
-                if (scc.isTest) {
-                    for (auto member : scc.members) {
-                        packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
-                    }
-                } else {
-                    // When processing the application source of a package, we need to make a copy of the package file,
-                    // and edit out any reference to test symbols.
-                    for (auto member : scc.members) {
-                        const auto &package = packagesToPackageRb[member];
-                        packageFiles.emplace_back(packager::Packager::copyPackageWithoutTestExports(gs, package));
-                    }
+                for (auto member : scc.members) {
+                    auto &tree = packageFiles.emplace_back(std::move(packagesToPackageRb[member]));
+                    ENFORCE(tree.tree);
                 }
             }
 
-            auto len = packageFiles.size() - start;
-            ENFORCE(len > 0);
-            resultStratum.packageFiles = absl::MakeSpan(packageFiles).subspan(start, len);
+            auto len = packageFiles.size() - packageFilesStart;
+            resultStratum.packageFiles = absl::MakeSpan(packageFiles).subspan(packageFilesStart, len);
+            packageFilesStart = packageFiles.size();
         }
 
         {
-            auto it = absl::c_find_if(sourceSpan, [currentStratum, &fileToStratum = as_const(fileToStratum)](
-                                                      auto file) { return fileToStratum[file.id()] > currentStratum; });
+            auto it = absl::c_find_if(sourceSpan,
+                                      [currentStratum, &fileToStratum = as_const(result.fileToStratum)](auto file) {
+                                          return fileToStratum[file.id()] > core::packages::Stratum(currentStratum);
+                                      });
             auto len = std::distance(sourceSpan.begin(), it);
             resultStratum.sourceFiles = sourceSpan.subspan(0, len);
             sourceSpan = sourceSpan.subspan(len);
         }
     }
 
-    ENFORCE(sourceSpan.empty());
-    ENFORCE(!result.empty());
-    ENFORCE(result.size() <= maxStrata);
+    ENFORCE(result.focusedPackages != nullptr || sourceSpan.empty());
+    ENFORCE(!result.strata.empty());
+    ENFORCE(result.strata.size() <= maxStrata);
 
     return result;
 }
@@ -1046,7 +1094,8 @@ public:
         if (unresolvedPath.has_value()) {
             unresolvedConstants.emplace_back(fmt::format(
                 "{}::{}", unresolvedPath->first != core::Symbols::root() ? unresolvedPath->first.show(ctx) : "",
-                fmt::map_join(unresolvedPath->second, "::", [&](const auto &el) -> string { return el.show(ctx); })));
+                fmt::map_join(unresolvedPath->second.rbegin(), unresolvedPath->second.rend(),
+                              "::", [&](const auto &el) -> string { return el.show(ctx); })));
         }
     }
 
@@ -1057,15 +1106,15 @@ public:
             if (unresolvedPath.has_value()) {
                 unresolvedConstants.emplace_back(fmt::format(
                     "{}::{}", unresolvedPath->first != core::Symbols::root() ? unresolvedPath->first.show(ctx) : "",
-                    fmt::map_join(unresolvedPath->second,
+                    fmt::map_join(unresolvedPath->second.rbegin(), unresolvedPath->second.rend(),
                                   "::", [&](const auto &el) -> string { return el.show(ctx); })));
             }
         }
     }
 };
 
-vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const options::Options &opts,
-                                              vector<ast::ParsedFile> what) {
+void printMissingConstants(core::GlobalState &gs, const options::Options &opts,
+                           absl::Span<const ast::ParsedFile> what) {
     Timer timeit(gs.tracer(), "printMissingConstants");
     GatherUnresolvedConstantsWalk walk;
     for (auto &resolved : what) {
@@ -1077,7 +1126,6 @@ vector<ast::ParsedFile> printMissingConstants(core::GlobalState &gs, const optio
     missing.erase(unique(missing.begin(), missing.end()), missing.end());
 
     opts.print.MissingConstants.fmt("{}\n", fmt::join(missing, "\n"));
-    return what;
 }
 
 class DefinitionLinesDenylistEnforcer {
@@ -1175,19 +1223,12 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
                 what = move(maybeResult.result());
             }
 
-#ifndef SORBET_REALMAIN_MIN
-            if (opts.cacheSensitiveOptions.sorbetPackages) {
-                Timer timeit(gs.tracer(), "visibility_checker");
-                what = packager::VisibilityChecker::run(gs, workers, std::move(what));
-            }
-#endif
-
             if (opts.stressIncrementalResolver) {
                 auto symbolsBefore = gs.symbolsUsedTotal();
                 for (auto &f : what) {
                     // Shift contents of file past current file's EOF, re-run incrementalResolve, assert that no
                     // locations appear before file's old EOF.
-                    const int prohibitedLines = f.file.data(gs).source().size();
+                    const int prohibitedLines = f.file.data(gs).sourceSize();
                     auto newSource = fmt::format("{}\n{}", string(prohibitedLines, '\n'), f.file.data(gs).source());
                     auto newFile = make_shared<core::File>(string(f.file.data(gs).path()), move(newSource),
                                                            f.file.data(gs).sourceType);
@@ -1225,100 +1266,8 @@ ast::ParsedFilesOrCancelled resolve(core::GlobalState &gs, vector<ast::ParsedFil
         }
     }
 
-    if (opts.print.SymbolTable.enabled) {
-        opts.print.SymbolTable.fmt("{}\n", gs.toString());
-    }
-    if (opts.print.SymbolTableRaw.enabled) {
-        opts.print.SymbolTableRaw.fmt("{}\n", gs.showRaw());
-    }
-
-#ifndef SORBET_REALMAIN_MIN
-    if (opts.print.SymbolTableJson.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        if (opts.print.SymbolTableJson.outputPath.empty()) {
-            core::Proto::toJSON(root, cout);
-        } else {
-            stringstream buf;
-            core::Proto::toJSON(root, buf);
-            opts.print.SymbolTableJson.print(buf.str());
-        }
-    }
-    if (opts.print.SymbolTableProto.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        if (opts.print.SymbolTableProto.outputPath.empty()) {
-            root.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            root.SerializeToString(&buf);
-            opts.print.SymbolTableProto.print(buf);
-        }
-    }
-    if (opts.print.SymbolTableMessagePack.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), false);
-        stringstream buf;
-        core::Proto::toJSON(root, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.SymbolTableMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.SymbolTableMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
-        }
-    }
-    if (opts.print.SymbolTableFullJson.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        if (opts.print.SymbolTableJson.outputPath.empty()) {
-            core::Proto::toJSON(root, cout);
-        } else {
-            stringstream buf;
-            core::Proto::toJSON(root, buf);
-            opts.print.SymbolTableJson.print(buf.str());
-        }
-    }
-    if (opts.print.SymbolTableFullProto.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        if (opts.print.SymbolTableFullProto.outputPath.empty()) {
-            root.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            root.SerializeToString(&buf);
-            opts.print.SymbolTableFullProto.print(buf);
-        }
-    }
-    if (opts.print.SymbolTableFullMessagePack.enabled) {
-        auto root = core::Proto::toProto(gs, core::Symbols::root(), true);
-        stringstream buf;
-        core::Proto::toJSON(root, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.SymbolTableFullMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.SymbolTableFullMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
-        }
-    }
-#endif
-    if (opts.print.SymbolTableFull.enabled) {
-        opts.print.SymbolTableFull.fmt("{}\n", gs.toStringFull());
-    }
-    if (opts.print.SymbolTableFullRaw.enabled) {
-        opts.print.SymbolTableFullRaw.fmt("{}\n", gs.showRawFull());
-    }
-
     if (opts.print.MissingConstants.enabled) {
-        what = printMissingConstants(gs, opts, move(what));
+        printMissingConstants(gs, opts, what);
     }
 
     return ast::ParsedFilesOrCancelled(move(what));
@@ -1342,6 +1291,15 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
     try {
         vector<core::ClassOrModuleRef> symbolsToRecompute;
         auto runIncrementalNamer = foundHashesForFiles.has_value() && !foundHashesForFiles->empty();
+
+        // Without the incremental namer, every file's hash is unchanged, so re-running the namer and resolver must
+        // only find symbols that already exist. LSPTypechecker::runFastPath relies on this: it only reopens the
+        // stratum of the edit (limiting how much of the symbol table a later slow path can copy) when it runs the
+        // incremental namer. A violation means that some symbol depends on part of a file not reflected in its hash.
+        optional<core::ForbidNewSymbols> forbidNewSymbols;
+        if (!runIncrementalNamer) {
+            forbidNewSymbols.emplace(gs);
+        }
         {
             Timer timeit(gs.tracer(), "incremental_naming");
             core::UnfreezeSymbolTable symbolTable(gs);
@@ -1395,13 +1353,6 @@ incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
                 return what;
             }
         }
-
-#ifndef SORBET_REALMAIN_MIN
-        if (opts.cacheSensitiveOptions.sorbetPackages) {
-            what = packager::VisibilityChecker::run(gs, workers, std::move(what));
-        }
-#endif
-
     } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
@@ -1419,7 +1370,7 @@ class CFGCollectorAndTyper {
     const options::Options &opts;
 
 public:
-    CFGCollectorAndTyper(const options::Options &opts) : opts(opts){};
+    CFGCollectorAndTyper(const options::Options &opts) : opts(opts) {};
 
     void preTransformMethodDef(core::Context ctx, const ast::MethodDef &m) {
         if (!infer::Inference::willRun(ctx, m.declLoc, m.symbol)) {
@@ -1568,15 +1519,34 @@ void typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Op
     return;
 }
 
+bool shouldTypecheck(const core::GlobalState &gs, const UnorderedSet<core::packages::MangledName> &relevantPackages,
+                     const UnorderedSet<core::FileRef> &hadErrors, core::FileRef file) {
+    auto pkg = gs.packageDB().getPackageNameForFile(file);
+    if (!pkg.exists()) {
+        return true;
+    }
+
+    // We override any potential skipping decision if the file has already had other errors raised.
+    if (hadErrors.contains(file)) {
+        return true;
+    }
+
+    return relevantPackages.contains(pkg);
+}
+
 } // namespace
 
-void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const options::Options &opts,
-               WorkerPool &workers, bool cancelable,
-               optional<shared_ptr<core::lsp::PreemptionTaskManager>> preemptionManager, bool presorted,
-               bool intentionallyLeakASTs) {
+void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> &&what, const options::Options &opts,
+               WorkerPool &workers, const UnorderedSet<core::packages::MangledName> *const relevantPackages,
+               bool cancelable, core::packages::Stratum currentStratum,
+               shared_ptr<core::lsp::PreemptionTaskManager> preemptionManager, bool intentionallyLeakASTs) {
     // Unless the error queue had a critical error, only typecheck should flush errors to the client, otherwise we will
     // drop errors in LSP mode.
     ENFORCE(gs.hadCriticalError() || gs.errorQueue->filesFlushedCount == 0);
+
+    // Collect all outstanding errors eagerly, so that we have an up-to-date picture of what files have had errors
+    // aready.
+    auto recordedErrors = gs.errorQueue->collectAll();
 
     const auto &epochManager = *gs.epochManager;
     // Record epoch at start of typechecking before any preemption occurs.
@@ -1586,28 +1556,23 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
         Timer timeit(gs.tracer(), "typecheck");
         if (preemptionManager) {
             // Before kicking off typechecking, check if we need to preempt.
-            (*preemptionManager)->tryRunScheduledPreemptionTask(gs);
+            preemptionManager->tryRunScheduledPreemptionTask(gs, currentStratum, /* allowReschedule */ true);
         }
 
         auto fileq = make_shared<ConcurrentBoundedQueue<ast::ParsedFile>>(what.size());
         auto outputq = make_shared<BlockingBoundedQueue<core::FileRef>>(what.size());
 
-        if (!presorted) {
-            // If files are not already sorted, we want to start typeckecking big files first because it helps with
-            // better work distribution
-            fast_sort(what, [&](const auto &lhs, const auto &rhs) -> bool {
-                return lhs.file.data(gs).source().size() > rhs.file.data(gs).source().size();
-            });
-        }
-
         for (auto &resolved : what) {
             fileq->push(move(resolved), 1);
         }
 
+        bool checkRelevantPackages = gs.packageDB().enabled() && relevantPackages != nullptr;
+
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, fileq, outputq,
-                                               cancelable, intentionallyLeakASTs]() {
+            workers.multiplexJob("typecheck", [&gs, &opts, epoch, &epochManager, &preemptionManager, &recordedErrors,
+                                               fileq, outputq, cancelable, relevantPackages, checkRelevantPackages,
+                                               intentionallyLeakASTs]() {
                 ast::ParsedFile job;
                 int processedByThread = 0;
 
@@ -1620,7 +1585,7 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                                 // the loop. Does not starve writers (tryRunScheduledPreemptionTask)
                                 // because this call can block once tryRunScheduledPreemptionTask tries to acquire
                                 // a (writer) lock.
-                                lock = (*preemptionManager)->lockPreemption();
+                                lock = preemptionManager->lockPreemption();
                             }
                             processedByThread++;
                             // [IDE] Only do the work if typechecking hasn't been canceled.
@@ -1631,17 +1596,23 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                             const bool fileWasChanged = preemptionManager && job.file.data(gs).epoch > epoch;
                             if (!isCanceled && !fileWasChanged && gs.errorQueue->wouldFlushErrorsForFile(job.file)) {
                                 core::FileRef file = job.file;
-                                try {
-                                    core::Context ctx(gs, core::Symbols::root(), file);
-                                    typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
-                                } catch (SorbetException &) {
-                                    Exception::failInFuzzer();
-                                    gs.tracer().error("Exception typing file: {} (backtrace is above)",
-                                                      file.data(gs).path());
+                                if (!checkRelevantPackages ||
+                                    shouldTypecheck(gs, *relevantPackages, recordedErrors, file)) {
+                                    try {
+                                        core::Context ctx(gs, core::Symbols::root(), file);
+                                        typecheckOne(ctx, move(job), opts, intentionallyLeakASTs);
+                                    } catch (SorbetException &) {
+                                        Exception::failInFuzzer();
+                                        gs.tracer().error("Exception typing file: {} (backtrace is above)",
+                                                          file.data(gs).path());
+                                    }
+
+                                    // Stream out errors for this file, as it has made it through the whole pipeline.
+                                    outputq->push(file, processedByThread);
+                                    processedByThread = 0;
+                                } else if (intentionallyLeakASTs) {
+                                    intentionallyLeakMemory(job.tree.release());
                                 }
-                                // Stream out errors
-                                outputq->push(file, processedByThread);
-                                processedByThread = 0;
                             }
                         }
                     }
@@ -1664,7 +1635,8 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
 
                     if (preemptionManager) {
-                        (*preemptionManager)->tryRunScheduledPreemptionTask(gs);
+                        preemptionManager->tryRunScheduledPreemptionTask(gs, currentStratum,
+                                                                         /* allowReschedule */ true);
                     }
                 }
                 if (cancelable && epochManager.wasTypecheckingCanceled()) {
@@ -1700,57 +1672,106 @@ void typecheck(const core::GlobalState &gs, vector<ast::ParsedFile> what, const 
 
 // ----- other ----------------------------------------------------------------
 
-void printFileTable(core::GlobalState &gs, const options::Options &opts,
-                    const UnorderedMap<long, long> &untypedUsages) {
 #ifndef SORBET_REALMAIN_MIN
-    if (opts.print.FileTableProto.enabled || opts.print.FileTableFullProto.enabled) {
-        if (opts.print.FileTableProto.enabled && opts.print.FileTableFullProto.enabled) {
-            Exception::raise("file-table-proto and file-table-full-proto are mutually exclusive print options");
+namespace {
+
+// Produces the file table JSON string, matching the format previously produced by
+// Proto::filesToProto + Proto::toJSON (proto3 JSON with add_whitespace=true).
+string printFileTableJSON(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedUsages, bool showFull) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    writer.SetIndent(' ', 1);
+
+    writer.StartObject();
+    writer.Key("files");
+    writer.StartArray();
+
+    for (int i = 1; i < gs.filesUsed(); ++i) {
+        core::FileRef file(i);
+        // Focused runs reserve file refs for unselected source files without reading them.
+        if (file.dataAllowingUnsafe(gs).sourceType == core::File::Type::NotYetRead) {
+            continue;
         }
-        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullProto.enabled);
-        if (opts.print.FileTableProto.outputPath.empty()) {
-            files.SerializeToOstream(&cout);
-        } else {
-            string buf;
-            files.SerializeToString(&buf);
-            opts.print.FileTableProto.print(buf);
+        if (file.data(gs).isPayload()) {
+            if (!showFull) {
+                continue;
+            } else if (gs.censorForSnapshotTests && i > 10) {
+                // Only show the first 10 payload files for the sake of snapshot tests, so that
+                // adding a new RBI file to the payload doesn't require updating snapshot tests.
+                continue;
+            }
         }
+
+        long untypedCount = 0;
+        auto it = untypedUsages.find(i);
+        if (it != untypedUsages.end()) {
+            untypedCount = it->second;
+        }
+
+        core::JSON::fileToJSON(writer, gs, file, untypedCount);
     }
+
+    writer.EndArray();
+    writer.EndObject();
+
+    // Proto3 JSON with add_whitespace=true appends a trailing newline.
+    string result(buffer.GetString(), buffer.GetLength());
+    result.push_back('\n');
+    return result;
+}
+
+} // anonymous namespace
+#endif
+
+void printGlobalTables(const core::GlobalState &gs, const options::Options &opts,
+                       const UnorderedMap<long, long> &untypedUsages) {
+#ifndef SORBET_REALMAIN_MIN
     if (opts.print.FileTableJson.enabled || opts.print.FileTableFullJson.enabled) {
         if (opts.print.FileTableJson.enabled && opts.print.FileTableFullJson.enabled) {
             Exception::raise("file-table-json and file-table-full-json are mutually exclusive print options");
         }
-        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullJson.enabled);
+        auto json = printFileTableJSON(gs, untypedUsages, opts.print.FileTableFullJson.enabled);
         if (opts.print.FileTableJson.outputPath.empty()) {
-            core::Proto::toJSON(files, cout);
+            cout << json;
         } else {
-            stringstream buf;
-            core::Proto::toJSON(files, buf);
-            opts.print.FileTableJson.print(buf.str());
-        }
-    }
-    if (opts.print.FileTableMessagePack.enabled || opts.print.FileTableFullMessagePack.enabled) {
-        if (opts.print.FileTableMessagePack.enabled && opts.print.FileTableFullMessagePack.enabled) {
-            Exception::raise("file-table-msgpack and file-table-full-msgpack are mutually exclusive print options");
-        }
-        auto files = core::Proto::filesToProto(gs, untypedUsages, opts.print.FileTableFullMessagePack.enabled);
-        stringstream buf;
-        core::Proto::toJSON(files, buf);
-        auto str = buf.str();
-        rapidjson::Document document;
-        document.Parse(str);
-        mpack_writer_t writer;
-        if (opts.print.FileTableMessagePack.outputPath.empty()) {
-            mpack_writer_init_stdfile(&writer, stdout, /* close when done */ false);
-        } else {
-            mpack_writer_init_filename(&writer, opts.print.FileTableMessagePack.outputPath.c_str());
-        }
-        json2msgpack::json2msgpack(document, &writer);
-        if (mpack_writer_destroy(&writer)) {
-            Exception::raise("failed to write msgpack");
+            opts.print.FileTableJson.print(json);
         }
     }
 #endif
+
+    if (opts.print.SymbolTable.enabled) {
+        opts.print.SymbolTable.fmt("{}\n", gs.toString());
+    }
+    if (opts.print.SymbolTableRaw.enabled) {
+        opts.print.SymbolTableRaw.fmt("{}\n", gs.showRaw());
+    }
+
+#ifndef SORBET_REALMAIN_MIN
+    if (opts.print.SymbolTableJson.enabled) {
+        rapidjson::StringBuffer buffer;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        writer.SetIndent(' ', 1);
+        core::JSON::symbolToJSON(writer, gs, core::Symbols::root(), false);
+        string json(buffer.GetString(), buffer.GetLength());
+        json.push_back('\n');
+        opts.print.SymbolTableJson.print(json);
+    }
+    if (opts.print.SymbolTableFullJson.enabled) {
+        rapidjson::StringBuffer buffer;
+        rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+        writer.SetIndent(' ', 1);
+        core::JSON::symbolToJSON(writer, gs, core::Symbols::root(), true);
+        string json(buffer.GetString(), buffer.GetLength());
+        json.push_back('\n');
+        opts.print.SymbolTableFullJson.print(json);
+    }
+#endif
+    if (opts.print.SymbolTableFull.enabled) {
+        opts.print.SymbolTableFull.fmt("{}\n", gs.toStringFull());
+    }
+    if (opts.print.SymbolTableFullRaw.enabled) {
+        opts.print.SymbolTableFullRaw.fmt("{}\n", gs.showRawFull());
+    }
 }
 
 void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, long> &untypedBlames,
@@ -1785,7 +1806,7 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
             if (!pkg.exists()) {
                 writer.String("<none>");
             } else {
-                writer.String(gs.packageDB().getPackageInfo(pkg).show(gs));
+                writer.String(pkg.owner.show(gs));
             }
 
         } else {
@@ -1809,6 +1830,15 @@ void printUntypedBlames(const core::GlobalState &gs, const UnorderedMap<long, lo
 
     opts.print.UntypedBlame.print(result.GetString());
 #endif
+}
+
+void sortBySize(const core::GlobalState &gs, vector<ast::ParsedFile> &trees) {
+    Timer timeit(gs.tracer(), "sortBySize");
+    // If files are not already sorted, we want to start typeckecking big files first because it helps with
+    // better work distribution
+    fast_sort(trees, [&](const auto &lhs, const auto &rhs) -> bool {
+        return lhs.file.data(gs).sourceSize() > rhs.file.data(gs).sourceSize();
+    });
 }
 
 } // namespace sorbet::realmain::pipeline

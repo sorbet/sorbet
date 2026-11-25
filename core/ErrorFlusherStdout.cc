@@ -1,5 +1,7 @@
 #include "core/ErrorFlusherStdout.h"
 #include "common/FileSystem.h"
+#include "core/ErrorQueue.h"
+#include "core/GlobalState.h"
 #include "core/lsp/QueryResponse.h"
 
 using namespace std;
@@ -59,7 +61,15 @@ void ErrorFlusherStdout::flushErrorCount(spdlog::logger &logger, int count) {
 void ErrorFlusherStdout::flushAutocorrects(const GlobalState &gs, FileSystem &fs) {
     auto toWrite = AutocorrectSuggestion::apply(gs, fs, this->autocorrects);
     for (auto &[file, contents] : toWrite) {
-        fs.writeFile(string(file.data(gs).path()), contents);
+        auto path = string(file.data(gs).path());
+        try {
+            fs.writeFile(path, contents);
+        } catch (FileNotFoundException &e) {
+            // Despite the name, FileOps::write throws FileNotFoundException whenever the file can't
+            // be opened for writing, whatever the reason (e.g. EACCES for a read-only file). Leave
+            // the file unchanged instead of crashing.
+            gs.errorQueue->logger.warn("Cannot write file `{}` to apply autocorrects", path);
+        }
     }
     autocorrects.clear();
 }

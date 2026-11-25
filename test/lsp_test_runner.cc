@@ -9,6 +9,7 @@
 #include "common/strings/formatting.h"
 #include "common/web_tracer_framework/tracing.h"
 #include "main/lsp/LSPConfiguration.h"
+#include "main/options/options.h"
 #include "test/helpers/expectations.h"
 #include "test/helpers/lsp.h"
 #include "test/helpers/position_assertions.h"
@@ -214,7 +215,7 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
                          int &nextId, vector<variant<CodeActionKind, string>> &selectedCodeActionKinds,
                          vector<CodeActionKind> &ignoredCodeActionKinds,
                          vector<shared_ptr<ApplyCodeActionAssertion>> &applyCodeActionAssertions,
-                         string codeActionDescription, bool assertAllChanges) {
+                         string codeActionDescription, bool assertAllChanges, bool omitApplyAll) {
     auto isSelectedKind = [&selectedCodeActionKinds](CodeActionKind kind) {
         return count(selectedCodeActionKinds.begin(), selectedCodeActionKinds.end(),
                      variant<CodeActionKind, string>(kind)) != 0;
@@ -249,7 +250,7 @@ void validateCodeActions(LSPWrapper &lspWrapper, Expectations &test, string file
         }
         // We send two identical "Apply all Sorbet autocorrects" code actions with different kinds: One is a
         // Source, the other is a Quickfix. This logic strips out the quickfix.
-        if (sourceLevelCodeAction != nullptr && codeAction->title == sourceLevelCodeAction->title) {
+        if (sourceLevelCodeAction != nullptr && codeAction->title == sourceLevelCodeAction->title && omitApplyAll) {
             continue;
         }
 
@@ -348,11 +349,12 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
 
     auto ignoredCodeActionAssertions =
         StringPropertyAssertions::getValues("assert-no-code-action", assertions).value_or(vector<string>{});
+    bool omitApplyAll = BooleanPropertyAssertion::getValue("omit-apply-all-quickfix", assertions).value_or(true);
     vector<CodeActionKind> ignoredCodeActionKinds;
     transform(ignoredCodeActionAssertions.begin(), ignoredCodeActionAssertions.end(),
               back_inserter(ignoredCodeActionKinds), getCodeActionKind);
 
-    auto errors = RangeAssertion::getErrorAssertions(assertions);
+    auto errors = RangeAssertion::getAssertions<ErrorAssertion>(assertions);
     UnorderedMap<string, vector<shared_ptr<RangeAssertion>>> errorsByFilename;
     for (auto &error : errors) {
         errorsByFilename[error->filename].emplace_back(error);
@@ -366,7 +368,8 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
             // Request code actions for each of this file's error.
             for (auto &error : errorsByFilename[filename]) {
                 validateCodeActions(lspWrapper, test, fileUri, error->range->copy(), nextId, selectedCodeActionKinds,
-                                    ignoredCodeActionKinds, applyCodeActionAssertions, error->toString(), false);
+                                    ignoredCodeActionKinds, applyCodeActionAssertions, error->toString(), false,
+                                    omitApplyAll);
             }
 
             // This weird loop is here because `validateCodeActions` erases the elements from
@@ -379,7 +382,7 @@ void testQuickFixCodeActions(LSPWrapper &lspWrapper, Expectations &test, const v
                 auto codeActionAssertion = applyCodeActionAssertions.at(0);
                 validateCodeActions(lspWrapper, test, fileUri, codeActionAssertion->range->copy(), nextId,
                                     selectedCodeActionKinds, ignoredCodeActionKinds, applyCodeActionAssertions,
-                                    codeActionAssertion->toString(), true);
+                                    codeActionAssertion->toString(), true, omitApplyAll);
                 REQUIRE_LT(applyCodeActionAssertions.size(), initialSize);
             }
 
@@ -434,52 +437,6 @@ void testDocumentSymbols(LSPWrapper &lspWrapper, Expectations &test, int &nextId
         for (auto &sym : *syms) {
             validateDocumentSymbol(sym);
         }
-    }
-}
-
-void testDocumentFormatting(LSPWrapper &lspWrapper, Expectations &test, int &nextId, string_view uri,
-                            string_view testFile) {
-    auto expectationFileName = test.expectations["document-formatting-rubyfmt"][testFile];
-    if (expectationFileName.empty()) {
-        // No .exp file found; nothing to do.
-        return;
-    }
-
-    auto params = make_unique<DocumentFormattingParams>(make_unique<TextDocumentIdentifier>(string(uri)),
-                                                        make_unique<FormattingOptions>(4, 4));
-    auto req = make_unique<RequestMessage>("2.0", nextId++, LSPMethod::TextDocumentFormatting, move(params));
-    auto responses = getLSPResponsesFor(lspWrapper, make_unique<LSPMessage>(move(req)));
-
-    // successful response
-    if (responses.at(0)->isResponse()) {
-        INFO("Did not receive exactly one response for a documentFormatting request.");
-        REQUIRE_EQ(responses.size(), 1);
-        auto &msg = responses.at(0);
-        REQUIRE(msg->isResponse());
-        auto &response = msg->asResponse();
-        REQUIRE_MESSAGE(response.result, "Document formatting request returned error: " << msg->toJSON());
-        auto &receivedFormattingResponse = get<variant<JSONNullObject, vector<unique_ptr<TextEdit>>>>(*response.result);
-        auto expectedOutput = FileOps::read(test.folder + expectationFileName);
-        if (auto *edits = get_if<vector<unique_ptr<TextEdit>>>(&receivedFormattingResponse)) {
-            // We can support multiple edits, but right now the impl only returns one.
-            REQUIRE_EQ(1, edits->size());
-            auto formattedText = (*edits)[0]->newText;
-            REQUIRE_EQ(expectedOutput, formattedText);
-        } else {
-            // Syntax error responses return null
-            auto isJSONNullObject = std::holds_alternative<JSONNullObject>(receivedFormattingResponse);
-            REQUIRE(isJSONNullObject);
-            REQUIRE_EQ(expectedOutput, "");
-        }
-    } else {
-        // Error responses return both a user notification and an LSP error
-        REQUIRE_EQ(responses.size(), 2);
-        REQUIRE(responses.at(0)->isNotification());
-        auto &errorMsg = responses.at(1);
-        REQUIRE(errorMsg->isResponse());
-        auto &receivedErrorResponse = *errorMsg->asResponse().error;
-        auto expectedOutput = FileOps::read(test.folder + expectationFileName);
-        REQUIRE_EQ(expectedOutput, receivedErrorResponse->message);
     }
 }
 
@@ -548,13 +505,16 @@ TEST_CASE("LSPTest") {
         opts.lspExtractToVariableEnabled =
             BooleanPropertyAssertion::getValue("enable-experimental-lsp-extract-to-variable", assertions)
                 .value_or(false);
+        opts.lspCreateMissingMethodEnabled =
+            BooleanPropertyAssertion::getValue("enable-experimental-lsp-create-missing-method", assertions)
+                .value_or(false);
         opts.disableWatchman = true;
-        opts.rubyfmtPath = "test/testdata/lsp/rubyfmt-stub/rubyfmt";
 
         // Set to a number that is reasonable large for tests, but small enough that we can have a test to handle
         // this edge case. If you change this number, `fast_path/{too_many_files,not_enough_files,initialize}` will
         // need to be changed as well.
         opts.lspMaxFilesOnFastPath = 10;
+        opts.cacheSensitiveOptions.usePrismParser = (parser == realmain::options::Parser::PRISM);
         lspWrapper = SingleThreadedLSPWrapper::create("", make_shared<realmain::options::Options>(move(opts)));
         lspWrapper->enableAllExperimentalFeatures();
     }
@@ -562,7 +522,7 @@ TEST_CASE("LSPTest") {
     if (test.expectations.contains("autogen")) {
         // Some autogen tests assume that some errors will occur from the resolver step, others assume the resolver
         // won't run.
-        if (!RangeAssertion::getErrorAssertions(assertions).empty()) {
+        if (!RangeAssertion::getAssertions<ErrorAssertion>(assertions).empty()) {
             // ...and stop after the resolver phase if there are errors
             lspWrapper->opts->stopAfterPhase = realmain::options::Phase::RESOLVER;
         } else {
@@ -634,11 +594,12 @@ TEST_CASE("LSPTest") {
             auto responses = getLSPResponsesFor(*lspWrapper, move(updates));
             updateDiagnostics(config, testFileUris, responses, diagnostics);
             bool errorAssertionsPassed = ErrorAssertion::checkAll(
-                test.sourceFileContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefixes[i]);
+                test.sourceFileContents, RangeAssertion::getAssertions<ErrorAssertion>(assertions), diagnostics,
+                errorPrefixes[i]);
 
-            bool untypedAssertionsPassed =
-                UntypedAssertion::checkAll(test.sourceFileContents, RangeAssertion::getUntypedAssertions(assertions),
-                                           diagnostics, errorPrefixes[i]);
+            bool untypedAssertionsPassed = UntypedAssertion::checkAll(
+                test.sourceFileContents, RangeAssertion::getAssertions<UntypedAssertion>(assertions), diagnostics,
+                errorPrefixes[i]);
 
             slowPathPassed = errorAssertionsPassed && untypedAssertionsPassed;
         }
@@ -646,7 +607,6 @@ TEST_CASE("LSPTest") {
 
     for (auto &filename : filenames) {
         testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[filename], filename);
-        testDocumentFormatting(*lspWrapper, test, nextId, testFileUris[filename], filename);
     }
     testQuickFixCodeActions(*lspWrapper, test, filenames, assertions, testFileUris, nextId);
 
@@ -735,16 +695,14 @@ TEST_CASE("LSPTest") {
 
             // Collect importUsageAssertions into a separate collection to handle them differently.
             vector<shared_ptr<RangeAssertion>> importUsageAssertions;
-            entryAssertions.erase(std::remove_if(entryAssertions.begin(), entryAssertions.end(),
-                                                 [&](auto &assertion) -> bool {
-                                                     if (dynamic_pointer_cast<ImportUsageAssertion>(assertion)) {
-                                                         importUsageAssertions.emplace_back(assertion);
-                                                         return true;
-                                                     }
+            std::erase_if(entryAssertions, [&](auto &assertion) -> bool {
+                if (dynamic_pointer_cast<ImportUsageAssertion>(assertion)) {
+                    importUsageAssertions.emplace_back(assertion);
+                    return true;
+                }
 
-                                                     return false;
-                                                 }),
-                                  entryAssertions.end());
+                return false;
+            });
 
             for (auto &assertion : entryAssertions) {
                 string_view symbol;
@@ -946,8 +904,9 @@ TEST_CASE("LSPTest") {
                 testDocumentSymbols(*lspWrapper, test, nextId, testFileUris[originalFile], updateFile);
             }
 
-            const bool passed = ErrorAssertion::checkAll(
-                updatesAndContents, RangeAssertion::getErrorAssertions(assertions), diagnostics, errorPrefix);
+            const bool passed =
+                ErrorAssertion::checkAll(updatesAndContents, RangeAssertion::getAssertions<ErrorAssertion>(assertions),
+                                         diagnostics, errorPrefix);
 
             if (!passed) {
                 // Abort if an update fails its assertions, as subsequent updates will likely fail as well.
@@ -973,6 +932,9 @@ int main(int argc, char *argv[]) {
     cxxopts::Options options("lsp_test_corpus", "Test corpus for Sorbet's language server");
     options.allow_unrecognised_options().add_options()("single_test", "run over single test.",
                                                        cxxopts::value<string>()->default_value(""), "testpath");
+    options.allow_unrecognised_options().add_options()("parser", "The parser to use while testing.",
+                                                       cxxopts::value<string>()->default_value("original"),
+                                                       "{original, prism}");
     options.add_options("advanced")("web-trace-file", "Web trace file. For use with chrome about://tracing",
                                     cxxopts::value<string>()->default_value(""), "file");
     auto res = options.parse(argc, argv);
@@ -984,6 +946,13 @@ int main(int argc, char *argv[]) {
 
     sorbet::test::singleTest = res["single_test"].as<string>();
     sorbet::test::webTraceFile = res["web-trace-file"].as<string>();
+
+    auto logger = spdlog::stderr_color_mt("lsp_test_runner");
+    auto parser = sorbet::realmain::options::extractParser(res["parser"].as<string>(), logger);
+    if (!parser) {
+        return 1;
+    }
+    sorbet::test::parser = *parser;
 
     doctest::Context context(argc, argv);
     return context.run();

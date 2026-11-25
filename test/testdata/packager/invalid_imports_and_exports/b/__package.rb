@@ -5,6 +5,4 @@
 
 class B < PackageSpec
   import A
-  export B::BClass
-  export B::BModule
 end

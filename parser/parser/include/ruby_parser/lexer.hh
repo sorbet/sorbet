@@ -20,21 +20,6 @@
 #include "token.hh"
 
 namespace ruby_parser {
-enum class ruby_version {
-    RUBY_18,
-    RUBY_19,
-    RUBY_20,
-    RUBY_21,
-    RUBY_22,
-    RUBY_23,
-    RUBY_24,
-    RUBY_25,
-    RUBY_26,
-    RUBY_27,
-    RUBY_30,
-    RUBY_31,
-};
-
 class lexer {
 public:
     using environment = std::set<std::string, std::less<void>>;
@@ -56,7 +41,6 @@ private:
     diagnostics_t &diagnostics;
     pool<token, 64> mempool;
 
-    ruby_version version;
     std::string_view source_buffer;
     sorbet::StableStringStorage<> &scratch;
     const std::vector<uint32_t> lineBreaks;
@@ -200,8 +184,7 @@ public:
 
     std::vector<std::pair<size_t, size_t>> comment_locations;
 
-    lexer(diagnostics_t &diag, ruby_version version, std::string_view source_buffer,
-          sorbet::StableStringStorage<> &scratch, bool traceLexer);
+    lexer(diagnostics_t &diag, std::string_view source_buffer, sorbet::StableStringStorage<> &scratch, bool traceLexer);
 
     // Main interface consumed by yylex function in parser
     token_t advance();

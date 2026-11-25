@@ -14,21 +14,18 @@ JEMALLOC_BUILD_COMMAND = """
    if [ "$${path#/}" = "$$path" ]; then
      path="$$(pwd)/$$path"
    fi
-   if [ "$${path%.sh}" != "$$path" ]; then
-     path="sh $$path"
-   fi
    echo "$$path"
   }
   export PATH="/usr/local/bin:$$PATH" # find autoconf on mac
   export PATH="/opt/homebrew/bin:$$PATH" # find autoconf on mac arm64
   export PATH="/home/linuxbrew/.linuxbrew/bin:$$PATH" # find autoconf on linux using Linuxbrew
-  export CC=$$(absolutize $(CC))
-  export CXX=$$(absolutize $(CC))
-  [ "$$(uname)" = "Linux" ] && export AR=$$(absolutize $(AR))
-  export NM=$$(absolutize $(NM))
-  export OBJCOPY=$$(absolutize $(OBJCOPY))
-  export CFLAGS=$(CC_FLAGS)
-  export CXXFLAGS=$(CC_FLAGS)
+  export CC="$$(absolutize $(CC))"
+  export CXX="$$(absolutize $(CC))"
+  [ "$$(uname)" = "Linux" ] && export AR="$$(absolutize $(AR))"
+  export NM="$$(absolutize $(NM))"
+  export OBJCOPY="$$(absolutize $(OBJCOPY))"
+  export CFLAGS="$(CC_FLAGS)"
+  export CXXFLAGS="$(CC_FLAGS)"
   export LTOFLAGS="$$([ "$$(uname)" = "Linux" ] && echo "-flto=thin -Wl,--thinlto-jobs=all")" # todo: on next clang toolchain upgrade, check if it's fixed and we can re-enable thinlto on mac
   export EXTRA_CFLAGS="$${LTOFLAGS}"
   export EXTRA_CXXFLAGS="-stdlib=libc++ $${EXTRA_CFLAGS}"
@@ -52,6 +49,14 @@ JEMALLOC_BUILD_COMMAND = """
   export CPPFLAGS="$${CFLAGS}"
 
   pushd $$(dirname $(location autogen.sh)) > /dev/null
+
+  # The rule that compiles c/c++ is broken, as it doesn't pass through the `-stdlib=libc++` flag that's critical for
+  # being able to find headers when outputting dependency files. As a result, that part of the build will fail even
+  # though we don't care about .d files for the purpose of this build. The CC_MM variable controls this, so we can
+  # change its default to be empty to ensure that the Makefile doesn't generate .d files. (There's unfortunately no way
+  # to control this behavior with a flag to configure or an env var in the Makefile, so editing configure.ac is the
+  # easiest option.)
+  sed -i.bak 's/CC_MM=1/CC_MM=/' configure.ac
 
   if compile_output=$$(./autogen.sh --without-export --disable-shared --enable-static $$AUTOGEN_FLAGS 2>&1 && make build_lib_static -j4 2>&1); then
     popd > /dev/null

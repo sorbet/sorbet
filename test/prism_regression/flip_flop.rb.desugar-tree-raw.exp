@@ -8,31 +8,46 @@ ClassDef{
     }]
   rhs = [
     If{
-      cond = EmptyTree
+      cond = ConstantLit{
+        symbol = (static-field ::<ErrorNode>)
+        orig = nullptr
+      }
       thenp = Literal{ value = "body 1" }
       elsep = EmptyTree
     }
 
     If{
-      cond = EmptyTree
+      cond = ConstantLit{
+        symbol = (static-field ::<ErrorNode>)
+        orig = nullptr
+      }
       thenp = Literal{ value = "body 2" }
       elsep = EmptyTree
     }
 
     If{
-      cond = EmptyTree
+      cond = ConstantLit{
+        symbol = (static-field ::<ErrorNode>)
+        orig = nullptr
+      }
       thenp = Literal{ value = "body 3" }
       elsep = EmptyTree
     }
 
     If{
-      cond = EmptyTree
+      cond = ConstantLit{
+        symbol = (static-field ::<ErrorNode>)
+        orig = nullptr
+      }
       thenp = EmptyTree
       elsep = Literal{ value = "body 4" }
     }
 
     If{
-      cond = EmptyTree
+      cond = ConstantLit{
+        symbol = (static-field ::<ErrorNode>)
+        orig = nullptr
+      }
       thenp = EmptyTree
       elsep = Literal{ value = "body 5" }
     }
@@ -43,8 +58,11 @@ ClassDef{
         name = <U b>
       }
       rhs = Send{
-        flags = {privateOk}
-        recv = Self
+        flags = {}
+        recv = ConstantLit{
+          symbol = (static-field ::<ErrorNode>)
+          orig = nullptr
+        }
         fun = <U !>
         block = nullptr
         pos_args = 0

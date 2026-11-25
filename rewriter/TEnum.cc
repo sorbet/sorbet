@@ -155,8 +155,6 @@ optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::ClassDef 
     auto classDef =
         ast::MK::Class(statLocZero, statLocZero, classCnst.deepCopy(), std::move(parent), std::move(classRhs));
 
-    ast::Send::Flags flags = {};
-    flags.isPrivateOk = true;
     auto singletonAsgn = ast::MK::Assign(
         statLocZero, std::move(asgn->lhs),
         ast::make_expression<ast::Cast>(statLocZero, core::Types::todo(),
@@ -256,11 +254,10 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
         auto sig = ast::MK::Sig0(klass->declLoc, std::move(return_type_ast));
         auto method = ast::MK::SyntheticMethod0(klass->loc, klass->declLoc, core::Names::serialize(),
                                                 ast::MK::RaiseTypedUnimplemented(klass->declLoc));
-        ast::Send::ARGS_store nargs;
         ast::Send::Flags flags;
         flags.isPrivateOk = true;
-        auto visibility = ast::MK::Send(klass->declLoc, ast::MK::Self(klass->declLoc), core::Names::public_(),
-                                        klass->declLoc, 0, std::move(nargs), flags);
+        auto visibility = ast::MK::Send0(klass->declLoc, ast::MK::Self(klass->declLoc), core::Names::public_(),
+                                         klass->declLoc, flags);
 
         klass->rhs.emplace_back(std::move(visibility));
         klass->rhs.emplace_back(std::move(sig));

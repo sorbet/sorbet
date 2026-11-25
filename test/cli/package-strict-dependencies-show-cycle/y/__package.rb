@@ -5,6 +5,4 @@ class Y < PackageSpec
   layer 'application'
 
   import Z
-
-  export Y::Foo
 end

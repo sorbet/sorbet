@@ -1,10 +1,17 @@
 #ifndef SORBET_RBS_SIGS_REWRITER_H
 #define SORBET_RBS_SIGS_REWRITER_H
 
-#include "parser/parser.h"
+#include <memory>
+
+#include "parser/prism/Factory.h"
+#include "parser/prism/Helpers.h"
+#include "parser/prism/Parser.h"
 #include "rbs/CommentsAssociator.h"
 #include "rbs/rbs_common.h"
-#include <memory>
+
+extern "C" {
+#include "prism.h"
+}
 
 namespace sorbet::rbs {
 
@@ -29,23 +36,33 @@ struct Comments {
 
 class SigsRewriter {
 public:
-    SigsRewriter(core::MutableContext ctx, std::map<parser::Node *, std::vector<rbs::CommentNode>> &commentsByNode)
-        : ctx(ctx), commentsByNode(commentsByNode){};
-    std::unique_ptr<parser::Node> run(std::unique_ptr<parser::Node> tree);
+    SigsRewriter(core::MutableContext ctx, parser::Prism::Parser &parser,
+                 UnorderedMap<pm_node_t *, std::vector<rbs::CommentNode>> &commentsByNode)
+        : ctx{ctx}, parser{parser}, prism{parser}, commentsByNode{commentsByNode} {}
+
+    // Rewrite the RBS signatures in the Prism AST, in-place.
+    void run(pm_node_t *node);
 
 private:
     core::MutableContext ctx;
-    std::map<parser::Node *, std::vector<rbs::CommentNode>> &commentsByNode;
+    parser::Prism::Parser &parser;
+    parser::Prism::Factory prism;
+    UnorderedMap<pm_node_t *, std::vector<rbs::CommentNode>> &commentsByNode;
 
-    std::unique_ptr<parser::Node> rewriteBegin(std::unique_ptr<parser::Node> tree);
-    std::unique_ptr<parser::Node> rewriteBody(std::unique_ptr<parser::Node> tree);
-    std::unique_ptr<parser::Node> rewriteNode(std::unique_ptr<parser::Node> tree);
-    std::unique_ptr<parser::Node> rewriteClass(std::unique_ptr<parser::Node> tree);
-    parser::NodeVec rewriteNodes(parser::NodeVec nodes);
-    std::unique_ptr<parser::NodeVec> signaturesForNode(parser::Node *node);
-    Comments commentsForNode(parser::Node *node);
-    void insertTypeParams(parser::Node *node, std::unique_ptr<parser::Node> *body);
-    std::unique_ptr<parser::Node> replaceSyntheticTypeAlias(std::unique_ptr<parser::Node> node);
+    pm_node_t *rewriteBody(pm_node_t *node);
+    void rewriteBody(pm_statements_node_t *stmts);
+    void rewriteNode(pm_node_t *node);
+    void rewriteNullableNode(pm_node_t *node);
+    void rewriteNodes(pm_node_list_t &nodes);
+    void rewriteArgumentsNode(pm_arguments_node_t *args);
+    void rewriteClass(pm_node_t *node);
+    std::unique_ptr<std::vector<pm_node_t *>> signaturesForNode(pm_node_t *node);
+    Comments commentsForNode(pm_node_t *node);
+    void insertTypeParams(pm_node_t *node, pm_node_t *body);
+    void processClassBody(pm_node_t *node, pm_node_t *&body, absl::Span<pm_node_t *const> helpers);
+    pm_node_t *replaceSyntheticTypeAlias(pm_node_t *node);
+    pm_node_t *createStatementsWithSignatures(pm_node_t *originalNode,
+                                              std::unique_ptr<std::vector<pm_node_t *>> signatures);
 };
 
 } // namespace sorbet::rbs

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # typed: true
 
-module Outer
+module Outer # error: Package `Outer::Inner` may not open `Outer`
   def self.bad
 # ^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Outer::Inner`
   end
@@ -14,4 +14,5 @@ module Outer
 
   include Inner::Mixin
 # ^^^^^^^^^^^^^^^^^^^^ error: This file must only define behavior in enclosing package `Outer::Inner`
+#         ^^^^^^^^^^^^ error: `include` may only be used on constants in the package that owns them
 end

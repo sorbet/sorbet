@@ -1,6 +1,8 @@
 #include "common/JSON.h"
 #include "spdlog/fmt/fmt.h"
 
+#include <iterator>
+
 using namespace std;
 
 namespace sorbet {

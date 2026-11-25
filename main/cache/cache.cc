@@ -1,14 +1,18 @@
 #include "main/cache/cache.h"
+#include "absl/cleanup/cleanup.h"
 #include "common/FileOps.h"
 #include "common/Random.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "common/exception/Exception.h"
+#include "common/kvstore/CacheLock.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/serialize/serialize.h"
 #include "main/options/options.h"
 #include "sorbet_version/sorbet_version.h"
+#include <cerrno>
 #include <charconv>
 #include <cstdio>
+#include <filesystem>
 #include <unistd.h>
 
 using namespace std;
@@ -24,7 +28,7 @@ unique_ptr<KeyValueStore> openCache(shared_ptr<::spdlog::logger> logger, string 
     // the number of files stored * the number of flavors used. For this reason, we need to be very careful when
     // considering adding a new cache flavor.
     auto flavor = "default";
-    auto version = fmt::format("{}|{}", sorbet_full_version_string, opts.cacheSensitiveOptions.serialize());
+    auto version = fmt::format("{}|{}", sorbet::full_version_string, opts.cacheSensitiveOptions.serialize());
     return make_unique<KeyValueStore>(std::move(logger), version, std::move(cacheDir), flavor, opts.maxCacheSizeBytes);
 }
 } // namespace
@@ -94,7 +98,16 @@ bool retainGlobalState(core::GlobalState &gs, const unique_ptr<OwnedKeyValueStor
         Timer timeit(gs.tracer(), "retainGlobalState.writeNameTable");
         gs.kvstoreUuid = Random::uniformU4();
         kvstore->write(core::serialize::Serializer::NAME_TABLE_UUID_KEY, core::serialize::Serializer::storeUUID(gs));
-        kvstore->write(core::serialize::Serializer::NAME_TABLE_KEY, core::serialize::Serializer::storeNameTable(gs));
+
+        // Write the diff entry before updating the metadata (diff count + hash size), so that a
+        // failure to write the diff doesn't corrupt the existing cached data.
+        kvstore->write(core::serialize::Serializer::nameTableDiffKey(gs.getNameTableDiffCount()),
+                       core::serialize::Serializer::storeNameTableDiff(gs));
+
+        gs.incrementNameTableDiffCount();
+        kvstore->write(core::serialize::Serializer::NAME_TABLE_DIFF_COUNT_AND_HASH_SIZE_KEY,
+                       core::serialize::Serializer::storeNameTableDiffCountAndHashSize(gs.getNameTableDiffCount(), gs));
+        gs.markNameTableAsCached();
     }
 
     return true;
@@ -202,7 +215,7 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
         size_t usedPercent = round((sizeBytes * 100.0) / opts.maxCacheSizeBytes);
         prodCounterSet("cache.used_bytes", sizeBytes);
         prodCounterSet("cache.used_percent", usedPercent);
-        gs.tracer().debug("sorbet_version={} cache_used_bytes={} cache_used_percent={}", sorbet_full_version_string,
+        gs.tracer().debug("sorbet_version={} cache_used_bytes={} cache_used_percent={}", sorbet::full_version_string,
                           sizeBytes, usedPercent);
     } else {
         prodCounterInc("cache.aborted");
@@ -213,42 +226,57 @@ unique_ptr<KeyValueStore> maybeCacheGlobalStateAndFiles(unique_ptr<KeyValueStore
 }
 
 namespace {
-void removeCacheDir(const string &path) {
-    if (!FileOps::dirExists(path)) {
-        return;
-    }
-
+// Missing files and directories containing unrelated files are acceptable.
+bool removeCacheDir(const string &path) noexcept {
     auto dataMdb = fmt::format("{}/data.mdb", path);
-    if (FileOps::exists(dataMdb)) {
-        FileOps::removeFile(dataMdb);
+    if (0 != remove(dataMdb.c_str())) {
+        switch (errno) {
+            // Another process may have already removed the database.
+            case ENOENT:
+                break;
+
+            default:
+                return false;
+        }
     }
 
     auto lockMdb = fmt::format("{}/lock.mdb", path);
-    if (FileOps::exists(lockMdb)) {
-        FileOps::removeFile(lockMdb);
+    if (0 != remove(lockMdb.c_str())) {
+        switch (errno) {
+            // Another process may have already removed the lock file.
+            case ENOENT:
+                break;
+
+            default:
+                return false;
+        }
     }
 
-    // Fail silently if the directory has files other than those created by LMDB. This should be fine though, as we
-    // will have removed the largest files.
-    auto err = rmdir(path.c_str());
-    if (err) {
+    auto accessLock = fmt::format("{}/{}", path, CacheLock::ACCESS_LOCK_FILE);
+    if (0 != remove(accessLock.c_str()) && errno != ENOENT) {
+        return false;
+    }
+
+    // Leave directories containing unrelated files intact.
+    if (0 != rmdir(path.c_str())) {
         switch (errno) {
-            // Return `false` if the directory is missing, isn't actually a directory, or wasn't empty.
+            // It's fine if the directory is missing, isn't actually a directory, or wasn't empty.
             case ENOENT:
             case ENOTDIR:
             case ENOTEMPTY:
                 break;
 
-            default: {
-                auto msg = fmt::format("Error in removeCacheDir('{}'): {}", path, errno);
-                throw sorbet::RemoveDirException(msg);
-            }
+            default:
+                return false;
         }
     }
+
+    return true;
 }
 } // namespace
 
 const string_view SessionCache::SESSION_DIR_PREFIX = "sorbet-session-";
+const string_view SessionCache::STAGING_DIR_PREFIX = "sorbet-publish-";
 
 SessionCache::SessionCache(string path) : path{std::move(path)} {}
 
@@ -262,12 +290,15 @@ void SessionCache::reapOldCaches(const options::Options &opts) {
     }
 
     for (const auto &dir : FileOps::listSubdirs(opts.cacheDir)) {
-        auto pos = dir.find(SESSION_DIR_PREFIX);
-        if (pos != 0) {
+        string_view pidStr;
+        if (dir.find(SESSION_DIR_PREFIX) == 0) {
+            pidStr = string_view(dir).substr(SESSION_DIR_PREFIX.size());
+        } else if (dir.find(STAGING_DIR_PREFIX) == 0) {
+            pidStr = string_view(dir).substr(STAGING_DIR_PREFIX.size());
+        } else {
             continue;
         }
 
-        string_view pidStr = string_view(dir).substr(SESSION_DIR_PREFIX.size());
         pid_t pid = -1;
         auto res = std::from_chars(pidStr.begin(), pidStr.end(), pid);
         if (res.ec != std::errc{} || res.ptr != pidStr.end() || pid <= 0) {
@@ -292,8 +323,8 @@ unique_ptr<SessionCache> SessionCache::make(unique_ptr<const OwnedKeyValueStore>
     auto path = fmt::format("{}/{}{}", opts.cacheDir, SESSION_DIR_PREFIX, pid);
 
     // If the directory already exists, we're reusing a PID from a previous run of Sorbet.
-    if (FileOps::dirExists(path)) {
-        removeCacheDir(path);
+    if (FileOps::dirExists(path) && !removeCacheDir(path)) {
+        throw RemoveDirException(fmt::format("Failed to remove existing session cache '{}': {}", path, errno));
     }
 
     kvstore->copyTo(path);
@@ -308,25 +339,47 @@ string_view SessionCache::kvstorePath() const {
     return string_view(this->path);
 }
 
-unique_ptr<KeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger, const options::Options &opts) const {
+unique_ptr<OwnedKeyValueStore> SessionCache::open(shared_ptr<::spdlog::logger> logger,
+                                                  const options::Options &opts) const {
     // If the session copy has disappeared, we return a nullptr to force downstream consumers to explicitly handle the
-    // empty cache.
+    // empty cache. If only the database has been removed, we'll create a new one in the openCache call below.
     if (!FileOps::dirExists(this->path)) {
         return nullptr;
     }
 
-    auto kvstore = make_unique<const OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
+    return make_unique<OwnedKeyValueStore>(openCache(std::move(logger), this->path, opts));
+}
 
-    // If the name table entry is missing, this indicates that the cache is completely fresh and doesn't originate in a
-    // copy from the result of indexing. This can happen if only the `data.mdb` file was removed from `this->path`, and
-    // the KeyValueStore created a fresh database when created.
-    const auto nameTableEntry = kvstore->read(core::serialize::Serializer::NAME_TABLE_KEY);
-    if (nameTableEntry.len == 0) {
-        return nullptr;
+void SessionCache::commit(spdlog::logger &logger, const options::Options &opts) const {
+    if (opts.cacheDir.empty()) {
+        return;
     }
 
-    // We abort here because there will be no outstanding transactions present.
-    return OwnedKeyValueStore::abort(std::move(kvstore));
+    if (!FileOps::dirExists(this->path)) {
+        return;
+    }
+
+    Timer timeit(logger, "session_cache.commit");
+
+    // Skip publication if the shared cache is still in use.
+    auto accessLock = CacheLock::acquireExclusive(opts.cacheDir, /* blocking */ false);
+    if (!accessLock.has_value()) {
+        prodCounterInc("cache.publish_failed");
+        return;
+    }
+
+    auto sourceDb = fmt::format("{}/data.mdb", this->path);
+    auto stagedCopy = fmt::format("{}/data.mdb.staging", opts.cacheDir);
+    absl::Cleanup cleanup = [&stagedCopy] { ::unlink(stagedCopy.c_str()); };
+
+    error_code ec;
+    if (!std::filesystem::copy_file(sourceDb, stagedCopy, filesystem::copy_options::overwrite_existing, ec)) {
+        prodCounterInc("cache.publish_failed");
+        return;
+    }
+
+    filesystem::rename(stagedCopy, fmt::format("{}/data.mdb", opts.cacheDir));
+    prodCounterInc("cache.publish_success");
 }
 
 } // namespace sorbet::realmain::cache

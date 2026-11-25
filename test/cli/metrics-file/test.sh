@@ -31,3 +31,11 @@ grep -A1 "types.input.modules.total\"" metrics5.json
 grep -A1 "types.input.classes.total\"" metrics5.json
 grep -A1 "types.input.singleton_classes.total\"" metrics5.json
 grep -A1 "types.input.methods.total\"" metrics5.json
+
+echo ------------------------------
+
+# Sorbet does not crash when the language server stops before the client
+# sends `initialized`.
+main/sorbet --silence-dev-message --lsp --disable-watchman --dir test/cli/metrics-file/files_for_metrics --metrics-file=metrics6.json < /dev/null 2>&1
+echo "exit code: $?"
+grep status metrics6.json

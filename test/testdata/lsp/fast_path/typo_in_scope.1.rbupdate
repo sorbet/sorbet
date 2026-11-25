@@ -1,0 +1,17 @@
+# typed: strict
+# assert-fast-path: typo_in_scope.rb
+
+module A::B
+  class C
+  end
+end
+
+class Other
+  extend T::Sig
+  sig { returns(iA::B::C) }
+  #             ^^^^^ error: Dynamic constant references are unsupported
+  #             ^^ error: Method `iA` does not exist
+  def call
+    raise
+  end
+end

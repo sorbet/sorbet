@@ -71,13 +71,25 @@ TEST_CASE("DefaultConstructorMatchesReadOptions") {
     CHECK_EQ(empty.inputFileNames.size(), opts.inputFileNames.size());
     CHECK_EQ(empty.lspDocumentHighlightEnabled, opts.lspDocumentHighlightEnabled);
     CHECK_EQ(empty.lspSignatureHelpEnabled, opts.lspSignatureHelpEnabled);
-    CHECK_EQ(empty.lspDocumentFormatRubyfmtEnabled, opts.lspDocumentFormatRubyfmtEnabled);
-    CHECK_EQ(empty.rubyfmtPath, opts.rubyfmtPath);
     CHECK_EQ(empty.inlineInput, opts.inlineInput);
     CHECK_EQ(empty.debugLogFile, opts.debugLogFile);
     CHECK_EQ(empty.webTraceFile, opts.webTraceFile);
     CHECK_EQ(empty.uniquelyDefinedBehavior, opts.uniquelyDefinedBehavior);
     CHECK_EQ(empty.forceHashing, opts.forceHashing);
     CHECK_EQ(empty.lspErrorCap, opts.lspErrorCap);
+    CHECK_EQ(empty.lspMaxFilesOnFastPath, opts.lspMaxFilesOnFastPath);
     CHECK_EQ(empty.forciblySilenceLspMultipleDirError, opts.forciblySilenceLspMultipleDirError);
+}
+
+TEST_CASE("ReadsLSPMaxFilesOnFastPath") {
+    vector<sorbet::pipeline::semantic_extension::SemanticExtensionProvider *> extensionProviders;
+    vector<unique_ptr<sorbet::pipeline::semantic_extension::SemanticExtension>> extensions;
+    sorbet::realmain::options::Options opts;
+    const char *argv[] = {"sorbet", "--lsp-max-files-on-fast-path=7", "-e", ""};
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
+    sorbet::realmain::options::readOptions(opts, extensions, std::size(argv), const_cast<char **>(argv),
+                                           extensionProviders, logger);
+
+    CHECK_EQ(7, opts.lspMaxFilesOnFastPath);
 }

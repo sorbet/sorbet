@@ -30,5 +30,5 @@ public:
     WorkerPool &operator=(WorkerPool &&) = delete;
     WorkerPool &operator=(const WorkerPool &) = delete;
 };
-};     // namespace sorbet
+}; // namespace sorbet
 #endif // SORBET_WORKERPOOL_H

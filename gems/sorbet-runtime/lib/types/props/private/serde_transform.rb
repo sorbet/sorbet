@@ -88,7 +88,7 @@ module T::Props
             # string comparisons.
             nil
           else
-            "T::Props::Utils.deep_clone_object(#{varname})"
+            "T::Props::Utils.deep_clone(#{varname})"
           end
         when T::Types::Union
           non_nil_type = T::Utils.unwrap_nilable(type)
@@ -110,10 +110,10 @@ module T::Props
             # this union to have no specific serde transform (the only reason
             # why Float has a special case is because round tripping through
             # JSON might normalize Floats to Integers)
-            "T::Props::Utils.deep_clone_object(#{varname})"
+            "T::Props::Utils.deep_clone(#{varname})"
           end
         when T::Types::Intersection
-          dynamic_fallback = "T::Props::Utils.deep_clone_object(#{varname})"
+          dynamic_fallback = "T::Props::Utils.deep_clone(#{varname})"
 
           # Transformations for any members of the intersection type where we
           # know what we need to do and did not have to fall back to the
@@ -147,7 +147,7 @@ module T::Props
         when T::Types::Enum
           generate(T::Utils.lift_enum(type), mode, varname)
         else
-          "T::Props::Utils.deep_clone_object(#{varname})"
+          "T::Props::Utils.deep_clone(#{varname})"
         end
       end
 

@@ -104,7 +104,7 @@ module MonitorMixin
   # Use `extend MonitorMixin` or `include MonitorMixin` instead of this
   # constructor. Have look at the examples above to understand how to use this
   # module.
-  def self.new(*args); end
+  def initialize(*args); end
 
   # Enters exclusive section.
   def mon_enter; end
@@ -159,7 +159,7 @@ end
 # and the example above calls while\_wait and signal, this class should be
 # documented.
 class MonitorMixin::ConditionVariable
-  def self.new(monitor); end
+  def initialize(monitor); end
 
   # Wakes up all threads waiting for this lock.
   def broadcast; end

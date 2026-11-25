@@ -10,6 +10,7 @@
 #include "core/StrictLevel.h"
 #include "core/core.h"
 #include "core/errors/internal.h"
+#include "core/errors/packager.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include "resolver/CorrectTypeAlias.h"
 #include "resolver/resolver.h"
@@ -147,10 +148,28 @@ private:
         const shared_ptr<Nesting> parent;
         const core::SymbolRef scope;
 
-        Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
+        // Marked `true` if we see a constant lit used under this scope. If it's true, this will trigger validation of
+        // the scope as it's being popped in `postTransformClassDef`. Additionally, `postTransformClassDef` will
+        // propagate the flag's state to parent scopes, ensuring that all are checked when constant resolution is
+        // triggered in a child scope.
+        bool runtimeResolutionPresent = false;
+
+        // Marked `true` when we open a scope that is part of a package namespace.
+        bool checkPackageRegistry = false;
+
+        Nesting(core::Context ctx, shared_ptr<Nesting> parent, core::SymbolRef scope)
+            : parent(std::move(parent)), scope(scope) {
+            if (ctx.state.packageDB().enabled()) {
+                this->checkPackageRegistry =
+                    scope.isClassOrModule() && scope.asClassOrModuleRef().data(ctx)->packageRegistryOwner.exists();
+            }
+        }
     };
+    CheckSize(Nesting, 24, 8);
 
     shared_ptr<Nesting> nesting_;
+    // True while resolving a ClassDef's mixin ancestors (everything other than a class's superclass).
+    bool inMixinAncestor_ = false;
 
     // Map of SymbolRef to first location of a symbol definition in a file. This is used for out-of-order reference
     // checking. When present in this map, the loc stored is different than a symbol's canonical loc. Specifically,
@@ -164,25 +183,54 @@ private:
         return loadScopeDepth_ == 0;
     }
 
+    enum class PackageCursorPosition : uint8_t {
+        // This constant path does not correspond to anything in the package registry.
+        None,
+        // The cursor names a package-registry namespace, but not a package.
+        NamespacePrefix,
+        // This component of the constant path names a package exactly.
+        PackageBoundary,
+        // The path has continued beyond a package, while the cursor remains at that package.
+        PackageMember,
+    };
+
     struct ConstantResolutionItem {
         shared_ptr<Nesting> scope;
         ast::ConstantLit *out;
-        bool resolutionFailed = false;
+        core::ClassOrModuleRef packageRegistryCursor;
+        bool resolutionFailed : 1 = false;
+        bool isOutermost : 1 = true;
+        // Whether this constant is (part of) one of a ClassDef's mixin ancestors. Namer copies the arguments of
+        // `include` and `extend` into the ClassDef's ancestors, but leaves the sends in the class body too, so resolver
+        // resolves these constants twice. Errors are only reported for the copy in the class body.
+        bool isMixinAncestor : 1 = false;
+        PackageCursorPosition packageCursorPosition = PackageCursorPosition::None;
 
         ConstantResolutionItem() = default;
-        ConstantResolutionItem(const shared_ptr<Nesting> &scope, ast::ConstantLit *lit) : scope(scope), out(lit) {}
+        ConstantResolutionItem(shared_ptr<Nesting> scope, ast::ConstantLit *lit) : scope(move(scope)), out(lit) {}
+        ConstantResolutionItem(shared_ptr<Nesting> scope, ast::ConstantLit *lit,
+                               core::ClassOrModuleRef packageRegistryCursor, bool isOutermost,
+                               PackageCursorPosition packageCursorPosition)
+            : scope(move(scope)), out(lit), packageRegistryCursor(packageRegistryCursor), isOutermost(isOutermost),
+              packageCursorPosition(packageCursorPosition) {}
         ConstantResolutionItem(ConstantResolutionItem &&rhs) noexcept = default;
         ConstantResolutionItem &operator=(ConstantResolutionItem &&rhs) noexcept = default;
 
         ConstantResolutionItem(const ConstantResolutionItem &rhs) = delete;
         const ConstantResolutionItem &operator=(const ConstantResolutionItem &rhs) = delete;
     };
+    CheckSize(ConstantResolutionItem, 32, 8);
 
     template <class T> struct ResolveItems {
         core::FileRef file;
         vector<T> items;
 
-        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)){};
+        ResolveItems(core::FileRef file, vector<T> &&items) : file(file), items(move(items)) {};
+    };
+
+    struct PackageReference {
+        core::packages::MangledName mangledName;
+        core::packages::PackageReferenceInfo referenceInfo;
     };
 
     struct AncestorResolutionItem {
@@ -192,6 +240,7 @@ private:
         bool isSuperclass; // true if superclass, false for mixin
         bool isInclude;    // true if include, false if extend
         optional<uint16_t> mixinIndex;
+        optional<core::packages::PackageInfo::CanModifyResult> canModify;
 
         AncestorResolutionItem() = default;
         AncestorResolutionItem(AncestorResolutionItem &&rhs) noexcept = default;
@@ -266,9 +315,47 @@ private:
     vector<TypeAliasResolutionItem> todoTypeAliases_;
     vector<ClassMethodsResolutionItem> todoClassMethods_;
     vector<RequireAncestorResolutionItem> todoRequiredAncestors_;
+    vector<PackageReference> packageReferences_;
 
-    static core::SymbolRef resolveLhs(core::Context ctx, const shared_ptr<Nesting> &nesting, core::NameRef name) {
-        Nesting *scope = nesting.get();
+    static bool shadowedByPackage(core::Context ctx, core::ClassOrModuleRef scope, core::NameRef name) {
+        auto packageRegistryScope = scope.data(ctx)->packageRegistryOwner;
+        if (!packageRegistryScope.exists()) {
+            return false;
+        }
+
+        // If the symbol exists in the package registry, but not outside of it, that could mean that we're seeing a
+        // reference to a package that hasn't been processed yet.
+        auto lookup = packageRegistryScope.data(ctx)->findMemberNoDealias(name);
+        if (!lookup.exists() || !lookup.isClassOrModule()) {
+            return false;
+        }
+
+        // If the symbol doesn't correspond directly to a package name, we can't make assumptions about how it's
+        // introduced, and must assume that it would be resolvable at runtime.
+        if (!cursorIsPackage(ctx, lookup.asClassOrModuleRef())) {
+            return true;
+        }
+
+        // If we have imported the package that owns this symbol, we can allow symbol resolution to continue, as we know
+        // that while the package does own that namespace, it does not define it.
+        if (canReferencePackage(ctx, core::packages::MangledName(lookup.asClassOrModuleRef()))) {
+            return false;
+        }
+
+        // At this point, we know that this refers to a package that wasn't imported, and that hasn't been seen yet, so
+        // shadowing is possible.
+        return true;
+    }
+
+    struct ResolveLhsResult {
+        core::SymbolRef symbol;
+        // Whether `name` isn't a member of any of the lexical scopes in `nesting`, and was instead found in an
+        // ancestor of the innermost one.
+        bool foundInAncestor = false;
+    };
+
+    static ResolveLhsResult resolveLhs(core::Context ctx, const Nesting *nesting, core::NameRef name) {
+        auto *scope = nesting;
         while (scope != nullptr) {
             if (scope->scope.isClassOrModule()) {
                 // We don't want to rely on existing information in the symbol table for the
@@ -288,13 +375,18 @@ private:
                         }
                     }
                 }
+
                 if (lookup.exists()) {
-                    return lookup;
+                    return {lookup, false};
+                }
+
+                if (scope->checkPackageRegistry && shadowedByPackage(ctx, scope->scope.asClassOrModuleRef(), name)) {
+                    return {core::SymbolRef(), false};
                 }
             }
             scope = scope->parent.get();
         }
-        return nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(ctx, name);
+        return {nesting->scope.asClassOrModuleRef().data(ctx)->findMemberTransitiveNoDealias(ctx, name), true};
     }
 
     static bool isAlreadyResolved(core::Context ctx, const ast::ConstantLit &original) {
@@ -321,6 +413,70 @@ private:
         ResolutionChecker checker;
         ast::ConstTreeWalk::apply(ctx, checker, expression);
         return !checker.seenUnresolved;
+    }
+
+    static bool shouldCheckPackage(core::Context ctx) {
+        return ctx.state.packageDB().enabled() && !ctx.file.data(ctx).isPackage(ctx) &&
+               ctx.state.packageDB().getPackageNameForFile(ctx.file).exists();
+    }
+
+    static bool canReferencePackage(core::Context ctx, core::packages::MangledName otherPackage) {
+        if (!otherPackage.exists()) {
+            return true;
+        }
+
+        auto &packageDB = ctx.state.packageDB();
+        auto currentPackage = packageDB.getPackageNameForFile(ctx.file);
+        if (!currentPackage.exists() || currentPackage == otherPackage) {
+            return true;
+        }
+
+        auto &currentPackageInfo = packageDB.getPackageInfo(currentPackage);
+        ENFORCE(currentPackageInfo.exists());
+        auto *import = currentPackageInfo.importsPackage(otherPackage);
+        return import != nullptr;
+    }
+
+    static bool isStrictPackagePrefix(core::Context ctx, core::packages::MangledName prefix,
+                                      core::packages::MangledName package) {
+        auto cur = package.owner;
+        while (cur.exists() && cur != core::Symbols::root()) {
+            cur = cur.data(ctx)->owner;
+            if (cur == prefix.owner) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static bool isStrictPrefixOfAvailablePackage(core::Context ctx, core::packages::MangledName otherPackage) {
+        if (!otherPackage.exists()) {
+            return false;
+        }
+
+        auto &packageDB = ctx.state.packageDB();
+        auto currentPackage = packageDB.getPackageNameForFile(ctx.file);
+        if (!currentPackage.exists()) {
+            return false;
+        }
+        auto &currentPackageInfo = packageDB.getPackageInfo(currentPackage);
+
+        // TODO(jez) This could be more efficient if we had something like a trie of imported package names,
+        // but for the time being this at least works.
+        if (isStrictPackagePrefix(ctx, otherPackage, currentPackage)) {
+            return true;
+        }
+        for (const auto &import : currentPackageInfo.importedPackageNames) {
+            if (isStrictPackagePrefix(ctx, otherPackage, import.mangledName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static bool cursorIsPackage(core::Context ctx, core::ClassOrModuleRef cursor) {
+        ENFORCE(cursor.exists());
+        return ctx.state.packageDB().getPackageInfo(core::packages::MangledName(cursor)).exists();
     }
 
     // Find load-time out-of-order references.
@@ -359,12 +515,209 @@ private:
         }
     }
 
-    static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job) {
+    static bool isMarkedPackagePrivate(core::Context ctx, core::SymbolRef sym) {
+        if (sym.isClassOrModule()) {
+            return sym.asClassOrModuleRef().data(ctx)->flags.isPackagePrivate;
+        }
+        return sym.isStaticField(ctx) && sym.asFieldRef().data(ctx)->flags.isPackagePrivate;
+    }
+
+    // Returns the constant marked `package_private!` that covers `sym` (`sym` itself, or its nearest enclosing
+    // namespace in `package` that's marked), or `noSymbol` if nothing covers it.
+    //
+    // Namer only flags the marked symbol itself, so this has to walk the owner chain. Most callers don't need it: see
+    // `canReferencePackagePrivate`.
+    static core::SymbolRef packagePrivateMarker(core::Context ctx, core::SymbolRef sym,
+                                                core::packages::MangledName package) {
+        while (sym.exists() && sym != core::Symbols::root()) {
+            if (sym.isClassOrModule() && sym.asClassOrModuleRef().data(ctx)->package != package) {
+                break;
+            }
+            if (isMarkedPackagePrivate(ctx, sym)) {
+                return sym;
+            }
+            sym = sym.owner(ctx);
+        }
+        return core::Symbols::noSymbol();
+    }
+
+    // Whether the current file may reference `result`, which belongs to `otherPackage`, if `result` is covered by a
+    // `package_private!` marker. Reports an error the first time it says no.
+    static bool canReferencePackagePrivate(core::Context ctx, ConstantResolutionItem &job, core::SymbolRef result,
+                                           bool foundInAncestor, core::packages::MangledName otherPackage,
+                                           vector<PackageReference> &packageReferences) {
+        auto &packageDB = ctx.state.packageDB();
+        if (!otherPackage.exists()) {
+            return true;
+        }
+        auto currentPackage = packageDB.getPackageNameForFile(ctx.file);
+        if (!currentPackage.exists() || packageDB.getPackageInfo(currentPackage).canAccessInternalsOf(otherPackage) ||
+            packageDB.allowRelaxedPackagerChecksFor(currentPackage)) {
+            return true;
+        }
+
+        // Checking `result`'s own marker is almost always enough:
+        //
+        // - A constant literal with a scope resolves each component of the scope first, so if `Outer` is marked,
+        //   `Outer::Inner` is refused at `Outer`, and never gets as far as `Inner`. (A class alias of `Outer` could
+        //   skip over it, but defining a public class alias of a package-private constant is an error.)
+        // - An unscoped constant literal found in one of its lexical scopes is a member of a namespace enclosing the
+        //   current file, which can only be marked if it's in the current package.
+        //
+        // That leaves an unscoped constant literal found in an ancestor. The marker that covers it can be anywhere in
+        // the ancestor's owner chain, since the ancestor was never named.
+        core::SymbolRef marker;
+        if (foundInAncestor) {
+            marker = packagePrivateMarker(ctx, result, otherPackage);
+        } else if (isMarkedPackagePrivate(ctx, result)) {
+            marker = result;
+        }
+        if (!marker.exists()) {
+            return true;
+        }
+
+        // Like for any other constant that resolves but can't be referenced, refuse to resolve it. Unlike for an
+        // import error, nothing about the current file could change that, so report the error now, and use
+        // `resolutionFailed` to avoid reporting it again (or reporting the constant as unresolved, or reporting
+        // later components of the constant literal).
+        if (!job.resolutionFailed && !job.isMixinAncestor) {
+            auto &pkg = packageDB.getPackageInfo(otherPackage);
+            if (auto e = ctx.beginError(job.out->original()->loc, core::errors::Packager::PackagePrivateConstant)) {
+                if (marker == result) {
+                    e.setHeader("`{}` is `{}` in package `{}`", result.show(ctx), "package_private!", pkg.show(ctx));
+                } else {
+                    e.setHeader("`{}` is package-private, because `{}` is `{}` in package `{}`", result.show(ctx),
+                                marker.show(ctx), "package_private!", pkg.show(ctx));
+                }
+                e.addErrorLine(marker.loc(ctx), "`{}` defined here", marker.show(ctx));
+                e.addErrorNote("Only `{}` and packages that import it with `{}` may reference it", pkg.show(ctx),
+                               "uses_internals: true");
+            }
+            // The reference still depends on `otherPackage`. Without recording it, `--gen-packages` would remove the
+            // import that this reference needs, then add it back on the next run.
+            addPackageReference(
+                packageReferences,
+                PackageReference{otherPackage, {.importNeeded = false, .causesModularityError = false}});
+        }
+        job.resolutionFailed = true;
+        return false;
+    }
+
+    // Ensures that we only allow resolving `job` to `result` if the package imports allow it
+    static core::SymbolRef enforcePackageBoundary(core::Context ctx, ConstantResolutionItem &job,
+                                                  core::SymbolRef result, bool foundInAncestor,
+                                                  vector<PackageReference> &packageReferences) {
+        if (!shouldCheckPackage(ctx) || !result.exists()) {
+            return result;
+        }
+        auto enclosing = result.enclosingClass(ctx);
+        core::packages::MangledName otherPackage;
+        if (enclosing.isPackageSpecSymbol(ctx)) {
+            if (!cursorIsPackage(ctx, enclosing)) {
+                // This is an intermediate package-registry namespace. Preserve it so resolution can continue
+                // looking for a package nested beneath it.
+                return result;
+            }
+            otherPackage = core::packages::MangledName(enclosing);
+        } else {
+            otherPackage = enclosing.data(ctx)->package;
+        }
+        if (canReferencePackage(ctx, otherPackage)) {
+            if (!canReferencePackagePrivate(ctx, job, result, foundInAncestor, otherPackage, packageReferences)) {
+                return core::Symbols::noSymbol();
+            }
+            return result;
+        }
+        if (!job.isOutermost && isStrictPrefixOfAvailablePackage(ctx, otherPackage)) {
+            return result;
+        }
+
+        // Prevent the constant from resolving (even though it resolved) because it's not imported
+        job.packageRegistryCursor = otherPackage.owner;
+        job.packageCursorPosition = PackageCursorPosition::PackageBoundary;
+        return core::Symbols::noSymbol();
+    }
+
+    // The package that `job` depends on, now that it has resolved to `symbol`, if that's another package.
+    //
+    // Each component of a constant literal can depend on a different package. For `A::Alias::Thing`, where
+    // `A::Alias` is a class alias for a constant in another package, `Alias` depends on `A`, and `Thing` on the other
+    // package.
+    static optional<PackageReference> packageReference(core::Context ctx, const ConstantResolutionItem &job,
+                                                       core::SymbolRef symbol) {
+        // The copy of a mixin ancestor in the class body records the reference.
+        if (!shouldCheckPackage(ctx) || job.isMixinAncestor) {
+            return nullopt;
+        }
+        if (!symbol.isClassOrModule() && !symbol.isFieldOrStaticField()) {
+            return nullopt;
+        }
+        if (!job.isOutermost && symbol.isClassOrModule() &&
+            symbol.asClassOrModuleRef().data(ctx)->packageRegistryOwner.exists()) {
+            // We're still on the `packageRegistryOwner` path to a constant. Defer until we're off that path, or reach
+            // the outermost component.
+            return nullopt;
+        }
+        auto enclosing = symbol.enclosingClass(ctx);
+        if (enclosing.isPackageSpecSymbol(ctx)) {
+            // This is a placeholder symbol that we've resolved a missing constant to (for the purpose of reporting
+            // the outermost missing constant as the one to import). `constantResolutionFailed` will handle tracking
+            // the final missing package. (These symbols are only real constants in `__package.rb` files, which
+            // returned above.)
+            return nullopt;
+        }
+        auto otherPackage = enclosing.data(ctx)->package;
+        auto &packageDB = ctx.state.packageDB();
+        auto currentPackage = packageDB.getPackageNameForFile(ctx.file);
+        if (!otherPackage.exists() || otherPackage == currentPackage) {
+            return nullopt;
+        }
+
+        auto &currentPackageInfo = packageDB.getPackageInfo(currentPackage);
+        if (currentPackageInfo.importsPackage(otherPackage) != nullptr) {
+            // The constant resolved, and constant resolution is import-aware, so no import is needed.
+            return PackageReference{otherPackage, {.importNeeded = false, .causesModularityError = false}};
+        }
+        // This can only be a namespace prefix of an imported package, which `enforcePackageBoundary` allows.
+        return nullopt;
+    }
+
+    static void addPackageReference(vector<PackageReference> &references, PackageReference reference) {
+        // A file references few distinct packages, so a linear search is cheaper than a map. Merging here keeps
+        // each file's list to one entry per package, however many constant literals reference it.
+        auto existing =
+            absl::c_find_if(references, [=](const auto &entry) { return entry.mangledName == reference.mangledName; });
+        if (existing == references.end()) {
+            references.emplace_back(reference);
+        } else {
+            existing->referenceInfo.importNeeded |= reference.referenceInfo.importNeeded;
+            existing->referenceInfo.causesModularityError |= reference.referenceInfo.causesModularityError;
+        }
+    }
+
+    // Package references are collected on worker threads, and recorded in the package DB on the main thread.
+    static void trackPackageReferences(core::GlobalState &gs, vector<ResolveItems<PackageReference>> &references) {
+        for (auto &fileReferences : references) {
+            auto package = gs.packageDB().getPackageNameForFile(fileReferences.file);
+            ENFORCE(package.exists());
+            auto packageInfo = gs.packageDB().getPackageInfoNonConst(package);
+            for (auto &[otherPackage, referenceInfo] : fileReferences.items) {
+                packageInfo->trackPackageReference(fileReferences.file, otherPackage, referenceInfo);
+            }
+        }
+        references.clear();
+    }
+
+    static core::SymbolRef resolveConstant(core::Context ctx, ConstantResolutionItem &job,
+                                           vector<PackageReference> &packageReferences) {
         auto &c = *job.out->original();
         if (ast::isa_tree<ast::EmptyTree>(c.scope)) {
-            auto result = resolveLhs(ctx, job.scope, c.cnst);
+            auto [result, foundInAncestor] = resolveLhs(ctx, job.scope.get(), c.cnst);
+            if (!result.exists()) {
+                return result;
+            }
 
-            return result;
+            return enforcePackageBoundary(ctx, job, result, foundInAncestor, packageReferences);
         }
         if (auto id = ast::cast_tree<ast::ConstantLit>(c.scope)) {
             auto sym = id->symbol();
@@ -375,8 +728,10 @@ private:
             }
 
             if (sym.isTypeAlias(ctx) && !job.resolutionFailed) {
-                if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
-                    e.setHeader("Resolving constants through type aliases is not supported");
+                if (!job.isMixinAncestor) {
+                    if (auto e = ctx.beginError(c.loc, core::errors::Resolver::ConstantInTypeAlias)) {
+                        e.setHeader("Resolving constants through type aliases is not supported");
+                    }
                 }
                 job.resolutionFailed = true;
                 return core::Symbols::noSymbol();
@@ -393,16 +748,16 @@ private:
             if (result.exists() &&
                 ((result.isClassOrModule() && result.asClassOrModuleRef().data(ctx)->flags.isPrivate) ||
                  (result.isStaticField(ctx) && result.asFieldRef().data(ctx)->flags.isStaticFieldPrivate)) &&
-                !ctx.file.data(ctx).isRBI()) {
+                !ctx.file.data(ctx).isRBI() && !job.isMixinAncestor) {
                 if (auto e = ctx.beginError(c.loc, core::errors::Resolver::PrivateConstantReferenced)) {
                     e.setHeader("Non-private reference to private constant `{}` referenced", result.show(ctx));
                 }
             }
 
-            return result;
+            return enforcePackageBoundary(ctx, job, result, /* foundInAncestor */ false, packageReferences);
         }
 
-        if (!job.resolutionFailed) {
+        if (!job.resolutionFailed && !job.isMixinAncestor) {
             if (auto e = ctx.beginError(c.loc, core::errors::Resolver::DynamicConstant)) {
                 e.setHeader("Dynamic constant references are unsupported");
             }
@@ -411,16 +766,130 @@ private:
         return core::Symbols::noSymbol();
     }
 
+    enum class PackageResolutionAction : uint8_t {
+        None,
+        DeferToOutermost,
+        ReportPackageError,
+    };
+
+    // There was an error, but we want to figure out whether to report it...
+    // - as a package error now,
+    // - as package error in the future (after processing the outermost symbol), or
+    // - as a normal "Unable to resolve constant" error
+    static PackageResolutionAction packageResolutionAction(core::Context ctx, const ConstantResolutionItem &job,
+                                                           bool alreadyReported) {
+        if (!shouldCheckPackage(ctx)) {
+            return PackageResolutionAction::None;
+        }
+
+        auto cursorIdentifiesPackage =
+            job.packageRegistryCursor.exists() && cursorIsPackage(ctx, job.packageRegistryCursor);
+        auto cursorPackage = core::packages::MangledName(job.packageRegistryCursor);
+        auto inaccessibleCursorPackage = cursorIdentifiesPackage && !canReferencePackage(ctx, cursorPackage);
+
+        if (!job.isOutermost && job.packageRegistryCursor.exists() &&
+            (!cursorIdentifiesPackage || inaccessibleCursorPackage)) {
+            return PackageResolutionAction::DeferToOutermost;
+        }
+
+        if (job.isOutermost && !alreadyReported && inaccessibleCursorPackage) {
+            bool shouldReport;
+            switch (job.packageCursorPosition) {
+                case PackageCursorPosition::PackageBoundary:
+                    shouldReport = true;
+                    break;
+                case PackageCursorPosition::PackageMember:
+                    shouldReport = !isStrictPrefixOfAvailablePackage(ctx, cursorPackage);
+                    break;
+                case PackageCursorPosition::None:
+                case PackageCursorPosition::NamespacePrefix:
+                    shouldReport = false;
+                    break;
+            }
+            if (shouldReport) {
+                return PackageResolutionAction::ReportPackageError;
+            }
+        }
+
+        return PackageResolutionAction::None;
+    }
+
+    static bool shouldContinueWithPackageRegistryCursor(core::Context ctx, const ConstantResolutionItem &job) {
+        auto cursorIdentifiesPackage =
+            job.packageRegistryCursor.exists() && cursorIsPackage(ctx, job.packageRegistryCursor);
+        auto cursorIdentifiesAccessiblePackage =
+            cursorIdentifiesPackage && canReferencePackage(ctx, core::packages::MangledName(job.packageRegistryCursor));
+        // Cross package boundaries to find nested packages, but preserve unresolved accessible package members.
+        return !cursorIdentifiesAccessiblePackage ||
+               job.packageCursorPosition == PackageCursorPosition::PackageBoundary;
+    }
+
+    // Walks the tree back up the scope, but ONLY during error reporting
+    //
+    // In general, we're trying to avoid having to walk back up the scope for package-related errors,
+    // so that processing a constant lit is "final" in some sense.
+    //
+    // However, if we `DeferToOutermost` for the error, that would report the error loc on the full
+    // loc of the outermost literal. I think the errors look better if we can find the actual bad
+    // constant, which requires looking back through the scope or storing more state in the job.
+    //
+    // Walking back seems best, but a second best would be deciding that the juice isn't worth the
+    // squeeze, and reporting the errors on the outermost constant's full loc.
+    static core::LocOffsets packageBoundaryLoc(core::Context ctx, const ast::UnresolvedConstantLit &original,
+                                               core::packages::MangledName package) {
+        auto scope = ast::cast_tree<ast::ConstantLit>(original.scope);
+        if (scope == nullptr) {
+            return original.loc;
+        }
+
+        struct Walker {
+            core::Context ctx;
+            core::packages::MangledName package;
+            core::LocOffsets result;
+
+            bool referencesPackage(core::SymbolRef symbol) {
+                if (!symbol.exists() || symbol == core::Symbols::todo()) {
+                    return false;
+                }
+                auto enclosing = symbol.enclosingClass(ctx);
+                return enclosing.isPackageSpecSymbol(ctx) ? core::packages::MangledName(enclosing) == package
+                                                          : enclosing.data(ctx)->package == package;
+            }
+
+            bool onRoot(core::LocOffsets loc, core::SymbolRef symbol, bool isConstant) {
+                if (isConstant && referencesPackage(symbol)) {
+                    result = loc;
+                }
+                return true;
+            }
+
+            bool onPart(core::LocOffsets loc, core::SymbolRef symbol, core::NameRef, bool) {
+                if (referencesPackage(symbol)) {
+                    // Keep walking toward the root to find the first component that crosses this package boundary.
+                    result = loc;
+                }
+                return true;
+            }
+        } walker{ctx, package, original.loc};
+        scope->walkOriginalPath(walker);
+        return walker.result;
+    }
+
     static const int MAX_SUGGESTION_COUNT = 10;
 
-    // Determine if a parent package exports a constant named `base`. If it does, return the symbol that already exists
-    // for that nesting scope.
     // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
     static void constantResolutionFailed(core::GlobalState &gs, core::FileRef file, ConstantResolutionItem &job,
                                          int &suggestionCount) {
         core::Context ctx(gs, core::Symbols::root(), file);
 
-        auto resolved = resolveConstant(ctx, job);
+        vector<PackageReference> packageReferences;
+        auto resolved = resolveConstant(ctx, job, packageReferences);
+        for (auto &[otherPackage, referenceInfo] : packageReferences) {
+            auto currentPackage = gs.packageDB().getPackageNameForFile(file);
+            gs.packageDB()
+                .getPackageInfoNonConst(currentPackage)
+                ->trackPackageReference(file, otherPackage, referenceInfo);
+        }
         if (resolved.exists() && resolved.isTypeAlias(ctx)) {
             auto resolvedField = resolved.asFieldRef();
             if (resolvedField.data(ctx)->resultType == nullptr) {
@@ -435,23 +904,71 @@ private:
                 resolvedField.data(gs)->resultType = core::Types::untyped(resolved);
             }
             job.out->setSymbol(resolved);
+            if (auto reference = packageReference(ctx, job, resolved)) {
+                auto currentPackage = gs.packageDB().getPackageNameForFile(file);
+                gs.packageDB()
+                    .getPackageInfoNonConst(currentPackage)
+                    ->trackPackageReference(file, reference->mangledName, reference->referenceInfo);
+            }
             return;
+        }
+        if (resolved.exists()) {
+            // An inner component may have been resolved to its package-registry cursor earlier in this final pass,
+            // allowing this component to resolve now even though the fixed point had previously exhausted itself.
+            ENFORCE(resolved.isClassOrModule() && resolved.asClassOrModuleRef().isPackageSpecSymbol(ctx.state));
+
+            if (!job.isOutermost) {
+                job.out->setSymbol(resolved);
+                return;
+            }
+
+            // A package-registry cursor can help resolve later components, but it does not define the runtime constant
+            // named by an outermost reference.
+            resolved = core::Symbols::noSymbol();
         }
         if (job.resolutionFailed) {
             // we only set this when a job has failed for other reasons and we've already reported an error, and
             // continuing on will only redundantly report that we can't resolve the constant, so bail early here
-            job.out->setSymbol(core::Symbols::untyped());
+            job.out->markUnresolved();
+            if (auto scope = ast::cast_tree<ast::ConstantLit>(job.out->original()->scope)) {
+                // The scope resolved, but we refused to look up a constant through it (e.g., `A::B`
+                // where `A` is a type alias). Record the scope like any other explicit scope.
+                //
+                // Recording `noSymbol` here would instead mean "the scope was stubbed," which tells
+                // `fullUnresolvedPath` to keep walking outward into `A`. That's only valid when `A` is
+                // itself unresolved and has resolutionScopes.
+                ENFORCE(scope->symbol().exists() && scope->symbol() != core::Symbols::StubModule());
+                job.out->resolutionScopes()->emplace_back(scope->symbol());
+            } else {
+                // Dynamic constant reference (e.g., `foo::B`). There is no constant scope to report.
+                job.out->resolutionScopes()->emplace_back(core::Symbols::noSymbol());
+            }
             return;
         }
 
         ENFORCE(!resolved.exists());
         ENFORCE(!job.out->symbol().exists());
 
+        auto &original = *job.out->original();
+        auto scope = ast::cast_tree<ast::ConstantLit>(original.scope);
+        auto scopeWasStubbed = scope != nullptr && scope->symbol() == core::Symbols::StubModule();
+        if (shouldCheckPackage(ctx) && !job.isOutermost && job.packageRegistryCursor.exists() && !scopeWasStubbed &&
+            shouldContinueWithPackageRegistryCursor(ctx, job)) {
+            // Lie, and say that this constant resolves to a `<PackageSpecRegistry>`-scoped symbol.
+            //
+            // We want to report the import that would make the outermost constant resolve, which
+            // requires finding the narrowest package which might own that constant. We can hijack
+            // resolution to help us find this by continuing the resolution search on the package
+            // spec symbol. Once a future job can't find the symbol, even on the package spec
+            // cursor, that's the package we need to import.
+            job.out->setSymbol(job.packageRegistryCursor);
+            return;
+        }
+
         bool alreadyReported = false;
         job.out->markUnresolved();
-        auto &original = *job.out->original();
         if (auto id = ast::cast_tree<ast::ConstantLit>(original.scope)) {
-            auto originalScope = id->symbol().dealias(ctx);
+            auto originalScope = id->symbol();
             if (originalScope == core::Symbols::StubModule()) {
                 // If we were trying to resolve some literal like C::D but `C` itself was already stubbed,
                 // no need to also report that `D` is missing.
@@ -481,99 +998,126 @@ private:
         // This name is an artifact of parser recovery--no need to leak the parser implementation to the user,
         // because an error will have already been reported.
         auto constantNameMissing = original.cnst == core::Names::Constants::ConstantNameMissing();
-        if (!constantNameMissing && !alreadyReported) {
-            if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
-                e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
-                auto foundCommonTypo = false;
-                if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
-                    for (const auto &[from, to] : COMMON_TYPOS) {
-                        if (from == original.cnst) {
-                            e.didYouMean(to, ctx.locAt(job.out->loc()));
-                            foundCommonTypo = true;
-                            break;
-                        }
+        auto suggestScope = job.out->resolutionScopes()->front();
+        auto isPackage = ctx.file.data(ctx).isPackage(gs);
+        auto isImport = false;
+        if (isPackage) {
+            // In the case the file is a __package.rb file, and the scope is a PackageSpec-scoped symbol,
+            // the resolution error must be in an import statement.
+            isImport = suggestScope.asClassOrModuleRef().isPackageSpecSymbol(ctx.state);
+        }
+
+        auto packageAction = packageResolutionAction(ctx, job, alreadyReported);
+        switch (packageAction) {
+            case PackageResolutionAction::ReportPackageError: {
+                if (job.isMixinAncestor) {
+                    // The copy of this constant in the class body reports the error, and tracks the reference.
+                    return;
+                }
+                auto cursorPackage = core::packages::MangledName(job.packageRegistryCursor);
+                auto currentPackage = gs.packageDB().getPackageNameForFile(file);
+                auto currentPackageInfo = gs.packageDB().getPackageInfoNonConst(currentPackage);
+                auto errorLoc = packageBoundaryLoc(ctx, original, cursorPackage);
+                auto referenceInfo = currentPackageInfo->checkReferenceAgainstImports(ctx, errorLoc, cursorPackage);
+                ENFORCE(referenceInfo.has_value());
+                currentPackageInfo->trackPackageReference(file, cursorPackage, referenceInfo.value());
+                return;
+            }
+            case PackageResolutionAction::DeferToOutermost:
+                return;
+            case PackageResolutionAction::None:
+                break;
+        }
+
+        if (constantNameMissing || alreadyReported || job.isMixinAncestor) {
+            return;
+        }
+        if (isImport && gs.packageDB().genPackagesMode() != core::packages::GenPackagesMode::Disabled) {
+            // The user has added an import for a package that does not exist. However, in gen-packages mode, we'll
+            // delete this import and add the correct import, so no need to report an error here.
+            // TODO(neil): Should we add an autocorrect to delete this import outside of gen-packages mode?
+            return;
+        }
+
+        if (auto e = ctx.beginError(original.loc, core::errors::Resolver::StubConstant)) {
+            e.setHeader("Unable to resolve constant `{}`", original.cnst.show(ctx));
+            auto foundCommonTypo = false;
+            if (ast::isa_tree<ast::EmptyTree>(original.scope)) {
+                for (const auto &[from, to] : COMMON_TYPOS) {
+                    if (from == original.cnst) {
+                        e.didYouMean(to, ctx.locAt(job.out->loc()));
+                        foundCommonTypo = true;
+                        break;
                     }
                 }
+            }
 
-                auto suggestScope = job.out->resolutionScopes()->front();
-                if (!foundCommonTypo && suggestionCount < MAX_SUGGESTION_COUNT && suggestScope.exists() &&
-                    suggestScope.isClassOrModule()) {
-                    suggestionCount++;
+            if (!foundCommonTypo && suggestionCount < MAX_SUGGESTION_COUNT && suggestScope.exists() &&
+                suggestScope.isClassOrModule()) {
+                suggestionCount++;
 
-                    auto suggested =
-                        suggestScope.asClassOrModuleRef().data(ctx)->findMemberFuzzyMatch(ctx, original.cnst);
+                core::packages::MangledName filterToPackage;
+                if (!isPackage && gs.packageDB().enabled()) {
+                    filterToPackage = gs.packageDB().getPackageNameForFile(file);
+                }
+                auto suggested = suggestScope.asClassOrModuleRef().data(ctx)->findConstantFuzzyMatch(ctx, original.cnst,
+                                                                                                     filterToPackage);
 
-                    if (ctx.file.data(ctx).isPackage(gs) &&
-                        !suggestScope.asClassOrModuleRef().isPackageSpecSymbol(ctx.state)) {
-                        // In case the file is a __package.rb file, and the scope is not a PackageSpec-scoped symbol,
-                        // the resolution error must be in an export statement. In this case, suggestions must be
-                        // restricted to within the current package only. They must not cross package boundaries as
-                        // out-of-package suggestions would be inherently invalid.
-
-                        // TODO (aadi-stripe) Find a less brittle way of ascertaining whether the error comes from an
-                        // export statement. Currently (1/9/23) this happens to work because export statements are the
-                        // only part of the packager DSL that do not prepend PackageSpec to the relevant constant.
-                        auto enclosingPackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
-                        if (enclosingPackage.exists()) {
-                            auto it = std::remove_if(
-                                suggested.begin(), suggested.end(), [&enclosingPackage, &gs](auto &suggestion) {
-                                    return suggestion.symbol.enclosingClass(gs).data(gs)->package != enclosingPackage;
-                                });
-                            suggested.erase(it, suggested.end());
-                        }
+                if (suggested.size() > 3) {
+                    suggested.resize(3);
+                }
+                for (auto suggestion : suggested) {
+                    const auto replacement = suggestion.symbol.show(ctx);
+                    auto replaceLoc = ctx.locAt(job.out->loc());
+                    if (replaceLoc.source(ctx) == replacement) {
+                        // The replacement is the same as the original.
+                        // This can happen for a number of reasons, usually due to things
+                        // where one of the names has an unprintable name from a rewriter.
+                        // It's confusing to see those bad did you mean and they don't
+                        // provide value.
+                        continue;
                     }
-
-                    if (suggested.size() > 3) {
-                        suggested.resize(3);
-                    }
-                    for (auto suggestion : suggested) {
-                        const auto replacement = suggestion.symbol.show(ctx);
-                        auto replaceLoc = ctx.locAt(job.out->loc());
-                        if (replaceLoc.source(ctx) == replacement) {
-                            // The replacement is the same as the original.
-                            // This can happen for a number of reasons, usually due to things
-                            // where one of the names has an unprintable name from a rewriter.
-                            // It's confusing to see those bad did you mean and they don't
-                            // provide value.
-                            continue;
-                        }
-                        e.didYouMean(replacement, replaceLoc);
-                        e.addErrorLine(suggestion.symbol.loc(ctx), "`{}` defined here", replacement);
-                    }
+                    e.didYouMean(replacement, replaceLoc);
+                    e.addErrorLine(suggestion.symbol.loc(ctx), "`{}` defined here", replacement);
                 }
             }
         }
     }
 
-    static bool resolveConstantJob(core::Context ctx, ConstantResolutionItem &job) {
+    static bool resolveConstantJob(core::Context ctx, ConstantResolutionItem &job,
+                                   vector<PackageReference> &packageReferences) {
         if (isAlreadyResolved(ctx, *job.out)) {
             return true;
         }
-        auto resolved = resolveConstant(ctx, job);
+        auto resolved = resolveConstant(ctx, job, packageReferences);
         if (!resolved.exists()) {
             return false;
         }
-        if (resolved.isTypeAlias(ctx)) {
-            auto resolvedField = resolved.asFieldRef();
-            if (resolvedField.data(ctx)->resultType != nullptr) {
-                job.out->setSymbol(resolved);
-                return true;
-            }
+        if (resolved.isTypeAlias(ctx) && resolved.asFieldRef().data(ctx)->resultType == nullptr) {
             return false;
         }
 
         job.out->setSymbol(resolved);
+        if (auto reference = packageReference(ctx, job, resolved)) {
+            addPackageReference(packageReferences, *reference);
+        }
         return true;
     }
 
+    struct ResolveConstantsWorkerResult {
+        uint32_t retries = 0;
+        vector<ResolveItems<ConstantResolutionItem>> leftover;
+        vector<ResolveItems<PackageReference>> packageReferences;
+    };
+
     static bool resolveConstantResolutionItems(const core::GlobalState &gs,
                                                vector<ResolveItems<ConstantResolutionItem>> &jobs,
+                                               vector<ResolveItems<PackageReference>> &packageReferences,
                                                WorkerPool &workers) {
         if (jobs.empty()) {
             return false;
         }
-        auto outputq = make_shared<BlockingBoundedQueue<pair<uint32_t, vector<ResolveItems<ConstantResolutionItem>>>>>(
-            jobs.size());
+        auto outputq = make_shared<BlockingBoundedQueue<ResolveConstantsWorkerResult>>(jobs.size());
         auto inputq = make_shared<ConcurrentBoundedQueue<ResolveItems<ConstantResolutionItem>>>(jobs.size());
         for (auto &job : jobs) {
             inputq->push(move(job), 1);
@@ -581,40 +1125,44 @@ private:
         jobs.clear();
 
         workers.multiplexJob("resolveConstantsWorker", [inputq, outputq, &gs]() {
-            vector<ResolveItems<ConstantResolutionItem>> leftover;
+            ResolveConstantsWorkerResult workerResult;
             ResolveItems<ConstantResolutionItem> job(core::FileRef(), {});
             uint32_t processed = 0;
-            uint32_t retries = 0;
             for (auto result = inputq->try_pop(job); !result.done(); result = inputq->try_pop(job)) {
                 if (result.gotItem()) {
                     processed++;
                     core::Context ictx(gs, core::Symbols::root(), job.file);
+                    vector<PackageReference> fileReferences;
                     auto origSize = job.items.size();
-                    auto fileIt =
-                        remove_if(job.items.begin(), job.items.end(),
-                                  [&](ConstantResolutionItem &item) -> bool { return resolveConstantJob(ictx, item); });
-                    job.items.erase(fileIt, job.items.end());
-                    retries += origSize - job.items.size();
+                    erase_if(job.items, [&](ConstantResolutionItem &item) -> bool {
+                        return resolveConstantJob(ictx, item, fileReferences);
+                    });
+                    workerResult.retries += origSize - job.items.size();
+                    if (!fileReferences.empty()) {
+                        workerResult.packageReferences.emplace_back(job.file, move(fileReferences));
+                    }
                     if (!job.items.empty()) {
-                        leftover.emplace_back(move(job));
+                        workerResult.leftover.emplace_back(move(job));
                     }
                 }
             }
             if (processed > 0) {
-                auto pair = make_pair(retries, move(leftover));
-                outputq->push(move(pair), processed);
+                outputq->push(move(workerResult), processed);
             }
         });
 
         uint32_t retries = 0;
-        pair<uint32_t, vector<ResolveItems<ConstantResolutionItem>>> threadResult;
+        ResolveConstantsWorkerResult threadResult;
         for (auto result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer());
              !result.done();
              result = outputq->wait_pop_timed(threadResult, WorkerPool::BLOCK_INTERVAL(), gs.tracer())) {
             if (result.gotItem()) {
-                retries += threadResult.first;
-                jobs.insert(jobs.end(), make_move_iterator(threadResult.second.begin()),
-                            make_move_iterator(threadResult.second.end()));
+                retries += threadResult.retries;
+                jobs.insert(jobs.end(), make_move_iterator(threadResult.leftover.begin()),
+                            make_move_iterator(threadResult.leftover.end()));
+                packageReferences.insert(packageReferences.end(),
+                                         make_move_iterator(threadResult.packageReferences.begin()),
+                                         make_move_iterator(threadResult.packageReferences.end()));
             }
         }
         categoryCounterAdd("resolve.constants.nonancestor", "retry", retries);
@@ -630,6 +1178,33 @@ private:
         }
 
         return false;
+    }
+
+    // A class alias makes the constants nested in the aliased class reachable through the alias's name, without naming
+    // the aliased class. So a class alias of a package-private constant must be package-private too, or it would make
+    // everything nested inside it public. (That's also why reference checks don't need to look past a scoped constant
+    // literal's own result.)
+    //
+    // `private_constant` isn't enough, because an unscoped constant literal can still find a private constant, e.g.
+    // through an ancestor.
+    static void checkPackagePrivateClassAlias(core::MutableContext ctx, core::SymbolRef lhs, core::SymbolRef rhs) {
+        auto rhsPkg = rhs.enclosingClass(ctx).data(ctx)->package;
+        if (!rhsPkg.exists()) {
+            return;
+        }
+        auto marker = packagePrivateMarker(ctx, rhs, rhsPkg);
+        if (!marker.exists()) {
+            return;
+        }
+        auto lhsPkg = lhs.enclosingClass(ctx).data(ctx)->package;
+        if (lhsPkg == rhsPkg && packagePrivateMarker(ctx, lhs, lhsPkg).exists()) {
+            return;
+        }
+        if (auto e = ctx.state.beginError(lhs.loc(ctx), core::errors::Packager::PublicAliasOfPackagePrivate)) {
+            e.setHeader("`{}` is a public alias of package-private `{}`", lhs.show(ctx), rhs.show(ctx));
+            e.addErrorLine(marker.loc(ctx), "`{}` is marked `{}` here", marker.show(ctx), "package_private!");
+            e.addErrorNote("Mark the alias `{}` too, or reference `{}` directly", "package_private!", rhs.show(ctx));
+        }
     }
 
     static bool resolveClassAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
@@ -653,6 +1228,7 @@ private:
 
         if (rhsSym.dealias(ctx) != it.lhs) {
             it.lhs.setResultType(ctx, core::make_type<core::AliasType>(rhsSym));
+            checkPackagePrivateClassAlias(ctx, it.lhs, rhsSym);
         } else {
             if (auto e = ctx.state.beginError(it.lhs.loc(ctx), core::errors::Resolver::RecursiveClassAlias)) {
                 e.setHeader("Class alias aliases to itself");
@@ -663,10 +1239,15 @@ private:
     }
 
     static void saveAncestorTypeForHashing(core::MutableContext ctx, const AncestorResolutionItem &item) {
+        saveUnresolvedAncestorForHashing(ctx, item.klass, *item.ancestor);
+    }
+
+    static void saveUnresolvedAncestorForHashing(core::MutableContext ctx, core::ClassOrModuleRef klass,
+                                                 const ast::ConstantLit &ancestor) {
         // For LSP, create a synthetic method <unresolved-ancestors> that has a return type containing a type
         // for every ancestor. When this return type changes, LSP takes the slow path (see
         // Symbol::methodShapeHash()).
-        auto unresolvedPath = item.ancestor->fullUnresolvedPath(ctx);
+        auto unresolvedPath = ancestor.fullUnresolvedPath(ctx);
         if (!unresolvedPath.has_value()) {
             return;
         }
@@ -674,7 +1255,7 @@ private:
         auto ancestorType =
             core::make_type<core::UnresolvedClassType>(unresolvedPath->first, move(unresolvedPath->second));
 
-        auto uaSym = ctx.state.enterMethodSymbol(core::Loc::none(), item.klass, core::Names::unresolvedAncestors());
+        auto uaSym = ctx.state.enterMethodSymbol(core::Loc::none(), klass, core::Names::unresolvedAncestors());
 
         // Add a fake block argument so that this method symbol passes sanity checks
         auto &arg = ctx.state.enterMethodParameter(core::Loc::none(), uaSym, core::Names::blkArg());
@@ -698,11 +1279,23 @@ private:
     }
 
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job,
-                                   const UnorderedSet<core::ClassOrModuleRef> suppressPayloadSuperclassRedefinitionFor,
+                                   const UnorderedSet<core::ClassOrModuleRef> &suppressPayloadSuperclassRedefinitionFor,
                                    bool lastRun) {
+        auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        auto &filePackageInfo = ctx.state.packageDB().getPackageInfo(filePackage);
+        if (!job.canModify.has_value()) {
+            // Ownership is unchanged across fixed-point retries, so only check it once per job.
+            job.canModify = filePackageInfo.canModifySymbol(ctx, job.klass);
+        }
+        auto canModify = *job.canModify;
         auto ancestorSym = job.ancestor->symbol();
-        if (!ancestorSym.exists()) {
-            if (!lastRun && !job.isSuperclass && !job.mixinIndex.has_value()) {
+        bool isTypeAlias = ancestorSym.exists() && ancestorSym.isTypeAlias(ctx);
+        auto resolved = ancestorSym.exists() && !isTypeAlias ? ancestorSym.dealias(ctx) : core::SymbolRef();
+        if (!ancestorSym.exists() || (!lastRun && !resolved.isClassOrModule())) {
+            // Reserving a mixin slot also mutates the class. Do not modify an earlier stratum's class
+            // even temporarily when package ownership will reject the mixin once its constant resolves.
+            if (!lastRun && !isTypeAlias && !job.isSuperclass && !job.mixinIndex.has_value() &&
+                canModify == core::packages::PackageInfo::CanModifyResult::CanModify) {
                 // This is an include or extend. Add a placeholder to fill in later to preserve
                 // ordering of mixins, unless an index is already set.
                 job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
@@ -710,37 +1303,20 @@ private:
             return false;
         }
 
-        core::ClassOrModuleRef resolvedClass;
-        {
-            core::SymbolRef resolved;
-            if (ancestorSym.isTypeAlias(ctx)) {
-                if (!lastRun) {
-                    return false;
-                }
-                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
-                    e.setHeader("Superclasses and mixins may not be type aliases");
-                }
-                resolved = stubSymbolForAncestor(job);
-            } else {
-                resolved = ancestorSym.dealias(ctx);
+        if (isTypeAlias) {
+            if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
+                e.setHeader("Superclasses and mixins may not be type aliases");
             }
-
-            if (!resolved.isClassOrModule()) {
-                if (!lastRun) {
-                    if (!job.isSuperclass && !job.mixinIndex.has_value()) {
-                        // This is an include or extend. Add a placeholder to fill in later to preserve
-                        // ordering of mixins.
-                        job.mixinIndex = job.klass.data(ctx)->addMixinPlaceholder(ctx);
-                    }
-                    return false;
-                }
-                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
-                    e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
-                }
-                resolved = stubSymbolForAncestor(job);
-            }
-            resolvedClass = resolved.asClassOrModuleRef();
+            resolved = stubSymbolForAncestor(job);
         }
+
+        if (!resolved.isClassOrModule()) {
+            if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::DynamicSuperclass)) {
+                e.setHeader("Superclasses and mixins may only use class aliases like `{}`", "A = Integer");
+            }
+            resolved = stubSymbolForAncestor(job);
+        }
+        auto resolvedClass = resolved.asClassOrModuleRef();
 
         if (resolvedClass == job.klass) {
             if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::CircularDependency)) {
@@ -760,41 +1336,134 @@ private:
 
         bool ancestorPresent = true;
         if (job.isSuperclass) {
-            if (resolvedClass == core::Symbols::todo()) {
-                // No superclass specified
-                ancestorPresent = false;
-            } else if (!job.klass.data(ctx)->superClass().exists() ||
-                       job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
-                       job.klass.data(ctx)->superClass() == resolvedClass) {
-                job.klass.data(ctx)->setSuperClass(resolvedClass);
-            } else {
-                auto fileIsPayload = ctx.file.data(ctx).isPayload();
-                auto klassDefinedInPayload = absl::c_any_of(
-                    job.klass.data(ctx)->locs(), [&](auto &loc) { return loc.file().data(ctx).isPayload(); });
-                auto allowsPayloadParentOverride = suppressPayloadSuperclassRedefinitionFor.contains(job.klass);
-
-                if (!allowsPayloadParentOverride) {
-                    if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::RedefinitionOfParents)) {
-                        e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
-                                    job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
-                        if (!fileIsPayload && klassDefinedInPayload) {
-                            e.addErrorNote(
-                                "Pass `{}` at the command line or in the `{}` file to silence this error.\n"
-                                "    Only use this to work around Ruby or gem upgrade incompatibilities.",
-                                fmt::format("--suppress-payload-superclass-redefinition-for={}", job.klass.show(ctx)),
-                                "sorbet/config");
+            switch (canModify) {
+                // NOTE: we ignore the PackageSpec error here, as it's fine to set the superclass of something in the
+                // package spec registry.
+                case core::packages::PackageInfo::CanModifyResult::CanModify:
+                case core::packages::PackageInfo::CanModifyResult::PackageSpec:
+                    if (resolvedClass == core::Symbols::todo()) {
+                        // No superclass specified
+                        ancestorPresent = false;
+                    } else if (!job.klass.data(ctx)->superClass().exists() ||
+                               job.klass.data(ctx)->superClass() == core::Symbols::todo() ||
+                               job.klass.data(ctx)->superClass() == resolvedClass) {
+                        job.klass.data(ctx)->setSuperClass(resolvedClass);
+                    } else {
+                        if (!suppressPayloadSuperclassRedefinitionFor.contains(job.klass)) {
+                            if (auto e = ctx.beginError(job.ancestor->loc(),
+                                                        core::errors::Resolver::RedefinitionOfParents)) {
+                                e.setHeader("Parent of class `{}` redefined from `{}` to `{}`", job.klass.show(ctx),
+                                            job.klass.data(ctx)->superClass().show(ctx), resolvedClass.show(ctx));
+                                auto fileIsPayload = ctx.file.data(ctx).isPayload();
+                                auto klassDefinedInPayload =
+                                    absl::c_any_of(job.klass.data(ctx)->locs(),
+                                                   [&](auto &loc) { return loc.file().data(ctx).isPayload(); });
+                                if (!fileIsPayload && klassDefinedInPayload) {
+                                    e.addErrorLine(job.klass.data(ctx)->loc(), "Originally defined here");
+                                    e.addErrorNote(
+                                        "Pass `{}` at the command line or in the `{}` file to silence this error.\n"
+                                        "    Only use this to work around Ruby or gem upgrade incompatibilities.",
+                                        fmt::format("--suppress-payload-superclass-redefinition-for={}",
+                                                    job.klass.show(ctx)),
+                                        "sorbet/config");
+                                }
+                            }
                         }
                     }
-                }
+
+                    break;
+
+                case core::packages::PackageInfo::CanModifyResult::Subpackages:
+                    if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
+                        auto attached = job.klass.data(ctx)->topAttachedClass(ctx);
+                        filePackageInfo.explainSubpackageNamespaceError(
+                            ctx, e, job.klass.show(ctx), "have a superclass", attached.data(ctx)->packageRegistryOwner,
+                            attached.show(ctx), "remove the superclass");
+                    }
+                    break;
+
+                case core::packages::PackageInfo::CanModifyResult::NotOwner:
+                case core::packages::PackageInfo::CanModifyResult::UnpackagedSymbol:
+                    if (auto e =
+                            ctx.beginError(job.ancestor->loc(), core::errors::Resolver::ModifyingUnpackagedConstant)) {
+                        e.setHeader("Superclasses may only be set on constants in the package that owns them");
+
+                        e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
+
+                        if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
+                            e.addErrorLine(filePackageInfo.declLoc(), "Package where the `{}` occurs",
+                                           job.isInclude ? "include" : "extend");
+
+                            auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
+                            ENFORCE(ownerPackage.exists());
+                            e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
+                                           job.klass.show(ctx));
+                        } else {
+                            e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not marked `{}`",
+                                           "prelude!");
+                            e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
+                                           job.klass.show(ctx), "prelude!");
+                        }
+                    }
+                    break;
             }
         } else {
-            if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
-                if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::IncludesNonModule)) {
-                    e.setHeader("Only modules can be `{}`d, but `{}` is a class", job.isInclude ? "include" : "extend",
-                                resolvedClass.show(ctx));
-                    e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
-                                   resolvedClass.show(ctx));
-                }
+            switch (canModify) {
+                case core::packages::PackageInfo::CanModifyResult::CanModify:
+                    if (!job.klass.data(ctx)->addMixin(ctx, resolvedClass, job.mixinIndex)) {
+                        if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::IncludesNonModule)) {
+                            e.setHeader("Only modules can be `{}`d, but `{}` is a class",
+                                        job.isInclude ? "include" : "extend", resolvedClass.show(ctx));
+                            e.addErrorLine(resolvedClass.data(ctx)->loc(), "`{}` defined as a class here",
+                                           resolvedClass.show(ctx));
+                        }
+                    }
+                    break;
+
+                case core::packages::PackageInfo::CanModifyResult::PackageSpec:
+                    if (auto e =
+                            ctx.beginError(job.ancestor->loc(), core::errors::Resolver::InvalidPackageExpression)) {
+                        e.setHeader("Invalid expression in package: `{}` is not allowed",
+                                    job.isInclude ? "include" : "extend");
+
+                        e.addErrorLine(job.klass.data(ctx)->loc(), "Package defined here");
+                    }
+                    break;
+
+                case core::packages::PackageInfo::CanModifyResult::Subpackages:
+                    if (auto e = ctx.beginError(job.ancestor->loc(), core::errors::Resolver::PackageNamespaceMixin)) {
+                        auto attached = job.klass.data(ctx)->topAttachedClass(ctx);
+                        filePackageInfo.explainSubpackageNamespaceError(
+                            ctx, e, job.klass.show(ctx), "have ancestors", attached.data(ctx)->packageRegistryOwner,
+                            attached.show(ctx), job.isInclude ? "remove the `include`" : "remove the `extend`");
+                    }
+                    break;
+
+                case core::packages::PackageInfo::CanModifyResult::NotOwner:
+                case core::packages::PackageInfo::CanModifyResult::UnpackagedSymbol:
+                    if (auto e =
+                            ctx.beginError(job.ancestor->loc(), core::errors::Resolver::ModifyingUnpackagedConstant)) {
+                        e.setHeader("`{}` may only be used on constants in the package that owns them",
+                                    job.isInclude ? "include" : "extend");
+
+                        e.addErrorLine(job.klass.data(ctx)->loc(), "Symbol originally defined here");
+
+                        if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
+                            e.addErrorLine(filePackageInfo.declLoc(), "Package where the `{}` occurs",
+                                           job.isInclude ? "include" : "extend");
+
+                            auto &ownerPackage = ctx.state.packageDB().getPackageInfo(job.klass.data(ctx)->package);
+                            ENFORCE(ownerPackage.exists());
+                            e.addErrorLine(ownerPackage.declLoc(), "Package where `{}` is defined",
+                                           job.klass.show(ctx));
+                        } else {
+                            e.addErrorLine(filePackageInfo.declLoc(), "Package defined here is not marked `{}`",
+                                           "prelude!");
+                            e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
+                                           job.klass.show(ctx), "prelude!");
+                        }
+                    }
+                    break;
             }
         }
 
@@ -896,6 +1565,49 @@ private:
                 elems.emplace_back(type);
             }
         }
+    }
+
+    // A file's hash is computed by resolving that file in isolation, where a module defined in another file will not
+    // resolve, so `resolveClassMethodsJob` will not enter <mixed-in-class-methods>. Record those arguments like
+    // unresolved ancestors, so that adding or changing them changes the file's hash. This has to run after
+    // constantResolutionFailed, which stubs the unresolved constants.
+    static void saveClassMethodsForHashing(core::GlobalState &gs, const ClassMethodsResolutionItem &todo) {
+        if (!todo.owner.isClassOrModule()) {
+            // e.g., a call inside a method body. resolveClassMethodsJob reports an error for this.
+            return;
+        }
+
+        auto ownerKlass = todo.owner.asClassOrModuleRef();
+        core::MutableContext ctx(gs, ownerKlass, todo.file);
+        const auto numPosArgs = todo.send->numPosArgs();
+        for (auto i = 0; i < numPosArgs; ++i) {
+            if (auto id = ast::cast_tree<ast::ConstantLit>(todo.send->getPosArg(i))) {
+                saveUnresolvedAncestorForHashing(ctx, ownerKlass, *id);
+            }
+        }
+    }
+
+    // Like saveClassMethodsForHashing, but for the argument of `requires_ancestor { X }` or
+    // `requires_ancestor { T.class_of(X) }`.
+    static void saveRequiredAncestorForHashing(core::GlobalState &gs, const RequireAncestorResolutionItem &todo) {
+        auto *block = todo.send->block();
+        if (block == nullptr || todo.send->numPosArgs() > 0) {
+            return;
+        }
+
+        auto id = ast::cast_tree<ast::ConstantLit>(block->body);
+        if (id == nullptr && isTClassOf(block->body)) {
+            auto &send = ast::cast_tree_nonnull<ast::Send>(block->body);
+            if (send.numPosArgs() == 1) {
+                id = ast::cast_tree<ast::ConstantLit>(send.getPosArg(0));
+            }
+        }
+        if (id == nullptr) {
+            return;
+        }
+
+        core::MutableContext ctx(gs, todo.owner, todo.file);
+        saveUnresolvedAncestorForHashing(ctx, todo.owner, *id);
     }
 
     static void resolveRequiredAncestorsJob(core::GlobalState &gs, const RequireAncestorResolutionItem &todo) {
@@ -1007,7 +1719,10 @@ private:
             if (isSuperclass) {
                 nesting_ = nesting_->parent;
             }
+            auto inMixinAncestorTmp = this->inMixinAncestor_;
+            this->inMixinAncestor_ = !isSuperclass;
             postTransformUnresolvedConstantLit(ctx, ancestor);
+            this->inMixinAncestor_ = inMixinAncestorTmp;
             nesting_ = scopeTmp;
         }
         AncestorResolutionItem job;
@@ -1047,42 +1762,140 @@ private:
         todoAncestors_.emplace_back(std::move(job));
     }
 
-    void walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
-        if (auto c = ast::cast_tree<ast::UnresolvedConstantLit>(tree)) {
-            walkUnresolvedConstantLit(ctx, c->scope);
-            auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(),
-                                                              tree.toUnique<ast::UnresolvedConstantLit>());
-            auto constant = ast::cast_tree<ast::ConstantLit>(out);
-            ConstantResolutionItem job{nesting_, constant};
-            if (resolveConstantJob(ctx, job)) {
-                categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-                if (this->loadTimeScope() && (!constant->symbol().isClassOrModule() ||
-                                              constant->symbol().asClassOrModuleRef().data(ctx)->isDeclared())) {
-                    // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
-                    // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
-                    // Sorbet should be taught to emit errors when these references are not actually defined,
-                    // matching Ruby's behavior. Then the reference order checks will be able to check all
-                    // references against their definitions, and not limit them to only isDeclared symbols here.
+    struct PackageCursorState {
+        core::ClassOrModuleRef cursor;
+        PackageCursorPosition position = PackageCursorPosition::None;
+    };
 
-                    // (Historically, Stripe's custom autoloader used static analysis to predeclare these
-                    // intermediate namespaces, so they would always be defined at the right time. As Stripe's
-                    // codebase moves away from this legacy autoloader, it will be easier to introduce such
-                    // changes into Sorbet.)
-                    checkReferenceOrder(ctx, constant->symbol(), *c, firstDefinitionLocs);
-                }
-            } else {
-                todo_.emplace_back(std::move(job));
+    static PackageCursorState advancePackageCursor(core::Context ctx, PackageCursorState state, core::NameRef name) {
+        if (!state.cursor.exists()) {
+            return {};
+        }
+        auto member = state.cursor.data(ctx)->findMemberNoDealias(name);
+        if (member.exists() && member.isClassOrModule()) {
+            state.cursor = member.asClassOrModuleRef();
+            state.position = cursorIsPackage(ctx, state.cursor) ? PackageCursorPosition::PackageBoundary
+                                                                : PackageCursorPosition::NamespacePrefix;
+            return state;
+        }
+        // Once a path has reached a package, all non-package descendants remain owned by that package.
+        if (cursorIsPackage(ctx, state.cursor)) {
+            state.position = PackageCursorPosition::PackageMember;
+            return state;
+        }
+        return {};
+    }
+
+    static PackageCursorState cursorForSymbol(core::Context ctx, core::SymbolRef symbol) {
+        if (!shouldCheckPackage(ctx) || !symbol.exists() || symbol == core::Symbols::todo()) {
+            return {};
+        }
+        auto enclosing = symbol.enclosingClass(ctx);
+        auto cursor = enclosing.data(ctx)->packageRegistryOwner;
+        if (!cursor.exists()) {
+            return {};
+        }
+        auto position = PackageCursorPosition::NamespacePrefix;
+        if (cursorIsPackage(ctx, cursor)) {
+            position = enclosing.data(ctx)->isPackageNamespace() ? PackageCursorPosition::PackageBoundary
+                                                                 : PackageCursorPosition::PackageMember;
+        }
+        return {cursor, position};
+    }
+
+    static PackageCursorState cursorForBareConstant(core::Context ctx, const Nesting *nesting, core::NameRef name) {
+        if (!shouldCheckPackage(ctx)) {
+            return {};
+        }
+        for (auto scope = nesting; scope != nullptr; scope = scope->parent.get()) {
+            if (!scope->scope.isClassOrModule()) {
+                continue;
             }
-            tree = std::move(out);
-            return;
+            auto cursor = scope->scope.asClassOrModuleRef().data(ctx)->packageRegistryOwner;
+            if (!cursor.exists()) {
+                continue;
+            }
+            auto member = cursor.data(ctx)->findMemberNoDealias(name);
+            if (member.exists() && member.isClassOrModule()) {
+                auto result = member.asClassOrModuleRef();
+                auto position = cursorIsPackage(ctx, result) ? PackageCursorPosition::PackageBoundary
+                                                             : PackageCursorPosition::NamespacePrefix;
+                return {result, position};
+            }
         }
-        if (ast::isa_tree<ast::EmptyTree>(tree) || ast::isa_tree<ast::ConstantLit>(tree)) {
-            return;
-        }
+        return advancePackageCursor(ctx, {core::Symbols::PackageSpecRegistry()}, name);
+    }
 
-        // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
-        // Still want to do our best to recover (for e.g., LSP queries)
-        ast::TreeWalk::apply(ctx, *this, tree);
+    PackageCursorState walkUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+        struct Walker {
+            core::Context ctx;
+            ResolveConstantsWalk &resolver;
+            PackageCursorState cursor;
+            bool scopeWasEmpty;
+
+            ast::ExpressionPtr onRoot(ast::ExpressionPtr root) {
+                scopeWasEmpty = ast::isa_tree<ast::EmptyTree>(root);
+                if (scopeWasEmpty) {
+                    cursor = {};
+                } else if (auto lit = ast::cast_tree<ast::ConstantLit>(root)) {
+                    cursor = cursorForSymbol(ctx, lit->symbol());
+                } else {
+                    // Uncommon case. Will result in "Dynamic constant references are not allowed" eventually.
+                    // Still want to do our best to recover (for e.g., LSP queries)
+                    ast::TreeWalk::apply(ctx, resolver, root);
+                    cursor = {};
+                }
+                return root;
+            }
+
+            ast::ExpressionPtr onPart(std::unique_ptr<ast::UnresolvedConstantLit> original, bool isOutermost) {
+                auto name = original->cnst;
+                auto out = ast::make_expression<ast::ConstantLit>(core::Symbols::noSymbol(), std::move(original));
+                auto constant = ast::cast_tree<ast::ConstantLit>(out);
+
+                if (scopeWasEmpty) {
+                    cursor = cursorForBareConstant(ctx, resolver.nesting_.get(), name);
+                } else {
+                    cursor = advancePackageCursor(ctx, cursor, name);
+                }
+                scopeWasEmpty = false;
+
+                ConstantResolutionItem job{
+                    resolver.nesting_, constant, cursor.cursor, isOutermost, cursor.position,
+                };
+                job.isMixinAncestor = resolver.inMixinAncestor_;
+                auto resolved = resolveConstantJob(ctx, job, resolver.packageReferences_);
+                if (resolved) {
+                    categoryCounterInc("resolve.constants.nonancestor", "firstpass");
+                    // Once a symbol is resolved, we can just use the cursor of that symbol
+                    // (even if empty, i.e. "unpackaged"), rather than having to guess.
+                    cursor = cursorForSymbol(ctx, constant->symbol());
+                    if (resolver.loadTimeScope() && (!constant->symbol().isClassOrModule() ||
+                                                     constant->symbol().asClassOrModuleRef().data(ctx)->isDeclared())) {
+                        // While Sorbet treats class A::B; end like an implicit definition of A, it's actually a
+                        // reference of A--Ruby will require a proper definition of A elsewhere. Long term,
+                        // Sorbet should be taught to emit errors when these references are not actually defined,
+                        // matching Ruby's behavior. Then the reference order checks will be able to check all
+                        // references against their definitions, and not limit them to only isDeclared symbols here.
+
+                        // (Historically, Stripe's custom autoloader used static analysis to predeclare these
+                        // intermediate namespaces, so they would always be defined at the right time. As Stripe's
+                        // codebase moves away from this legacy autoloader, it will be easier to introduce such
+                        // changes into Sorbet.)
+                        if (!job.isMixinAncestor) {
+                            checkReferenceOrder(ctx, constant->symbol(), *constant->original(),
+                                                resolver.firstDefinitionLocs);
+                        }
+                    }
+                } else {
+                    resolver.todo_.emplace_back(std::move(job));
+                }
+                return out;
+            }
+        } walker{ctx, *this, {}, false};
+
+        tree = ast::UnresolvedConstantLit::foldOwned(std::move(tree), walker);
+        return walker.cursor;
     }
 
 public:
@@ -1109,7 +1922,65 @@ public:
     }
 
     void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+        this->nesting_->runtimeResolutionPresent = true;
         walkUnresolvedConstantLit(ctx, tree);
+    }
+
+    // Enforces that a file owned by a package may only open the scope of symbols that it owns (or imports).
+    // This is called for all nesting scopes that contain constant references that would trigger constant
+    // resolution.
+    //
+    // This restriction on the scopes opened is to ensure that we only allow constant resolution to happen
+    // in nesting scopes that we know we've seen all constant definitions for already. For unpackaged code
+    // this is trivially true, but for packaged code we may be processing packages incrementally, and
+    // reopening the symbols defined by a parent package might lead to incorrect resolution in the case that
+    // the parent package is processed after the subpackage.
+    void checkScopePackage(core::Context ctx, core::ClassOrModuleRef scopeKlass, core::LocOffsets declLoc) {
+        if (scopeKlass == core::Symbols::root()) {
+            return;
+        }
+
+        // Package specs already require a single top-level declaration. Namer reports unpackaged
+        // source files and isolates their definitions, so neither needs a scope check here.
+        auto package = ctx.state.packageDB().getPackageForSourceFile(ctx.state, ctx.file);
+        if (package == nullptr) {
+            return;
+        }
+        const auto &curPkg = *package;
+
+        switch (curPkg.canOpenScope(ctx, scopeKlass)) {
+            case core::packages::PackageInfo::CanOpenScopeResult::CanOpen:
+                return;
+
+            case core::packages::PackageInfo::CanOpenScopeResult::NotImported: {
+                if (auto e = ctx.beginError(declLoc, core::errors::Resolver::PackageScopeViolation)) {
+                    auto scopePkgName = scopeKlass.data(ctx)->package;
+                    const auto &scopePkg = ctx.state.packageDB().getPackageInfo(scopePkgName);
+
+                    auto scopeName = scopePkg.show(ctx);
+                    auto curName = curPkg.show(ctx);
+
+                    e.setHeader("Package `{}` may not open `{}`", curName, scopeKlass.show(ctx));
+                    e.addErrorLine(scopePkg.declLoc(), "Owning package");
+                    e.addErrorLine(curPkg.declLoc(), "Referencing package");
+
+                    if (isStrictPackagePrefix(ctx, scopePkgName, curPkg.mangledName())) {
+                        e.addErrorNote("Either `import {}` in `{}`'s `__package.rb`, or change this file's top-level "
+                                       "constant to match `{}`.",
+                                       scopeName, curName, curName);
+
+                        if (auto suggestion = curPkg.addImport(ctx, scopePkg)) {
+                            // TODO(trevor) how does this interact with gen-packages mode, do we need to add a
+                            // `trackPackageReference` call here?
+                            e.addAutocorrect(std::move(*suggestion));
+                        }
+                    } else {
+                        e.addErrorNote("Please change this file's top-level constant to match `{}`.", curName);
+                    }
+                }
+                return;
+            }
+        }
     }
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -1141,7 +2012,7 @@ public:
             }
         }
 
-        nesting_ = make_unique<Nesting>(std::move(nesting_), sym);
+        nesting_ = make_unique<Nesting>(ctx, move(nesting_), sym);
     }
 
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
@@ -1163,53 +2034,77 @@ public:
             transformAncestor(ctx.withOwner(klass), singleton, ancst, isInclude);
         }
 
-        // Check for ambiguous definitions.
-        if (checkAmbiguousDefinition(ctx, nesting_->scope, nesting_->parent)) {
-            const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx, nesting_->scope, nesting_->parent);
-            if (ambigDef.exists()) {
-                if (auto e = ctx.beginError(original.declLoc, core::errors::Resolver::AmbiguousDefinitionError)) {
-                    auto name = klass.data(ctx)->name.show(ctx);
-                    e.setHeader("Definition of `{}` is ambiguous", name);
-                    auto klassOwner = klass.data(ctx)->owner;
-                    auto option1 = fmt::format("{}::{}", klassOwner.show(ctx), name);
-                    e.addErrorLine(klassOwner.data(ctx)->loc(), "Could mean `{}` if nested under here", option1);
-                    auto option2 = fmt::format("{}::{}", ambigDef.show(ctx), name);
-                    e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
-                }
+        checkAmbiguousDefinition(ctx, nesting_->scope, nesting_->parent.get(), original.declLoc);
+
+        // Check the name we're introducing for a scope, as that counts for requiring a package namespace
+        // opening check in the parent scope.
+        if (auto name = ast::cast_tree<ast::ConstantLit>(original.name)) {
+            if (!ast::isa_tree<ast::EmptyTree>(name->original()->scope) && nesting_->parent != nullptr) {
+                nesting_->parent->runtimeResolutionPresent = true;
             }
+        }
+
+        if (this->nesting_->runtimeResolutionPresent) {
+            // Propagate the flag to the parent scope, ensuring that we check it as well during the corresponding call
+            // to `postTransformClassDef`.
+            if (auto &parent = this->nesting_->parent) {
+                parent->runtimeResolutionPresent = true;
+            }
+            checkScopePackage(ctx, klass, original.declLoc);
         }
 
         nesting_ = nesting_->parent;
     }
 
-    const bool checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym,
-                                        const shared_ptr<Nesting> &curNesting) {
+    void checkAmbiguousDefinition(core::Context ctx, core::SymbolRef curSym, const Nesting *curNesting,
+                                  core::LocOffsets loc) {
         if (!ctx.state.shouldReportErrorOn(ctx.file, core::errors::Resolver::AmbiguousDefinitionError)) {
             // no need to check if suppressed
-            return false;
+            return;
         }
 
         if (ctx.file.data(ctx).isPackage(ctx)) {
             // no need to check package files
-            return false;
+            return;
         }
 
         if (curSym == core::Symbols::root()) {
             // no need to check <root> def itself
-            return false;
+            return;
         }
 
         // Can't be ambiguous if current definition is single-part, don't check in this case.
         const core::SymbolRef curOwner = curSym.owner(ctx);
         if (curOwner == curNesting->scope) {
-            return false;
+            return;
         }
 
-        return true;
+        const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx, curSym, curNesting);
+        if (!ambigDef.exists()) {
+            return;
+        }
+
+        if (auto e = ctx.beginError(loc, core::errors::Resolver::AmbiguousDefinitionError)) {
+            auto name = curSym.name(ctx).show(ctx);
+            auto isPossiblyAmbiguous =
+                ambigDef.isClassOrModule() && ambigDef.asClassOrModuleRef().isPackageSpecSymbol(ctx.state);
+            e.setHeader("Definition of `{}` is {}ambiguous", name, isPossiblyAmbiguous ? "possibly " : "");
+            auto owner = curSym.owner(ctx);
+            auto option1 = fmt::format("{}::{}", owner.show(ctx), name);
+            auto option2 = fmt::format("{}::{}", ambigDef.show(ctx), name);
+            if (isPossiblyAmbiguous) {
+                e.addErrorLine(owner.loc(ctx), "Could define `{}`", option1);
+                e.addErrorLine(ambigDef.loc(ctx), "Or could define `{}`, which belongs to another package", option2);
+                e.addErrorNote("The relevant package is not imported, so its contents are unknown");
+            } else {
+                e.addErrorLine(owner.loc(ctx), "Could mean `{}` if nested under here", option1);
+                e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
+            }
+        }
     }
 
     const core::SymbolRef findAnyDefinitionAmbiguousWithCurrent(core::Context ctx, core::SymbolRef curSym,
-                                                                const shared_ptr<Nesting> &curNesting) {
+                                                                const Nesting *curNesting) {
         const core::SymbolRef defaultSymbol;
         if (curNesting == nullptr || curNesting->scope == core::Symbols::root()) {
             // can't be ambiguous if nested directly under root scope
@@ -1244,7 +2139,7 @@ public:
         core::NameRef filler = precedingSymForCurDef.name(ctx);
 
         // Look for filler name in all nestings above current nesting.
-        auto searchNesting = curNesting->parent;
+        auto *searchNesting = curNesting->parent.get();
         while (searchNesting != nullptr) {
             if (searchNesting->scope.isClassOrModule()) {
                 auto scopeSym = searchNesting->scope.asClassOrModuleRef().data(ctx);
@@ -1253,9 +2148,28 @@ public:
                     // Filler name found! Definition is ambiguous.
                     return ambigDef;
                 }
+
+                // Namespaces defined by packages in later strata have not been entered into the
+                // symbol table yet, so we have to consult the package registry to check for
+                // possible ambiguous definitions with those packages.
+                auto registryScope = scopeSym->packageRegistryOwner;
+                if (shouldCheckPackage(ctx) && registryScope.exists()) {
+                    auto registryMember = registryScope.data(ctx)->findMemberNoDealias(filler);
+                    if (registryMember.exists() && registryMember.isClassOrModule()) {
+                        auto registryNamespace = registryMember.asClassOrModuleRef();
+                        auto packageName = core::packages::MangledName(registryNamespace);
+                        auto isPackage = cursorIsPackage(ctx, registryNamespace);
+                        auto isAvailablePackage = isPackage && canReferencePackage(ctx, packageName);
+                        auto isAvailablePackagePrefix = isStrictPrefixOfAvailablePackage(ctx, packageName);
+                        if (!isAvailablePackage && !isAvailablePackagePrefix) {
+                            // This namespace might exist at runtime, making the scoped definition ambiguous.
+                            return registryMember;
+                        }
+                    }
+                }
             }
 
-            searchNesting = searchNesting->parent;
+            searchNesting = searchNesting->parent.get();
         }
 
         return defaultSymbol;
@@ -1296,46 +2210,41 @@ public:
         }
 
         auto send = ast::cast_tree<ast::Send>(asgn.rhs);
-        if (send != nullptr && send->fun == core::Names::typeAlias()) {
-            if (!send->hasBlock()) {
-                // if we have an invalid (i.e. nullary) call to TypeAlias, then we'll treat it as a type alias for
-                // Untyped and report an error here: otherwise, we end up in a state at the end of constant resolution
-                // that won't match our expected invariants (and in fact will fail our sanity checks)
-                // auto temporaryUntyped = ast::MK::Untyped(asgn->lhs.get()->loc);
-                auto temporaryUntyped = ast::MK::Block0(asgn.lhs.loc(), ast::MK::Untyped(asgn.lhs.loc()));
-                send->setBlock(std::move(temporaryUntyped));
-
-                // because we're synthesizing a fake "untyped" here and actually adding it to the AST, we won't report
-                // an arity mismatch for `T.untyped` in the future, so report the arity mismatch now
-                if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeAlias)) {
-                    e.setHeader("No block given to `{}`", "T.type_alias");
-                    CorrectTypeAlias::eagerToLazy(ctx, e, send);
+        if (send != nullptr) {
+            // Unwrap .checked(:sym) to find T.type_alias { ... }.checked(:sym)
+            if (send->fun == core::Names::checked() && send->numPosArgs() == 1 &&
+                ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
+                if (auto inner = ast::cast_tree<ast::Send>(send->recv)) {
+                    send = inner;
                 }
             }
-            auto *block = send->block();
-            this->todoTypeAliases_.emplace_back(id->symbol(), ctx.file, &block->body);
+            if (send->fun == core::Names::typeAlias()) {
+                if (!send->hasBlock()) {
+                    // if we have an invalid (i.e. nullary) call to TypeAlias, then we'll treat it as a type alias for
+                    // Untyped and report an error here: otherwise, we end up in a state at the end of constant
+                    // resolution that won't match our expected invariants (and in fact will fail our sanity checks)
+                    // auto temporaryUntyped = ast::MK::Untyped(asgn->lhs.get()->loc);
+                    auto temporaryUntyped = ast::MK::Block0(asgn.lhs.loc(), ast::MK::Untyped(asgn.lhs.loc()));
+                    send->setBlock(std::move(temporaryUntyped), ast::Send::BlockType::Present);
 
-            // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
-            // we'll still emit a warning when the rhs of a type alias doesn't resolve.
-            this->todo_.emplace_back(nesting_, id);
-            return;
-        }
-
-        // Check for ambiguous definitions.
-        if (checkAmbiguousDefinition(ctx, id->symbol(), nesting_)) {
-            const auto ambigDef = findAnyDefinitionAmbiguousWithCurrent(ctx, id->symbol(), nesting_);
-            if (ambigDef.exists()) {
-                if (auto e = ctx.beginError(asgn.loc, core::errors::Resolver::AmbiguousDefinitionError)) {
-                    auto name = id->symbol().name(ctx).show(ctx);
-                    e.setHeader("Definition of `{}` is ambiguous", name);
-                    auto casgnOwner = id->symbol().owner(ctx);
-                    auto option1 = fmt::format("{}::{}", casgnOwner.show(ctx), name);
-                    e.addErrorLine(casgnOwner.loc(ctx), "Could mean `{}` if nested under here", option1);
-                    auto option2 = fmt::format("{}::{}", ambigDef.show(ctx), name);
-                    e.addErrorLine(ambigDef.loc(ctx), "Or could mean `{}` if nested under here", option2);
+                    // because we're synthesizing a fake "untyped" here and actually adding it to the AST, we won't
+                    // report an arity mismatch for `T.untyped` in the future, so report the arity mismatch now
+                    if (auto e = ctx.beginError(send->loc, core::errors::Resolver::InvalidTypeAlias)) {
+                        e.setHeader("No block given to `{}`", "T.type_alias");
+                        CorrectTypeAlias::eagerToLazy(ctx, e, send);
+                    }
                 }
+                auto *block = send->block();
+                this->todoTypeAliases_.emplace_back(id->symbol(), ctx.file, &block->body);
+
+                // We also enter a ResolutionItem for the lhs of a type alias so even if the type alias isn't used,
+                // we'll still emit a warning when the rhs of a type alias doesn't resolve.
+                this->todo_.emplace_back(nesting_, id);
+                return;
             }
         }
+
+        checkAmbiguousDefinition(ctx, id->symbol(), nesting_.get(), asgn.loc);
 
         auto rhs = ast::cast_tree<ast::ConstantLit>(asgn.rhs);
         if (rhs == nullptr) {
@@ -1395,16 +2304,27 @@ public:
     }
 
     static int constantDepth(ast::ConstantLit *exp) {
-        int depth = 0;
-        ast::ConstantLit *scope = exp;
-        while (auto original = scope->original()) {
-            scope = ast::cast_tree<ast::ConstantLit>(original->scope);
-            if (!scope) {
-                break;
+        struct Walker {
+            int depth = 0;
+            bool hasOriginalPath = false;
+
+            bool onRoot(core::LocOffsets, core::SymbolRef, bool isConstant) {
+                if (hasOriginalPath && isConstant) {
+                    depth++;
+                }
+                return true;
             }
-            depth += 1;
-        }
-        return depth;
+
+            bool onPart(core::LocOffsets, core::SymbolRef, core::NameRef, bool isOutermost) {
+                hasOriginalPath = true;
+                if (!isOutermost) {
+                    depth++;
+                }
+                return true;
+            }
+        } walker;
+        exp->walkOriginalPath(walker);
+        return walker.depth;
     }
 
     static core::ClassOrModuleRef resolvePayloadSuperclassClassName(const core::GlobalState &gs,
@@ -1437,11 +2357,50 @@ public:
         vector<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases_;
         vector<ResolveItems<ClassMethodsResolutionItem>> todoClassMethods_;
         vector<ResolveItems<RequireAncestorResolutionItem>> todoRequiredAncestors_;
+        vector<ResolveItems<PackageReference>> packageReferences_;
         vector<ast::ParsedFile> trees;
+
+        // Consume the todos, and reset the internal state of the `ResolveConstantsWalk`.
+        void consume(core::FileRef file, ResolveConstantsWalk &constants) {
+            // Reset the internal state of the walk
+            constants.nesting_ = nullptr;
+            constants.loadScopeDepth_ = 0;
+
+            // We leave `constants.firstDefinitionLocs` alone here as it acts as a cache across trees.
+
+            if (!constants.todo_.empty()) {
+                this->todo_.emplace_back(file, move(constants.todo_));
+            }
+            if (!constants.todoAncestors_.empty()) {
+                this->todoAncestors_.emplace_back(file, move(constants.todoAncestors_));
+            }
+            if (!constants.todoClassAliases_.empty()) {
+                this->todoClassAliases_.emplace_back(file, move(constants.todoClassAliases_));
+            }
+            if (!constants.todoTypeAliases_.empty()) {
+                this->todoTypeAliases_.emplace_back(file, move(constants.todoTypeAliases_));
+            }
+            if (!constants.todoClassMethods_.empty()) {
+                this->todoClassMethods_.emplace_back(file, move(constants.todoClassMethods_));
+            }
+            if (!constants.todoRequiredAncestors_.empty()) {
+                this->todoRequiredAncestors_.emplace_back(file, move(constants.todoRequiredAncestors_));
+            }
+            if (!constants.packageReferences_.empty()) {
+                this->packageReferences_.emplace_back(file, move(constants.packageReferences_));
+            }
+        }
     };
 
     static ast::ParsedFilesOrCancelled resolveConstants(core::GlobalState &gs, vector<ast::ParsedFile> trees,
                                                         WorkerPool &workers) {
+        for (const auto &tree : trees) {
+            auto package = gs.packageDB().getPackageNameForFile(tree.file);
+            if (package.exists()) {
+                gs.packageDB().getPackageInfoNonConst(package)->resetPackageReferences(tree.file);
+            }
+        }
+
         UnorderedSet<core::ClassOrModuleRef> suppressPayloadSuperclassRedefinitionFor;
         for (string_view className : gs.suppressPayloadSuperclassRedefinitionFor) {
             auto klass = resolvePayloadSuperclassClassName(gs, className);
@@ -1451,6 +2410,19 @@ public:
                                 "--suppress-payload-superclass-redefinition-for");
                     e.addErrorNote("Double check that the provided class name exists, or delete this option\n"
                                    "    (which will be either from the command line args or from the `{}` file).",
+                                   "sorbet/config");
+                }
+                continue;
+            }
+
+            auto klassDefinedInPayload =
+                absl::c_any_of(klass.data(gs)->locs(), [&](auto &loc) { return loc.file().data(gs).isPayload(); });
+            if (!klassDefinedInPayload) {
+                if (auto e = gs.beginError(core::Loc::none(), core::errors::Resolver::RedefinitionOfParents)) {
+                    e.setHeader("`{}` provided via `{}` is not defined in Sorbet's payload", klass.show(gs),
+                                "--suppress-payload-superclass-redefinition-for");
+                    e.addErrorNote("This option only applies to classes defined in Sorbet's payload.\n"
+                                   "    Delete this option (from the command line args or from the `{}` file).",
                                    "sorbet/config");
                 }
                 continue;
@@ -1489,25 +2461,7 @@ public:
                     core::Context ictx(gs, core::Symbols::root(), job.file);
                     ast::TreeWalk::apply(ictx, constants, job.tree);
                     partiallyResolvedTrees.emplace_back(move(job));
-                    if (!constants.todo_.empty()) {
-                        walkResult.todo_.emplace_back(job.file, move(constants.todo_));
-                    }
-                    if (!constants.todoAncestors_.empty()) {
-                        walkResult.todoAncestors_.emplace_back(job.file, move(constants.todoAncestors_));
-                    }
-                    if (!constants.todoClassAliases_.empty()) {
-                        walkResult.todoClassAliases_.emplace_back(job.file, move(constants.todoClassAliases_));
-                    }
-                    if (!constants.todoTypeAliases_.empty()) {
-                        walkResult.todoTypeAliases_.emplace_back(job.file, move(constants.todoTypeAliases_));
-                    }
-                    if (!constants.todoClassMethods_.empty()) {
-                        walkResult.todoClassMethods_.emplace_back(job.file, move(constants.todoClassMethods_));
-                    }
-                    if (!constants.todoRequiredAncestors_.empty()) {
-                        walkResult.todoRequiredAncestors_.emplace_back(job.file,
-                                                                       move(constants.todoRequiredAncestors_));
-                    }
+                    walkResult.consume(job.file, constants);
                 }
             }
             if (!partiallyResolvedTrees.empty()) {
@@ -1522,6 +2476,7 @@ public:
         vector<ResolveItems<TypeAliasResolutionItem>> todoTypeAliases;
         vector<ResolveItems<ClassMethodsResolutionItem>> todoClassMethods;
         vector<ResolveItems<RequireAncestorResolutionItem>> todoRequiredAncestors;
+        vector<ResolveItems<PackageReference>> packageReferences;
 
         {
             ResolveWalkResult threadResult;
@@ -1545,11 +2500,15 @@ public:
                     todoRequiredAncestors.insert(todoRequiredAncestors.end(),
                                                  make_move_iterator(threadResult.todoRequiredAncestors_.begin()),
                                                  make_move_iterator(threadResult.todoRequiredAncestors_.end()));
+                    packageReferences.insert(packageReferences.end(),
+                                             make_move_iterator(threadResult.packageReferences_.begin()),
+                                             make_move_iterator(threadResult.packageReferences_.end()));
                     trees.insert(trees.end(), make_move_iterator(threadResult.trees.begin()),
                                  make_move_iterator(threadResult.trees.end()));
                 }
             }
         }
+        trackPackageReferences(gs, packageReferences);
 
         if (gs.epochManager->wasTypecheckingCanceled()) {
             return ast::ParsedFilesOrCancelled::cancel(std::move(trees), workers);
@@ -1571,8 +2530,6 @@ public:
         bool progress = true;
         bool first = true; // we need to run at least once to force class aliases and type aliases
 
-        // If the constant didn't immediately resolve during the initial treewalk, and we're not
-        // allowed to mutate GlobalState, it will never resolve. Let's just skip to the error phase.
         while (progress && (first || !todo.empty() || !todoAncestors.empty())) {
             first = false;
             counterInc("resolve.constants.retries");
@@ -1582,27 +2539,26 @@ public:
                 // We try to resolve most ancestors second because this makes us much more likely to resolve
                 // everything else.
                 long retries = 0;
-                auto f = [&gs, &retries, &suppressPayloadSuperclassRedefinitionFor](
+                erase_if(todoAncestors,
+                         [&gs, &retries, &suppressPayloadSuperclassRedefinitionFor](
                              ResolveItems<AncestorResolutionItem> &job) -> bool {
-                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                    const auto origSize = job.items.size();
-                    auto g = [&](AncestorResolutionItem &item) -> bool {
-                        auto resolved = resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, false);
-                        return resolved;
-                    };
-                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
-                    job.items.erase(fileIt, job.items.end());
-                    retries += origSize - job.items.size();
-                    return job.items.empty();
-                };
-                auto it = remove_if(todoAncestors.begin(), todoAncestors.end(), std::move(f));
-                todoAncestors.erase(it, todoAncestors.end());
+                             core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                             const auto origSize = job.items.size();
+                             erase_if(job.items, [&](AncestorResolutionItem &item) -> bool {
+                                 auto resolved =
+                                     resolveAncestorJob(ctx, item, suppressPayloadSuperclassRedefinitionFor, false);
+                                 return resolved;
+                             });
+                             retries += origSize - job.items.size();
+                             return job.items.empty();
+                         });
                 categoryCounterAdd("resolve.constants.ancestor", "retry", retries);
                 progress = retries > 0;
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.constants");
-                bool resolvedSomeConstants = resolveConstantResolutionItems(gs, todo, workers);
+                bool resolvedSomeConstants = resolveConstantResolutionItems(gs, todo, packageReferences, workers);
+                trackPackageReferences(gs, packageReferences);
                 progress = progress || resolvedSomeConstants;
             }
             {
@@ -1613,34 +2569,28 @@ public:
                 // there would be no point in running the todoClassAliases step before todo
 
                 long retries = 0;
-                auto f = [&gs, &retries](ResolveItems<ClassAliasResolutionItem> &job) -> bool {
+                erase_if(todoClassAliases, [&gs, &retries](ResolveItems<ClassAliasResolutionItem> &job) -> bool {
                     core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                     auto origSize = job.items.size();
-                    auto g = [&](ClassAliasResolutionItem &item) -> bool { return resolveClassAliasJob(ctx, item); };
-                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
-                    job.items.erase(fileIt, job.items.end());
+                    erase_if(job.items,
+                             [&](ClassAliasResolutionItem &item) -> bool { return resolveClassAliasJob(ctx, item); });
                     retries += origSize - job.items.size();
                     return job.items.empty();
-                };
-                auto it = remove_if(todoClassAliases.begin(), todoClassAliases.end(), std::move(f));
-                todoClassAliases.erase(it, todoClassAliases.end());
+                });
                 categoryCounterAdd("resolve.constants.aliases", "retry", retries);
                 progress = progress || retries > 0;
             }
             {
                 Timer timeit(gs.tracer(), "resolver.resolve_constants.fixed_point.type_aliases");
                 long retries = 0;
-                auto f = [&gs, &retries](ResolveItems<TypeAliasResolutionItem> &job) -> bool {
+                erase_if(todoTypeAliases, [&gs, &retries](ResolveItems<TypeAliasResolutionItem> &job) -> bool {
                     core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                     auto origSize = job.items.size();
-                    auto g = [&](TypeAliasResolutionItem &item) -> bool { return resolveTypeAliasJob(ctx, item); };
-                    auto fileIt = remove_if(job.items.begin(), job.items.end(), std::move(g));
-                    job.items.erase(fileIt, job.items.end());
+                    erase_if(job.items,
+                             [&](TypeAliasResolutionItem &item) -> bool { return resolveTypeAliasJob(ctx, item); });
                     retries += origSize - job.items.size();
                     return job.items.empty();
-                };
-                auto it = remove_if(todoTypeAliases.begin(), todoTypeAliases.end(), std::move(f));
-                todoTypeAliases.erase(it, todoTypeAliases.end());
+                });
                 categoryCounterAdd("resolve.constants.typealiases", "retry", retries);
                 progress = progress || retries > 0;
             }
@@ -1653,7 +2603,6 @@ public:
                     resolveClassMethodsJob(gs, todo);
                 }
             }
-            todoClassMethods.clear();
         }
 
         {
@@ -1663,7 +2612,6 @@ public:
                     resolveRequiredAncestorsJob(gs, todo);
                 }
             }
-            todoRequiredAncestors.clear();
         }
 
         // We can no longer resolve new constants. All the code below reports errors
@@ -1709,8 +2657,6 @@ public:
             });
         }
 
-        // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
-
         {
             Timer timeit(gs.tracer(), "resolver.resolve_constants.errors");
 
@@ -1729,9 +2675,6 @@ public:
                 }
             }
 
-            // Only purpose of resolveAncestorJob is to mutate the symbol table, not the tree, so
-            // in non-mutating resolver mode we don't have to do anything (because we don't care
-            // about errors).
             for (auto &job : todoAncestors) {
                 core::MutableContext ctx(gs, core::Symbols::root(), job.file);
                 for (auto &item : job.items) {
@@ -1743,6 +2686,20 @@ public:
                 }
             }
         }
+
+        for (auto &job : todoClassMethods) {
+            for (auto &todo : job.items) {
+                saveClassMethodsForHashing(gs, todo);
+            }
+        }
+        todoClassMethods.clear();
+
+        for (auto &job : todoRequiredAncestors) {
+            for (auto &todo : job.items) {
+                saveRequiredAncestorForHashing(gs, todo);
+            }
+        }
+        todoRequiredAncestors.clear();
 
         if (gs.epochManager->wasTypecheckingCanceled()) {
             return ast::ParsedFilesOrCancelled::cancel(std::move(trees), workers);
@@ -2129,6 +3086,9 @@ class ResolveTypeMembersAndFieldsWalk {
                 // Don't recurse--just take the type from the cast verbatim (no inference)
                 result = cast.type;
             },
+            [&](const ast::Assign &asgn) {
+                result = resolveConstantType(ctx, asgn.rhs, /* topCall */ false, /* isFrozen */ false);
+            },
             [&](const ast::Array &arr) {
                 if (arr.elems.empty()) {
                     // Require type annotation for empty array, instead of inferring something like
@@ -2154,6 +3114,10 @@ class ResolveTypeMembersAndFieldsWalk {
                 }
             },
             [&](const ast::Send &send) {
+                if (send.fun == core::Names::stringInterpolate()) {
+                    result = core::Types::String();
+                    return;
+                }
                 if (send.fun != core::Names::freeze() || send.hasNonBlockArgs() || send.hasBlock() ||
                     !(ast::isa_tree<ast::Array>(send.recv) || ast::isa_tree<ast::Hash>(send.recv))) {
                     return;
@@ -2434,7 +3398,7 @@ class ResolveTypeMembersAndFieldsWalk {
     static bool resolveAssign(core::MutableContext ctx, ResolveAssignItem &job, vector<bool> &resolvedAttachedClasses) {
         ENFORCE(job.lhs.isTypeAlias(ctx) || job.lhs.isTypeMember());
 
-        auto it = std::remove_if(job.dependencies.begin(), job.dependencies.end(), [&](core::SymbolRef dep) {
+        erase_if(job.dependencies, [&](core::SymbolRef dep) {
             if (isGenericResolved(ctx, dep)) {
                 if (dep.isClassOrModule()) {
                     // `dep`'s dependencies are resolved. Compute its externalType here so that we can resolve this
@@ -2445,7 +3409,6 @@ class ResolveTypeMembersAndFieldsWalk {
             }
             return false;
         });
-        job.dependencies.erase(it, job.dependencies.end());
         if (!job.dependencies.empty()) {
             return false;
         }
@@ -2571,8 +3534,8 @@ class ResolveTypeMembersAndFieldsWalk {
     static void computeExternalTypes(core::GlobalState &gs) {
         Timer timeit(gs.tracer(), "resolver.computeExternalType");
         // Ensure all symbols have `externalType` computed.
-        for (uint32_t i = 1; i < gs.classAndModulesUsed(); i++) {
-            core::ClassOrModuleRef(gs, i).data(gs)->unsafeComputeExternalType(gs);
+        for (auto ref : gs.newClassOrModules()) {
+            ref.data(gs)->unsafeComputeExternalType(gs);
         }
     }
 
@@ -2718,6 +3681,12 @@ public:
     void postTransformCast(core::Context ctx, ast::ExpressionPtr &tree) {
         auto cast = ast::cast_tree<ast::Cast>(tree);
         if (cast->cast == core::Names::assumeType()) {
+            if (cast->typeExpr.isSelfReference()) {
+                // Resolve the type for `X = new` here because class symbols aren't populated until naming.
+                auto klass = ctx.owner.enclosingClass(ctx);
+                cast->typeExpr = ast::MK::Constant(cast->typeExpr.loc(), klass);
+            }
+
             // This cast was not written by the user. Before we attempt to parse it as a type, let's
             // make sure that it's even possible to be valid.
             auto cnst = ast::cast_tree<ast::ConstantLit>(cast->typeExpr);
@@ -2884,7 +3853,17 @@ public:
             ENFORCE(!sym.isTypeMember() ||
                     (send->recv.isSelfReference() || ast::MK::isSorbetPrivateStatic(send->recv)));
 
-            if ((sym.isTypeAlias(ctx) && send->fun != core::Names::typeAlias()) ||
+            auto innerSend = send;
+            if (innerSend->fun == core::Names::checked() && innerSend->numPosArgs() == 1 &&
+                ast::isa_tree<ast::Literal>(innerSend->getPosArg(0))) {
+                if (auto inner = ast::cast_tree<ast::Send>(innerSend->recv)) {
+                    // We store the innerSend (if any) in the ResolveAssignItem because the
+                    // type_alias case expects to be able to unwrap the `Block`.
+                    innerSend = inner;
+                }
+            }
+
+            if ((sym.isTypeAlias(ctx) && innerSend->fun != core::Names::typeAlias()) ||
                 (sym.isTypeMember() && send->fun != core::Names::typeMember() &&
                  send->fun != core::Names::typeTemplate())) {
                 // This is a reassignment of a constant that was declared as a type member or a type alias.
@@ -2900,7 +3879,7 @@ public:
                 dependencies_.emplace_back(mixin);
             }
 
-            todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, send, std::move(dependencies_), ctx.file});
+            todoAssigns_.emplace_back(ResolveAssignItem{ctx.owner, sym, innerSend, std::move(dependencies_), ctx.file});
         } else if (sym.isStaticField(ctx)) {
             ResolveStaticFieldItem job{ctx.file, sym.asFieldRef(), &asgn};
             auto resultType = tryResolveStaticField(ctx, job);
@@ -2986,9 +3965,6 @@ public:
                     combinedTodoUntypedResultTypes.emplace_back(move(threadResult.todoUntypedResultTypes));
                     combinedTodoResolveCastItems.emplace_back(move(threadResult.todoResolveCastItems));
                     combinedTodoResolveFieldItems.emplace_back(move(threadResult.todoResolveFieldItems));
-                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
-                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
-                    combinedTodoAttachedClassItems.emplace_back(move(threadResult.todoAttachedClassItems));
                     combinedTodoResolveStaticFieldItems.emplace_back(move(threadResult.todoResolveStaticFieldItems));
                     combinedTodoResolveSimpleStaticFieldItems.emplace_back(
                         move(threadResult.todoResolveSimpleStaticFieldItems));
@@ -3028,19 +4004,15 @@ public:
         bool progress = true;
         while (progress && !combinedTodoAssigns.empty()) {
             progress = false;
-            auto it = std::remove_if(
-                combinedTodoAssigns.begin(), combinedTodoAssigns.end(), [&](vector<ResolveAssignItem> &threadTodos) {
-                    auto origSize = threadTodos.size();
-                    auto threadTodoIt =
-                        std::remove_if(threadTodos.begin(), threadTodos.end(), [&](ResolveAssignItem &job) -> bool {
-                            core::MutableContext ctx(gs, core::Symbols::root(), job.file);
-                            return resolveAssign(ctx, job, resolvedAttachedClasses);
-                        });
-                    threadTodos.erase(threadTodoIt, threadTodos.end());
-                    progress = progress || threadTodos.size() != origSize;
-                    return threadTodos.empty();
+            erase_if(combinedTodoAssigns, [&](vector<ResolveAssignItem> &threadTodos) {
+                auto origSize = threadTodos.size();
+                erase_if(threadTodos, [&](ResolveAssignItem &job) -> bool {
+                    core::MutableContext ctx(gs, core::Symbols::root(), job.file);
+                    return resolveAssign(ctx, job, resolvedAttachedClasses);
                 });
-            combinedTodoAssigns.erase(it, combinedTodoAssigns.end());
+                progress = progress || threadTodos.size() != origSize;
+                return threadTodos.empty();
+            });
         }
 
         // If there was a step with no progress, there's a cycle in the
@@ -3408,21 +4380,47 @@ private:
             } else {
                 if (!isBlkArg) {
                     info.hasMissingArgument = true;
+                } else if (treeArgName == core::Names::implicitYield()) {
+                    if (auto e = ctx.beginError(mdef.declLoc, core::errors::Resolver::UnnamedBlockParameter)) {
+                        e.setHeader("Method `{}` uses `{}` but does not mention a block parameter", mdef.name.show(ctx),
+                                    "yield");
+                        e.addErrorLine(ctx.locAt(local->loc), "Detected implicit block parameter here");
+                        if (mdef.params.size() > 1 && !sigParams.empty()) {
+                            auto &beforeBlockParam = mdef.params[mdef.params.size() - 2];
+                            auto mdefInsertLoc = beforeBlockParam.loc().copyEndWithZeroLength();
+                            if (auto optionalParam = ast::cast_tree<ast::OptionalParam>(beforeBlockParam)) {
+                                mdefInsertLoc = optionalParam->default_.loc().copyEndWithZeroLength();
+                            }
+                            e.addAutocorrect(core::AutocorrectSuggestion{
+                                "Insert untyped block parameter",
+                                {core::AutocorrectSuggestion::Edit{
+                                     ctx.locAt(sigParams.back().typeLoc.copyEndWithZeroLength()), ", blk: T.untyped"},
+                                 core::AutocorrectSuggestion::Edit{ctx.locAt(mdefInsertLoc), ", &blk"}}});
+                        } else if (mdef.params.size() == 1 && sigParams.empty() && !sig.seen.params.exists() &&
+                                   mdef.declLoc.exists() && !mdef.declLoc.empty() &&
+                                   (sig.seen.returns.exists() || sig.seen.void_.exists())) {
+                            auto paramsLoc = sig.seen.returns.exists() ? sig.seen.returns : sig.seen.void_;
+                            auto declLoc = ctx.locAt(mdef.declLoc);
+                            auto declLocStr = "(&blk)";
+                            if (declLoc.source(ctx)->back() == ')') {
+                                declLocStr = "&blk";
+                                declLoc = declLoc.adjust(ctx, 0, -1);
+                            }
+                            declLoc = declLoc.copyEndWithZeroLength();
+                            e.addAutocorrect(core::AutocorrectSuggestion{
+                                "Insert untyped block parameter",
+                                {core::AutocorrectSuggestion::Edit{ctx.locAt(paramsLoc.copyWithZeroLength()),
+                                                                   "params(blk: T.untyped)."},
+                                 core::AutocorrectSuggestion::Edit{declLoc, declLocStr}}});
+                        }
+                    }
                 }
 
                 if (param.type == nullptr) {
-                    if (isBlkArg && ctx.file.data(ctx).strictLevel >= core::StrictLevel::Strict) {
-                        // Only in `typed: strict` do we report the "method uses `yield` but does
-                        // not mention a block parameter" error, because we only know for sure that
-                        // there will be a sig on a method in `# typed: strict` files.
-                        //
-                        // If we were to somehow communicate from Desugar to Resolver that the
-                        // method is relying on `yield` despite not mentioning an explicit block
-                        // arg, then we could report that error here and expand the cases where we
-                        // know for sure that the method does not take a block to any method with a
-                        // sig, regardless of the enclosing file's sigil.
-                        //
-                        // Short of that, we can only set this for `# typed: strict` files today.
+                    if (isBlkArg) {
+                        // If we got a sig, and the MethodDef mentions `yield` but did not
+                        // mention a blockArg, and the sig omits a type for the block arg, we
+                        // can assume that this method does not take a block arg.
                         //
                         // We're using `bottom` instead of `nilClass` because `foo(&nil)` is valid.
                         param.type = core::Types::bottom();
@@ -3573,11 +4571,7 @@ private:
                     return;
                 }
 
-                if (send.numPosArgs() == 1 &&
-                    (send.fun == core::Names::public_() || send.fun == core::Names::private_() ||
-                     send.fun == core::Names::privateClassMethod() || send.fun == core::Names::protected_() ||
-                     send.fun == core::Names::packagePrivateClassMethod() ||
-                     send.fun == core::Names::packagePrivate())) {
+                if (send.numPosArgs() == 1 && send.fun.isMethodDefModifierName()) {
                     processStatement(ctx, send.getPosArg(0), lastSigs);
                     return;
                 }
@@ -3661,7 +4655,7 @@ private:
 
                     lastSigs.clear();
                 } else {
-                    handleAbstractMethod(ctx, mdef);
+                    handleAbstractMethod(ctx, mdef, nullptr);
                 }
             },
 
@@ -3775,33 +4769,69 @@ public:
                 }
             }
         }
-        handleAbstractMethod(ctx, mdef);
+        handleAbstractMethod(ctx, mdef, nullptr);
     }
     static void resolveSignatureJob(core::MutableContext ctx, ResolveSignatureJob &job) {
         prodCounterInc("types.sig.count");
         auto &mdef = *job.mdef;
         bool isOverloaded = false;
         fillInInfoFromSig(ctx, mdef.symbol, job.loc, job.sig, isOverloaded, mdef);
-        handleAbstractMethod(ctx, mdef);
+        handleAbstractMethod(ctx, mdef, &job.sig);
     }
 
-    static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef) {
+    // `sig == nullptr` implies overloaded sig or no sig
+    static void handleAbstractMethod(core::Context ctx, ast::MethodDef &mdef, const ParsedSig *sig) {
         if (mdef.symbol.data(ctx)->flags.isAbstract) {
             if (!ast::isa_tree<ast::EmptyTree>(mdef.rhs)) {
                 if (auto e = ctx.beginError(mdef.rhs.loc(), core::errors::Resolver::AbstractMethodWithBody)) {
                     e.setHeader("Abstract methods must not contain any code in their body");
-                    e.replaceWith("Delete the body", ctx.locAt(mdef.rhs.loc()), "");
+                    if (mdef.flags.isAttrBestEffortUIOnly) {
+                        // This isAttrBestEffortUIOnly is fine because we're not using it to compute
+                        // a load-bearing semantic property (e.g., the error itself is still
+                        // reported by checking whether the body is empty). Referencing it here to
+                        // generate an autocorrect is fine, because autocorrects are already best effort.
+                        e.replaceWith("Define via `def`", ctx.locAt(mdef.loc), "def {}; end",
+                                      mdef.symbol.data(ctx)->name.show(ctx));
+                    } else {
+                        e.replaceWith("Delete the body", ctx.locAt(mdef.rhs.loc()), "");
+                    }
                 }
             }
             if (!mdef.symbol.data(ctx)->owner.data(ctx)->flags.isAbstract) {
-                if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
+                if (auto e = ctx.beginError(mdef.declLoc, core::errors::Resolver::AbstractMethodOutsideAbstract)) {
                     e.setHeader("Before declaring an abstract method, you must mark your class/module "
                                 "as abstract using `abstract!` or `interface!`");
+                    if (sig != nullptr && sig->seen.sig.exists()) {
+                        auto sigLoc = ctx.locAt(sig->seen.sig);
+                        auto [insertLoc, padding] = sigLoc.findStartOfIndentation(ctx);
+                        auto spaces = string(padding, ' ');
+                        auto needsExtendTHelpers = false;
+                        if (ctx.owner.isClassOrModule()) {
+                            // Defensive, if it's not a class or module don't bother checking hierarchy
+                            auto singletonClass = ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx);
+                            if (singletonClass.exists()) {
+                                needsExtendTHelpers =
+                                    !singletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Helpers());
+                            }
+                        }
+                        e.replaceWith("Insert `abstract!`", insertLoc, "{}abstract!\n\n{}",
+                                      needsExtendTHelpers ? fmt::format("extend T::Helpers\n\n{}", spaces) : "",
+                                      spaces);
+                    }
                 }
             }
         } else if (mdef.symbol.data(ctx)->owner.data(ctx)->flags.isInterface) {
-            if (auto e = ctx.beginError(mdef.loc, core::errors::Resolver::ConcreteMethodInInterface)) {
+            if (auto e = ctx.beginError(mdef.declLoc, core::errors::Resolver::ConcreteMethodInInterface)) {
                 e.setHeader("All methods in an interface must be declared abstract");
+                if (sig != nullptr) {
+                    auto insertLoc = sig->seen.params.exists()  ? sig->seen.params
+                                     : sig->seen.void_.exists() ? sig->seen.void_
+                                                                : sig->seen.returns;
+                    insertLoc = insertLoc.copyWithZeroLength();
+                    if (insertLoc.exists()) {
+                        e.replaceWith("Make abstract", ctx.locAt(insertLoc), "abstract.");
+                    }
+                }
             }
         }
     }
@@ -3950,6 +4980,20 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
         return ast::ParsedFilesOrCancelled::cancel(move(trees), workers);
     }
 
+    // TODO(jez) Ideally, we would be able to mark the symbol table frozen and call updateSymbolTableOffsets() here.
+    //
+    // `symbolTableFrozen` is only checked when entering/deleting symbols (not any other mutable
+    // symbol table operations.) updateSymbolTableOffsets makes GlobalState remember the new count
+    // of all symbol kinds. Since we're not going to call `finalizeAncestors`/`finalizeSymbols`
+    // again for this strata, we need it to be the case that we don't introduce new symbols which
+    // would need to be finalized.
+    //
+    // That is not true today: both `ResolveTypeMembersAndFieldsWalk::run` and `resolveSigs` enter
+    // symbols (method overloads, type parameters, and method aliases at time of writing). Today it
+    // just so happens that those symbol kinds are not the symbols that we care about in
+    // `finalizeAncestors` / `finalizeSymbols`. But it would be ideal to be able to ENFORCE (via
+    // gs.freezeSymbolTable()) that no errant symbols are entered via those (and future) phases.
+
     auto rtmafResult = ResolveTypeMembersAndFieldsWalk::run(gs, std::move(trees), workers, computeAllSymbols);
     if (epochManager.wasTypecheckingCanceled()) {
         return ast::ParsedFilesOrCancelled::cancel(move(rtmafResult.trees), workers);
@@ -3958,6 +5002,9 @@ ast::ParsedFilesOrCancelled Resolver::run(core::GlobalState &gs, vector<ast::Par
     auto result = resolveSigs(gs, std::move(rtmafResult.trees), workers);
     ResolveTypeMembersAndFieldsWalk::resolvePendingCastItems(gs, rtmafResult.todoResolveCastItems);
     sanityCheck(gs, result);
+
+    // Update offsets for the next stratum.
+    gs.updateSymbolTableOffsets();
 
     return result;
 }

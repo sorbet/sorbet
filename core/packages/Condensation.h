@@ -5,6 +5,7 @@
 #include "absl/types/span.h"
 #include "common/common.h"
 #include "core/packages/MangledName.h"
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
@@ -15,24 +16,37 @@ class GlobalState;
 
 namespace sorbet::core::packages {
 
+enum class FocusExtent : uint8_t {
+    // The full extent of the focused set's dependent packages.
+    Full,
+
+    // Don't consider any downstream dependent packages of the focused set.
+    None,
+};
+
+class CondensationBuilder;
+
 class Condensation {
+    friend class CondensationBuilder;
+
 public:
     struct Node {
+        // Sorted by mangled name when the condensation is built.
         std::vector<core::packages::MangledName> members;
 
         // The SCC IDs of the packages this SCC depends on.
         UnorderedSet<int> imports;
 
+        // The SCC IDs of the packages that depend on this SCC.
+        std::vector<int> backEdges;
+
         // The SCC ID of this node.
         const int id = 0;
-
-        // Whether or not this is a node of application or test code.
-        const bool isTest = false;
 
         // True when this node contains prelude packages.
         const bool isPrelude = false;
 
-        Node(int id, bool isTest, bool isPrelude) : id{id}, isTest{isTest}, isPrelude{isPrelude} {}
+        Node(int id, bool isPrelude) : id{id}, isPrelude{isPrelude} {}
     };
 
 private:
@@ -49,28 +63,31 @@ public:
     Condensation &operator=(const Condensation &other) = delete;
     Condensation &operator=(Condensation &&other) = default;
 
-    Node &pushNode(ImportType type, bool isPrelude);
-
     struct Traversal {
-        // Packages ordered according to their dependencies in the package graph. It's safe to traverse this vector, and
-        // assume that when processing a package all of its imports will have been seen already. Packages will occur
-        // at least once and at most twice in this vector, with the second occurrence always being for the test code of
-        // a package.
+        // Packages ordered according to their dependencies in the package graph. It's safe to traverse this vector and
+        // assume that, when processing a package, all of its imports have been seen already. Each package occurs once.
         std::vector<MangledName> packages;
 
         struct SCCInfo {
-            // True when this group of packages represents a cycle of test dependencies.
-            bool isTest = false;
-
-            // A span of `this->packages` that's involved in this SCC.
+            // A span of `this->packages` that's involved in this SCC, sorted by mangled name.
             absl::Span<MangledName> members;
         };
 
-        // Spans of `this->packages` that correspond to an SCC.
+        // Spans of `this->packages` that correspond to an SCC. Within each stratum, SCCs are ordered lexicographically
+        // by member mangled names.
         std::vector<SCCInfo> sccs;
 
         // Spans of `this->sccs` that have no import conflicts, and could go through the pipeline in the same stratum.
         std::vector<absl::Span<SCCInfo>> strata;
+
+        // True when this traversal was restored from a copy of the package DB.
+        bool cached = false;
+
+        // All dependencies of the focused packages.
+        UnorderedSet<MangledName> focusedUpstream;
+
+        // All dependants of the focused packages.
+        UnorderedSet<MangledName> focusedDownstream;
 
         Traversal() = default;
 
@@ -80,26 +97,44 @@ public:
         Traversal &operator=(const Traversal &other) = default;
         Traversal &operator=(Traversal &&other) = default;
 
-        // Using "stratum" instead of "layer" to avoid confusion with the modularity concept/package
-        // DSL method of "layer" (utility, business, service, etc.)
-        struct StratumInfo {
-            uint32_t applicationStratum;
-            uint32_t testStratum;
-        };
+        // Record the stratum of each package in PackageInfo.
+        void recordStrata(core::GlobalState &gs) const;
 
-        // Build a mapping from package mangled name to the entry in `this->strata` that the application and test code
-        // belong to, respectively.
-        UnorderedMap<MangledName, StratumInfo> buildStratumMapping(const core::GlobalState &gs) const;
+        // Apply splitting and combining optimizations to the traversal. This will potentially move packages between
+        // strata, and must not be called after `recordStrata`.
+        void optimize(const PackageDB &db, std::optional<uint32_t> stratumSplitThreshold,
+                      std::optional<uint32_t> minStratumFiles);
     };
 
     // Compute a traversal through the condensation graph, that yields groups of SCCs that have no dependencies on each
     // other. These groups are acceptable to typecheck in the same stratum, under the assumption that the package graph
     // is well-formed.
-    const Traversal computeTraversal(const GlobalState &gs) const;
+    //
+    // If the `focusedPackages` set is non-null, those packages will be used to prune the traversal to only include
+    // packages that either are dependencies of or are depended on by the focused set.  NOTE: the `focusedPackages` set
+    // may be modified if it is passed, as it will be augmented to include all the members of the SCCs that the original
+    // packages belong to.
+    //
+    // Passing `FocusExtent::None` will exclude the dependant packages of the focused set.
+    const Traversal computeTraversal(const GlobalState &gs, UnorderedSet<MangledName> *focusedPackages,
+                                     FocusExtent extent) const;
 
     absl::Span<const Node> nodes() const {
         return this->nodes_;
     }
+
+    // Fetch the set of packages that depend on the set of packages provided.
+    UnorderedSet<MangledName> transitiveDependentsOf(const PackageDB &db,
+                                                     const UnorderedSet<MangledName> &packages) const;
+};
+
+class CondensationBuilder {
+    Condensation condensation;
+
+public:
+    Condensation::Node &pushNode(bool isPrelude);
+
+    Condensation build() &&;
 };
 
 } // namespace sorbet::core::packages

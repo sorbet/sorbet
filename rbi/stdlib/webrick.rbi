@@ -1155,9 +1155,9 @@ class WEBrick::HTTPAuth::DigestAuth::OpaqueInfo < Struct
     params(
       _: T.untyped,
     )
-    .returns(T.untyped)
+    .void
   end
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 # [`Htdigest`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPAuth/Htdigest.html)
@@ -2072,12 +2072,13 @@ class WEBrick::HTTPServer < WEBrick::GenericServer
   # [`WEBrick::HTTPResponse`](https://docs.ruby-lang.org/en/2.7.0/WEBrick/HTTPResponse.html)
   sig do
     params(
-      dir: T.untyped,
-      proc: T.untyped,
+      dir: String,
+      proc: T.nilable(T.proc.params(request: WEBrick::HTTPRequest, response: WEBrick::HTTPResponse).void),
+      block: T.nilable(T.proc.params(request: WEBrick::HTTPRequest, response: WEBrick::HTTPResponse).void),
     )
-    .returns(T.untyped)
+    .void
   end
-  def mount_proc(dir, proc=T.unsafe(nil)); end
+  def mount_proc(dir, proc = T.unsafe(nil), &block); end
 
   # Processes requests on `sock`
   sig do

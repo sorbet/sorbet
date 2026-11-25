@@ -8,13 +8,19 @@ ClassDef{
     }]
   rhs = [
     If{
-      cond = EmptyTree
+      cond = ConstantLit{
+        symbol = (static-field ::<ErrorNode>)
+        orig = nullptr
+      }
       thenp = EmptyTree
       elsep = EmptyTree
     }
 
     If{
-      cond = EmptyTree
+      cond = ConstantLit{
+        symbol = (static-field ::<ErrorNode>)
+        orig = nullptr
+      }
       thenp = InsSeq{
         stats = [
           Literal{ value = "This is _not_ a truthiness test of a Regexp literal," }
@@ -25,7 +31,10 @@ ClassDef{
     }
 
     If{
-      cond = EmptyTree
+      cond = ConstantLit{
+        symbol = (static-field ::<ErrorNode>)
+        orig = nullptr
+      }
       thenp = Literal{ value = "This one uses an interpolated regexp" }
       elsep = EmptyTree
     }
@@ -36,8 +45,11 @@ ClassDef{
         name = <U b>
       }
       rhs = Send{
-        flags = {privateOk}
-        recv = Self
+        flags = {}
+        recv = ConstantLit{
+          symbol = (static-field ::<ErrorNode>)
+          orig = nullptr
+        }
         fun = <U !>
         block = nullptr
         pos_args = 0
@@ -52,8 +64,11 @@ ClassDef{
         name = <U b>
       }
       rhs = Send{
-        flags = {privateOk}
-        recv = Self
+        flags = {}
+        recv = ConstantLit{
+          symbol = (static-field ::<ErrorNode>)
+          orig = nullptr
+        }
         fun = <U !>
         block = nullptr
         pos_args = 0

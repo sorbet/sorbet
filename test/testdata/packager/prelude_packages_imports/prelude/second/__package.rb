@@ -3,7 +3,5 @@
 # enable-packager: true
 
 class Prelude::Second < PackageSpec
-  prelude_package
-
-  export Prelude::Second::B
+  prelude!
 end

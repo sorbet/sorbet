@@ -75,7 +75,7 @@ def dead_code_before(x)
   when String
     puts x
   else
-    puts 1 # error: This code is unreachable
+    puts 1
     T.absurd(x)
   end
 end
@@ -101,11 +101,8 @@ def cant_alias_local_variables(x)
   when String
     puts x
   else
-    # Hello future Sorbet contributor.
-    # It's not that we MUST have an error here, but rather that we were fine
-    # with it, and couldn't see a simple solution that avoided emitting one.
+    # The whole block is unreachable, so aliasing x does not invalidate the assertion.
     y = x
-    #   ^ error: This code is unreachable
     T.absurd(y)
   end
 end

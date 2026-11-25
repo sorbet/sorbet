@@ -70,3 +70,34 @@ brackets_assign[
 
 self #: as untyped
   .unexisting_method = 42
+
+# Assertions on compound assignments with method receivers
+
+let6 = Let.new
+let6.foo &&= "foo" #: as String # error: `T.cast` is useless
+let6.foo ||= "foo" #: as String # error: `T.cast` is useless
+let6.foo += "foo" #: as String # error: `T.cast` is useless
+
+# Assertions on bracket/index assignment operators
+
+class BracketsOpAssign
+  #: (*untyped) -> void
+  def []=(*args); end
+
+  #: (*untyped) -> untyped
+  def [](*args); end
+end
+
+brackets_op_assign = BracketsOpAssign.new
+brackets_op_assign[:a] &&= "foo" #: as String # error: `T.cast` is useless
+brackets_op_assign[:a] ||= "foo" #: as String # error: `T.cast` is useless
+brackets_op_assign[:a] += "foo" #: as String # error: `T.cast` is useless
+brackets_op_assign[
+  :a, #: as String
+] &&= "foo" #: as String # error: `T.cast` is useless
+brackets_op_assign[
+  :a, #: as String
+] ||= "foo" #: as String # error: `T.cast` is useless
+brackets_op_assign[
+  :a, #: as String
+] += "foo" #: as String # error: `T.cast` is useless

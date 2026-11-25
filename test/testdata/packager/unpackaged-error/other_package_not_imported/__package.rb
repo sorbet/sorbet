@@ -3,5 +3,4 @@
 # typed: strict
 
 class OtherPackageNotImported < PackageSpec
-  export OtherPackageNotImported::ExportedClass
 end

@@ -21,9 +21,6 @@ foo do |positional, (multi, target)|
   "block with multi-target node in parameter list"
 end
 
-# block with parameter `bar` and block locals `baz` and `qux`
-foo { |bar; baz, qux| }
-
 foo do |positional, (multi, target); baz, qux|
   "block with multi-target node in parameter list and block locals"
 end

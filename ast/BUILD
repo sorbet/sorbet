@@ -27,3 +27,16 @@ cc_library(
         "//core/hashing",
     ],
 )
+
+cc_test(
+    name = "tree_test",
+    srcs = [
+        "test/tree_test.cc",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ast",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)

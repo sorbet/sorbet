@@ -4,7 +4,6 @@
 
 class Project::MainLib < PackageSpec
   import Project::Util
-  test_import Project::TestOnly
 
   export_for_test Project::MainLib::Lib
 # ^^^^^^^^^^^^^^^ error: Method `export_for_test` does not exist

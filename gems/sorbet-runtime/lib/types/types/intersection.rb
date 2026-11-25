@@ -26,18 +26,36 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      types.each { |type| build_inner_lazy_fields(type) }
+      nil
+    end
+
+    # overrides Base
     def name
       "T.all(#{types.map(&:name).compact.sort.join(', ')})"
     end
 
     # overrides Base
     def recursively_valid?(obj)
-      types.all? { |type| type.recursively_valid?(obj) }
+      members = types
+      index = 0
+      while index < members.length
+        return false unless members.fetch(index).recursively_valid?(obj)
+        index += 1
+      end
+      true
     end
 
     # overrides Base
     def valid?(obj)
-      types.all? { |type| type.valid?(obj) }
+      members = types
+      index = 0
+      while index < members.length
+        return false unless members.fetch(index).valid?(obj)
+        index += 1
+      end
+      true
     end
 
     # overrides Base

@@ -1,10 +1,13 @@
 #include "rbs/TypeToParserNode.h"
+
+#include "common/typecase.h"
 #include "core/GlobalState.h"
 #include "core/errors/internal.h"
 #include "core/errors/rewriter.h"
-#include "parser/helper.h"
+#include "parser/prism/Helpers.h"
 
 using namespace std;
+using namespace sorbet::parser::Prism;
 
 namespace sorbet::rbs {
 
@@ -14,314 +17,300 @@ bool hasTypeParam(absl::Span<const pair<core::LocOffsets, core::NameRef>> typePa
     return absl::c_any_of(typeParams, [&](const auto &param) { return param.second == name; });
 }
 
-bool isEnumerator(const unique_ptr<parser::Node> &node) {
-    auto constNode = parser::cast_node<parser::Const>(node.get());
+bool isEnumerator(pm_node_t *node, parser::Prism::Parser &prismParser, core::GlobalState &gs) {
+    auto *constNode = down_cast<pm_constant_read_node_t>(node);
+    auto *pathNode = down_cast<pm_constant_path_node_t>(node);
 
-    if (!constNode) {
+    if (!constNode && !pathNode) {
         return false;
     }
 
-    return constNode->name == core::Names::Constants::Enumerator() &&
-           (constNode->scope == nullptr || parser::isa_node<parser::Cbase>(constNode->scope.get()));
+    auto nameId = constNode ? constNode->name : pathNode->name;
+    auto name = gs.enterNameConstant(prismParser.resolveConstant(nameId));
+    return name == core::Names::Constants::Enumerator() && (constNode || pathNode->parent == nullptr);
 }
 
 } // namespace
 
-unique_ptr<parser::Node> TypeToParserNode::namespaceConst(const rbs_namespace_t *rbsNamespace,
-                                                          const RBSDeclaration &declaration) {
-    auto loc = declaration.typeLocFromRange(((rbs_node_t *)rbsNamespace)->location->rg);
+// Converts an RBS namespace to a Prism constant path node.
+//   Foo::Bar -> ConstantPathNode(ConstantReadNode(Foo), Bar)
+//   ::Foo    -> ConstantPathNode(nullptr, Foo)
+pm_node_t *TypeToParserNode::namespaceConst(const rbs_namespace_t *rbsNamespace, const RBSDeclaration &declaration,
+                                            core::LocOffsets loc) {
     rbs_node_list *typePath = rbsNamespace->path;
 
-    unique_ptr<parser::Node> parent;
+    pm_node_t *parent = nullptr;
+    bool isAbsolute = rbsNamespace->absolute;
 
-    if (rbsNamespace->absolute) {
-        parent = parser::MK::Cbase(loc);
-    } else {
-        parent = nullptr;
+    if (typePath == nullptr) {
+        return nullptr;
     }
 
-    if (typePath != nullptr) {
-        for (rbs_node_list_node *list_node = typePath->head; list_node != nullptr; list_node = list_node->next) {
-            rbs_node_t *node = list_node->node;
+    for (rbs_node_list_node *list_node = typePath->head; list_node != nullptr; list_node = list_node->next) {
+        rbs_node_t *node = list_node->node;
 
-            ENFORCE(node->type == RBS_AST_SYMBOL, "Unexpected node type `{}` in type name, expected `{}`",
-                    rbs_node_type_name(node), "Symbol");
+        ENFORCE(node->type == RBS_AST_SYMBOL, "Unexpected node type `{}` in type name, expected `{}`",
+                rbs_node_type_name(node), "Symbol");
 
-            rbs_ast_symbol_t *symbol = (rbs_ast_symbol_t *)node;
-            auto nameStr = parser.resolveConstant(symbol);
-            auto pathNameConst = ctx.state.enterNameConstant(nameStr);
-            parent = parser::MK::Const(loc, move(parent), pathNameConst);
+        auto *symbol = (rbs_ast_symbol_t *)node;
+        auto nameStr = parser.resolveConstant(symbol);
+
+        if (parent != nullptr || isAbsolute) {
+            parent = prism.ConstantPathNode(loc, parent, nameStr);
+        } else {
+            parent = prism.ConstantReadNode(nameStr, loc);
         }
     }
 
     return parent;
 }
 
-unique_ptr<parser::Node> TypeToParserNode::typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
-                                                        const RBSDeclaration &declaration) {
-    auto loc = declaration.typeLocFromRange(((rbs_node_t *)typeName)->location->rg);
+pm_node_t *TypeToParserNode::typeNameType(const rbs_type_name_t *typeName, bool isGeneric,
+                                          const RBSDeclaration &declaration) {
+    auto loc = declaration.typeLocFromRange(typeName->base.location);
 
-    auto parent = namespaceConst(typeName->rbs_namespace, declaration);
+    pm_node_t *parent = namespaceConst(typeName->rbs_namespace, declaration, loc);
+    bool isAbsolute = typeName->rbs_namespace && typeName->rbs_namespace->absolute;
 
     auto nameStr = parser.resolveConstant(typeName->name);
     auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
     auto nameConstant = ctx.state.enterNameConstant(nameUTF8);
 
     if (isGeneric) {
-        if (parent == nullptr || parser::isa_node<parser::Cbase>(parent.get())) {
+        if (!parent) { // Root level constants
             if (nameConstant == core::Names::Constants::Array()) {
-                return parser::MK::T_Array(loc);
+                return prism.T_Array(loc);
             } else if (nameConstant == core::Names::Constants::Class()) {
-                return parser::MK::T_Class(loc);
+                return prism.T_Class(loc);
             } else if (nameConstant == core::Names::Constants::Module()) {
-                return parser::MK::T_Module(loc);
+                return prism.T_Module(loc);
             } else if (nameConstant == core::Names::Constants::Enumerable()) {
-                return parser::MK::T_Enumerable(loc);
+                return prism.T_Enumerable(loc);
             } else if (nameConstant == core::Names::Constants::Enumerator()) {
-                return parser::MK::T_Enumerator(loc);
+                return prism.T_Enumerator(loc);
             } else if (nameConstant == core::Names::Constants::Hash()) {
-                return parser::MK::T_Hash(loc);
+                return prism.T_Hash(loc);
             } else if (nameConstant == core::Names::Constants::Set()) {
-                return parser::MK::T_Set(loc);
+                return prism.T_Set(loc);
             } else if (nameConstant == core::Names::Constants::Range()) {
-                return parser::MK::T_Range(loc);
+                return prism.T_Range(loc);
             }
-        } else if (nameConstant == core::Names::Constants::Lazy() && isEnumerator(parent)) {
-            return parser::MK::T_Enumerator_Lazy(loc);
-        } else if (nameConstant == core::Names::Constants::Chain() && isEnumerator(parent)) {
-            return parser::MK::T_Enumerator_Chain(loc);
+        } else if (nameConstant == core::Names::Constants::Lazy() && isEnumerator(parent, prismParser, ctx.state)) {
+            return prism.T_Enumerator_Lazy(loc);
+        } else if (nameConstant == core::Names::Constants::Chain() && isEnumerator(parent, prismParser, ctx.state)) {
+            return prism.T_Enumerator_Chain(loc);
         }
     } else {
         // The type may refer to a type parameter, so we need to check if it exists as a NameKind::UTF8
         if (hasTypeParam(typeParams, nameUTF8)) {
-            return parser::MK::TTypeParameter(loc, parser::MK::Symbol(loc, nameUTF8));
+            return prism.TTypeParameter(loc, prism.Symbol(loc, nameStr));
         }
     }
 
-    return parser::MK::Const(loc, move(parent), nameConstant);
+    if (parent || isAbsolute) {
+        return prism.ConstantPathNode(loc, parent, nameStr);
+    } else {
+        return prism.ConstantReadNode(nameStr, loc);
+    }
 }
 
-unique_ptr<parser::Node> TypeToParserNode::aliasType(const rbs_types_alias_t *node, core::LocOffsets loc,
-                                                     const RBSDeclaration &declaration) {
-    vector<core::NameRef> pathNames;
-    auto parent = namespaceConst(node->name->rbs_namespace, declaration);
+pm_node_t *TypeToParserNode::aliasType(const rbs_types_alias_t *node, core::LocOffsets loc,
+                                       const RBSDeclaration &declaration) {
+    pm_node_t *parent = namespaceConst(node->name->rbs_namespace, declaration, loc);
     auto nameView = parser.resolveConstant(node->name->name);
     auto nameStr = "type " + string(nameView);
-    auto nameUTF8 = ctx.state.enterNameUTF8(nameStr);
-    auto nameConstant = ctx.state.enterNameConstant(nameUTF8);
 
-    return parser::MK::Const(loc, move(parent), nameConstant);
+    if (parent != nullptr || (node->name->rbs_namespace && node->name->rbs_namespace->absolute)) {
+        return prism.ConstantPathNode(loc, parent, nameStr);
+    } else {
+        return prism.ConstantReadNode(nameStr, loc);
+    }
 }
 
-unique_ptr<parser::Node> TypeToParserNode::classInstanceType(const rbs_types_class_instance_t *node,
-                                                             core::LocOffsets loc, const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::classInstanceType(const rbs_types_class_instance_t *node, core::LocOffsets loc,
+                                               const RBSDeclaration &declaration) {
     auto argsValue = node->args;
     auto isGeneric = argsValue != nullptr && argsValue->length > 0;
     auto typeConstant = typeNameType(node->name, isGeneric, declaration);
 
     if (isGeneric) {
-        auto args = parser::NodeVec();
-        args.reserve(argsValue->length);
-        for (rbs_node_list_node *list_node = argsValue->head; list_node != nullptr; list_node = list_node->next) {
-            auto argType = toParserNode(list_node->node, declaration);
-            args.emplace_back(move(argType));
-        }
-
-        return parser::MK::Send(loc, move(typeConstant), core::Names::syntheticSquareBrackets(), loc, move(args));
+        auto args = translateNodeList(argsValue, declaration);
+        auto methodName = core::Names::syntheticSquareBrackets().shortName(ctx.state);
+        return prism.Call(loc, typeConstant, methodName, absl::MakeSpan(args));
     }
 
     return typeConstant;
 }
 
-unique_ptr<parser::Node> TypeToParserNode::classSingletonType(const rbs_types_class_singleton_t *node,
-                                                              core::LocOffsets loc, const RBSDeclaration &declaration) {
+pm_node_t *TypeToParserNode::classSingletonType(const rbs_types_class_singleton_t *node, core::LocOffsets loc,
+                                                const RBSDeclaration &declaration) {
+    auto argsValue = node->args;
+    auto isGeneric = argsValue != nullptr && argsValue->length > 0;
     auto innerType = typeNameType(node->name, false, declaration);
-    return parser::MK::TClassOf(loc, move(innerType));
-}
+    auto classOfNode = prism.Call1(loc, prism.T(loc), "class_of"sv, innerType);
 
-unique_ptr<parser::Node> TypeToParserNode::unionType(const rbs_types_union_t *node, core::LocOffsets loc,
-                                                     const RBSDeclaration &declaration) {
-    auto args = parser::NodeVec();
-    args.reserve(node->types->length);
-
-    for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
-        auto innerType = toParserNode(list_node->node, declaration);
-        args.emplace_back(move(innerType));
+    if (isGeneric) {
+        auto args = translateNodeList(argsValue, declaration);
+        auto methodName = core::Names::squareBrackets().shortName(ctx.state);
+        return prism.Call(loc, classOfNode, methodName, absl::MakeSpan(args));
     }
 
-    return parser::MK::TAny(loc, move(args));
+    return classOfNode;
 }
 
-unique_ptr<parser::Node> TypeToParserNode::intersectionType(const rbs_types_intersection_t *node, core::LocOffsets loc,
-                                                            const RBSDeclaration &declaration) {
-    auto args = parser::NodeVec();
-    args.reserve(node->types->length);
-
-    for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
-        auto innerType = toParserNode(list_node->node, declaration);
-        args.emplace_back(move(innerType));
-    }
-
-    return parser::MK::TAll(loc, move(args));
+pm_node_t *TypeToParserNode::unionType(const rbs_types_union_t *node, core::LocOffsets loc,
+                                       const RBSDeclaration &declaration) {
+    auto args = translateNodeList(node->types, declaration);
+    return prism.TAny(loc, absl::MakeSpan(args));
 }
 
-unique_ptr<parser::Node> TypeToParserNode::optionalType(const rbs_types_optional_t *node, core::LocOffsets loc,
-                                                        const RBSDeclaration &declaration) {
-    auto innerType = toParserNode(node->type, declaration);
+pm_node_t *TypeToParserNode::intersectionType(const rbs_types_intersection_t *node, core::LocOffsets loc,
+                                              const RBSDeclaration &declaration) {
+    auto args = translateNodeList(node->types, declaration);
+    return prism.TAll(loc, absl::MakeSpan(args));
+}
 
-    if (parser::MK::isTUntyped(innerType)) {
+pm_node_t *TypeToParserNode::optionalType(const rbs_types_optional_t *node, core::LocOffsets loc,
+                                          const RBSDeclaration &declaration) {
+    auto innerType = toPrismNode(node->type, declaration);
+    if (prismParser.isTUntyped(innerType)) {
         return innerType;
     }
-
-    return parser::MK::TNilable(loc, move(innerType));
+    return prism.TNilable(loc, innerType);
 }
 
-unique_ptr<parser::Node> TypeToParserNode::voidType(const rbs_types_bases_void_t *node, core::LocOffsets loc) {
-    return make_unique<parser::ResolvedConst>(loc, core::Symbols::void_());
-}
-
-unique_ptr<parser::Node> TypeToParserNode::functionType(const rbs_types_function_t *node, core::LocOffsets loc,
-                                                        const RBSDeclaration &declaration) {
-    auto pairs = parser::NodeVec();
+pm_node_t *TypeToParserNode::functionType(const rbs_types_function_t *node, core::LocOffsets loc,
+                                          const RBSDeclaration &declaration) {
+    vector<pm_node_t *> pairs;
     pairs.reserve(node->required_positionals->length);
 
-    int i = 0;
+    int argIndex = 0;
     for (rbs_node_list_node *list_node = node->required_positionals->head; list_node != nullptr;
          list_node = list_node->next) {
-        auto argName = ctx.state.enterNameUTF8("arg" + to_string(i));
-        auto key = parser::MK::Symbol(loc, argName);
-
         rbs_node_t *paramNode = list_node->node;
-        unique_ptr<parser::Node> innerType;
+        pm_node_t *innerType;
 
+        string argName;
         if (paramNode->type != RBS_TYPES_FUNCTION_PARAM) {
             if (auto e = ctx.beginIndexerError(loc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in function parameter type, expected `{}`",
                             rbs_node_type_name(paramNode), "FunctionParam");
             }
-            innerType = parser::MK::TUntyped(loc);
+            innerType = prism.TUntyped(loc);
+            argName = "arg" + to_string(argIndex);
         } else {
-            innerType = toParserNode(((rbs_types_function_param_t *)paramNode)->type, declaration);
+            auto *param = rbs_down_cast<rbs_types_function_param_t>(paramNode);
+            innerType = toPrismNode(param->type, declaration);
+            argName = param->name ? string(parser.resolveConstant(param->name)) : "arg" + to_string(argIndex);
         }
 
-        pairs.emplace_back(make_unique<parser::Pair>(loc, move(key), move(innerType)));
-
-        i++;
+        auto key = prism.Symbol(loc, argName);
+        pairs.push_back(prism.AssocNode(loc, key, innerType));
+        argIndex++;
     }
 
     rbs_node_t *returnValue = node->return_type;
+    pm_node_t *argsHash = pairs.empty() ? nullptr : prism.KeywordHash(loc, absl::MakeSpan(pairs));
+
     if (returnValue->type == RBS_TYPES_BASES_VOID) {
-        return parser::MK::TProcVoid(loc, make_unique<parser::Hash>(loc, true, move(pairs)));
+        return prism.TProcVoid(loc, argsHash);
     }
 
-    auto returnType = toParserNode(returnValue, declaration);
-
-    return parser::MK::TProc(loc, make_unique<parser::Hash>(loc, true, move(pairs)), move(returnType));
+    auto returnType = toPrismNode(returnValue, declaration);
+    return prism.TProc(loc, argsHash, returnType);
 }
 
-unique_ptr<parser::Node> TypeToParserNode::procType(const rbs_types_proc_t *node, core::LocOffsets loc,
-                                                    const RBSDeclaration &declaration) {
-    auto function = parser::MK::TUntyped(loc);
-
+pm_node_t *TypeToParserNode::procType(const rbs_types_proc_t *node, core::LocOffsets loc,
+                                      const RBSDeclaration &declaration) {
     rbs_node_t *functionTypeNode = node->type;
+    pm_node_t *function;
+
     switch (functionTypeNode->type) {
         case RBS_TYPES_FUNCTION: {
-            function = functionType((rbs_types_function_t *)functionTypeNode, loc, declaration);
+            function = functionType(rbs_down_cast<rbs_types_function_t>(functionTypeNode), loc, declaration);
             break;
         }
         case RBS_TYPES_UNTYPED_FUNCTION: {
-            return function;
+            return prism.TUntyped(loc);
         }
         default: {
-            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location->rg);
+            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location);
             if (auto e = ctx.beginIndexerError(errLoc, core::errors::Internal::InternalError)) {
-                e.setHeader("Unexpected node type `{}` in proc type, expected `{}`",
-                            rbs_node_type_name(functionTypeNode), "Function");
+                e.setHeader("Unexpected node type `{}` in proc type, expected `{}` or `{}`",
+                            rbs_node_type_name(functionTypeNode), "Function", "UntypedFunction");
             }
+            return prism.TUntyped(loc);
         }
     }
 
-    rbs_node_t *selfNode = node->self_type;
-    if (selfNode != nullptr) {
-        auto selfType = toParserNode(selfNode, declaration);
-        function = parser::MK::Send1(loc, move(function), core::Names::bind(), loc, move(selfType));
+    if (auto *selfNode = node->self_type) {
+        auto selfType = toPrismNode(selfNode, declaration);
+        return prism.Call1(loc, function, "bind"sv, selfType);
     }
 
     return function;
 }
 
-unique_ptr<parser::Node> TypeToParserNode::blockType(const rbs_types_block_t *node, core::LocOffsets loc,
-                                                     const RBSDeclaration &declaration) {
-    auto function = parser::MK::TUntyped(loc);
-
+pm_node_t *TypeToParserNode::blockType(const rbs_types_block_t *node, core::LocOffsets loc,
+                                       const RBSDeclaration &declaration) {
     rbs_node_t *functionTypeNode = node->type;
+    pm_node_t *function;
+
     switch (functionTypeNode->type) {
         case RBS_TYPES_FUNCTION: {
-            function = functionType((rbs_types_function_t *)functionTypeNode, loc, declaration);
+            function = functionType(rbs_down_cast<rbs_types_function_t>(functionTypeNode), loc, declaration);
             break;
         }
         case RBS_TYPES_UNTYPED_FUNCTION: {
-            return function;
+            return prism.TUntyped(loc);
         }
         default: {
-            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location->rg);
+            auto errLoc = declaration.typeLocFromRange(functionTypeNode->location);
             if (auto e = ctx.beginIndexerError(errLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}` in block type, expected `{}`",
                             rbs_node_type_name(functionTypeNode), "Function");
             }
-
-            return function;
+            return prism.TUntyped(loc);
         }
     }
 
-    rbs_node_t *selfNode = node->self_type;
-    if (selfNode != nullptr) {
-        auto selfLoc = declaration.typeLocFromRange(selfNode->location->rg);
-        auto selfType = toParserNode(selfNode, declaration);
-        function = parser::MK::Send1(selfLoc, move(function), core::Names::bind(), selfLoc, move(selfType));
+    if (auto *selfNode = node->self_type) {
+        auto selfLoc = declaration.typeLocFromRange(selfNode->location);
+        auto selfType = toPrismNode(selfNode, declaration);
+        function = prism.Call1(selfLoc, function, "bind"sv, selfType);
     }
 
     if (!node->required) {
-        return parser::MK::TNilable(loc, move(function));
+        return prism.TNilable(loc, function);
     }
 
     return function;
 }
 
-unique_ptr<parser::Node> TypeToParserNode::tupleType(const rbs_types_tuple_t *node, core::LocOffsets loc,
-                                                     const RBSDeclaration &declaration) {
-    auto typesStore = parser::NodeVec();
-    typesStore.reserve(node->types->length);
-
-    for (rbs_node_list_node *list_node = node->types->head; list_node != nullptr; list_node = list_node->next) {
-        auto innerType = toParserNode(list_node->node, declaration);
-        typesStore.emplace_back(move(innerType));
-    }
-
-    return parser::MK::Array(loc, move(typesStore));
+pm_node_t *TypeToParserNode::tupleType(const rbs_types_tuple_t *node, core::LocOffsets loc,
+                                       const RBSDeclaration &declaration) {
+    auto types = translateNodeList(node->types, declaration);
+    return prism.Array(loc, absl::MakeSpan(types));
 }
 
-unique_ptr<parser::Node> TypeToParserNode::recordType(const rbs_types_record_t *node, core::LocOffsets loc,
-                                                      const RBSDeclaration &declaration) {
-    auto pairs = parser::NodeVec();
+pm_node_t *TypeToParserNode::recordType(const rbs_types_record_t *node, core::LocOffsets loc,
+                                        const RBSDeclaration &declaration) {
+    vector<pm_node_t *> pairs;
     pairs.reserve(node->all_fields->length);
 
     for (rbs_hash_node_t *hash_node = node->all_fields->head; hash_node != nullptr; hash_node = hash_node->next) {
-        unique_ptr<parser::Node> key;
+        pm_node_t *key = nullptr;
 
         switch (hash_node->key->type) {
             case RBS_AST_SYMBOL: {
-                rbs_ast_symbol_t *keyNode = (rbs_ast_symbol_t *)hash_node->key;
-                auto keyStr = parser.resolveConstant(keyNode);
-                auto keyName = ctx.state.enterNameUTF8(keyStr);
-                key = parser::MK::Symbol(loc, keyName);
+                auto *keyNode = (rbs_ast_symbol_t *)hash_node->key;
+                key = prism.Symbol(loc, parser.resolveConstant(keyNode));
                 break;
             }
             case RBS_AST_STRING: {
-                rbs_ast_string_t *keyNode = (rbs_ast_string_t *)hash_node->key;
+                auto *keyNode = (rbs_ast_string_t *)hash_node->key;
                 string_view keyStr(reinterpret_cast<const char *>(keyNode->string.start));
-                auto keyName = ctx.state.enterNameUTF8(keyStr);
-                key = parser::MK::String(loc, keyName);
+                key = prism.String(loc, keyStr);
                 break;
             }
             default: {
@@ -338,53 +327,69 @@ unique_ptr<parser::Node> TypeToParserNode::recordType(const rbs_types_record_t *
                 e.setHeader("Unexpected node type `{}` in record value type, expected `{}`",
                             rbs_node_type_name(hash_node->value), "RecordFieldtype");
             }
-
             continue;
         }
 
-        rbs_types_record_field_type_t *valueNode = (rbs_types_record_field_type_t *)hash_node->value;
-        auto innerType = toParserNode(valueNode->type, declaration);
-        pairs.emplace_back(make_unique<parser::Pair>(loc, move(key), move(innerType)));
+        auto *valueNode = (rbs_types_record_field_type_t *)hash_node->value;
+        if (!valueNode->required) {
+            auto keyLoc = declaration.typeLocFromRange(hash_node->key->location);
+            auto source = ctx.file.data(ctx).source();
+            auto optionalKeyBegin = keyLoc.beginPos();
+            for (; source[optionalKeyBegin] != '?'; optionalKeyBegin--) {
+                ENFORCE(optionalKeyBegin > loc.beginPos(), "Failed to find `?` before optional RBS record key");
+            }
+            auto optionalFieldLoc = core::LocOffsets{optionalKeyBegin, keyLoc.endPos()};
+            if (auto e = ctx.beginIndexerError(optionalFieldLoc, core::errors::Rewriter::RBSOptionalRecordKey)) {
+                e.setHeader("Optional keys in Hash shapes are not supported");
+            }
+        }
+        pairs.push_back(prism.AssocNode(loc, key, toPrismNode(valueNode->type, declaration)));
     }
 
-    return parser::MK::Hash(loc, false, move(pairs));
+    return prism.Hash(loc, absl::MakeSpan(pairs));
 }
 
-unique_ptr<parser::Node> TypeToParserNode::variableType(const rbs_types_variable_t *node, core::LocOffsets loc) {
-    rbs_ast_symbol_t *symbol = (rbs_ast_symbol_t *)node->name;
-    auto nameStr = parser.resolveConstant(symbol);
-    auto name = ctx.state.enterNameUTF8(nameStr);
-    return parser::MK::TTypeParameter(loc, parser::MK::Symbol(loc, name));
+pm_node_t *TypeToParserNode::variableType(const rbs_types_variable_t *node, core::LocOffsets loc) {
+    return prism.TTypeParameter(loc, prism.Symbol(loc, parser.resolveConstant(node->name)));
 }
 
-unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, const RBSDeclaration &declaration) {
-    auto nodeLoc = declaration.typeLocFromRange(((rbs_node_t *)node)->location->rg);
+vector<pm_node_t *> TypeToParserNode::translateNodeList(rbs_node_list *list, const RBSDeclaration &declaration) {
+    vector<pm_node_t *> result;
+    result.reserve(list->length);
+    for (rbs_node_list_node *node = list->head; node != nullptr; node = node->next) {
+        result.push_back(toPrismNode(node->node, declaration));
+    }
+    return result;
+}
+
+pm_node_t *TypeToParserNode::toPrismNode(const rbs_node_t *node, const RBSDeclaration &declaration) {
+    auto nodeLoc = declaration.typeLocFromRange(node->location);
+
     switch (node->type) {
-        case RBS_TYPES_ALIAS: {
+        case RBS_TYPES_ALIAS:
             return aliasType((rbs_types_alias_t *)node, nodeLoc, declaration);
-        }
         case RBS_TYPES_BASES_ANY:
-            return parser::MK::TUntyped(nodeLoc);
+            return prism.TUntyped(nodeLoc);
         case RBS_TYPES_BASES_BOOL:
-            return parser::MK::T_Boolean(nodeLoc);
+            return prism.T_Boolean(nodeLoc);
         case RBS_TYPES_BASES_BOTTOM:
-            return parser::MK::TNoReturn(nodeLoc);
+            return prism.Call0(nodeLoc, prism.T(nodeLoc), "noreturn"sv);
         case RBS_TYPES_BASES_CLASS: {
             if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS type `{}` is not supported", "class");
             }
-            return parser::MK::TUntyped(nodeLoc);
+            return prism.TUntyped(nodeLoc);
         }
         case RBS_TYPES_BASES_INSTANCE:
-            return parser::MK::TAttachedClass(nodeLoc);
+            return prism.TAttachedClass(nodeLoc);
         case RBS_TYPES_BASES_NIL:
-            return make_unique<parser::ResolvedConst>(nodeLoc, core::Symbols::NilClass());
+            return prism.NilClass(nodeLoc);
         case RBS_TYPES_BASES_SELF:
-            return parser::MK::TSelfType(nodeLoc);
+            return prism.TSelfType(nodeLoc);
         case RBS_TYPES_BASES_TOP:
-            return parser::MK::TAnything(nodeLoc);
+            return prism.TAnything(nodeLoc);
         case RBS_TYPES_BASES_VOID:
-            return voidType((rbs_types_bases_void_t *)node, nodeLoc);
+            return prism.SorbetPrivateStaticVoid(nodeLoc);
         case RBS_TYPES_BLOCK:
             return blockType((rbs_types_block_t *)node, nodeLoc, declaration);
         case RBS_TYPES_CLASS_INSTANCE:
@@ -397,15 +402,30 @@ unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, 
             if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
                 e.setHeader("RBS interfaces are not supported");
             }
-            return parser::MK::TUntyped(nodeLoc);
+            return prism.TUntyped(nodeLoc);
         }
         case RBS_TYPES_INTERSECTION:
             return intersectionType((rbs_types_intersection_t *)node, nodeLoc, declaration);
         case RBS_TYPES_LITERAL: {
-            if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
-                e.setHeader("RBS literal types are not supported");
+            rbs_types_literal_t *literalNode = rbs_down_cast<rbs_types_literal_t>(const_cast<rbs_node_t *>(node));
+
+            switch (literalNode->literal->type) {
+                case RBS_AST_BOOL: { // Boolean literals used in type positions, like `(false) -> true`
+                    auto *boolNode = rbs_down_cast<rbs_ast_bool_t>(literalNode->literal);
+
+                    // Sorbet doesn't support literal bool types. Rewrite them to their corresponding classes instead:
+                    // * `true` -> `TrueClass`
+                    // * `false` -> `FalseClass`
+                    return boolNode->value ? prism.TrueClass(nodeLoc) : prism.FalseClass(nodeLoc);
+                }
+                default: {
+                    // We don't have a good way to represent other literal types, so we just return T.untyped for them.
+                    if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Rewriter::RBSUnsupported)) {
+                        e.setHeader("RBS literal types are not supported");
+                    }
+                    return prism.TUntyped(nodeLoc);
+                }
             }
-            return parser::MK::TUntyped(nodeLoc);
         }
         case RBS_TYPES_OPTIONAL:
             return optionalType((rbs_types_optional_t *)node, nodeLoc, declaration);
@@ -423,8 +443,7 @@ unique_ptr<parser::Node> TypeToParserNode::toParserNode(const rbs_node_t *node, 
             if (auto e = ctx.beginIndexerError(nodeLoc, core::errors::Internal::InternalError)) {
                 e.setHeader("Unexpected node type `{}`", rbs_node_type_name((rbs_node_t *)node));
             }
-
-            return parser::MK::TUntyped(nodeLoc);
+            return prism.TUntyped(nodeLoc);
         }
     }
 }

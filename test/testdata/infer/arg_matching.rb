@@ -136,7 +136,7 @@ class TestArgs
     optkw(u: 1)
     #         ^ error: Missing required keyword argument `u`
     optkw(1, 2, 3)
-    #            ^    error: Missing required keyword argument `u` for method `TestArgs#optkw`
+    #            ^ error: Missing required keyword argument `u` for method `TestArgs#optkw`
     #           ^ error: Too many positional arguments provided for method `TestArgs#optkw`. Expected: `1..2`, got: `3`
   end
 

@@ -14,7 +14,6 @@ public:
     Parser(rbs_string_t rbsString, const rbs_encoding_t *encoding);
 
     std::string_view resolveConstant(const rbs_ast_symbol_t *symbol) const;
-    std::string_view resolveKeyword(const rbs_keyword_t *keyword) const;
 
     rbs_node_list_t *parseTypeParams();
     rbs_method_type_t *parseMethodType();

@@ -7,14 +7,14 @@ class <C <U <root>>> < <C <U Object>> ()
     static-field-type-alias <C <U Foo>>::<C <U ADDRESS_TYPE>> -> NilClass | ShapeType {           Symbol(:line1) => String | NilClass           Symbol(:line2) => String | NilClass           Symbol(:city) => String | NilClass           Symbol(:state) => String | NilClass           Symbol(:postal_code) => String | NilClass           Symbol(:country) => String | NilClass         } @ Loc {file=test/testdata/resolver/alias.rb start=18:3 end=18:15}
     static-field-type-alias <C <U Foo>>::<C <U DeprecatedReactions>> -> String @ Loc {file=test/testdata/resolver/alias.rb start=11:3 end=11:22}
     method <C <U Foo>>#<U address> (<blk>) -> NilClass | ShapeType {           Symbol(:line1) => String | NilClass           Symbol(:line2) => String | NilClass           Symbol(:city) => String | NilClass           Symbol(:state) => String | NilClass           Symbol(:postal_code) => String | NilClass           Symbol(:country) => String | NilClass         } @ Loc {file=test/testdata/resolver/alias.rb start=30:3 end=30:14}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
     method <C <U Foo>>#<U any> (<blk>) @ Loc {file=test/testdata/resolver/alias.rb start=34:3 end=34:10}
       argument <blk><block> @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
     method <C <U Foo>>#<U bar> (a, <blk>) -> Integer @ Loc {file=test/testdata/resolver/alias.rb start=7:3 end=7:13}
       argument a<> -> Integer @ Loc {file=test/testdata/resolver/alias.rb start=6:15 end=6:16}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
     method <C <U Foo>>#<U deprecated_react> (<blk>) -> String @ Loc {file=test/testdata/resolver/alias.rb start=14:3 end=14:23}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/resolver/alias.rb start=??? end=???}
   class <S <C <U Foo>> $1>[<C <U <AttachedClass>>>] < <S <C <U Object>> $1> (<C <U Sig>>) @ Loc {file=test/testdata/resolver/alias.rb start=2:1 end=2:10}
     type-member(+) <S <C <U Foo>> $1>::<C <U <AttachedClass>>> -> LambdaParam(<S <C <U Foo>> $1>::<C <U <AttachedClass>>>, lower=T.noreturn, upper=Foo) @ Loc {file=test/testdata/resolver/alias.rb start=2:1 end=2:10}
     method <S <C <U Foo>> $1>#<U <static-init>> (<blk>) @ Loc {file=test/testdata/resolver/alias.rb start=2:1 end=35:4}

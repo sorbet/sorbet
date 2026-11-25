@@ -1,0 +1,11 @@
+No errors! Great job.
+# typed: strict
+
+class Producer < PackageSpec
+end
+###### gen-packages=strict ######
+No errors! Great job.
+# typed: strict
+
+class Producer < PackageSpec
+end

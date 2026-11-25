@@ -43,3 +43,7 @@ end
 begin
 rescue #: as String # error: Unexpected RBS assertion comment found after `rescue`
 end
+
+def method_with_only_rescue # error: The method `method_with_only_rescue` does not have a `sig`
+rescue StandardError
+end

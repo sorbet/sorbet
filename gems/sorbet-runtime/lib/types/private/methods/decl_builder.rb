@@ -15,20 +15,34 @@ module T::Private::Methods
       end
     end
 
-    def initialize(mod, raw)
+    def initialize(mod, abstract, override, overridable)
       @decl = Declaration.new(
         mod,
         ARG_NOT_PROVIDED, # params
         ARG_NOT_PROVIDED, # returns
         ARG_NOT_PROVIDED, # bind
         Modes.standard, # mode
-        ARG_NOT_PROVIDED, # checked
+        nil, # checked
         false, # finalized
         ARG_NOT_PROVIDED, # on_failure
-        nil, # override_allow_incompatible
+        false, # override_allow_incompatible
         ARG_NOT_PROVIDED, # type_parameters
-        raw
       )
+
+      # Call the methods after the fact (instead of setting them in the constructor)
+      # so we get the BuilderError's, if applicable
+
+      if abstract
+        self.abstract
+      end
+
+      if override
+        self.override(**override)
+      end
+
+      if overridable
+        self.overridable
+      end
     end
 
     def params(*unused_positional_params, **params)
@@ -98,10 +112,10 @@ module T::Private::Methods
     def checked(level)
       check_live!
 
-      if !decl.checked.equal?(ARG_NOT_PROVIDED)
+      if !decl.checked.nil?
         raise BuilderError.new("You can't call .checked multiple times in a signature.")
       end
-      if level == :never && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
+      if :never == level && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't use .checked(:#{level}) with .on_failure because .on_failure will have no effect.")
       end
       if !T::Private::RuntimeLevels::LEVELS.include?(level)
@@ -119,8 +133,13 @@ module T::Private::Methods
       if !decl.on_failure.equal?(ARG_NOT_PROVIDED)
         raise BuilderError.new("You can't call .on_failure multiple times in a signature.")
       end
-      if decl.checked == :never
-        raise BuilderError.new("You can't use .on_failure with .checked(:#{decl.checked}) because .on_failure will have no effect.")
+      effective_checked = decl.checked.nil? ? T::Private::RuntimeLevels.default_checked_level : decl.checked
+      if effective_checked == :never
+        if decl.checked.nil?
+          raise BuilderError.new("To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect.")
+        else
+          raise BuilderError.new("You can't use .on_failure with .checked(:#{effective_checked}) because .on_failure will have no effect.")
+        end
       end
 
       decl.on_failure = args
@@ -203,7 +222,10 @@ module T::Private::Methods
       check_live!
 
       names.each do |name|
-        raise BuilderError.new("not a symbol: #{name}") unless name.is_a?(Symbol)
+        unless Symbol === name
+          raise BuilderError.new("not a symbol: #{name}")
+          T.absurd(name)
+        end
       end
 
       if !decl.type_parameters.equal?(ARG_NOT_PROVIDED)
@@ -225,13 +247,6 @@ module T::Private::Methods
       if decl.bind.equal?(ARG_NOT_PROVIDED)
         decl.bind = nil
       end
-      if decl.checked.equal?(ARG_NOT_PROVIDED)
-        default_checked_level = T::Private::RuntimeLevels.default_checked_level
-        if default_checked_level == :never && !decl.on_failure.equal?(ARG_NOT_PROVIDED)
-          raise BuilderError.new("To use .on_failure you must additionally call .checked(:tests) or .checked(:always), otherwise, the .on_failure has no effect.")
-        end
-        decl.checked = default_checked_level
-      end
       if decl.on_failure.equal?(ARG_NOT_PROVIDED)
         decl.on_failure = nil
       end
@@ -239,7 +254,7 @@ module T::Private::Methods
         decl.params = FROZEN_HASH
       end
       if decl.type_parameters.equal?(ARG_NOT_PROVIDED)
-        decl.type_parameters = FROZEN_HASH
+        decl.type_parameters = FROZEN_ARRAY
       end
 
       decl.finalized = true
@@ -248,5 +263,6 @@ module T::Private::Methods
     end
 
     FROZEN_HASH = {}.freeze
+    FROZEN_ARRAY = [].freeze
   end
 end

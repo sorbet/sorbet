@@ -6,15 +6,24 @@ clang_tool("clang-format")
 
 clang_tool("clang-tidy")
 
+sh_binary(
+    name = "sanitizer_test_wrapper",
+    srcs = ["sanitizer_test_wrapper.sh"],
+    data = ["@llvm_toolchain_22_1_3_llvm//:bin/llvm-symbolizer"],
+)
+
 compilation_database(
     name = "compdb",
     testonly = True,
     output_base = OUTPUT_BASE,
+    tags = ["manual"],
     targets = [
         # BEGIN compile_commands targets
         "//ast:ast",
+        "//ast:tree_test",
         "//ast/desugar:desugar",
         "//ast/desugar:desugar_test",
+        "//ast/desugar/prism:prism",
         "//ast/packager:packager",
         "//ast/substitute:substitute",
         "//ast/treemap:treemap",
@@ -28,7 +37,6 @@ compilation_database(
         "//common/crypto_hashing:crypto_hashing",
         "//common/enforce_no_timer:enforce_no_timer",
         "//common/exception:exception",
-        "//common/json2msgpack:json2msgpack",
         "//common/kvstore:kvstore",
         "//common/kvstore:kvstore_test",
         "//common/os:os",
@@ -42,7 +50,8 @@ compilation_database(
         "//core:core_test",
         "//core:generate_names",
         "//core/hashing:hashing",
-        "//core/proto:proto",
+        "//core/insert_method:insert_method",
+        "//core/json:json",
         "//core/serialize:serialize",
         "//core/serialize:serialize_test",
         "//core/sig_finder:sig_finder",
@@ -69,9 +78,13 @@ compilation_database(
         "//main/lsp:generate_lsp_messages",
         "//main/lsp:generate_lsp_messages_test",
         "//main/lsp:lsp",
+        "//main/lsp:lsp_configuration_test",
         "//main/lsp:lsp_file_updates_test",
         "//main/lsp:lsp_preprocessor_test",
         "//main/lsp:lsp_test",
+        "//main/lsp:undo_state_test",
+        "//main/lsp:watchman_shutdown_test",
+        "//main/lsp:watchman_subscription_test",
         "//main/minimize:minimize",
         "//main/options:options",
         "//main/options:options_test",
@@ -120,7 +133,6 @@ compilation_database(
         "//test/fuzz:fuzz_dash_e",
         "//test/fuzz:fuzz_dash_e_impl",
         "//test/fuzz:fuzz_doc_symbols",
-        "//test/fuzz:fuzz_hover",
         "//test/helpers:helpers",
         "//test/lsp:cache_protocol_test_corpus",
         "//test/lsp:multithreaded_protocol_test_corpus",

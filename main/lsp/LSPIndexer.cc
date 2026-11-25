@@ -12,6 +12,7 @@
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/ShowOperation.h"
 #include "main/lsp/json_types.h"
+#include "main/lsp/notifications/sorbet_workspace_edit.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/payload.h"
 
@@ -54,8 +55,9 @@ void clearAndReplaceTimers(vector<unique_ptr<Timer>> &timers, const vector<uniqu
 } // namespace
 
 LSPIndexer::LSPIndexer(shared_ptr<const LSPConfiguration> config, unique_ptr<core::GlobalState> gs,
-                       unique_ptr<KeyValueStore> kvstore)
-    : config(config), gs(move(gs)), kvstore(move(kvstore)), emptyWorkers(WorkerPool::create(0, *config->logger)) {}
+                       unique_ptr<cache::SessionCache> sessionCache)
+    : config(config), gs(move(gs)), sessionCache(move(sessionCache)),
+      emptyWorkers(WorkerPool::create(0, *config->logger)) {}
 
 LSPIndexer::~LSPIndexer() {
     for (auto &timer : pendingTypecheckDiagnosticLatencyTimers) {
@@ -80,11 +82,11 @@ void LSPIndexer::computeFileHashes(const vector<shared_ptr<core::File>> &files) 
 // incremental mode(s) that lied between the original fast and slow path. Leaving this comment here
 // because old habits die hard and I still can only remember the name "canTakeFastPath"
 LSPIndexer::TypecheckingPathResult
-LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &changedFiles,
-                                        const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
-    TypecheckingPathResult result;
+LSPIndexer::computeTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles,
+                                    const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
+    TypecheckingPathResult result(this->commitCount);
 
-    Timer timeit(config->logger, "fast_path_decision");
+    Timer timeit(*config->logger, "fast_path_decision");
     auto &logger = *config->logger;
     logger.debug("Trying to see if fast path is available after {} file changes", changedFiles.size());
     if (config->disableFastPath) {
@@ -118,7 +120,7 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
         // working in `__package.rb` since every edit causes a slow path.
         // Note: We don't use File::isPackage because we have not necessarily set the packager options on initialGS yet
         if (this->config->opts.cacheSensitiveOptions.sorbetPackages && oldFile.hasPackageRbPath() &&
-            oldFile.source() != f->source()) {
+            oldFile.sourceHash() != f->sourceHash()) {
             logger.debug("Taking slow path because {} is a package file", f->path());
             prodCategoryCounterInc("lsp.slow_path_reason", "package_file");
             timeit.setTag("path_chosen", "slow");
@@ -226,8 +228,8 @@ LSPIndexer::getTypecheckingPathInternal(const vector<shared_ptr<core::File>> &ch
 }
 
 TypecheckingPath
-LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
-                                const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
+LSPIndexer::decideTypecheckingPath(LSPFileUpdates &edit,
+                                   const UnorderedMap<core::FileRef, shared_ptr<core::File>> &evictedFiles) const {
     auto &logger = *config->logger;
     // Path taken after the first time an update has been encountered. Hack since we can't roll back new files just yet.
     if (edit.hasNewFiles) {
@@ -236,11 +238,10 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
         return TypecheckingPath::Slow;
     }
 
-    auto [path, result] = getTypecheckingPathInternal(edit.updatedFiles, evictedFiles);
-    switch (path) {
+    auto result = computeTypecheckingPath(edit.updatedFiles, evictedFiles);
+    switch (result.path) {
         case TypecheckingPath::Fast: {
-            edit.fastPathUseIncrementalNamer = result.useIncrementalNamer;
-            edit.fastPathExtraFiles = std::move(result.extraFiles);
+            edit.fastPathFiles = std::move(result.files);
             break;
         }
 
@@ -248,10 +249,11 @@ LSPIndexer::getTypecheckingPath(LSPFileUpdates &edit,
             break;
     }
 
-    return path;
+    return result.path;
 }
 
-TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
+LSPIndexer::TypecheckingPathResult
+LSPIndexer::provisionalTypecheckingPath(const vector<shared_ptr<core::File>> &changedFiles) const {
     static UnorderedMap<core::FileRef, shared_ptr<core::File>> emptyMap;
 
     // Avoid expensively computing file hashes if there are too many files and it's likely that we'd
@@ -260,33 +262,33 @@ TypecheckingPath LSPIndexer::getTypecheckingPath(const vector<shared_ptr<core::F
         config->logger->debug("Taking slow path because too many files changed ({} files > {} files)",
                               changedFiles.size(), config->opts.lspMaxFilesOnFastPath);
         prodCategoryCounterInc("lsp.slow_path_reason", "too_many_files");
-        return TypecheckingPath::Slow;
+
+        return LSPIndexer::TypecheckingPathResult(this->commitCount);
     }
 
     // Ensure all files have computed hashes.
     computeFileHashes(changedFiles);
 
-    auto [path, result] = getTypecheckingPathInternal(changedFiles, emptyMap);
-    return path;
+    return computeTypecheckingPath(changedFiles, emptyMap);
 }
 
 void LSPIndexer::transferInitializeState(InitializedTask &task) {
-    ENFORCE(!this->config->opts.genPackages);
+    ENFORCE(this->config->opts.genPackagesMode == core::packages::GenPackagesMode::Disabled);
     // Copying the global state here means that we snapshot before any files have been loaded. That means that the
     // indexer and typechecker's file tables will almost immediately diverge, but that's not an issue as we don't share
     // `core::FileRef` values between the two.
-    auto typecheckerGS =
-        std::exchange(this->gs, this->gs->copyForLSPTypechecker(
-                                    this->config->opts.cacheSensitiveOptions.sorbetPackages,
-                                    this->config->opts.extraPackageFilesDirectoryUnderscorePrefixes,
-                                    this->config->opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                    this->config->opts.extraPackageFilesDirectorySlashPrefixes,
-                                    this->config->opts.packageSkipRBIExportEnforcementDirs,
-                                    this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.packagerLayers,
-                                    this->config->opts.sorbetPackagesHint, false));
+    auto enableGenPackagesAllowRelaxingTestVisibility = false;
+    auto typecheckerGS = std::exchange(
+        this->gs, this->gs->copyForLSPTypechecker(
+                      this->config->opts.cacheSensitiveOptions.sorbetPackages,
+                      this->config->opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                      this->config->opts.extraPackageFilesDirectorySlashPrefixes,
+                      this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.updateVisibilityFor,
+                      this->config->opts.packagerLayers, this->config->opts.sorbetPackagesHint,
+                      core::packages::GenPackagesMode::Disabled, enableGenPackagesAllowRelaxingTestVisibility));
 
     task.setGlobalState(std::move(typecheckerGS));
-    task.setKeyValueStore(std::move(this->kvstore));
+    task.setSessionCache(std::move(this->sessionCache));
 }
 
 void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<core::File>> &&files) {
@@ -297,12 +299,22 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<c
     {
         core::UnfreezeFileTable unfreezeFiles{*this->gs};
 
+        auto ix = 0;
         for (auto &file : files) {
+            ++ix;
             auto fref = this->gs->findFileByPath(file->path());
             if (fref.exists()) {
                 this->gs->replaceFile(fref, std::move(file));
             } else {
-                this->gs->enterFile(std::move(file));
+                fref = this->gs->enterFile(std::move(file));
+            }
+
+            auto expectedFref = core::FileRef(ix);
+            if (fref != expectedFref) {
+                ENFORCE(false);
+
+                config->logger->error("Mismatched ref during indexer initialization path=\"{}\" expected={} actual={}",
+                                      file->path(), expectedFref.id(), fref.id());
             }
         }
     }
@@ -311,7 +323,11 @@ void LSPIndexer::initialize(IndexerInitializationTask &task, vector<shared_ptr<c
 }
 
 unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edit, WorkerPool &workers) {
-    Timer timeit(config->logger, "LSPIndexer::commitEdit");
+    Timer timeit(*config->logger, "LSPIndexer::commitEdit");
+
+    // Update the commit counter, as we're about to mutate the file table.
+    this->commitCount++;
+
     auto result = make_unique<LSPFileUpdates>();
     auto &update = *result;
     update.epoch = edit.epoch;
@@ -319,38 +335,24 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
     update.updatedFiles = move(edit.updates);
     update.cancellationExpected = edit.sorbetCancellationExpected;
     update.preemptionsExpected = edit.sorbetPreemptionsExpected;
-    // _Wait_ to compute `getTypecheckingPath` until after we compute hashes.
+    // _Wait_ to compute `decideTypecheckingPath` until after we compute hashes.
 
     UnorderedMap<core::FileRef, shared_ptr<core::File>> newlyEvictedFiles;
     // Update globalStateHashes. Keep track of file IDs for these files, along with old hashes for these files.
-    vector<core::FileRef> frefs;
     {
         core::UnfreezeFileTable fileTableAccess(*gs);
+        update.updatedFileRefs.reserve(update.updatedFiles.size());
         for (auto &file : update.updatedFiles) {
             auto fref = gs->findFileByPath(file->path());
             if (fref.exists()) {
-                newlyEvictedFiles[fref] = gs->getFiles()[fref.id()];
-                gs->replaceFile(fref, file);
+                newlyEvictedFiles[fref] = gs->replaceFile(fref, file);
             } else {
                 // This file update adds a new file to GlobalState.
                 update.hasNewFiles = true;
                 fref = gs->enterFile(file);
                 fref.data(*gs).strictLevel = pipeline::decideStrictLevel(*gs, fref, config->opts);
             }
-            frefs.emplace_back(fref);
-        }
-    }
-
-    // Index changes in gs. pipeline::index sorts output by file id, but we need to reorder to match the order of
-    // other fields.
-    UnorderedMap<core::FileRef, int> fileToPos;
-    {
-        int i = -1;
-        for (auto fref : frefs) {
-            // We should have ensured before reaching here that there are no duplicates.
-            ENFORCE(!fileToPos.contains(fref));
-            i++;
-            fileToPos[fref] = i;
+            update.updatedFileRefs.emplace_back(fref);
         }
     }
 
@@ -361,13 +363,13 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
         // which one it will be.
         gs->errorQueue = make_shared<core::ErrorQueue>(gs->errorQueue->logger, gs->errorQueue->tracer,
                                                        make_shared<core::NullFlusher>());
-        auto trees = hashing::Hashing::indexAndComputeFileHashes(*gs, config->opts, *config->logger,
-                                                                 absl::Span<core::FileRef>(frefs), workers, kvstore);
+        auto trees = hashing::Hashing::indexAndComputeFileHashes(
+            *gs, config->opts, *config->logger, absl::MakeSpan(update.updatedFileRefs), workers, kvstore);
         ENFORCE(trees.hasResult(), "The indexer thread doesn't support cancellation");
     }
 
     // _Now_ that we've computed file hashes, we can make a fast path determination.
-    update.typecheckingPath = getTypecheckingPath(update, newlyEvictedFiles);
+    update.typecheckingPath = decideTypecheckingPath(update, newlyEvictedFiles);
 
     auto runningSlowPath = gs->epochManager->getStatus();
     if (runningSlowPath.slowPathRunning) {
@@ -384,7 +386,7 @@ unique_ptr<LSPFileUpdates> LSPIndexer::commitEdit(SorbetWorkspaceEditParams &edi
             update.mergeOlder(pendingTypecheckUpdates);
             mergeEvictedFiles(evictedFiles, newlyEvictedFiles);
             // The two updates together could end up taking the fast path.
-            update.typecheckingPath = getTypecheckingPath(update, newlyEvictedFiles);
+            update.typecheckingPath = decideTypecheckingPath(update, newlyEvictedFiles);
             update.canceledSlowPath = true;
         }
     }
@@ -453,6 +455,45 @@ void LSPIndexer::updateConfigAndGsFromOptions(const DidChangeConfigurationParams
         gs->highlightUntypedDiagnosticSeverity =
             convertDiagnosticSeverity(options.settings->highlightUntypedDiagnosticSeverity.value());
     }
+}
+
+bool LSPIndexer::preemptionPossible(const TaskQueue::QueueType &tasks) const {
+    if (tasks.empty()) {
+        return false;
+    }
+
+    auto cannotPreempt =
+        absl::c_find_if_not(tasks, [&indexer = *this](auto &task) { return task->canPreempt(indexer); });
+
+    // No tasks can preempt
+    if (cannotPreempt == tasks.begin()) {
+        return false;
+    }
+
+    // All tasks can preempt
+    if (cannotPreempt == tasks.end()) {
+        return true;
+    }
+
+    // If the first task that can't preempt is a workspace edit, return that preemption is no longer possible so that
+    // the main thread will move the slow path edit to the front of the queue and force a slow path cancellation.
+    if (dynamic_cast<SorbetWorkspaceEditTask *>(cannotPreempt->get())) {
+        return false;
+    }
+
+    return true;
+}
+
+bool LSPIndexer::wouldUpdateFileTable(const core::File &newer) const {
+    auto fref = this->gs->findFileByPath(newer.path());
+    if (!fref.exists()) {
+        return true;
+    }
+
+    auto &existing = this->getFile(fref);
+    return existing.sourceType != core::File::Type::Normal || existing.sourceType != newer.sourceType ||
+           existing.isOpenInClient() != newer.isOpenInClient() || existing.sourceSize() != newer.sourceSize() ||
+           existing.sourceHash() != newer.sourceHash();
 }
 
 } // namespace sorbet::realmain::lsp

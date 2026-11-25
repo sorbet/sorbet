@@ -34,5 +34,5 @@ class B
   def f3(v, w = T2.new, *y, z:, x: T1.new); end
   #                      ^ error: Bad parameter ordering for `y`, expected `x` instead
   #                         ^^ error: Bad parameter ordering for `z`, expected `y` instead
-  #                             ^^ error-with-dupes: Bad parameter ordering for `x`, expected `z` instead
+  #                             ^^ error: Bad parameter ordering for `x`, expected `z` instead
 end

@@ -72,8 +72,37 @@ module SorbetBenchmarks
       end
     end
 
+    def self.accessors
+      time_block("T::Enum#serialize") do
+        MyEnum::X.serialize
+        MyEnum::Y.serialize
+      end
+
+      time_block("T::Enum#to_s") do
+        MyEnum::X.to_s
+        MyEnum::Y.to_s
+      end
+
+      time_block("T::Enum#inspect") do
+        MyEnum::X.inspect
+        MyEnum::Y.inspect
+      end
+
+      time_block("T::Enum.values") do
+        MyEnum.values
+        MyEnum.values
+      end
+
+      time_block("T::Enum.each_value {}", iterations_of_block: 500_000) do
+        MyEnum.each_value {}
+        MyEnum.each_value {}
+      end
+    end
+
     def self.run
-      puts("before T::Configuration.enable_legacy_t_enum_migration_mode")
+      accessors
+
+      puts("\nbefore T::Configuration.enable_legacy_t_enum_migration_mode")
 
       all_comparisons
 

@@ -72,37 +72,5 @@ requires: []
  resolved=[Integer]
  loc=test/cli/autogen_print_rbi/b.rbi:4
  is_defining_ref=0
-# ParsedFile: test/cli/autogen_print_rbi/behavior_allowed.rbi
-requires: []
-## defs:
-[def id=0]
- type=module
- defines_behavior=0
- is_empty=0
-[def id=1]
- type=class
- defines_behavior=1
- is_empty=0
- defining_ref=[BehaviorRBI]
-[def id=2]
- type=casgn
- defines_behavior=1
- is_empty=0
- defining_ref=[C]
-## refs:
-[ref id=0]
- scope=[]
- name=[BehaviorRBI]
- nesting=[]
- resolved=[BehaviorRBI]
- loc=test/cli/autogen_print_rbi/behavior_allowed.rbi:3
- is_defining_ref=1
-[ref id=1]
- scope=[BehaviorRBI]
- name=[C]
- nesting=[[BehaviorRBI]]
- resolved=[BehaviorRBI C]
- loc=test/cli/autogen_print_rbi/behavior_allowed.rbi:4
- is_defining_ref=1
 
-aef1aa9433f51f3e1c2fae492fcde49998feec11  autogen6.msgpack
+7b2c409bfd9a863017c793f1063187b31682a150  autogen6.msgpack

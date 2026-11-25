@@ -71,7 +71,12 @@ class T::Props::Decorator
       raise ArgumentError.new("Attempted to redefine prop #{name.inspect} on class #{@class} that's already defined without specifying :override => true: #{prop_rules(name)}")
     end
 
-    @props = @props.merge(name => rules.freeze).freeze
+    # dup/store/freeze rather than @props.merge(name => rules.freeze).freeze:
+    # merge would allocate a temporary single-entry Hash and re-insert every
+    # existing entry. The published hash stays frozen between adds.
+    new_props = @props.dup
+    new_props[name] = rules.freeze
+    @props = new_props.freeze
   end
 
   # Heads up!
@@ -84,7 +89,6 @@ class T::Props::Decorator
   # solve the problem you're encountering.
   VALID_RULE_KEYS = T.let(%i[
     enum
-    foreign
     ifunset
     immutable
     override
@@ -126,7 +130,7 @@ class T::Props::Decorator
   # preexisting behavior).
   #
   # Note this path is NOT used by generated setters on instances,
-  # which are defined using `setter_proc` directly.
+  # which are defined using the 1-arity `:setter_proc` directly.
   #
   # checked(:never) - O(prop accesses)
   sig do
@@ -140,7 +144,9 @@ class T::Props::Decorator
     .checked(:never)
   end
   def prop_set(instance, prop, val, rules=prop_rules(prop))
-    instance.instance_exec(val, &rules.fetch(:setter_proc))
+    # The 2-arity bound proc does the same validation/assignment as the
+    # 1-arity setter proc without instance_exec's per-call self-rebinding.
+    rules.fetch(:_bound_setter_proc).call(instance, val)
   end
   alias_method :set, :prop_set
 
@@ -182,7 +188,7 @@ class T::Props::Decorator
     if !val.nil?
       val
     elsif (d = rules[:ifunset])
-      T::Props::Utils.deep_clone_object(d)
+      T::Props::Utils.deep_clone(d)
     else
       nil
     end
@@ -203,23 +209,6 @@ class T::Props::Decorator
     instance.instance_variable_get(rules[:accessor_key])
   end
   alias_method :get, :prop_get_if_set # Alias for backwards compatibility
-
-  # checked(:never) - O(prop accesses)
-  sig do
-    params(
-      instance: DecoratedInstance,
-      prop: Symbol,
-      foreign_class: T::Module[T.anything],
-      rules: Rules,
-      opts: T::Hash[Symbol, T.untyped],
-    )
-    .returns(T.untyped)
-    .checked(:never)
-  end
-  def foreign_prop_get(instance, prop, foreign_class, rules=prop_rules(prop), opts={})
-    return if !(value = prop_get(instance, prop, rules))
-    T.unsafe(foreign_class).load(value, {}, opts)
-  end
 
   # TODO: we should really be checking all the methods on `cls`, not just Object
   BANNED_METHOD_NAMES = T.let(Object.instance_methods.each_with_object({}) { |x, acc| acc[x] = true }.freeze, T::Hash[Symbol, TrueClass], checked: false)
@@ -290,7 +279,7 @@ class T::Props::Decorator
       Set
     when T::Types::Union
       # The below unwraps our T.nilable types for T::Props if we can.
-      # This lets us do things like specify: const T.nilable(String), foreign: Opus::DB::Model::Merchant
+      # This lets us do things like specify `const :foo, T.nilable(String)`
       non_nil_type = T::Utils.unwrap_nilable(type)
       if non_nil_type
         convert_type_to_class(non_nil_type)
@@ -421,11 +410,20 @@ class T::Props::Decorator
       end
     end
 
-    setter_proc, value_validate_proc = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules)
+    setter_proc, value_validate_proc, bound_setter_proc = T::Props::Private::SetterFactory.build_setter_proc(@class, name, rules)
     setter_proc.freeze
     value_validate_proc.freeze
-    rules[:setter_proc] = setter_proc
+    bound_setter_proc.freeze
     rules[:value_validate_proc] = value_validate_proc
+    # :setter_proc is a pre-existing rules key and is preserved as-is: the
+    # 1-arity, self-bound proc used only to define the generated `name=`
+    # instance setter via `define_method(&proc)` (its fast path). The net-new
+    # :_bound_setter_proc is the 2-arity (instance, val) equivalent that every
+    # other write goes through without instance_exec's per-call self-rebinding;
+    # it is underscore-prefixed (like :_tnilable) so external code that replays
+    # rules hashes back into prop() filters it out as internal.
+    rules[:setter_proc] = setter_proc
+    rules[:_bound_setter_proc] = bound_setter_proc
 
     validate_overrides(name, rules)
     add_prop_definition(name, rules)
@@ -434,7 +432,6 @@ class T::Props::Decorator
     # get at the property (e.g., Chalk::ODM::Document exposes `get` and `set`).
     define_getter_and_setter(name, rules) unless rules[:without_accessors]
 
-    handle_foreign_option(name, cls, rules, rules[:foreign]) if rules[:foreign]
     handle_redaction_option(name, rules[:redaction]) if rules[:redaction]
   end
 
@@ -509,124 +506,6 @@ class T::Props::Decorator
     end
   end
 
-  sig do
-    params(
-      option_sym: Symbol,
-      foreign: T.untyped,
-      valid_type_msg: String,
-    )
-    .void
-    .checked(:never)
-  end
-  private def validate_foreign_option(option_sym, foreign, valid_type_msg:)
-    if foreign.is_a?(Symbol) || foreign.is_a?(String)
-      raise ArgumentError.new(
-        "Using a symbol/string for `#{option_sym}` is no longer supported. Instead, use a Proc " \
-        "that returns the class, e.g., foreign: -> {Foo}"
-      )
-    end
-
-    if !foreign.is_a?(Proc) && !foreign.is_a?(Array) && !foreign.respond_to?(:load)
-      raise ArgumentError.new("The `#{option_sym}` option must be #{valid_type_msg}")
-    end
-  end
-
-  # checked(:never) - Rules hash is expensive to check
-  sig do
-    params(
-      prop_name: T.any(String, Symbol),
-      rules: Rules,
-      foreign: T.untyped,
-    )
-    .void
-    .checked(:never)
-  end
-  private def define_foreign_method(prop_name, rules, foreign)
-    fk_method = "#{prop_name}_"
-
-    # n.b. there's no clear reason *not* to allow additional options
-    # here, but we're baking in `allow_direct_mutation` since we
-    # *haven't* allowed additional options in the past and want to
-    # default to keeping this interface narrow.
-    foreign = T.let(foreign, T.untyped, checked: false)
-    @class.send(:define_method, fk_method) do |allow_direct_mutation: nil|
-      if foreign.is_a?(Proc)
-        resolved_foreign = foreign.call
-        if !resolved_foreign.respond_to?(:load)
-          raise ArgumentError.new(
-            "The `foreign` proc for `#{prop_name}` must return a model class. " \
-            "Got `#{resolved_foreign.inspect}` instead."
-          )
-        end
-        # `foreign` is part of the closure state, so this will persist to future invocations
-        # of the method, optimizing it so this only runs on the first invocation.
-        foreign = resolved_foreign
-      end
-      opts = if allow_direct_mutation.nil?
-        {}
-      else
-        {allow_direct_mutation: allow_direct_mutation}
-      end
-
-      T.unsafe(self.class).decorator.foreign_prop_get(self, prop_name, foreign, rules, opts)
-    end
-
-    force_fk_method = "#{fk_method}!"
-    @class.send(:define_method, force_fk_method) do |allow_direct_mutation: nil|
-      loaded_foreign = send(fk_method, allow_direct_mutation: allow_direct_mutation)
-      if !loaded_foreign
-        T::Configuration.hard_assert_handler(
-          'Failed to load foreign model',
-          storytime: {method: force_fk_method, class: self.class}
-        )
-      end
-      loaded_foreign
-    end
-  end
-
-  # checked(:never) - Rules hash is expensive to check
-  sig do
-    params(
-      prop_name: Symbol,
-      prop_cls: T::Module[T.anything],
-      rules: Rules,
-      foreign: T.untyped,
-    )
-    .void
-    .checked(:never)
-  end
-  private def handle_foreign_option(prop_name, prop_cls, rules, foreign)
-    validate_foreign_option(
-      :foreign, foreign, valid_type_msg: "a model class or a Proc that returns one"
-    )
-
-    if prop_cls != String
-      raise ArgumentError.new("`foreign` can only be used with a prop type of String")
-    end
-
-    if foreign.is_a?(Array)
-      # We don't support arrays with `foreign` because it's hard to both preserve ordering and
-      # keep them from being lurky performance hits by issuing a bunch of un-batched DB queries.
-      # We could potentially address that by porting over something like AmbiguousIDLoader.
-      raise ArgumentError.new(
-        "Using an array for `foreign` is no longer supported. Instead, please use a union type of " \
-        "token types for the prop type, e.g., T.any(Opus::Autogen::Tokens::FooModelToken, Opus::Autogen::Tokens::BarModelToken)"
-      )
-    end
-
-    unless foreign.is_a?(Proc)
-      T::Configuration.soft_assert_handler(<<~MESSAGE, storytime: {prop: prop_name, value: foreign}, notify: 'jerry')
-        Please use a Proc that returns a model class instead of the model class itself as the argument to `foreign`. In other words:
-
-          instead of `prop :foo, String, foreign: FooModel`
-          use `prop :foo, String, foreign: -> {FooModel}`
-
-      MESSAGE
-    end
-
-    define_foreign_method(prop_name, rules, foreign)
-  end
-
   # TODO: rename this to props_inherited
   #
   # This gets called when a module or class that extends T::Props gets included, extended,
@@ -644,12 +523,25 @@ class T::Props::Decorator
       T::Props::Plugin::Private.apply_class_methods(mod, child)
     end
 
-    props.each do |name, rules|
+    parent_props = props
+    # Return before child.decorator below: forcing decorator creation for a
+    # prop-less parent would defeat any decorator_class override (see the NB).
+    return if parent_props.empty?
+
+    # NB: Calling `child.decorator` here is a time bomb that's going to give someone a really bad
+    # time. Any class that defines props and also overrides the `decorator_class` method is going
+    # to reach this line before its override take effect, turning it into a no-op.
+    child_decorator = child.decorator
+
+    # Computed once for all props: the owner comparison cannot change inside
+    # the loop below (it only defines prop accessors on child), and each
+    # Object#method call allocates a fresh Method.
+    clobber_getters = child_decorator.method(:prop_get).owner != method(:prop_get).owner
+    clobber_setters = child_decorator.method(:prop_set).owner != method(:prop_set).owner
+
+    parent_props.each do |name, rules|
       copied_rules = rules.dup
-      # NB: Calling `child.decorator` here is a time bomb that's going to give someone a really bad
-      # time. Any class that defines props and also overrides the `decorator_class` method is going
-      # to reach this line before its override take effect, turning it into a no-op.
-      child.decorator.add_prop_definition(name, copied_rules)
+      child_decorator.add_prop_definition(name, copied_rules)
 
       # It's a bit tricky to support `prop_get` hooks added by plugins without
       # sacrificing the `attr_reader` fast path or clobbering customized getters
@@ -660,13 +552,13 @@ class T::Props::Decorator
       # (b) it's safe because the getter was defined by this file.
       #
       unless rules[:without_accessors]
-        if clobber_getter?(child, name)
+        if clobber_getters && child.instance_method(name).source_location&.first == __FILE__
           child.send(:define_method, name) do
             T.unsafe(self.class).decorator.prop_get(self, name, rules)
           end
         end
 
-        if !rules[:immutable] && clobber_setter?(child, name)
+        if !rules[:immutable] && clobber_setters && child.instance_method("#{name}=").source_location&.first == __FILE__
           child.send(:define_method, "#{name}=") do |val|
             T.unsafe(self.class).decorator.prop_set(self, name, val, rules)
           end
@@ -719,18 +611,6 @@ class T::Props::Decorator
     elaborate_override_entry(:reader, d, result)
     elaborate_override_entry(:writer, d, result)
     result
-  end
-
-  sig { params(child: DecoratedClassType, prop: Symbol).returns(T::Boolean).checked(:never) }
-  private def clobber_getter?(child, prop)
-    !!(child.decorator.method(:prop_get).owner != method(:prop_get).owner &&
-       child.instance_method(prop).source_location&.first == __FILE__)
-  end
-
-  sig { params(child: DecoratedClassType, prop: Symbol).returns(T::Boolean).checked(:never) }
-  private def clobber_setter?(child, prop)
-    !!(child.decorator.method(:prop_set).owner != method(:prop_set).owner &&
-       child.instance_method("#{prop}=").source_location&.first == __FILE__)
   end
 
   sig { params(mod: T::Module[T.anything]).void.checked(:never) }

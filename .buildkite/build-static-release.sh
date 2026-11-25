@@ -3,9 +3,10 @@
 set -euo pipefail
 
 export JOB_NAME=build-static-release
+# shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/setup-bazel.sh
 
-kernel_name="$(uname -s | tr 'A-Z' 'a-z')"
+kernel_name="$(uname -s | tr '[:upper:]' '[:lower:]')"
 processor_name="$(uname -m)"
 
 platform="${kernel_name}-${processor_name}"
@@ -26,9 +27,9 @@ case "$platform" in
     ;;
 esac
 
-echo will run with $CONFIG_OPTS
+echo will run with "$CONFIG_OPTS"
 
-./bazel build //main:sorbet --strip=always $CONFIG_OPTS
+./bazel build //main:sorbet --strip=always "$CONFIG_OPTS"
 
 if [ "$kernel_name" != "darwin" ]; then
   cp bazel-bin/main/sorbet sorbet_bin
@@ -54,9 +55,10 @@ cp sorbet_bin gems/sorbet-static/libexec/sorbet
 
 rbenv install --skip-existing
 
-pushd gems/sorbet-static
 git_commit_count=$(git rev-list --count HEAD)
-release_version="0.6.${git_commit_count}"
+prefix=$(.buildkite/tools/sorbet-version-prefix.sh)
+release_version="${prefix}.${git_commit_count}"
+pushd gems/sorbet-static
 sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet-static.gemspec
 if [[ "darwin" == "$kernel_name" ]]; then
     sed -i.bak "s/Gem::Platform::CURRENT/'universal-darwin'/" sorbet-static.gemspec

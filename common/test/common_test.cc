@@ -5,10 +5,15 @@
 #include "common/UIntSet.h"
 #include "common/UIntSetForEach.h"
 #include "common/common.h"
+#include "common/concurrency/WorkerPool.h"
+#include "spdlog/spdlog.h"
+
+#include <array>
+#include <filesystem>
 
 namespace sorbet::common {
 
-TEST_CASE("Levenstein") { // NOLINT
+TEST_CASE("Levenstein") {
     Levenstein levenstein;
     CHECK_EQ(2, levenstein.distance("Mama", "Papa", 10));
     CHECK_EQ(5, levenstein.distance("Ruby", "Scala", 10));
@@ -25,6 +30,64 @@ TEST_CASE("FileOps::ensureDir") {
     CHECK_FALSE(FileOps::ensureDir("common_test_dir"));
 
     FileOps::removeDir("common_test_dir");
+}
+
+TEST_CASE("FileOps::listFilesInDir") {
+    auto logger = spdlog::default_logger();
+    auto workers = WorkerPool::create(0, *logger);
+
+    SUBCASE("lists files recursively") {
+        const std::string root = "common_test_list_dir";
+        std::filesystem::remove_all(root);
+        FileOps::ensureDir(root);
+        FileOps::ensureDir(root + "/nested");
+        FileOps::write(root + "/a.rb", "");
+        FileOps::write(root + "/nested/b.rb", "");
+        FileOps::write(root + "/nested/c.txt", "");
+
+        auto files = FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {});
+        CHECK_EQ(files, std::vector<std::string>{root + "/a.rb", root + "/nested/b.rb"});
+
+        std::filesystem::remove_all(root);
+    }
+
+    SUBCASE("a missing root names itself in the error") {
+        const std::string root = "common_test_missing_dir";
+        std::filesystem::remove_all(root);
+
+        try {
+            FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {});
+            FAIL("expected listFilesInDir to throw");
+        } catch (FileNotFoundException &e) {
+            CHECK_EQ(std::string(e.what()), "Couldn't open directory `common_test_missing_dir`");
+        }
+    }
+
+    SUBCASE("a root that is not a directory still raises") {
+        const std::string root = "common_test_not_a_dir.rb";
+        std::filesystem::remove_all(root);
+        FileOps::write(root, "");
+
+        CHECK_THROWS_AS(FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {}), FileNotDirException);
+
+        std::filesystem::remove_all(root);
+    }
+
+    SUBCASE("a symlink loop is treated like a dangling symlink") {
+        const std::string root = "common_test_symlink_loop_dir";
+        std::filesystem::remove_all(root);
+        FileOps::ensureDir(root);
+        FileOps::write(root + "/a.rb", "");
+        std::filesystem::create_symlink("loop2", root + "/loop1");
+        std::filesystem::create_symlink("loop1", root + "/loop2");
+        std::filesystem::create_symlink("loop.rb", root + "/loop.rb");
+        std::filesystem::create_symlink("nonexistent.rb", root + "/dangling.rb");
+
+        auto files = FileOps::listFilesInDir(root, {".rb"}, *workers, true, {}, {});
+        CHECK_EQ(files, std::vector<std::string>{root + "/a.rb", root + "/dangling.rb", root + "/loop.rb"});
+
+        std::filesystem::remove_all(root);
+    }
 }
 
 TEST_SUITE("UIntSet") {
@@ -211,6 +274,22 @@ TEST_SUITE("UIntSet") {
             callCount++;
         });
         CHECK_EQ(2, callCount);
+
+        // Multiple bits in words, not at word boundaries.
+        callCount = 0;
+        a.remove(0);
+        a.remove(64);
+        std::array<uint32_t, 7> bits = {5, 8, 13, 21, 34, 55, 89};
+        for (auto bit : bits) {
+            a.add(bit);
+        }
+
+        a.forEach([&bits, &callCount](uint32_t bit) -> void {
+            CHECK(callCount < bits.size());
+            CHECK_EQ(bits[callCount], bit);
+            callCount++;
+        });
+        CHECK_EQ(bits.size(), callCount);
 
         // Full case
         for (int i = 0; i < 128; i++) {

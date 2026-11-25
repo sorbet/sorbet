@@ -12,7 +12,7 @@ ClassDef{
       name = <U m><<U <todo method>>>
       params = [BlockParam{ expr = UnresolvedIdent{
           kind = Local
-          name = <U <blk>>
+          name = <U <implicit yield>>
         } }]
       rhs = InsSeq{
         stats = [
@@ -60,7 +60,7 @@ ClassDef{
             ]
           }
           Send{
-            flags = {privateOk}
+            flags = {privateOk, doEndBlock}
             recv = Self
             fun = <U <super>>
             block = Block {
@@ -70,7 +70,7 @@ ClassDef{
                 flags = {}
                 recv = UnresolvedIdent{
                   kind = Local
-                  name = <U <blk>>
+                  name = <U <implicit yield>>
                 }
                 fun = <U call>
                 block = nullptr
@@ -84,7 +84,7 @@ ClassDef{
             ]
           }
           Send{
-            flags = {privateOk}
+            flags = {privateOk, doEndBlock}
             recv = Self
             fun = <U <super>>
             block = Block {
@@ -94,7 +94,7 @@ ClassDef{
                 flags = {}
                 recv = UnresolvedIdent{
                   kind = Local
-                  name = <U <blk>>
+                  name = <U <implicit yield>>
                 }
                 fun = <U call>
                 block = nullptr
@@ -111,7 +111,7 @@ ClassDef{
             ]
           }
           Send{
-            flags = {privateOk}
+            flags = {privateOk, doEndBlock}
             recv = Self
             fun = <U <super>>
             block = Block {
@@ -121,7 +121,7 @@ ClassDef{
                 flags = {}
                 recv = UnresolvedIdent{
                   kind = Local
-                  name = <U <blk>>
+                  name = <U <implicit yield>>
                 }
                 fun = <U call>
                 block = nullptr
@@ -139,7 +139,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          flags = {privateOk}
+          flags = {privateOk, doEndBlock}
           recv = Self
           fun = <U <super>>
           block = Block {
@@ -149,7 +149,7 @@ ClassDef{
               flags = {}
               recv = UnresolvedIdent{
                 kind = Local
-                name = <U <blk>>
+                name = <U <implicit yield>>
               }
               fun = <U call>
               block = nullptr

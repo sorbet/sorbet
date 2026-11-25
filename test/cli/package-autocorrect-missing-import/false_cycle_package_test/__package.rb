@@ -8,6 +8,4 @@ class Foo::Bar::FalseCyclePackageTest < PackageSpec
 
   import Foo::Bar::FalseCyclePackageTest::SubPackage
   import Foo::MyPackage
-
-  export Foo::Bar::FalseCyclePackageTest::OtherClass
 end

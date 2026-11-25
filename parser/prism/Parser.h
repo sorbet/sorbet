@@ -10,8 +10,8 @@ extern "C" {
 }
 
 #include "core/LocOffsets.h"
+#include "core/SymbolRef.h"
 #include "parser/Node.h" // To clarify: these are Sorbet Parser nodes, not Prism ones.
-#include "parser/ParseResult.h"
 
 namespace sorbet::parser::Prism {
 
@@ -29,14 +29,6 @@ public:
     pm_error_level_t level;
 };
 
-struct SimpleParseResult {
-    std::vector<ParseError> parseErrors;
-    std::vector<core::LocOffsets> commentLocations;
-
-    SimpleParseResult(std::vector<ParseError> parseErrors, std::vector<core::LocOffsets> commentLocations)
-        : parseErrors(std::move(parseErrors)), commentLocations(std::move(commentLocations)) {}
-};
-
 class Parser final {
     // The version of Ruby syntax that we're parsing with Prism. This determines what syntax is supported or not.
     static constexpr std::string_view ParsedRubyVersion = "3.4.0";
@@ -44,8 +36,12 @@ class Parser final {
     pm_parser_t parser;
     pm_options_t options;
 
+    // Tracks Prism constant nodes (by their `node_id`) that have already been resolved to a known Sorbet symbol.
+    // The desugarer can directly emit resolved `ast::ConstantLit` nodes for these, instead of the usual
+    // `ast::UnresolvedConstantLit` nodes.
+    UnorderedMap<uint32_t, core::SymbolRef> resolvedConstants_;
+
     friend class ParseResult;
-    friend struct NodeDeleter;
     friend class Factory;
 
 public:
@@ -65,10 +61,7 @@ public:
     Parser(Parser &&) = delete;
     Parser &operator=(Parser &&) = delete;
 
-    static parser::ParseResult run(core::MutableContext ctx, bool directlyDesugar = true,
-                                   bool preserveConcreteSyntax = false);
-
-    ParseResult parseWithoutTranslation(bool collectComments = false);
+    static Prism::ParseResult run(core::MutableContext ctx, bool preserveConcreteSyntax = false);
     core::LocOffsets translateLocation(pm_location_t location) const;
     core::LocOffsets translateLocation(const uint8_t *start, const uint8_t *end) const;
     std::string_view resolveConstant(pm_constant_id_t constantId) const;
@@ -82,8 +75,23 @@ public:
     bool isT(pm_node_t *node) const;
     bool isSetterCall(pm_node_t *node) const;
     bool isSafeNavigationCall(pm_node_t *node) const;
-    bool isVisibilityCall(pm_node_t *node) const;
+    bool isMethodDefModifierCall(pm_node_t *node, const core::GlobalState &gs) const;
     bool isAttrAccessorCall(pm_node_t *node) const;
+
+    void destroyNode(pm_node_t *node);
+
+    // Record that `node` should resolve to `symbol`. Returns the same node pointer, for convenience.
+    pm_node_t *markResolved(pm_node_t *node, core::SymbolRef symbol) {
+        ENFORCE(node != nullptr);
+        resolvedConstants_[node->node_id] = symbol;
+        return node;
+    }
+
+    // Returns the resolved Symbol for `node` (if there was one).
+    core::SymbolRef getResolvedSymbol(const pm_node_t *node) const {
+        auto it = resolvedConstants_.find(node->node_id);
+        return it != resolvedConstants_.end() ? it->second : core::Symbols::noSymbol();
+    }
 
 private:
     std::vector<ParseError> collectErrors();
@@ -92,47 +100,57 @@ private:
 };
 
 class ParseResult final {
-    struct NodeDeleter {
-        Parser &parser;
-
-        void operator()(pm_node_t *node) {
-            pm_node_destroy(parser.getRawParserPointer(), node);
-        }
-    };
-
     friend class Parser;
     friend class Translator;
 
-    const Parser &parser;
-    const std::unique_ptr<pm_node_t, NodeDeleter> node;
-    const std::vector<ParseError> parseErrors;
+    // The parser instance needs to outlive the AST, so we keep it together with the node in this parse result.
+    std::unique_ptr<Parser> parser;
+
+    // The root node, allocated by the parser.
+    pm_node_t *node;
+
     std::vector<core::LocOffsets> commentLocations;
 
 public:
-    ParseResult(Parser &parser, pm_node_t *node, std::vector<ParseError> parseErrors,
-                std::vector<core::LocOffsets> commentLocations)
-        : parser{parser}, node{node, NodeDeleter{parser}}, parseErrors{parseErrors}, commentLocations{
-                                                                                         commentLocations} {}
+    ParseResult(std::unique_ptr<Parser> parser, pm_node_t *node, std::vector<core::LocOffsets> commentLocations)
+        : parser{std::move(parser)}, node{node}, commentLocations{std::move(commentLocations)} {}
+
+    ~ParseResult() {
+        if (node != nullptr && parser != nullptr) {
+            parser->destroyNode(node);
+        }
+    }
+
+    ParseResult(ParseResult &&other) noexcept
+        : parser{std::move(other.parser)}, node{other.node}, commentLocations{std::move(other.commentLocations)} {
+        other.node = nullptr;
+    }
+
+    ParseResult &operator=(ParseResult &&other) noexcept {
+        this->parser = std::move(other.parser);
+        this->node = std::move(other.node);
+        other.node = nullptr;
+        this->commentLocations = std::move(other.commentLocations);
+        return *this;
+    }
 
     ParseResult(const ParseResult &) = delete;            // Copy constructor
     ParseResult &operator=(const ParseResult &) = delete; // Copy assignment
-    ParseResult(ParseResult &&) = delete;                 // Move constructor
-    ParseResult &operator=(ParseResult &&) = delete;      // Move assignment
 
     pm_node_t *getRawNodePointer() const {
-        return node.get();
+        return node;
+    }
+
+    std::string prettyPrint() const {
+        return parser->prettyPrint(node);
     }
 
     const std::vector<core::LocOffsets> &getCommentLocations() const {
         return commentLocations;
     }
 
-    const std::vector<ParseError> &getParseErrors() const {
-        return parseErrors;
-    }
-
-    const Parser &getParser() const {
-        return parser;
+    Parser &getParser() {
+        return *parser;
     }
 };
 

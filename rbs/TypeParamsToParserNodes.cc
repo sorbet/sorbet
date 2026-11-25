@@ -1,26 +1,20 @@
 #include "rbs/TypeParamsToParserNodes.h"
 
 #include "core/errors/rewriter.h"
-#include "parser/helper.h"
-#include "parser/parser.h"
 #include "rbs/TypeToParserNode.h"
-#include "rbs/rbs_common.h"
 
 using namespace std;
 
 namespace sorbet::rbs {
 
-parser::NodeVec TypeParamsToParserNode::typeParams(const rbs_node_list_t *rbsTypeParams,
-                                                   const RBSDeclaration &declaration) {
-    parser::NodeVec result;
+vector<pm_node_t *> TypeParamsToParserNodes::typeParams(const rbs_node_list_t *rbsTypeParams,
+                                                        const RBSDeclaration &declaration) {
+    vector<pm_node_t *> result{};
+    result.reserve(rbsTypeParams->length);
 
-    for (rbs_node_list_node_t *list_node = rbsTypeParams->head; list_node != nullptr; list_node = list_node->next) {
-        ENFORCE(list_node->node->type == RBS_AST_TYPE_PARAM,
-                "Unexpected node type `{}` in type parameter list, expected `{}`", rbs_node_type_name(list_node->node),
-                "TypeParam");
-
-        auto rbsTypeParam = (rbs_ast_type_param_t *)list_node->node;
-        auto loc = declaration.typeLocFromRange(list_node->node->location->rg);
+    for (auto *listNode = rbsTypeParams->head; listNode != nullptr; listNode = listNode->next) {
+        auto *rbsTypeParam = rbs_down_cast<rbs_ast_type_param_t>(listNode->node);
+        auto loc = declaration.typeLocFromRange(listNode->node->location);
 
         if (rbsTypeParam->unchecked) {
             if (auto e = ctx.beginIndexerError(loc, core::errors::Rewriter::RBSUnsupported)) {
@@ -29,51 +23,59 @@ parser::NodeVec TypeParamsToParserNode::typeParams(const rbs_node_list_t *rbsTyp
         }
 
         auto nameStr = parser.resolveConstant(rbsTypeParam->name);
-        auto nameConstant = ctx.state.enterNameConstant(nameStr);
 
-        auto args = parser::NodeVec();
-        if (rbsTypeParam->variance) {
-            auto variance = parser.resolveKeyword(rbsTypeParam->variance);
-            if (variance == "covariant") {
-                args.emplace_back(parser::MK::Symbol(loc, core::Names::covariant()));
-            } else if (variance == "contravariant") {
-                args.emplace_back(parser::MK::Symbol(loc, core::Names::contravariant()));
+        if (nameStr == core::Names::Constants::T().shortName(ctx.state)) {
+            auto nameLoc = declaration.typeLocFromRange(rbsTypeParam->name_range);
+
+            if (auto e = ctx.beginIndexerError(nameLoc, core::errors::Rewriter::RBSUnsupported)) {
+                e.setHeader("`{}` is not a valid type parameter name", nameStr);
+                e.addErrorNote("It conflicts with Sorbet's own namespace");
             }
         }
 
-        auto typeConst = parser::MK::Const(loc, nullptr, nameConstant);
-        auto typeSend =
-            parser::MK::Send(loc, parser::MK::SorbetPrivateStatic(loc), core::Names::typeMember(), loc, move(args));
+        absl::InlinedVector<pm_node_t *, 1> args{};
+        if (rbsTypeParam->variance) {
+            auto variance = rbsTypeParam->variance;
+            if (variance == RBS_TYPE_PARAM_VARIANCE_COVARIANT) {
+                args.push_back(prism.Symbol(loc, core::Names::covariant().show(ctx.state)));
+            } else if (variance == RBS_TYPE_PARAM_VARIANCE_CONTRAVARIANT) {
+                args.push_back(prism.Symbol(loc, core::Names::contravariant().show(ctx.state)));
+            }
+        }
 
         auto defaultType = rbsTypeParam->default_type;
         auto upperBound = rbsTypeParam->upper_bound;
         auto lowerBound = rbsTypeParam->lower_bound;
 
+        pm_node_t *block = nullptr;
         if (defaultType || upperBound || lowerBound) {
-            auto typeTranslator = TypeToParserNode(ctx, vector<pair<core::LocOffsets, core::NameRef>>(), parser);
-            auto pairs = parser::NodeVec();
+            auto typeTranslator = TypeToParserNode{ctx, {}, parser, prismParser};
+            absl::InlinedVector<pm_node_t *, 3> pairs{};
 
             if (defaultType) {
-                pairs.emplace_back(make_unique<parser::Pair>(loc, parser::MK::Symbol(loc, core::Names::fixed()),
-                                                             typeTranslator.toParserNode(defaultType, declaration)));
+                auto key = prism.Symbol(loc, core::Names::fixed().show(ctx.state));
+                auto value = typeTranslator.toPrismNode(defaultType, declaration);
+                pairs.push_back(prism.AssocNode(loc, key, value));
             }
 
             if (upperBound) {
-                pairs.emplace_back(make_unique<parser::Pair>(loc, parser::MK::Symbol(loc, core::Names::upper()),
-                                                             typeTranslator.toParserNode(upperBound, declaration)));
+                auto key = prism.Symbol(loc, core::Names::upper().show(ctx.state));
+                auto value = typeTranslator.toPrismNode(upperBound, declaration);
+                pairs.push_back(prism.AssocNode(loc, key, value));
             }
 
             if (lowerBound) {
-                pairs.emplace_back(make_unique<parser::Pair>(loc, parser::MK::Symbol(loc, core::Names::lower()),
-                                                             typeTranslator.toParserNode(lowerBound, declaration)));
+                auto key = prism.Symbol(loc, core::Names::lower().show(ctx.state));
+                auto value = typeTranslator.toPrismNode(lowerBound, declaration);
+                pairs.push_back(prism.AssocNode(loc, key, value));
             }
 
-            auto body = parser::MK::Hash(loc, false, move(pairs));
-            typeSend = make_unique<parser::Block>(loc, move(typeSend), nullptr, move(body));
+            block = prism.Block(loc, prism.Hash(loc, absl::MakeSpan(pairs)));
         }
 
-        auto assign = make_unique<parser::Assign>(loc, move(typeConst), move(typeSend));
-        result.emplace_back(move(assign));
+        auto typeCall = prism.Call(loc, prism.SorbetPrivateStatic(loc), "type_member"sv, absl::MakeSpan(args), block);
+        auto assign = prism.ConstantWriteNode(loc, prism.addConstantToPool(nameStr), typeCall);
+        result.push_back(assign);
     }
 
     return result;

@@ -14,6 +14,7 @@ enum class FieldType {
     Uint,
     Loc,
     Bool,
+    BlockStyle,
     Symbol,
 };
 
@@ -88,12 +89,18 @@ NodeDef nodes[] = {
         "begin",
         vector<FieldDef>({{"stmts", FieldType::NodeVec}}),
     },
-    // A method call with a blockis modelled as a Send node with a Block as a parent.
+    // A method call with a block is modelled as a Send node with a Block as a parent.
     // The `send` is always a `parser::Send` node, and the `params` models the parameters of the block.
+    // Like every node, the `loc` covers all its children, including the `send`. The `blockLoc` is just
+    // the `{ ... }` or `do ... end`.
     {
         "Block",
         "block",
-        vector<FieldDef>({{"send", FieldType::Node}, {"params", FieldType::Node}, {"body", FieldType::Node}}),
+        vector<FieldDef>({{"blockLoc", FieldType::Loc},
+                          {"send", FieldType::Node},
+                          {"params", FieldType::Node},
+                          {"body", FieldType::Node},
+                          {"style", FieldType::BlockStyle}}),
     },
     // Wraps a `&foo` parameter in a parameter list
     {
@@ -815,6 +822,8 @@ string constructorArgType(FieldType arg) {
             return "core::LocOffsets";
         case FieldType::Bool:
             return "bool";
+        case FieldType::BlockStyle:
+            return "BlockStyle";
     }
 }
 
@@ -836,6 +845,8 @@ string fieldType(FieldType arg) {
             return "core::LocOffsets";
         case FieldType::Bool:
             return "bool";
+        case FieldType::BlockStyle:
+            return "BlockStyle";
     }
 }
 
@@ -908,13 +919,13 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = \");\n";
-                out << "    printNode(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "    printNode(buf, " << arg.name << ".get(), gs, tabs + 1);\n";
                 break;
             case FieldType::NodeVec:
                 out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = [\\n\");\n";
                 out << "    for (auto &&a: " << arg.name << ") {\n";
                 out << "      printTabs(buf, tabs + 2);\n";
-                out << "      printNode(buf, a, gs, tabs + 2);\n";
+                out << "      printNode(buf, a.get(), gs, tabs + 2);\n";
                 out << "    }" << '\n';
                 out << "    printTabs(buf, tabs + 1);\n";
                 out << "    fmt::format_to(std::back_inserter(buf), \"]\\n\");\n";
@@ -934,6 +945,10 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
             case FieldType::Bool:
                 out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", " << arg.name
                     << ");\n";
+                break;
+            case FieldType::BlockStyle:
+                out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", showBlockStyle("
+                    << arg.name << "));\n";
                 break;
         }
     }
@@ -982,7 +997,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \");\n";
-                out << "    printNodeJSON(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "    printNodeJSON(buf, " << arg.name << ".get(), gs, tabs + 1);\n";
                 out << "    fmt::format_to(std::back_inserter(buf),  \"" << maybeComma << "\\n\");\n";
                 break;
             case FieldType::NodeVec:
@@ -991,7 +1006,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    for (auto &&a: " << arg.name << ") { \n";
                 out << "      i++;\n";
                 out << "      printTabs(buf, tabs + 2);\n";
-                out << "      printNodeJSON(buf, a, gs, tabs + 2);\n";
+                out << "      printNodeJSON(buf, a.get(), gs, tabs + 2);\n";
                 out << "      if (i + 1 < " << arg.name << ".size()) {\n";
                 out << "        fmt::format_to(std::back_inserter(buf),  \",\");" << '\n';
                 out << "      }" << '\n';
@@ -1014,6 +1029,10 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
             case FieldType::Bool:
                 out << "    fmt::format_to(std::back_inserter(buf), \"" << arg.name << " = {}\\n\", " << arg.name
                     << ");\n";
+                break;
+            case FieldType::BlockStyle:
+                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                    << maybeComma << "\\n\", showBlockStyle(" << arg.name << "));\n";
                 break;
         }
     }
@@ -1062,7 +1081,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 break;
             case FieldType::Node:
                 out << "    fmt::format_to(std::back_inserter(buf),  \"\\\"" << arg.name << "\\\" : \");\n";
-                out << "    printNodeJSONWithLocs(buf, " << arg.name << ", gs, file, tabs + 1);\n";
+                out << "    printNodeJSONWithLocs(buf, " << arg.name << ".get(), gs, file, tabs + 1);\n";
                 out << "    fmt::format_to(std::back_inserter(buf),  \"" << maybeComma << "\\n\");\n";
                 break;
             case FieldType::NodeVec:
@@ -1071,7 +1090,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    for (auto &&a: " << arg.name << ") { \n";
                 out << "      i++;\n";
                 out << "      printTabs(buf, tabs + 2);\n";
-                out << "      printNodeJSONWithLocs(buf, a, gs, file, tabs + 2);\n";
+                out << "      printNodeJSONWithLocs(buf, a.get(), gs, file, tabs + 2);\n";
                 out << "      if (i + 1 < " << arg.name << ".size()) {\n";
                 out << "        fmt::format_to(std::back_inserter(buf),  \",\");" << '\n';
                 out << "      }" << '\n';
@@ -1097,6 +1116,10 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
             case FieldType::Bool:
                 out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
                     << maybeComma << "\\n\", " << arg.name << ");\n";
+                break;
+            case FieldType::BlockStyle:
+                out << R"(    fmt::format_to(std::back_inserter(buf),  "\")" << arg.name << R"(\" : \"{}\")"
+                    << maybeComma << "\\n\", showBlockStyle(" << arg.name << "));\n";
                 break;
         }
     }
@@ -1131,7 +1154,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "    if (" << arg.name << ") {\n";
                 out << "     fmt::format_to(std::back_inserter(buf), \"\\n\");\n";
                 out << "     printTabs(buf, tabs + 1);" << '\n';
-                out << "     printNodeWhitequark(buf, " << arg.name << ", gs, tabs + 1);\n";
+                out << "     printNodeWhitequark(buf, " << arg.name << ".get(), gs, tabs + 1);\n";
                 out << "    } else {\n";
                 out << "      fmt::format_to(std::back_inserter(buf), \" nil\");\n";
                 out << "    }\n";
@@ -1142,7 +1165,7 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
                 out << "      if (a) {\n";
                 out << "        fmt::format_to(std::back_inserter(buf), \"\\n\");\n";
                 out << "        printTabs(buf, tabs + 1);" << '\n';
-                out << "        printNodeWhitequark(buf, a, gs, tabs + 1);\n";
+                out << "        printNodeWhitequark(buf, a.get(), gs, tabs + 1);\n";
                 out << "      } else {\n";
                 out << "        fmt::format_to(std::back_inserter(buf), \" nil\");\n";
                 out << "      }\n";
@@ -1157,6 +1180,9 @@ void emitNodeClassfile(ostream &out, NodeDef &node) {
             case FieldType::Loc:
                 continue;
             case FieldType::Bool:
+                continue;
+            case FieldType::BlockStyle:
+                // The whitequark format has no notion of the syntax used to write a block.
                 continue;
         }
     }

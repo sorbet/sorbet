@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.summary     = 'Sorbet runtime'
   s.description = "Sorbet's runtime type checking component"
   s.authors     = ['Stripe']
-  s.files       = Dir.glob('lib/**/*')
+  s.files       = Dir.glob('lib/**/*.rb')
   s.homepage    = 'https://sorbet.org'
   s.license     = 'Apache-2.0'
   s.metadata = {
@@ -13,7 +13,8 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = ['>= 3.0.0']
 
-  s.add_development_dependency 'minitest', '~> 5.11'
+  s.add_development_dependency 'benchmark'
+  s.add_development_dependency 'minitest', '6.0.6'
   s.add_development_dependency 'mocha', '~> 2.1'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rubocop', '1.81.6'
@@ -23,6 +24,4 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'debug'
   s.add_development_dependency 'pry'
   s.add_development_dependency 'pry-byebug'
-  # for running ruby subprocesses
-  s.add_development_dependency 'subprocess', '~> 1.5.3'
 end

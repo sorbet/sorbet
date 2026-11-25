@@ -132,14 +132,18 @@ It's similar for `kwargs`: it's declared as `Float`, but in the method body Sorb
 ### Block parameters
 
 ```ruby
-sig do
-  params(
-    blk: T.proc.returns(NilClass)
-  )
-  .void
-end
+sig { params(blk: T.proc.returns(NilClass)) }
 def self.main(&blk)
   # ...
+end
+```
+
+For methods declared with [anonymous block parameters](https://docs.ruby-lang.org/en/3.1/syntax/methods_rdoc.html#label-Block+Argument), the name of the `&` in the `sig` must be quoted:
+
+```ruby
+sig { params("&": T.proc.void) }
+def self.main(&)
+  takes_block(&)
 end
 ```
 
@@ -197,6 +201,10 @@ Using `void` instead of `returns(...)` does a number of things:
 - In the runtime, `sorbet-runtime` will _throw away_ the result of our method, and return a dummy value instead. (All `void` methods return the same dummy value.)
 
   If you do not want this behavior, either use `returns(T.anything)` instead ([docs for `T.anything`](anything.md)), or [disable runtime checking](runtime.md) for that method (or all methods).
+
+  Note that the return value will **not** be intercepted and replaced for `.void.checked(:tests)` signatures. See [`.checked(:tests)` and `.void`] for more.
+
+[`.checked(:tests)` and `.void`]: runtime.md#checkedtests-and-void
 
 Replacing the return value with a meaningless value prevents untyped code from silently depending on what a typed method returns, so that the implementation is free to change without worry of breaking existing code which silently depended on the result of the method being meaningful.
 

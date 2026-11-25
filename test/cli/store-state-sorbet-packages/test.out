@@ -1,0 +1,2 @@
+--store-state can't be combined with --sorbet-packages
+exit code: 1

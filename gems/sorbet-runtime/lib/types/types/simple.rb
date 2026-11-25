@@ -18,6 +18,14 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      name
+      # NilClass can't be paired with itself in a SimplePairUnion.
+      to_nilable.types unless @raw_type.equal?(NilClass)
+      nil
+    end
+
+    # overrides Base
     def name
       # Memoize to mitigate pathological performance with anonymous modules (https://bugs.ruby-lang.org/issues/11119)
       #
@@ -29,6 +37,14 @@ module T::Types
       # rubocop:disable Performance/BindCall
       @name ||= (NAME_METHOD.bind(@raw_type).call || @raw_type.name).freeze
       # rubocop:enable Performance/BindCall
+    end
+
+    # overrides Base
+    #
+    # Identical to valid?; defined directly so the leaf-type hot path (every
+    # element check in a typed collection walk) skips the Base delegator frame.
+    def recursively_valid?(obj)
+      obj.is_a?(@raw_type)
     end
 
     # overrides Base
@@ -91,17 +107,17 @@ module T::Types
           return cached if cached
 
           type = if mod == ::Array
-            T::Array[T.untyped]
+            TypedArray::Untyped::Private::INSTANCE
           elsif mod == ::Hash
-            T::Hash[T.untyped, T.untyped]
+            TypedHash::Untyped::Private::INSTANCE
           elsif mod == ::Enumerable
-            T::Enumerable[T.untyped]
+            TypedEnumerable::Untyped.new
           elsif mod == ::Enumerator
-            T::Enumerator[T.untyped]
+            TypedEnumerator::Untyped.new
           elsif mod == ::Range
-            T::Range[T.untyped]
+            TypedRange::Untyped.new
           elsif !Object.autoload?(:Set) && Object.const_defined?(:Set) && mod == ::Set
-            T::Set[T.untyped]
+            TypedSet::Untyped.new
           else
             # ideally we would have a case mapping from ::Class -> T::Class and
             # ::Module -> T::Module here but for backwards compatibility we

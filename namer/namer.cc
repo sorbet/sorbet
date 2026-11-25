@@ -20,6 +20,7 @@
 #include "core/errors/namer.h"
 #include "core/hashing/hashing.h"
 #include "core/lsp/TypecheckEpochManager.h"
+#include "core/packages/PackageInfo.h"
 
 using namespace std;
 
@@ -40,6 +41,14 @@ struct ParsedFileWithIdx {
 };
 
 using AllFoundDefinitions = vector<pair<core::FileRef, unique_ptr<core::FoundDefinitions>>>;
+
+using namespace core::packages;
+
+// [file, owner, originalName, withinExplicitRootScope]
+using PackageMangledSymbolKey = tuple<core::FileRef, core::ClassOrModuleRef, core::NameRef, bool>;
+// PackageMangledSymbolKey → owner::mangledName
+using PackageMangledClasses = UnorderedMap<PackageMangledSymbolKey, core::ClassOrModuleRef>;
+using PackageMangledStaticFields = UnorderedMap<PackageMangledSymbolKey, core::FieldRef>;
 
 core::ClassOrModuleRef methodOwner(core::Context ctx, core::SymbolRef owner, bool isSelfMethod) {
     ENFORCE(owner.exists() && owner != core::Symbols::todo());
@@ -74,6 +83,25 @@ core::ClassOrModuleRef contextClass(const core::GlobalState &gs, core::SymbolRef
     }
 }
 
+bool isExplicitlyRootScoped(const ast::ExpressionPtr &node) {
+    auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
+    const auto &outermostScope = constLit == nullptr ? node : constLit->outermostScope();
+    auto rootLit = ast::cast_tree<ast::ConstantLit>(outermostScope);
+    return rootLit != nullptr && rootLit->symbol() == core::Symbols::root();
+}
+
+// Returns nullptr if this file's package spec did not define a package. For example, `insertPackage` does not enter a
+// package for a `__package.rb` file that redefines a package already defined by some other `__package.rb` file.
+PackageInfo *packageInfoForContext(core::MutableContext ctx) {
+    auto packageName = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+    if (!packageName.exists() || packageName.owner != ctx.owner.asClassOrModuleRef()) {
+        return nullptr;
+    }
+    auto *packageInfo = ctx.state.packageDB().getPackageInfoNonConst(packageName);
+    ENFORCE(packageInfo != nullptr);
+    return packageInfo;
+}
+
 /**
  * Used with TreeWalk to locate all of the class, method, static field, and type member symbols defined in the tree.
  * Does not mutate GlobalState, which allows us to parallelize this process.
@@ -94,7 +122,17 @@ class SymbolFinder {
             return;
         }
 
+        auto isPackageClass = foundDefs->package.has_value() && foundDefs->package->owner.kind() == klass.kind() &&
+                              foundDefs->package->owner.idx() == klass.idx();
+
         switch (send->fun.rawId()) {
+            case core::Names::prelude_bang().rawId():
+            case core::Names::test_bang().rawId():
+            case core::Names::importedByNestedPackages().rawId():
+                if (!isPackageClass || send->hasBlock() || send->hasNonBlockArgs()) {
+                    break;
+                }
+                [[fallthrough]];
             case core::Names::declareFinal().rawId():
             case core::Names::declareSealed().rawId():
             case core::Names::declareInterface().rawId():
@@ -107,6 +145,20 @@ class SymbolFinder {
                 foundDefs->addModifier(move(mod));
                 break;
             }
+            case core::Names::packagePrivateBang().rawId():
+                // `postTransformSend` reports errors for every form, and handles `package_private!(:NAME)`.
+                if (!ctx.state.packageDB().enabled() || !send->recv.isSelfReference() || send->hasBlock() ||
+                    send->hasNonBlockArgs()) {
+                    break;
+                }
+                foundDefs->addModifier(core::FoundModifier{
+                    core::FoundModifier::Kind::Class,
+                    klass,
+                    send->loc,
+                    /*name*/ send->fun,
+                    core::NameRef::noName(),
+                });
+                break;
             default:
                 break;
         }
@@ -135,29 +187,44 @@ class SymbolFinder {
         return {*it, isSelfMethod};
     }
 
+    bool currentOwnerWithinExplicitRootScope() {
+        auto owner = getOwner();
+        return owner.kind() == core::FoundDefinitionRef::Kind::Class && owner.klass(*foundDefs).withinExplicitRootScope;
+    }
+
     core::FoundDefinitionRef getOwner() {
         return getOwnerSkippingMethods().first;
     }
 
-    core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node) {
-        if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
-            // Already defined. Insert a foundname so we can reference it.
-            auto sym = id->symbol();
-            ENFORCE(sym.exists());
-            return foundDefs->addSymbol(sym.asClassOrModuleRef());
-        } else if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
-            core::FoundClass found;
-            found.owner = defineScope(owner, constLit->scope);
-            found.name = constLit->cnst;
-            found.loc = constLit->loc;
-            found.declLoc = constLit->loc;
-            found.classKind = core::FoundClass::Kind::Unknown;
-            return foundDefs->addClass(move(found));
-        } else {
+    core::FoundDefinitionRef defineScope(core::FoundDefinitionRef owner, const ast::ExpressionPtr &node,
+                                         bool withinExplicitRootScope) {
+        auto defineRoot = [&](const ast::ExpressionPtr &root) {
+            if (auto id = ast::cast_tree<ast::ConstantLit>(root)) {
+                // Already defined. Insert a foundname so we can reference it.
+                auto sym = id->symbol();
+                ENFORCE(sym.exists());
+                return foundDefs->addSymbol(sym.asClassOrModuleRef());
+            }
+
             // Either EmptyTree (no more scope) or something is ill-formed (arbitrary expr for const scope?)
             // Fall back to just using `owner`.
             return owner;
+        };
+
+        if (auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node)) {
+            return constLit->foldFromRoot(
+                defineRoot, [&](core::FoundDefinitionRef current, core::NameRef name, core::LocOffsets loc) {
+                    core::FoundClass found;
+                    found.owner = current;
+                    found.name = name;
+                    found.loc = loc;
+                    found.declLoc = loc;
+                    found.classKind = core::FoundClass::Kind::Unknown;
+                    found.withinExplicitRootScope = withinExplicitRootScope;
+                    return foundDefs->addClass(move(found));
+                });
         }
+        return defineRoot(node);
     }
 
 public:
@@ -175,6 +242,7 @@ public:
         found.classKind = ast::ClassDef::kindToFoundClassKind(klass.kind);
         found.loc = klass.loc;
         found.declLoc = klass.declLoc;
+        found.withinExplicitRootScope = currentOwnerWithinExplicitRootScope() || isExplicitlyRootScoped(klass.name);
 
         auto ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
@@ -183,7 +251,7 @@ public:
         } else {
             if (klass.symbol == core::Symbols::todo()) {
                 const auto &constLit = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(klass.name);
-                found.owner = defineScope(getOwner(), constLit.scope);
+                found.owner = defineScope(getOwner(), constLit.scope, found.withinExplicitRootScope);
                 found.name = constLit.cnst;
             } else {
                 // Desugar populates a top-level root() ClassDef.
@@ -299,14 +367,15 @@ public:
         }
     }
 
+    // `self` is a valid ancestor on its own, but `self::B` is a dynamic constant reference.
     bool isValidAncestor(const ast::ExpressionPtr &exp) {
-        if (ast::isa_tree<ast::EmptyTree>(exp) || exp.isSelfReference() || ast::isa_tree<ast::ConstantLit>(exp)) {
+        if (exp.isSelfReference()) {
             return true;
         }
-        if (auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp)) {
-            return isValidAncestor(lit->scope);
-        }
-        return false;
+
+        auto lit = ast::cast_tree<ast::UnresolvedConstantLit>(exp);
+        const auto &outermostScope = lit == nullptr ? exp : lit->outermostScope();
+        return ast::isa_tree<ast::EmptyTree>(outermostScope) || ast::isa_tree<ast::ConstantLit>(outermostScope);
     }
 
     void preTransformBlock(core::Context ctx, const ast::ExpressionPtr &block) {
@@ -331,7 +400,7 @@ public:
 
         // After flatten, method defs have been hoisted and reordered, so instead we look for the
         // keep_def / keep_self_def calls, which will still be ordered correctly relative to
-        // visibility modifiers.
+        // method def modifiers.
         ownerStack.emplace_back(def);
         methodVisiStack.emplace_back(nullopt);
     }
@@ -341,8 +410,8 @@ public:
         ownerStack.pop_back();
     }
 
-    void addMethodModifiers(core::Context ctx, core::NameRef modifierName,
-                            absl::Span<const ast::ExpressionPtr> sendArgs) {
+    void addMethodModifiers(core::Context ctx, const ast::Send &send) {
+        auto sendArgs = send.posArgs();
         if (sendArgs.empty()) {
             return;
         }
@@ -350,14 +419,14 @@ public:
         if (sendArgs.size() == 1) {
             if (auto array = ast::cast_tree<ast::Array>(sendArgs[0])) {
                 for (auto &e : array->elems) {
-                    addMethodModifier(ctx, modifierName, e);
+                    addMethodModifier(ctx, send, e);
                 }
                 return;
             }
         }
 
         for (auto &arg : sendArgs) {
-            addMethodModifier(ctx, modifierName, arg);
+            addMethodModifier(ctx, send, arg);
         }
     }
 
@@ -371,13 +440,35 @@ public:
                 if (ownerIsMethod) {
                     break;
                 }
-                addMethodModifiers(ctx, original.fun, original.posArgs());
+                addMethodModifiers(ctx, original);
                 break;
             }
             case core::Names::packagePrivate().rawId():
             case core::Names::packagePrivateClassMethod().rawId(): {
                 if (!ctx.state.packageDB().enabled()) {
                     // These are only special if running in the packager.
+                    if (original.numPosArgs() == 1) {
+                        addMethodModifierDiagnostics(ctx, original, original.getPosArg(0));
+                    }
+                    break;
+                }
+                if (!ownerIsMethod && !original.hasPosArgs() && original.recv.isSelfReference()) {
+                    // A bare `private` toggles the visibility of the methods defined after it. Report a
+                    // bare `package_private` instead of applying it, because it's almost certainly a mistake.
+                    if (auto e = ctx.beginError(original.loc, core::errors::Namer::BarePackagePrivate)) {
+                        auto name = original.fun.show(ctx);
+                        e.setHeader("`{}` with no arguments is not allowed", name);
+                        e.addErrorNote("Unlike `{}`, `{}` does not toggle the visibility of the methods after it",
+                                       "private", name);
+                        if (original.fun == core::Names::packagePrivate()) {
+                            e.addErrorNote("To make the enclosing class or module package-private, use `{}`",
+                                           "package_private!");
+                            auto funLoc = ctx.locAt(original.funLoc);
+                            if (funLoc.source(ctx) == "package_private") {
+                                e.replaceWith("Use `package_private!`", funLoc, "package_private!");
+                            }
+                        }
+                    }
                     break;
                 }
                 [[fallthrough]];
@@ -403,7 +494,7 @@ public:
                         core::NameRef::noName(),
                     }};
                 } else {
-                    addMethodModifiers(ctx, original.fun, original.posArgs());
+                    addMethodModifiers(ctx, original);
                 }
                 break;
             case core::Names::privateConstant().rawId(): {
@@ -415,12 +506,45 @@ public:
                 }
                 break;
             }
+            case core::Names::packagePrivateBang().rawId(): {
+                // Without --sorbet-packages there are no packages for a marker to restrict access to, so markers
+                // are silently ignored. That way, files with markers can still be typechecked with packages off.
+                if (!ctx.state.packageDB().enabled() || ownerIsMethod || !original.recv.isSelfReference()) {
+                    break;
+                }
+                if (original.hasBlock() || original.hasKwArgs() || original.numPosArgs() > 1) {
+                    if (auto e = ctx.beginError(original.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                        e.setHeader("`{}` takes no arguments, or the name of one constant as a Symbol",
+                                    "package_private!");
+                    }
+                    break;
+                }
+                if (original.numPosArgs() == 1) {
+                    auto &arg = original.getPosArg(0);
+                    auto lit = ast::cast_tree<ast::Literal>(arg);
+                    if (lit == nullptr || !lit->isSymbol()) {
+                        if (auto e = ctx.beginError(arg.loc(), core::errors::Namer::InvalidPackagePrivate)) {
+                            e.setHeader("`{}` takes no arguments, or the name of one constant as a Symbol",
+                                        "package_private!");
+                        }
+                        break;
+                    }
+                    addConstantModifier(ctx, original.fun, arg);
+                }
+                // The `numPosArgs() == 0` case is handled by `findClassModifiers`
+                break;
+            }
             case core::Names::aliasMethod().rawId(): {
                 if (ownerIsMethod) {
                     break;
                 }
                 addMethodAlias(ctx, original);
                 break;
+            }
+
+            default: {
+                ENFORCE(!original.fun.isMethodDefModifierName(), "Unhandled method def modifier: {}",
+                        original.fun.show(ctx));
             }
         }
     }
@@ -442,15 +566,54 @@ public:
         foundDefs->addModifier(methodVisiStack.back()->withTarget(original.name));
     }
 
-    void addMethodModifier(core::Context ctx, core::NameRef modifierName, const ast::ExpressionPtr &arg) {
+    struct UnwrappedMethodName {
+        core::NameRef name;
+        optional<bool> isSelfMethod;
+    };
+
+    void addMethodModifierDiagnostics(core::Context ctx, const ast::Send &send, const ast::ExpressionPtr &arg) {
         auto target = unwrapLiteralToMethodName(ctx, arg);
-        if (target.exists()) {
+        if (target.has_value() && target->isSelfMethod.has_value()) {
+            auto isSelfMethod = target->isSelfMethod.value();
+            if (send.fun == core::Names::private_() && isSelfMethod) {
+                if (auto e = ctx.beginError(send.funLoc, core::errors::Namer::PrivateMethodMismatch)) {
+                    e.setHeader("Use `{}` to define private class methods", "private_class_method");
+                    auto replacementLoc = ctx.locAt(send.funLoc);
+                    e.replaceWith("Replace with `private_class_method`", replacementLoc, "private_class_method");
+                }
+            } else if (send.fun == core::Names::privateClassMethod() && !isSelfMethod) {
+                if (auto e = ctx.beginError(send.funLoc, core::errors::Namer::PrivateMethodMismatch)) {
+                    e.setHeader("Use `{}` to define private instance methods", "private");
+                    auto replacementLoc = ctx.locAt(send.funLoc);
+                    e.replaceWith("Replace with `private`", replacementLoc, "private");
+                }
+            } else if (send.fun == core::Names::packagePrivate() && isSelfMethod) {
+                if (auto e = ctx.beginError(send.funLoc, core::errors::Namer::PrivateMethodMismatch)) {
+                    e.setHeader("Use `{}` to define package-private class methods", "package_private_class_method");
+                    auto replacementLoc = ctx.locAt(send.funLoc);
+                    e.replaceWith("Replace with `package_private_class_method`", replacementLoc,
+                                  "package_private_class_method");
+                }
+            } else if (send.fun == core::Names::packagePrivateClassMethod() && !isSelfMethod) {
+                if (auto e = ctx.beginError(send.funLoc, core::errors::Namer::PrivateMethodMismatch)) {
+                    e.setHeader("Use `{}` to define package-private instance methods", "package_private");
+                    auto replacementLoc = ctx.locAt(send.funLoc);
+                    e.replaceWith("Replace with `package_private`", replacementLoc, "package_private");
+                }
+            }
+        }
+    }
+
+    void addMethodModifier(core::Context ctx, const ast::Send &send, const ast::ExpressionPtr &arg) {
+        addMethodModifierDiagnostics(ctx, send, arg);
+        auto target = unwrapLiteralToMethodName(ctx, arg);
+        if (target.has_value()) {
             foundDefs->addModifier(core::FoundModifier{
                 core::FoundModifier::Kind::Method,
                 getOwner(),
                 arg.loc(),
-                /*name*/ modifierName,
-                target,
+                /*name*/ send.fun,
+                target->name,
             });
         }
     }
@@ -506,29 +669,41 @@ public:
         });
     }
 
-    core::NameRef unwrapLiteralToMethodName(core::Context ctx, const ast::ExpressionPtr &expr) {
+    optional<UnwrappedMethodName> unwrapLiteralToMethodName(core::Context ctx, const ast::ExpressionPtr &expr) {
         if (auto sym = ast::cast_tree<ast::Literal>(expr)) {
             // this handles the `private :foo` case
             if (!sym->isSymbol()) {
-                return core::NameRef::noName();
+                return nullopt;
             }
-            return sym->asSymbol();
+            return UnwrappedMethodName{sym->asSymbol(), nullopt};
         } else if (auto def = ast::cast_tree<ast::RuntimeMethodDefinition>(expr)) {
-            return def->name;
+            // this handles the `private def foo` case
+            return UnwrappedMethodName{def->name, def->isSelfMethod};
+        } else if (auto send = ast::cast_tree<ast::Send>(expr)) {
+            // Handles combinations of modifiers like
+            // - `private abstract def foo` (`private(abstract(def foo; end))`)
+            // - `abstract private def foo` (`abstract(private(def foo; end))`)
+            if (send->numPosArgs() == 1 && send->fun.isMethodDefModifierName()) {
+                return unwrapLiteralToMethodName(ctx, send->getPosArg(0));
+            }
+
+            return nullopt;
         } else {
             ENFORCE(!ast::isa_tree<ast::MethodDef>(expr), "methods inside sends should be gone");
-            return core::NameRef::noName();
+            return nullopt;
         }
     }
 
     core::FoundDefinitionRef fillAssign(core::Context ctx, const ast::Assign &asgn) {
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
+        auto withinExplicitRootScope = currentOwnerWithinExplicitRootScope() || isExplicitlyRootScoped(asgn.lhs);
         core::FoundStaticField found;
-        found.owner = defineScope(getOwner(), lhs.scope);
+        found.owner = defineScope(getOwner(), lhs.scope, withinExplicitRootScope);
         found.name = lhs.cnst;
         found.asgnLoc = asgn.loc;
         found.lhsLoc = lhs.loc;
+        found.withinExplicitRootScope = withinExplicitRootScope;
         return foundDefs->addStaticField(move(found));
     }
 
@@ -556,6 +731,7 @@ public:
             staticField.asgnLoc = found.asgnLoc;
             staticField.lhsLoc = asgn.lhs.loc();
             staticField.isTypeAlias = true;
+            staticField.withinExplicitRootScope = currentOwnerWithinExplicitRootScope();
             return foundDefs->addStaticField(move(staticField));
         }
 
@@ -599,11 +775,18 @@ public:
     }
 
     core::FoundDefinitionRef handleAssignment(core::Context ctx, const ast::Assign &asgn) {
-        auto &send = ast::cast_tree_nonnull<ast::Send>(asgn.rhs);
+        auto send = ast::cast_tree<ast::Send>(asgn.rhs);
+        ENFORCE(send != nullptr);
         auto foundRef = fillAssign(ctx, asgn);
         ENFORCE(foundRef.kind() == core::FoundDefinitionRef::Kind::StaticField);
         auto &staticField = foundRef.staticField(*foundDefs);
-        staticField.isTypeAlias = sendRecvIsT(send) && send.fun == core::Names::typeAlias();
+        if (send->fun == core::Names::checked() && send->numPosArgs() == 1 &&
+            ast::isa_tree<ast::Literal>(send->getPosArg(0))) {
+            if (auto inner = ast::cast_tree<ast::Send>(send->recv)) {
+                send = inner;
+            }
+        }
+        staticField.isTypeAlias = send->fun == core::Names::typeAlias() && sendRecvIsT(*send);
         return foundRef;
     }
 
@@ -677,6 +860,18 @@ public:
             }
         }
     }
+
+    void postTransformUnresolvedConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto &outermostScope = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(tree).outermostScope();
+        ast::TreeWalk::apply(ctx, *this, outermostScope);
+    }
+
+    void postTransformConstantLit(core::Context ctx, ast::ExpressionPtr &tree) {
+        auto original = ast::cast_tree_nonnull<ast::ConstantLit>(tree).original();
+        if (original != nullptr) {
+            ast::TreeWalk::apply(ctx, *this, original->outermostScope());
+        }
+    }
 };
 
 using BehaviorLocs = InlinedVector<core::Loc, 1>;
@@ -696,14 +891,12 @@ vector<core::NameRef> fullyQualifiedNameFromMangledName(const core::GlobalState 
 
 void populatePackagePathPrefixes(core::MutableContext ctx, core::packages::PackageInfo &info) {
     auto &gs = ctx.state;
-    auto extraPackageFilesDirectoryUnderscorePrefixes = gs.packageDB().extraPackageFilesDirectoryUnderscorePrefixes();
     auto extraPackageFilesDirectorySlashDeprecatedPrefixes =
         gs.packageDB().extraPackageFilesDirectorySlashDeprecatedPrefixes();
     auto extraPackageFilesDirectorySlashPrefixes = gs.packageDB().extraPackageFilesDirectorySlashPrefixes();
 
-    const auto numPrefixes = extraPackageFilesDirectoryUnderscorePrefixes.size() +
-                             extraPackageFilesDirectorySlashDeprecatedPrefixes.size() +
-                             extraPackageFilesDirectorySlashPrefixes.size() + 1;
+    const auto numPrefixes =
+        extraPackageFilesDirectorySlashDeprecatedPrefixes.size() + extraPackageFilesDirectorySlashPrefixes.size() + 1;
     info.packagePathPrefixes.reserve(numPrefixes);
     auto packageFilePath = ctx.file.data(gs).path();
     info.packagePathPrefixes.emplace_back(packageFilePath.substr(0, packageFilePath.find_last_of('/') + 1));
@@ -711,11 +904,6 @@ void populatePackagePathPrefixes(core::MutableContext ctx, core::packages::Packa
     const auto shortName = absl::StrJoin(fullName, "_", core::packages::NameFormatter(gs));
     const auto slashDirName = absl::StrJoin(fullName, "/", core::packages::NameFormatter(gs)) + "/";
     const string_view dirNameFromShortName = shortName;
-
-    for (const string &prefix : extraPackageFilesDirectoryUnderscorePrefixes) {
-        // Project_FooBar -- munge with underscore
-        info.packagePathPrefixes.emplace_back(absl::StrCat(prefix, dirNameFromShortName, "/"));
-    }
 
     for (const string &prefix : extraPackageFilesDirectorySlashDeprecatedPrefixes) {
         // project/Foo_bar -- convert camel-case to snake-case and munge with slash
@@ -754,7 +942,7 @@ void populatePackagePathPrefixes(core::MutableContext ctx, core::packages::Packa
 class SymbolDefiner {
 public:
     struct State {
-        // See getOwnerSymbol for how both of these work.
+        // See getOwnerSymbol for how definition references map to these symbols.
         vector<core::ClassOrModuleRef> definedClasses;
 
         State() = default;
@@ -768,6 +956,13 @@ private:
     const core::FoundDefinitions &foundDefs;
 
     vector<core::ClassOrModuleRef> &symbolsToRecompute;
+    PackageMangledClasses &packageMangledClasses;
+    PackageMangledStaticFields &packageMangledStaticFields;
+    const PackageInfo *const package;
+    // Isolate the definitions in an unpackaged file that would populate a package's namespace (see
+    // `isPackageTerritory`). Its other definitions, like new root constants or reopened payload classes, are entered
+    // as usual, the way unpackaged RBIs need.
+    const bool isolateUnpackagedDefinitions;
 
     // Get the symbol for an already-defined owner. Limited to refs that can own things (classes and methods).
     core::ClassOrModuleRef getOwnerSymbol(const SymbolDefiner::State &state, core::FoundDefinitionRef ref) {
@@ -839,9 +1034,6 @@ private:
     void emitRedefinedConstantError(core::MutableContext ctx, core::LocOffsets errorLoc, core::NameRef name,
                                     core::SymbolRef::Kind kind, core::SymbolRef prevSymbol) {
         using Kind = core::SymbolRef::Kind;
-        ENFORCE(
-            kind != Kind::ClassOrModule,
-            "ClassOrModule symbols should always be entered first, so they should never need to mangle something else");
         if (auto e = ctx.beginError(errorLoc, core::errors::Namer::ConstantKindRedefinition)) {
             auto prevSymbolKind = prettySymbolKind(ctx, prevSymbol.kind());
             if (prevSymbol.kind() == Kind::ClassOrModule && prevSymbol.asClassOrModuleRef().data(ctx)->isDeclared()) {
@@ -873,11 +1065,14 @@ private:
         if (pos < methodData->parameters.size()) {
             // TODO: check that flags match;
             if (parsedParam.loc.exists()) {
-                methodData->parameters[pos].loc = ctx.locAt(parsedParam.loc);
+                if (parsedParam.local._name != core::Names::implicitYield()) {
+                    methodData->parameters[pos].loc = ctx.locAt(parsedParam.loc);
+                }
             }
             return;
         }
 
+        core::LocOffsets loc = parsedParam.loc;
         core::NameRef name;
         if (parsedParam.flags.isKeyword) {
             if (parsedParam.flags.isRepeated) {
@@ -890,13 +1085,24 @@ private:
                 name = parsedParam.local._name;
             }
         } else if (parsedParam.flags.isBlock) {
+            if (parsedParam.local._name == core::Names::implicitYield()) {
+                // The loc of an `implicitYield` Local points at the `yield` or `block_given?` node,
+                // which is not contained in the declLoc of the enclosing method (can cause
+                // confusing errors). Also, the isSyntheticBlockParameter helper looks at whether
+                // the loc exists (because we normalize all block parameter names to blkArg--it
+                // can't branch on the name). Thus the loc we use in the tree (for the "implicit
+                // yield" error) must differ from the loc that we use in the symbol table. The
+                // symbol table needs to still be `none`, like it would have been had we not
+                // explictily set the loc to something when desugaring.
+                loc = core::LocOffsets::none();
+            }
             name = core::Names::blkArg();
         } else {
             name = ctx.state.freshNameUnique(core::UniqueNameKind::PositionalArg, core::Names::arg(), pos + 1);
         }
         // we know right now that pos >= arguments.size() because otherwise we would have hit the early return at the
         // beginning of this method
-        auto &paramInfo = ctx.state.enterMethodParameter(ctx.locAt(parsedParam.loc), ctx.owner.asMethodRef(), name);
+        auto &paramInfo = ctx.state.enterMethodParameter(ctx.locAt(loc), ctx.owner.asMethodRef(), name);
         // at this point, we should have at least pos + 1 arguments, and arguments[pos] should be the thing we got back
         // from enterMethodParameter
         ENFORCE(methodData->parameters.size() >= pos + 1);
@@ -1103,6 +1309,17 @@ private:
         return symbol;
     }
 
+    // We don't track the funLoc of FoundModifier.
+    // We're only using this in autocorrects, so I didn't think we should start tracking it.
+    static optional<core::Loc> modifierFunLoc(core::Context ctx, core::LocOffsets argLoc, string_view fun) {
+        auto funLen = static_cast<int32_t>(fun.size());
+        auto funLoc = ctx.locAt(argLoc).adjustLen(ctx, -funLen - 1, funLen);
+        if (funLoc.source(ctx) != fun) {
+            return nullopt;
+        }
+        return funLoc;
+    }
+
     void modifyMethod(core::MutableContext ctx, const core::FoundModifier &mod) {
         ENFORCE(mod.kind == core::FoundModifier::Kind::Method);
 
@@ -1123,6 +1340,12 @@ private:
                     break;
                 case core::Names::packagePrivate().rawId():
                 case core::Names::packagePrivateClassMethod().rawId():
+                    // Set the flag even if the owner has no package. Hashing a file is done without
+                    // knowledge of package files, so no owner has a package there, and we have to
+                    // unconditionally set the flag in order to make sure that toggling it changes the
+                    // method's hash. Infer ignores the flag on a method whose owner has no package.
+                    method.data(ctx)->flags.isPackagePrivate = true;
+
                     if (!owner.data(ctx)->package.exists()) {
                         if (auto e = ctx.beginError(mod.loc, core::errors::Namer::PackagePrivateOutsidePackage)) {
                             e.setHeader("Method `{}` is not in a package and so cannot be made `{}`", method.show(ctx),
@@ -1130,10 +1353,7 @@ private:
                             e.addErrorLine(owner.data(ctx)->loc(), "This class has no package");
                             e.addErrorLine(method.data(ctx)->loc(), "Method defined here");
                         }
-                        break;
                     }
-
-                    method.data(ctx)->flags.isPackagePrivate = true;
                     break;
                 case core::Names::protected_().rawId():
                     method.data(ctx)->flags.isProtected = true;
@@ -1146,6 +1366,31 @@ private:
                     break;
             }
         }
+
+        if (!method.exists() && mod.name == core::Names::packagePrivate()) {
+            // Check for a `package_private` <> `package_private!` mixup
+            auto cnst = ctx.state.lookupNameConstant(mod.target);
+            auto klass = ctx.owner.enclosingClass(ctx);
+            auto sym = cnst.exists() ? ctx.state.lookupSymbol(klass, cnst) : core::Symbols::noSymbol();
+            if (sym.exists() && !sym.isTypeMember()) {
+                if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                    e.setHeader("`{}` can only make methods package-private, but `{}` is a constant",
+                                mod.name.show(ctx), mod.target.show(ctx));
+                    e.addErrorLine(sym.loc(ctx), "`{}` defined here", sym.show(ctx));
+                    if (sym.isClassOrModule()) {
+                        // No autocorrect: a class or module is marked by `package_private!` in its own body, which
+                        // might be in another file, and `package_private!(:NAME)` only marks static fields.
+                        e.addErrorNote("To make `{}` package-private, use `{}` in its body", sym.show(ctx),
+                                       "package_private!");
+                    } else if (auto funLoc = modifierFunLoc(ctx, mod.loc, "package_private"sv)) {
+                        e.replaceWith("Use `package_private!`", *funLoc, "package_private!");
+                    } else {
+                        e.addErrorNote("To make `{}` package-private, use `{}`", sym.show(ctx),
+                                       fmt::format("package_private!(:{})", mod.target.show(ctx)));
+                    }
+                }
+            }
+        }
     }
 
     void modifyConstant(core::MutableContext ctx, const core::FoundModifier &mod) {
@@ -1153,17 +1398,241 @@ private:
 
         auto owner = ctx.owner.enclosingClass(ctx);
         auto constantNameRef = ctx.state.lookupNameConstant(mod.target);
+        if (!constantNameRef.exists()) {
+            // If no constant with this name has ever been entered, there can't be a symbol to modify.
+            if (mod.name == core::Names::packagePrivateBang()) {
+                reportPackagePrivateNotDefinedInFile(ctx, mod, owner);
+            }
+            return;
+        }
         auto constant = ctx.state.lookupSymbol(owner, constantNameRef);
-        if (constant.exists() && mod.name == core::Names::privateConstant()) {
-            if (constant.isClassOrModule()) {
-                constant.asClassOrModuleRef().data(ctx)->flags.isPrivate = true;
-            } else if (constant.isStaticField(ctx)) {
-                constant.asFieldRef().data(ctx)->flags.isStaticFieldPrivate = true;
-            } else if (constant.isTypeMember()) {
-                // Visibility on type members is special (even more restrictive than private),
-                // so we ignore requests to mark type members private.
+        if (!constant.exists()) {
+            if (mod.name == core::Names::packagePrivateBang()) {
+                reportPackagePrivateNotDefinedInFile(ctx, mod, owner);
+            }
+            return;
+        }
+
+        switch (mod.name.rawId()) {
+            case core::Names::privateConstant().rawId():
+                if (constant.isClassOrModule()) {
+                    constant.asClassOrModuleRef().data(ctx)->flags.isPrivate = true;
+                } else if (constant.isStaticField(ctx)) {
+                    constant.asFieldRef().data(ctx)->flags.isStaticFieldPrivate = true;
+                } else if (constant.isTypeMember()) {
+                    // Visibility on type members is special (even more restrictive than private),
+                    // so we ignore requests to mark type members private.
+                }
+                break;
+            case core::Names::packagePrivateBang().rawId():
+                if (constant.isClassOrModule()) {
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                        e.setHeader("Use `{}` in the body of `{}` to mark it package-private", "package_private!",
+                                    constant.show(ctx));
+                    }
+                } else if (!constant.isStaticField(ctx)) {
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                        e.setHeader("`{}` can only mark a constant, type alias, or class alias", "package_private!");
+                        e.addErrorLine(constant.loc(ctx), "`{}` defined here", constant.show(ctx));
+                    }
+                } else if (!absl::c_any_of(constant.locs(ctx), [&](auto loc) { return loc.file() == ctx.file; })) {
+                    // A marker in a file that doesn't define the constant would be lost on the fast path: when
+                    // the file that does define it is edited, namer deletes and re-enters the constant, but doesn't
+                    // re-run this file's modifiers.
+                    //
+                    // TODO(jez) `private_constant :NAME` on a static field has the same problem, so we should apply
+                    // this restriction to it too. (Classes aren't affected: namer doesn't delete them on the fast
+                    // path.)
+                    reportPackagePrivateNotDefinedInFile(ctx, mod, owner);
+                } else {
+                    constant.asFieldRef().data(ctx)->flags.isPackagePrivate = true;
+                    checkPackagePrivateOwner(ctx, mod.loc, constant);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    void reportPackagePrivateNotDefinedInFile(core::MutableContext ctx, const core::FoundModifier &mod,
+                                              core::ClassOrModuleRef owner) {
+        // Check whether it's a typo and they meant to mark a method `package_private`
+        auto method = owner.data(ctx)->findMethod(ctx, mod.target);
+        auto methodModifier = core::Names::packagePrivate();
+        auto singleton = owner.data(ctx)->lookupSingletonClass(ctx);
+        if (!method.exists() && singleton.exists()) {
+            // TODO(jez) We should revisit this, there are few enough uses in pay-server that we
+            // should probably just standardize on `package_private`, drop `package_private_class_method`,
+            // and tie it into the existing support for e.g. `abstract def foo`
+            method = singleton.data(ctx)->findMethod(ctx, mod.target);
+            methodModifier = core::Names::packagePrivateClassMethod();
+        }
+        if (method.exists()) {
+            if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                e.setHeader("`{}` can only make constants package-private, but `{}` is a method", "package_private!",
+                            mod.target.show(ctx));
+                e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", method.show(ctx));
+                if (auto funLoc = modifierFunLoc(ctx, mod.loc, "package_private!"sv)) {
+                    e.replaceWith(fmt::format("Use `{}`", methodModifier.show(ctx)), *funLoc, "{}",
+                                  methodModifier.show(ctx));
+                } else {
+                    e.addErrorNote("To make `{}` package-private, use `{}`", method.show(ctx),
+                                   fmt::format("{} :{}", methodModifier.show(ctx), mod.target.show(ctx)));
+                }
+            }
+            return;
+        }
+
+        if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+            e.setHeader("`{}` can only mark a constant defined in the same file", "package_private!");
+            e.addErrorNote("No constant named `{}` is defined in `{}` in this file", mod.target.show(ctx),
+                           owner.show(ctx));
+        }
+    }
+
+    bool isMangledNamespace(core::Context ctx, core::ClassOrModuleRef owner) {
+        return owner.data(ctx)->topAttachedClass(ctx).data(ctx)->name.hasUniqueNameKind(
+            ctx, core::UniqueNameKind::MangleRename);
+    }
+
+    bool hasNamespaceError(core::packages::MangledName namespacePackage, bool withinExplicitRootScope,
+                           bool onPackagePath) const {
+        auto foreignNamespace = namespacePackage.exists() && !onPackagePath;
+        auto exempt = package->isPreludePackage() && withinExplicitRootScope && !foreignNamespace;
+        return !exempt && !onPackagePath;
+    }
+
+    // Whether a definition with this ownership would populate a package's namespace, or an intermediate namespace in
+    // the package hierarchy (like `Opus` for an `Opus::Foo` package). Unpackaged files may define anything else.
+    static bool isPackageTerritory(core::ClassOrModuleRef packageRegistryOwner,
+                                   core::packages::MangledName namespacePackage) {
+        return namespacePackage.exists() ||
+               (packageRegistryOwner.exists() && packageRegistryOwner != core::Symbols::PackageSpecRegistry());
+    }
+
+    bool shouldMangleClassDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
+                                     const core::FoundClass &klass) {
+        // Once we're in a mangled namespace, we keep mangling (all nested definitions are isolated,
+        // which allows keeping the implementation of canModifySymbol cheap since it only has to
+        // look directly at the symbol, not any of its owners)
+        if (isMangledNamespace(ctx, owner)) {
+            return true;
+        }
+        if (this->package == nullptr && !isolateUnpackagedDefinitions) {
+            return false;
+        }
+
+        auto [packageRegistryOwner, namespacePackage] = ctx.state.packageInfoForClassOrModule(owner, klass.name);
+
+        // Check the symbol before following aliases, because aliases are a resolver concept.
+        auto existing = owner.data(ctx)->findMemberNoDealias(klass.name);
+        if (existing.exists() && existing.isClassOrModule()) {
+            auto data = existing.asClassOrModuleRef().data(ctx);
+            // If we've found a pre-existing symbol, treat its packaging information as canonical.
+            // (It might have been marked explicitly unpackaged, e.g. String in the payload)
+            packageRegistryOwner = data->packageRegistryOwner;
+            namespacePackage = data->package;
+        }
+
+        if (this->package == nullptr) {
+            return isPackageTerritory(packageRegistryOwner, namespacePackage);
+        }
+
+        auto onPackagePath = package->ownsNamespace(ctx, namespacePackage, packageRegistryOwner);
+        if (packageRegistryOwner == core::Symbols::PackageSpecRegistry()) {
+            onPackagePath = false;
+        }
+        auto shouldMangle = hasNamespaceError(namespacePackage, klass.withinExplicitRootScope, onPackagePath);
+        if (shouldMangle) {
+            // Report using the source namespace's ownership before mangling clears it.
+            reportNamespaceError(ctx, klass.declLoc, klass.withinExplicitRootScope, namespacePackage, onPackagePath,
+                                 owner, klass.name);
+        }
+        return shouldMangle;
+    }
+
+    bool shouldMangleStaticFieldDefinition(core::MutableContext ctx, core::ClassOrModuleRef owner,
+                                           const core::FoundStaticField &staticField) {
+        if (isMangledNamespace(ctx, owner)) {
+            return true;
+        }
+        if (this->package == nullptr) {
+            // The owner is `<root>` or a class that this file defines (namer defines the scope of `A::B = ...` as a
+            // class), which `shouldMangleClassDefinition` has already isolated if it needed to be.
+            return false;
+        }
+        // Assignments define values inside namespaces, so classify the containing owner.
+        auto namespacePackage = owner.data(ctx)->package;
+
+        // Unlike class definitions, assignments require exact package ownership.
+        auto onPackagePath = namespacePackage == package->mangledName();
+        auto shouldMangle = hasNamespaceError(namespacePackage, staticField.withinExplicitRootScope, onPackagePath);
+        if (shouldMangle) {
+            reportNamespaceError(ctx, staticField.lhsLoc, staticField.withinExplicitRootScope, namespacePackage,
+                                 onPackagePath, owner, staticField.name);
+        }
+        return shouldMangle;
+    }
+
+    void reportNamespaceError(core::MutableContext ctx, core::LocOffsets nameLoc, bool withinExplicitRootScope,
+                              core::packages::MangledName namespacePackage, bool onPackagePath,
+                              core::ClassOrModuleRef owner, core::NameRef name) {
+        if (auto e = ctx.beginError(nameLoc, core::errors::Namer::DefinitionPackageMismatch)) {
+            if (withinExplicitRootScope && !package->isPreludePackage()) {
+                e.setHeader("Defining a root-scoped constant requires this package to be marked `{}`", "prelude!");
+                e.addErrorLine(package->declLoc(), "This package is missing a `{}` declaration", "prelude!");
+                e.addErrorNote("Root-scoped constants are exempt from package namespace checks only in `{}` packages",
+                               "prelude!");
+                return;
+            }
+            e.setHeader("File belongs to package `{}` but defines a constant that does not match this namespace",
+                        package->mangledName().owner.show(ctx));
+            e.addErrorLine(package->declLoc(), "Enclosing package declared here");
+            if (!onPackagePath && namespacePackage.exists()) {
+                auto &requiredPackage = ctx.state.packageDB().getPackageInfo(namespacePackage);
+                if (requiredPackage.exists()) {
+                    auto constantName = owner == core::Symbols::root()
+                                            ? name.show(ctx)
+                                            : fmt::format("{}::{}", owner.show(ctx), name.show(ctx));
+                    e.addErrorLine(requiredPackage.declLoc(), "Must belong to this package, given constant name `{}`",
+                                   constantName);
+                }
             }
         }
+    }
+
+    enum class PackageMangledKind { ClassOrModule, StaticField };
+
+    core::NameRef packageMangledName(core::MutableContext ctx, core::ClassOrModuleRef owner, core::NameRef name,
+                                     PackageMangledKind kind) {
+        // We can't always call `nextMangledName` because on the fast path we need to reuse the previous name.
+        // To do that, we search the owner's members for a matching mangled symbol defined in this file.
+        // This intentionally gives subsequent reopenings within the same file the same mangled name. It also
+        // makes us resilient to fast path edits, like whitespace changes, that preserve the definition.
+        //
+        // Reuse must stay file-local: canModifySymbol permits modifying mangled recovery classes, whether
+        // mangled for a package violation or a constant-kind conflict. A later stratum must get a fresh
+        // recovery class, not add mixins or type members to an earlier stratum's class. The same-file
+        // restriction is safe because each file belongs to a single stratum.
+        for (const auto &[candidateName, candidateSymbol] : owner.data(ctx)->members()) {
+            if (!candidateName.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename) ||
+                candidateName.dataUnique(ctx)->original != name) {
+                continue;
+            }
+
+            // If we had separate symbol kinds for static-field and field, we could simplify this to something
+            // like `kind == candidateSymbol.kind()`, instead of having a custom enum for this function.
+            auto matchesKind = kind == PackageMangledKind::ClassOrModule ? candidateSymbol.isClassOrModule()
+                                                                         : candidateSymbol.isStaticField(ctx);
+            if (!matchesKind) {
+                continue;
+            }
+            auto locs = candidateSymbol.locs(ctx);
+            if (absl::c_any_of(locs, [&ctx](core::Loc loc) { return loc.file() == ctx.file; })) {
+                return candidateName;
+            }
+        }
+        return ctx.state.nextMangledName(owner, name);
     }
 
     core::ClassOrModuleRef getClassSymbol(core::MutableContext ctx, const State &state, const core::FoundClass &klass) {
@@ -1174,13 +1643,39 @@ private:
             symbol = ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx);
         } else {
             auto owner = getOwnerSymbol(state, klass.owner);
-            auto member = owner.data(ctx)->findMember(ctx, klass.name);
-            if (member.exists()) {
-                // If member exists with this name, it must be a class or module, because we never mangle-rename them.
-                symbol = member.asClassOrModuleRef();
-            } else {
-                auto newClass = ctx.state.enterClassSymbol(ctx.locAt(klass.declLoc), owner, klass.name);
-                symbol = newClass;
+            auto name = klass.name;
+
+            auto shouldMangle = shouldMangleClassDefinition(ctx, owner, klass);
+            if (!shouldMangle) {
+                // Aliases are entered by resolver--namer should be agnostic of them.
+                auto original = owner.data(ctx)->findMemberNoDealias(klass.name);
+                if (original.exists() && !original.isClassOrModule()) {
+                    // We used to try to ensure that classes were defined first, so if the symbol
+                    // existed it would necessarily be a class, and not need to be mangled.
+                    //
+                    // Turns out, that was never true (because of payload symbols), and is
+                    // increasingly not true in a package-directed world. Luckily we can piggy back
+                    // on the same mangling logic we built for package-directed class mangling to
+                    // also mangle class symbols everywhere.
+                    emitRedefinedConstantError(ctx, klass.declLoc, klass.name, core::SymbolRef::Kind::ClassOrModule,
+                                               original);
+                    shouldMangle = true;
+                }
+            }
+            if (shouldMangle) {
+                auto previous =
+                    packageMangledClasses.find({ctx.file, owner, klass.name, klass.withinExplicitRootScope});
+                if (previous != packageMangledClasses.end()) {
+                    name = previous->second.data(ctx)->name;
+                } else {
+                    name = packageMangledName(ctx, owner, klass.name, PackageMangledKind::ClassOrModule);
+                }
+            }
+
+            symbol = ctx.state.enterClassOrModuleSymbol(ctx.locAt(klass.declLoc), owner, name);
+
+            if (shouldMangle) {
+                packageMangledClasses[{ctx.file, owner, klass.name, klass.withinExplicitRootScope}] = symbol;
             }
         }
         ENFORCE(symbol.exists());
@@ -1189,6 +1684,7 @@ private:
         const bool isModule = klass.classKind == core::FoundClass::Kind::Module;
         auto declLoc = ctx.locAt(klass.declLoc);
 
+        bool isDeclared = false;
         if (symbol.data(ctx)->isClassModuleSet() && !isUnknown && isModule != symbol.data(ctx)->isModule()) {
             if (auto e = ctx.state.beginError(declLoc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("`{}` was previously defined as a `{}`", symbol.show(ctx),
@@ -1202,10 +1698,19 @@ private:
             }
 
             // Even though the declaration is erroneous, the class/module is technically "declared".
-            symbol.data(ctx)->setDeclared();
+            isDeclared = true;
         } else if (!isUnknown) {
             symbol.data(ctx)->setIsModule(isModule);
+            isDeclared = true;
+        }
+
+        if (isDeclared) {
             symbol.data(ctx)->setDeclared();
+
+            auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+            if (filePackage.exists() && filePackage == symbol.data(ctx)->package) {
+                symbol.data(ctx)->setDeclaredInPackage();
+            }
         }
 
         return symbol;
@@ -1218,13 +1723,6 @@ private:
         if (klass.classKind == core::FoundClass::Kind::Class && !symbol.data(ctx)->superClass().exists() &&
             symbol != core::Symbols::BasicObject()) {
             symbol.data(ctx)->setSuperClass(core::Symbols::todo());
-        }
-
-        // In Ruby 2.5 they changed this class to have a different superclass
-        // from 2.4. Since we don't have a good story around versioned ruby rbis
-        // yet, lets just force the superclass regardless of version.
-        if (symbol == core::Symbols::Net_IMAP()) {
-            symbol.data(ctx)->setSuperClass(core::Symbols::Net_Protocol());
         }
 
         const bool isUnknown = klass.classKind == core::FoundClass::Kind::Unknown;
@@ -1303,8 +1801,7 @@ private:
         ENFORCE(ctx.file.data(ctx).isPackage(ctx));
         auto owner = getOwnerSymbol(state, package.owner);
 
-        // Eagerly resolve the superclass, so that we can rely on
-        // TODO(trevor) Finish this comment
+        // Eagerly resolve the superclass, so that we can rely on it being set before we hit the resolver.
         owner.data(ctx)->setSuperClass(core::Symbols::PackageSpec());
 
         auto mangledName = core::packages::MangledName(owner);
@@ -1319,7 +1816,7 @@ private:
         } else if (!prevPkg.exists()) {
             // TODO(jez) The above condition is a poor-man's way of making this safe for the fast path
             // Previously, we would not run the "definePackage" logic at all for `__package.rb` files.
-            // By making a new package, we blow away all the imports/exports/etc. that were defined
+            // By making a new package, we blow away all the imports/visible_tos/etc. that were defined
             // on the old package, which we don't want to do.
             //
             // Eventually we want to make edits to `__package.rb` files take the fast path, which
@@ -1342,37 +1839,117 @@ private:
         ENFORCE(mod.kind == core::FoundModifier::Kind::Class);
         const auto fun = mod.name;
         auto symbolData = ctx.owner.asClassOrModuleRef().data(ctx);
-        if (fun == core::Names::declareFinal()) {
-            symbolData->flags.isFinal = true;
-            symbolData->singletonClass(ctx).data(ctx)->flags.isFinal = true;
-        }
-        if (fun == core::Names::declareSealed()) {
-            symbolData->flags.isSealed = true;
-
-            auto classOfKlass = symbolData->singletonClass(ctx);
-            auto loc = ctx.locAt(mod.loc);
-            auto sealedSubclasses = ctx.state.enterMethodSymbol(loc, classOfKlass, core::Names::sealedSubclasses());
-            sealedSubclasses.data(ctx)->addLoc(ctx, loc);
-            auto &blkArg = ctx.state.enterMethodParameter(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
-            blkArg.flags.isBlock = true;
-
-            // T.noreturn here represents the zero-length list of subclasses of this sealed class.
-            // We will use T.any to record subclasses when they're resolved.
-            sealedSubclasses.data(ctx)->resultType = core::Types::setOf(core::Types::bottom());
-        }
-        if (fun == core::Names::declareInterface() || fun == core::Names::declareAbstract()) {
-            symbolData->flags.isAbstract = true;
-            symbolData->singletonClass(ctx).data(ctx)->flags.isAbstract = true;
-        }
-        if (fun == core::Names::declareInterface()) {
-            symbolData->flags.isInterface = true;
-            if (!symbolData->isModule()) {
-                if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
-                    e.setHeader("Classes can't be interfaces. Use `{}` instead of `{}`", "abstract!", "interface!");
-                    e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
+        switch (fun.rawId()) {
+            case core::Names::prelude_bang().rawId():
+                if (auto *packageInfo = packageInfoForContext(ctx)) {
+                    packageInfo->locs.preludePackage = mod.loc;
                 }
+                break;
+            case core::Names::test_bang().rawId():
+                if (auto *packageInfo = packageInfoForContext(ctx)) {
+                    packageInfo->locs.testPackage = mod.loc;
+                }
+                break;
+            case core::Names::importedByNestedPackages().rawId():
+                if (auto *packageInfo = packageInfoForContext(ctx)) {
+                    packageInfo->locs.importedByNestedPackages = mod.loc;
+                }
+                break;
+            case core::Names::declareFinal().rawId():
+                symbolData->flags.isFinal = true;
+                symbolData->singletonClass(ctx).data(ctx)->flags.isFinal = true;
+                break;
+            case core::Names::declareSealed().rawId(): {
+                symbolData->flags.isSealed = true;
+
+                auto classOfKlass = symbolData->singletonClass(ctx);
+                auto loc = ctx.locAt(mod.loc);
+                auto sealedSubclasses = ctx.state.enterMethodSymbol(loc, classOfKlass, core::Names::sealedSubclasses());
+                sealedSubclasses.data(ctx)->addLoc(ctx, loc);
+                auto &blkArg =
+                    ctx.state.enterMethodParameter(core::Loc::none(), sealedSubclasses, core::Names::blkArg());
+                blkArg.flags.isBlock = true;
+
+                // T.noreturn here represents the zero-length list of subclasses of this sealed class.
+                // We will use T.any to record subclasses when they're resolved.
+                sealedSubclasses.data(ctx)->resultType = core::Types::setOf(core::Types::bottom());
+                break;
             }
+            case core::Names::declareInterface().rawId():
+                symbolData->flags.isInterface = true;
+                if (!symbolData->isModule()) {
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InterfaceClass)) {
+                        e.setHeader("Classes can't be interfaces. Use `{}` instead of `{}`", "abstract!", "interface!");
+                        e.replaceWith("Change `interface!` to `abstract!`", ctx.locAt(mod.loc), "abstract!");
+                    }
+                }
+                [[fallthrough]];
+            case core::Names::declareAbstract().rawId():
+                symbolData->flags.isAbstract = true;
+                symbolData->singletonClass(ctx).data(ctx)->flags.isAbstract = true;
+                break;
+            case core::Names::packagePrivateBang().rawId(): {
+                auto klass = ctx.owner.asClassOrModuleRef();
+
+                // Set the flag even if the marker is the wrong package. Hashing a file is done
+                // without knowledge of package files, and thus doesn't know if the file has the
+                // right owner, so we have to unconditionally set the flag in order in order to make
+                // sure we choose to take the slow path.
+                symbolData->flags.isPackagePrivate = true;
+
+                // We don't also have to set isPackagePrivate on the singletonClass(), because I
+                // don't think it's ever possible to resolve a constant reference to the singleton
+                // class (only a dynamic reference like `self`).
+
+                if (!checkPackagePrivateOwner(ctx, mod.loc, klass)) {
+                    break;
+                }
+
+                if (symbolData->packageRegistryOwner.exists()) {
+                    // Only namespaces that are or that enclose a package have an entry in the package registry.
+                    auto registryPackage = core::packages::MangledName(symbolData->packageRegistryOwner);
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::InvalidPackagePrivate)) {
+                        if (registryPackage == symbolData->package) {
+                            e.setHeader("`{}` cannot mark the root namespace of package `{}`", "package_private!",
+                                        klass.show(ctx));
+                            e.addErrorNote("To restrict which packages can import `{}`, use `{}` in its `{}` file",
+                                           klass.show(ctx), "visible_to", "__package.rb");
+                        } else {
+                            e.setHeader("`{}` cannot mark `{}`, because it encloses another package",
+                                        "package_private!", klass.show(ctx));
+                            e.addErrorNote("Mark the constants inside `{}` instead", klass.show(ctx));
+                        }
+                    }
+                }
+                break;
+            }
+            default:
+                break;
         }
+    }
+
+    // Reports an error and returns false if a `package_private!` marker in this file may not mark `sym`.
+    //
+    // Callers set the flag regardless (see the comment in `modifyClass`).
+    bool checkPackagePrivateOwner(core::MutableContext ctx, core::LocOffsets loc, core::SymbolRef sym) {
+        auto symPackage = sym.enclosingClass(ctx).data(ctx)->package;
+        if (!symPackage.exists()) {
+            if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidPackagePrivate)) {
+                e.setHeader("`{}` is not in a package and so cannot be made `{}`", sym.show(ctx), "package_private!");
+            }
+            return false;
+        }
+
+        auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        if (filePackage != symPackage) {
+            if (auto e = ctx.beginError(loc, core::errors::Namer::InvalidPackagePrivate)) {
+                e.setHeader("`{}` can only be marked `{}` by a file in its package, `{}`", sym.show(ctx),
+                            "package_private!", symPackage.owner.show(ctx));
+            }
+            return false;
+        }
+
+        return true;
     }
 
     core::FieldRef insertField(core::MutableContext ctx, const core::FoundField &field) {
@@ -1419,8 +1996,28 @@ private:
                                      const core::FoundStaticField &staticField) {
         ENFORCE(ctx.owner.isClassOrModule());
 
+        if (staticField.name == core::Names::Constants::AttachedClass()) {
+            // This is an invalid `has_attached_class!` that we're ignoring (the name can't be
+            // written in Ruby source). The rest of the pipeline assumes that any `<AttachedClass>`
+            // member is a type member, so don't define a static field with that name.
+            return core::Symbols::noField();
+        }
+
         auto scope = getOwnerSymbol(state, staticField.owner);
         auto name = staticField.name;
+
+        // Package-aware mangling, to avoid entering symbols which belong to other packages
+        auto shouldMangle = shouldMangleStaticFieldDefinition(ctx, scope, staticField);
+        if (shouldMangle) {
+            auto previous = packageMangledStaticFields.find(
+                {ctx.file, scope, staticField.name, staticField.withinExplicitRootScope});
+            if (previous != packageMangledStaticFields.end()) {
+                name = previous->second.data(ctx)->name;
+            } else {
+                name = packageMangledName(ctx, scope, staticField.name, PackageMangledKind::StaticField);
+            }
+        }
+
         auto sym = ctx.state.lookupStaticFieldSymbol(scope, name);
         auto currSym = ctx.state.lookupSymbol(scope, name);
         if (!sym.exists() && currSym.exists()) {
@@ -1431,13 +2028,16 @@ private:
         if (sym.exists()) {
             ENFORCE(currSym.exists());
             name = sym.data(ctx)->name;
-            if (name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
+            if (!shouldMangle && name.hasUniqueNameKind(ctx, core::UniqueNameKind::MangleRename)) {
                 ENFORCE(currSym != sym);
                 emitRedefinedConstantError(ctx, staticField.asgnLoc, sym, currSym);
             }
         }
         ensureNoPackageConflict(ctx, scope, name, staticField.lhsLoc);
         sym = ctx.state.enterStaticFieldSymbol(ctx.locAt(staticField.lhsLoc), scope, name);
+        if (shouldMangle) {
+            packageMangledStaticFields[{ctx.file, scope, staticField.name, staticField.withinExplicitRootScope}] = sym;
+        }
         // Reset resultType to nullptr for idempotency on the fast path--it will always be
         // re-entered in resolver.
         sym.data(ctx)->resultType = nullptr;
@@ -1449,16 +2049,23 @@ private:
         return sym;
     }
 
+    core::SymbolRef insertTypeMemberAsStaticField(core::MutableContext ctx, const State &state,
+                                                  const core::FoundTypeMember &typeMember) {
+        core::FoundStaticField staticField;
+        staticField.owner = typeMember.owner;
+        staticField.withinExplicitRootScope = typeMember.owner.kind() == core::FoundDefinitionRef::Kind::Class &&
+                                              typeMember.owner.klass(foundDefs).withinExplicitRootScope;
+        staticField.name = typeMember.name;
+        staticField.asgnLoc = typeMember.asgnLoc;
+        staticField.lhsLoc = typeMember.nameLoc;
+        staticField.isTypeAlias = true;
+        return insertStaticField(ctx, state, staticField);
+    }
+
     core::SymbolRef insertTypeMember(core::MutableContext ctx, const State &state,
                                      const core::FoundTypeMember &typeMember) {
         if (ctx.owner == core::Symbols::root()) {
-            core::FoundStaticField staticField;
-            staticField.owner = typeMember.owner;
-            staticField.name = typeMember.name;
-            staticField.asgnLoc = typeMember.asgnLoc;
-            staticField.lhsLoc = typeMember.asgnLoc;
-            staticField.isTypeAlias = true;
-            return insertStaticField(ctx, state, staticField);
+            return insertTypeMemberAsStaticField(ctx, state, typeMember);
         }
 
         core::Variance variance = core::Variance::Invariant;
@@ -1466,6 +2073,12 @@ private:
 
         auto onSymbol = isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->singletonClass(ctx)
                                        : ctx.owner.asClassOrModuleRef();
+
+        auto package = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        if (ctx.state.packageDB().getPackageInfo(package).canModifySymbol(ctx, onSymbol) !=
+            core::packages::PackageInfo::CanModifyResult::CanModify) {
+            return insertTypeMemberAsStaticField(ctx, state, typeMember);
+        }
 
         core::NameRef foundVariance = typeMember.varianceName;
         if (foundVariance.exists()) {
@@ -1540,8 +2153,7 @@ private:
                 alias.data(ctx)->addLoc(ctx, ctx.locAt(typeMember.asgnLoc));
             } else {
                 auto oldSym = context.data(ctx)->findMemberNoDealias(typeTemplateAliasName);
-                if (oldSym.exists() &&
-                    !(oldSym.loc(ctx) == ctx.locAt(typeMember.asgnLoc) || oldSym.loc(ctx).isTombStoned(ctx))) {
+                if (oldSym.exists() && oldSym.loc(ctx) != ctx.locAt(typeMember.asgnLoc)) {
                     emitRedefinedConstantError(ctx, typeMember.nameLoc, typeMemberName,
                                                core::SymbolRef::Kind::TypeMember, oldSym);
                     typeTemplateAliasName = ctx.state.nextMangledName(context, typeTemplateAliasName);
@@ -1729,11 +2341,33 @@ public:
         }
     }
 
-    SymbolDefiner(const core::FoundDefinitions &foundDefs, vector<core::ClassOrModuleRef> &symbolsToRecompute)
-        : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute} {}
+    SymbolDefiner(core::Context ctx, const core::FoundDefinitions &foundDefs,
+                  vector<core::ClassOrModuleRef> &symbolsToRecompute, PackageMangledClasses &packageMangledClasses,
+                  PackageMangledStaticFields &packageMangledStaticFields)
+        : foundDefs(foundDefs), symbolsToRecompute{symbolsToRecompute}, packageMangledClasses(packageMangledClasses),
+          packageMangledStaticFields(packageMangledStaticFields),
+          package(ctx.state.packageDB().getPackageForSourceFile(ctx.state, ctx.file)),
+          isolateUnpackagedDefinitions(ctx.state.packageDB().enabled() && !ctx.file.data(ctx).isPackage(ctx) &&
+                                       this->package == nullptr) {
+        // Payload files belong to no package, so they'd be isolated too. But they're only ever entered before the
+        // packager is enabled: when building the payload (`--store-state`, which `--sorbet-packages` rejects), or when
+        // populating it from source. LSP doesn't re-run namer on them.
+        ENFORCE(!isolateUnpackagedDefinitions || !ctx.file.data(ctx).isPayload(), "Payload file `{}` in packager mode",
+                ctx.file.data(ctx).path());
+    }
 
     SymbolDefiner::State enterClassDefinitions(core::MutableContext ctx, bool willDeleteOldDefs,
                                                ClassBehaviorLocsMap &classBehaviorLocs) {
+        // Report once per file, before entering isolated recovery symbols. SymbolDefiner is constructed
+        // again for non-class definitions, so its constructor must not report this error.
+        if (isolateUnpackagedDefinitions && ctx.file.data(ctx).sourceSize() != 0) {
+            if (auto e = ctx.beginError(core::LocOffsets{0, 0}, core::errors::Namer::UnpackagedFile)) {
+                e.setHeader("File `{}` does not belong to a package; add a `{}` file to one "
+                            "of its parent directories",
+                            ctx.file.data(ctx).path(), "__package.rb");
+            }
+        }
+
         SymbolDefiner::State state;
         state.definedClasses.reserve(foundDefs.klasses().size());
 
@@ -1874,56 +2508,73 @@ public:
  */
 class TreeSymbolizer {
     friend class Namer;
+    const PackageMangledClasses &packageMangledClasses;
+    const PackageMangledStaticFields &packageMangledStaticFields;
+    size_t explicitRootScopeDepth = 0;
 
-    core::SymbolRef squashNamesInner(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
-                                     bool firstName) {
-        auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node);
-        if (constLit == nullptr) {
-            if (auto id = ast::cast_tree<ast::ConstantLit>(node)) {
-                return id->symbol().dealias(ctx);
-            }
-            if (auto uid = ast::cast_tree<ast::UnresolvedIdent>(node)) {
-                if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
-                    if (auto e = ctx.beginError(node.loc(), core::errors::Namer::DynamicConstant)) {
-                        e.setHeader("Unsupported constant scope");
+    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node,
+                                bool withinExplicitRootScope) {
+        struct Walker {
+            core::Context ctx;
+            const PackageMangledClasses &packageMangledClasses;
+            bool withinExplicitRootScope;
+            core::SymbolRef newOwner;
+
+            ast::ExpressionPtr onRoot(ast::ExpressionPtr root) {
+                if (auto id = ast::cast_tree<ast::ConstantLit>(root)) {
+                    newOwner = id->symbol().dealias(ctx);
+                    return root;
+                }
+                if (auto uid = ast::cast_tree<ast::UnresolvedIdent>(root)) {
+                    if (uid->kind != ast::UnresolvedIdent::Kind::Class || uid->name != core::Names::singleton()) {
+                        if (auto e = ctx.beginError(root.loc(), core::errors::Namer::DynamicConstant)) {
+                            e.setHeader("Unsupported constant scope");
+                        }
+                    }
+                    // emitted via `class << self` blocks
+                } else if (ast::isa_tree<ast::EmptyTree>(root)) {
+                    // ::Foo
+                } else if (root.isSelfReference()) {
+                    // self::Foo
+                } else {
+                    if (auto e = ctx.beginError(root.loc(), core::errors::Namer::DynamicConstant)) {
+                        e.setHeader("Dynamic constant references are unsupported");
                     }
                 }
-                // emitted via `class << self` blocks
-            } else if (ast::isa_tree<ast::EmptyTree>(node)) {
-                // ::Foo
-            } else if (node.isSelfReference()) {
-                // self::Foo
-            } else {
-                if (auto e = ctx.beginError(node.loc(), core::errors::Namer::DynamicConstant)) {
-                    e.setHeader("Dynamic constant references are unsupported");
+                return ast::MK::EmptyTree();
+            }
+
+            ast::ExpressionPtr onPart(std::unique_ptr<ast::UnresolvedConstantLit> constLit, bool isOutermost) {
+                ENFORCE(newOwner.exists());
+
+                auto mangled = packageMangledClasses.find(
+                    {ctx.file, newOwner.asClassOrModuleRef(), constLit->cnst, withinExplicitRootScope});
+                core::SymbolRef existing =
+                    mangled != packageMangledClasses.end()
+                        ? mangled->second
+                        : ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
+                if (isOutermost && !existing.exists() && newOwner.isClassOrModule()) {
+                    existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
+                    if (existing.exists()) {
+                        existing = existing.dealias(ctx.state);
+                    }
                 }
+
+                // NameInserter should have created this symbol
+                ENFORCE(existing.exists());
+
+                newOwner = existing;
+                return ast::make_expression<ast::ConstantLit>(existing, std::move(constLit));
             }
-            node = ast::MK::EmptyTree();
-            return owner;
+        } walker{ctx, packageMangledClasses, withinExplicitRootScope, owner};
+
+        if (!ast::isa_tree<ast::UnresolvedConstantLit>(node)) {
+            node = walker.onRoot(std::move(node));
+            return walker.newOwner;
         }
 
-        const bool firstNameRecursive = false;
-        auto newOwner = squashNamesInner(ctx, owner, constLit->scope, firstNameRecursive);
-        ENFORCE(newOwner.exists());
-
-        core::SymbolRef existing = ctx.state.lookupClassSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
-        if (firstName && !existing.exists() && newOwner.isClassOrModule()) {
-            existing = ctx.state.lookupStaticFieldSymbol(newOwner.asClassOrModuleRef(), constLit->cnst);
-            if (existing.exists()) {
-                existing = existing.dealias(ctx.state);
-            }
-        }
-
-        // NameInserter should have created this symbol
-        ENFORCE(existing.exists());
-
-        node = ast::make_expression<ast::ConstantLit>(existing, node.toUnique<ast::UnresolvedConstantLit>());
-        return existing;
-    }
-
-    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, ast::ExpressionPtr &node) {
-        const bool firstName = true;
-        return squashNamesInner(ctx, owner, node, firstName);
+        node = ast::UnresolvedConstantLit::foldOwned(std::move(node), walker);
+        return walker.newOwner;
     }
 
     ast::ExpressionPtr arg2Symbol(int pos, const core::ParsedParam &parsedArg, ast::ExpressionPtr arg) {
@@ -1936,10 +2587,17 @@ class TreeSymbolizer {
     }
 
 public:
-    TreeSymbolizer() {}
+    TreeSymbolizer(const PackageMangledClasses &packageMangledClasses,
+                   const PackageMangledStaticFields &packageMangledStaticFields)
+        : packageMangledClasses(packageMangledClasses), packageMangledStaticFields(packageMangledStaticFields) {}
 
     void preTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
+
+        auto withinExplicitRootScope = explicitRootScopeDepth > 0 || isExplicitlyRootScoped(klass.name);
+        if (withinExplicitRootScope) {
+            explicitRootScopeDepth++;
+        }
 
         auto ident = ast::cast_tree<ast::UnresolvedIdent>(klass.name);
 
@@ -1950,7 +2608,8 @@ public:
         } else {
             auto symbol = klass.symbol;
             if (symbol == core::Symbols::todo()) {
-                auto squashedSymbol = squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name);
+                auto squashedSymbol =
+                    squashNames(ctx, ctx.owner.enclosingClass(ctx), klass.name, withinExplicitRootScope);
                 ENFORCE(squashedSymbol.exists());
                 klass.symbol = squashedSymbol.asClassOrModuleRef();
             } else {
@@ -1961,13 +2620,12 @@ public:
         }
     }
 
-#ifdef DEBUG_MODE
-    // After some refactors, the only thing left in this callback is a bunch of ENFORCEs, so I've
-    // compiled the entire callback out unless DEBUG_MODE is set.
-    //
-    // If you're changing this to put load bearing logic back into this method, feel free to remove
-    // the #ifdef above.
     void postTransformClassDef(core::Context ctx, ast::ExpressionPtr &tree) {
+        if (explicitRootScopeDepth > 0) {
+            explicitRootScopeDepth--;
+        }
+
+#ifdef DEBUG_MODE
         auto &klass = ast::cast_tree_nonnull<ast::ClassDef>(tree);
 
         ENFORCE(klass.symbol != core::Symbols::todo());
@@ -1979,8 +2637,8 @@ public:
         // ENFORCE'ing it here makes certain errors apparent earlier.
         auto allowMissing = true;
         ENFORCE(ctx.state.lookupStaticInitForClass(klass.symbol, allowMissing).exists());
-    }
 #endif
+    }
 
     ast::MethodDef::PARAMS_store fillInParams(const vector<core::ParsedParam> &parsedParams,
                                               ast::MethodDef::PARAMS_store oldParams) {
@@ -2027,7 +2685,9 @@ public:
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
         auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
 
-        auto maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope);
+        // squashNames removes the leading `::`; preserve it for the same lookup key used by SymbolDefiner.
+        auto withinExplicitRootScope = explicitRootScopeDepth > 0 || isExplicitlyRootScoped(asgn.lhs);
+        auto maybeScope = squashNames(ctx, contextClass(ctx, ctx.owner), lhs.scope, withinExplicitRootScope);
         ENFORCE(maybeScope.exists());
 
         if (!maybeScope.isClassOrModule()) {
@@ -2036,7 +2696,10 @@ public:
         }
         auto scope = maybeScope.asClassOrModuleRef();
 
-        core::SymbolRef cnst = ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
+        auto maybeCnst = packageMangledStaticFields.find({ctx.file, scope, lhs.cnst, withinExplicitRootScope});
+        core::SymbolRef cnst = maybeCnst != packageMangledStaticFields.end()
+                                   ? maybeCnst->second
+                                   : ctx.state.lookupStaticFieldSymbol(scope, lhs.cnst);
         ENFORCE(cnst.exists());
         asgn.lhs = ast::make_expression<ast::ConstantLit>(cnst, asgn.lhs.toUnique<ast::UnresolvedConstantLit>());
 
@@ -2104,6 +2767,13 @@ public:
     ast::ExpressionPtr ignoreBadTypeMember(core::Context ctx, ast::ExpressionPtr tree) {
         auto &asgn = ast::cast_tree_nonnull<ast::Assign>(tree);
 
+        auto &lhs = ast::cast_tree_nonnull<ast::UnresolvedConstantLit>(asgn.lhs);
+        if (lhs.cnst == core::Names::Constants::AttachedClass()) {
+            // The rest of the pipeline assumes that any `<AttachedClass>` member is a type member,
+            // so don't define a static field with that name.
+            return ast::MK::EmptyTree();
+        }
+
         asgn.rhs =
             ast::MK::Send0Block(asgn.loc, ast::MK::T(asgn.loc), core::Names::typeAlias(), asgn.loc.copyWithZeroLength(),
                                 ast::MK::Block0(asgn.loc, ast::MK::Untyped(asgn.loc)));
@@ -2151,6 +2821,56 @@ public:
         auto onSymbol = isTypeTemplate ? ctx.owner.asClassOrModuleRef().data(ctx)->lookupSingletonClass(ctx)
                                        : ctx.owner.asClassOrModuleRef();
         ENFORCE(onSymbol.exists());
+
+        auto filePackage = ctx.state.packageDB().getPackageNameForFile(ctx.file);
+        auto &filePackageInfo = ctx.state.packageDB().getPackageInfo(filePackage);
+        auto canModify = filePackageInfo.canModifySymbol(ctx, onSymbol);
+        switch (canModify) {
+            case core::packages::PackageInfo::CanModifyResult::CanModify:
+                break;
+
+            case core::packages::PackageInfo::CanModifyResult::Subpackages:
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::RootTypeMember)) {
+                    auto attached = onSymbol.data(ctx)->topAttachedClass(ctx);
+                    filePackageInfo.explainSubpackageNamespaceError(
+                        ctx, e, onSymbol.show(ctx), "be generic", attached.data(ctx)->packageRegistryOwner,
+                        attached.show(ctx), isTypeTemplate ? "remove the `type_template`" : "remove the `type_member`");
+                }
+                return ignoreBadTypeMember(ctx, move(tree));
+
+            case core::packages::PackageInfo::CanModifyResult::NotOwner:
+            case core::packages::PackageInfo::CanModifyResult::UnpackagedSymbol:
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::ModifyingUnpackagedConstant)) {
+                    e.setHeader("`{}` may only be used on constants in the package that owns them",
+                                isTypeTemplate ? "type_template" : "type_member");
+
+                    if (canModify == core::packages::PackageInfo::CanModifyResult::NotOwner) {
+                        e.addErrorLine(filePackageInfo.declLoc(), "Package containing the `{}` defined here",
+                                       isTypeTemplate ? "type_template" : "type_member");
+
+                        auto &ownerPackage = ctx.state.packageDB().getPackageInfo(onSymbol.data(ctx)->package);
+                        ENFORCE(ownerPackage.exists());
+                        e.addErrorLine(ownerPackage.declLoc(), "Owning package defined here", ctx.owner.show(ctx));
+                    } else {
+                        e.addErrorLine(filePackageInfo.declLoc(), "Package containing the `{}` is not a `{}`",
+                                       isTypeTemplate ? "type_template" : "type_member", "prelude!");
+                        e.addErrorNote("`{}` is unpackaged, and may be reopened from a package marked `{}`",
+                                       ctx.owner.show(ctx), "prelude!");
+                    }
+                }
+                return ignoreBadTypeMember(ctx, move(tree));
+
+            case core::packages::PackageInfo::CanModifyResult::PackageSpec:
+                if (auto e = ctx.beginError(send->loc, core::errors::Namer::InvalidPackageExpression)) {
+                    e.setHeader("Invalid expression in package: `{}` is not allowed",
+                                isTypeTemplate ? "type_template" : "type_member");
+
+                    e.addErrorLine(onSymbol.data(ctx)->loc(), "Package defined here");
+                }
+
+                return ignoreBadTypeMember(ctx, move(tree));
+        }
+
         core::SymbolRef sym = ctx.state.lookupTypeMemberSymbol(onSymbol, typeName->cnst);
         ENFORCE(sym.exists());
 
@@ -2327,9 +3047,11 @@ void findConflictingClassDefs(const core::GlobalState &gs, ClassBehaviorLocsMap 
     }
 }
 
-void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions, WorkerPool &workers,
+void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinitions,
                    UnorderedMap<core::FileRef, shared_ptr<const core::FileHash>> &&oldFoundHashesForFiles,
-                   core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols) {
+                   core::FoundDefHashesResult *foundHashesOut, vector<core::ClassOrModuleRef> &updatedSymbols,
+                   PackageMangledClasses &packageMangledClasses,
+                   PackageMangledStaticFields &packageMangledStaticFields) {
     Timer timeit(gs.tracer(), "naming.defineSymbols");
     const auto &epochManager = *gs.epochManager;
     uint32_t count = 0;
@@ -2346,7 +3068,8 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
         }
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions, updatedSymbols);
+        SymbolDefiner symbolDefiner(ctx, *fileFoundDefinitions, updatedSymbols, packageMangledClasses,
+                                    packageMangledStaticFields);
         auto state = symbolDefiner.enterClassDefinitions(ctx, willDeleteOldDefs, classBehaviorLocs);
         if (willDeleteOldDefs) {
             auto frefIt = oldFoundHashesForFiles.find(fref);
@@ -2372,19 +3095,24 @@ void defineSymbols(core::GlobalState &gs, AllFoundDefinitions allFoundDefinition
 
         core::MutableContext ctx(gs, core::Symbols::root(), fref);
 
-        SymbolDefiner symbolDefiner(*fileFoundDefinitions, updatedSymbols);
+        SymbolDefiner symbolDefiner(ctx, *fileFoundDefinitions, updatedSymbols, packageMangledClasses,
+                                    packageMangledStaticFields);
         symbolDefiner.enterNewDefinitions(ctx, move(incrementalDefinitions[fref]));
     }
     return;
 }
 
-void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers) {
+void symbolizeTrees(const core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, WorkerPool &workers,
+                    const PackageMangledClasses &packageMangledClasses,
+                    const PackageMangledStaticFields &packageMangledStaticFields) {
     Timer timeit(gs.tracer(), "naming.symbolizeTrees");
-    Parallel::iterate(workers, "symbolizeTrees", trees, [&gs, inserter = TreeSymbolizer()](auto &parsedFile) mutable {
-        Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(parsedFile.file.data(gs).path())}});
-        core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
-        ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
-    });
+    Parallel::iterate(
+        workers, "symbolizeTrees", trees,
+        [&gs, inserter = TreeSymbolizer(packageMangledClasses, packageMangledStaticFields)](auto &parsedFile) mutable {
+            Timer timeit(gs.tracer(), "naming.symbolizeTreesOne", {{"file", string(parsedFile.file.data(gs).path())}});
+            core::Context ctx(gs, core::Symbols::root(), parsedFile.file);
+            ast::TreeWalk::apply(ctx, inserter, parsedFile.tree);
+        });
 }
 
 } // namespace
@@ -2402,12 +3130,15 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
         ENFORCE(foundDefs.size() == 1,
                 "Producing foundMethodHashes is meant to only happen when hashing a single file");
     }
-    defineSymbols(gs, move(foundDefs), workers, std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols);
+    PackageMangledClasses packageMangledClasses;
+    PackageMangledStaticFields packageMangledStaticFields;
+    defineSymbols(gs, move(foundDefs), std::move(oldFoundHashesForFiles), foundHashesOut, updatedSymbols,
+                  packageMangledClasses, packageMangledStaticFields);
     if (gs.epochManager->wasTypecheckingCanceled()) {
         return true;
     }
 
-    symbolizeTrees(gs, trees, workers);
+    symbolizeTrees(gs, trees, workers, packageMangledClasses, packageMangledStaticFields);
     return false;
 }
 
@@ -2415,8 +3146,9 @@ Namer::runInternal(core::GlobalState &gs, absl::Span<ast::ParsedFile> trees, Wor
                               core::FoundDefHashesResult *foundHashesOut) {
     // In non-incremental namer, there are no old FoundDefHashes; just defineSymbols like normal.
     vector<core::ClassOrModuleRef> updatedSymbols;
-    return runInternal(gs, trees, workers, {}, foundHashesOut, updatedSymbols);
+    auto canceled = runInternal(gs, trees, workers, {}, foundHashesOut, updatedSymbols);
     ENFORCE(updatedSymbols.empty());
+    return canceled;
 }
 
 [[nodiscard]] bool

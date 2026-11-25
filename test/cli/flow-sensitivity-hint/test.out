@@ -259,6 +259,9 @@ test/cli/flow-sensitivity-hint/test.rb:137: This code is unreachable https://srb
     test/cli/flow-sensitivity-hint/test.rb:136:
      136 |  if Integer === x.first # Should have special message, but doesn't (bug, annoying to fix)
                ^^^^^^^^^^^^^^^^^^^
+  Note:
+    If this code is intentionally unreachable, end this sequence with `T.absurd(...)`
+    after any defensive error handling.
 
 test/cli/flow-sensitivity-hint/test.rb:144: Method `even?` does not exist on `T.class_of(Integer)` component of `T.nilable(T.class_of(Integer))` https://srb.help/7003
      144 |    x.first.even?

@@ -205,6 +205,8 @@ This is required even if the block is only ever used by way of `yield`, and neve
 
 **Why?** The distinguishing factor of `# typed: strict` is that every method has an explicit interface with a signature. It's equally important to be explicit about the block argument, if present. For more, see the docs on [strictness levels](static.md#file-level-granularity-strictness-levels).
 
+**Note**: This error code is from an old Sorbet version. In newer versions, it's replaced with [5082](#5082), which extends the logic discussed here to any method with a `sig`, regardless of whether it is in a `# typed: strict` file.
+
 ## 3008
 
 Sorbet does not support the `undef` keyword. Sorbet assumes that the set of all classes, modules, methods, and constants is static throughout the lifetime of a program. It does not attempt to model the way that a Ruby program might mutate itself by deleting constants or methods at runtime.
@@ -302,14 +304,9 @@ If you are attempting to dynamically compute the name of an `attr_*` method, you
 
 ## 3503
 
-Ruby has separate syntax for marking instance methods and singleton class methods private:
+This error code is from an old Sorbet version. It's equivalent to error 4030:
 
-```ruby
-private def some_instance_method; end
-private_class_method def self.some_singleton_class_method; end
-```
-
-Note that the `self.` keyword in the method declaration changes the method from being an instance method to being a class method. In Ruby this `self.` prefix is similar to the `static` keyword on method definitions in languages like C++ or Java.
+[→ 4030](#4030)
 
 ## 3504
 
@@ -491,29 +488,39 @@ end
 
 This error indicates that the `override` argument passed to a `prop` or `const` is ill-formed. See [prop overrides](override-checking.md#overrides-and-the-prop-dsl).
 
+## 3518
+
+> This error is specific to a Stripe-specific library called `Opus::Command`.
+
+`Opus::Command` subclasses cannot have singleton class methods. The intention behind a command is to expose a single public method, which is achieved by implementing a `def call` instance method, and letting the `Opus::Command` library forward public calls to the singleton class `call` method to the instance method `call` that the command defines.
+
+To define private helper functions in the implementation of a command, use instance methods.
+
+To define multiple public methods in a single namespace, do not use `Opus::Command` and instead define a normal Ruby class or module. Alternatively, create multiple commands, one per public method.
+
 ## 3550
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-This error is raised when a RBS signature comment contains a syntax error. See the [RBS syntax reference](https://github.com/ruby/rbs/blob/master/docs/syntax.md) for more details on the RBS syntax.
+This error is raised when an RBS signature comment contains a syntax error. See the [RBS syntax reference](https://github.com/ruby/rbs/blob/master/docs/syntax.md) for more details on the RBS syntax.
 
 ## 3551
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-This error is raised when a RBS signature comment contains a feature not supported by Sorbet. See the page on [RBS comments support](rbs-support.md) for a list of supported features.
+This error is raised when an RBS signature comment contains a feature not supported by Sorbet. See the page on [RBS comments support](rbs-support.md) for a list of supported features.
 
 ## 3552
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-This error is raised when a RBS signature comment has more parameters than the method definition it represents.
+This error is raised when an RBS signature comment has more parameters than the method definition it represents.
 
 ## 3553
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-This error is raised when a RBS assertion comment is found in a place where it is not allowed.
+This error is raised when an RBS assertion comment is found in a place where it is not allowed.
 
 For example this snippet will raise this error:
 
@@ -526,7 +533,7 @@ end
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-This error is raised when Sorbet couldn't match a RBS comment with a method definition or a type assertion.
+This error is raised when Sorbet couldn't match an RBS comment with a method definition or a type assertion.
 
 ## 3555
 
@@ -540,7 +547,7 @@ This error is raised when Sorbet encounters an incorrect ordering of signature c
 
 This error is raised when the kind of parameter in the method definition does not match the kind of parameter in the RBS signature.
 
-For example, this method expect the parameter to be defined as a keyword parameter, while the RBS signature declares it as a positional parameter:
+For example, this method expects the parameter to be defined as a keyword parameter, while the RBS signature declares it as a positional parameter:
 
 ```ruby
 #: (Integer) -> void
@@ -572,15 +579,21 @@ end
 
 > This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
 
-Methods annotated with `@abstract` must always raise an error:
+Methods annotated with `@abstract` must contain only a forwarding `super` call. This allows an implementation inherited from a superclass to satisfy the abstract method while still raising `NoMethodError` when no implementation exists. See [RBS support: Abstract methods](rbs-support.md#abstract-methods) for details.
 
 ```ruby
 # @abstract
 #: -> void
-def baz
-  raise "not implemented"
-end
+def baz = super
 ```
+
+## 3559
+
+> This error is specific to RBS support when using the `--enable-experimental-rbs-comments` flag.
+
+This error is raised when an RBS record type contains an optional key, like `{ ?k: String }`.
+
+The underlying feature (Sorbet's Hash [Shapes](https://sorbet.org/docs/shapes)) [does not support optional keys](https://github.com/sorbet/sorbet/issues/1160#issuecomment-507889702).
 
 ## 3702
 
@@ -606,17 +619,17 @@ Each package must have only one definition. A package definition is the place wh
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-Sorbet found an `import` in a `__package.rb` file, but the imported constant did not exist.
+Sorbet found a reference to a package that does not exist.
 
 ## 3705
 
-> **TODO** This error code is not yet documented.
+This error has been replaced by [4032](#4032).
 
 ## 3706
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-All `import` and `export` lines in a `__package.rb` file must have constant literals as their argument. Doing arbitrary computation of imports and exports is not allowed in `__package.rb` files.
+All `import` lines in a `__package.rb` file must have constant literals as their argument. Doing arbitrary computation of imports is not allowed in `__package.rb` files.
 
 Also note that all `import` declarations must be unique, with no duplicated imports.
 
@@ -644,6 +657,8 @@ Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary Ru
 
 But despite that, `__package.rb` files must be completely statically analyzable, which means most forms of Ruby expressions are not allowed in these files.
 
+`export` and `export_all!` are no longer part of the package DSL, so an `export` line reports this error for its argument, and both report that the method does not exist ([7003](#7003)). Constants are public unless marked `package_private!`, so delete these lines.
+
 ## 3711
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
@@ -660,9 +675,11 @@ Package names must not contain underscores. Internally, the packager assumes it 
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-All code inside a package must live within the namespace declared by it's enclosing `__package.rb` file. Note that since packages are allowed to nest inside each other, sometimes you might have attempted to add code in a folder that you didn't realize was actually managed by a nested package.
+Behavior defined inside a package must live within the namespace declared by its enclosing `__package.rb` file. Note that since packages are allowed to nest inside each other, sometimes you might have attempted to add code in a folder that you didn't realize was actually managed by a nested package.
 
 If you're seeing this error and surprised, double check which folders have `__package.rb` files in them, and the names of the packages declared by them.
+
+Namespace-definition violations previously reported with this code now use [4031](#4031). This code still reports behavior defined outside the permitted namespace.
 
 ## 3714
 
@@ -686,6 +703,8 @@ Trying to apply this directive to a constant defined in the `Test::` namespace w
 
 If you're trying to export a constant from the test namespace to be used in other packages, then just use `export`. Otherwise, these lines can be safely deleted.
 
+Sorbet no longer reports this error: `export_for_test` is no longer part of the package DSL.
+
 ## 3716
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
@@ -694,6 +713,8 @@ This error means that you're exporting a constant redundantly. In Stripe Package
 
 To fix this error, simply remove the more specific export.
 
+Sorbet no longer reports this error: `export` is no longer part of the package DSL, because constants are public unless marked `package_private!`.
+
 ## 3717
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
@@ -701,6 +722,8 @@ To fix this error, simply remove the more specific export.
 Referencing a constant defined in another package that has not been explicitly exported by that package is not allowed.
 
 To fix this error, either change the upstream package to start exporting the constant, or change the code in the current package to depend on only public exports of the upstream package. When changing an upstream package to expose things that were not previously exposed, double check whether it's intentional that the constant has not been exported.
+
+Sorbet no longer reports this error: constants are public unless marked `package_private!`.
 
 ## 3718
 
@@ -711,20 +734,6 @@ To reference constants defined in other packages, the package must first be impo
 Fix the error by explicitly `import`'ing the upstream package into the `__package.rb` file for the package where this error was reported.
 
 Note that sometimes it is not possible to import another package because doing so would make the dependency graph of packages have a dependency cycle. In these cases, a common solution is to factor the shared functionality to a new package, and import that new package wherever it's needed. In some situations, there may be simpler ways to restructure the code that don't involve making a new package.
-
-## 3720
-
-> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
-
-The `--sorbet-packages` mode draws a distinction between test and non-test code. For a package called `A::B`
-
-- Some of the constants defined outside of `A::B` but imported into `A::B` are **test-only** imports (created by writing `test_import` instead of `import` in a `__package.rb` file).
-
-  To fix this error, if the change is desired, replace `test_import` with `import` for the constant.
-
-- Some of the constants defined within `A::B` live in the test namespace of `Test::A::B`, meaning that those constants can only be referenced inside `T::A::B`, not inside the non-test `A::B` namespace.
-
-  To fix this error, avoid referencing test code from a non-test namespace. This means refactoring where code lives within `A::B` to satisfy the above rule.
 
 ## 3721
 
@@ -754,6 +763,7 @@ end
 
 Additional signatures of error 3721 include:
 
+- An export path using a class alias as a namespace. For example, if `MyPackage::Alias = MyPackage::Target`, use `export MyPackage::Target::Nested` instead of `export MyPackage::Alias::Nested`. Exporting the alias itself with `export MyPackage::Alias` is allowed; this exports the alias constant without exporting its target.
 - A package exporting a constant only defined in .rbi files. RBI files are shims to enable typechecking in places where Ruby metaprogramming prevents Sorbet from statically interpreting the behavior of a class or module. Generally, these files declare additional methods on classes defined in Ruby source files, and should not define any new constants. However, there are some rare exceptions where these files can define net-new constants. For these cases, we enforce that these constants cannot be exported.
 - A package exporting an enum value:
 
@@ -773,6 +783,8 @@ class MyPackage < PackageSpec
   export A::Val1 # not allowed, instead the full enum should be exported with `export A`
 end
 ```
+
+Sorbet no longer reports this error: `export` is no longer part of the package DSL, because constants are public unless marked `package_private!`.
 
 ## 3722
 
@@ -796,6 +808,8 @@ class A::B < PackageSpec
   # ^ allows referencing `A::B::Types::GoodTypeAlias` in downstream packages
 end
 ```
+
+Sorbet no longer reports this error: `export` is no longer part of the package DSL, because constants are public unless marked `package_private!`.
 
 ## 3723
 
@@ -855,8 +869,6 @@ If the flag is passed with no argument, then the default valid layers are `libra
 
 If a package is at `strict_dependencies 'layered'` or stricter, all packages it imports or references must have the same or lower layer. For example, given `--packager-layers util,lib,app`, all imports for a package with layer `lib` must either also have layer `lib`, or have layer `util` (but not layer `app`).
 
-Note: `test_import`s are not checked for layering violations.
-
 ## 3727
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
@@ -879,8 +891,6 @@ end
 
 Additionally, if a package is at `strict_dependencies 'dag'`, all packages it imports or references must also be `strict_dependencies 'dag'`.
 
-Note: `test_import`s are not checked for strict dependency violations.
-
 ## 3728
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
@@ -889,28 +899,28 @@ The following directives can only appear once per `__package.rb` file:
 
 - `layer`
 - `strict_dependencies`
-- `sorbet min_typed_level: ..., tests_min_typed_level: ...`.
+- `sorbet min_typed_level: ...`.
 
 ## 3729
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
-The `sorbet` directive in `__package.rb` specifies what the minimum sigil must be for source files in that package. It takes two keyword arguments: `min_typed_level` and `tests_min_typed_level`. For each, the valid options are: `'ignore'`, `'false'`, `'true'`, `'strict'`, and `'strong'`.
+The `sorbet` directive in `__package.rb` specifies what the minimum sigil must be for source files in that package. The valid values for `min_typed_level` are: `'ignore'`, `'false'`, `'true'`, `'strict'`, and `'strong'`.
 
 ## 3731
 
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) and [go/strict-dependencies](http://go/strict-dependencies) for more.
 
-If a package is marked with `prelude_package`, it is restricted to only importing other packages marked as `prelude_package`. This error indicates that a `prelude_package` is importing a non-prelude package.
+If a package is marked with `prelude!`, it is restricted to only importing other packages marked as `prelude!`. This error indicates that a prelude package is importing a non-prelude package.
 
 ```ruby
 class A < PackageSpec
 end
 
 class B < PackageSpec
-  prelude_package
+  prelude!
 
-  import A # error: Importing A, which is not marked as `prelude_package`
+  import A # error: Importing A, which is not marked as `prelude!`
 end
 ```
 
@@ -923,7 +933,84 @@ This error occurs in `--gen-packages` mode, which aims to report all packaging r
 This error will be reported on a `__package.rb` file, along with an autocorrect that fixes those issues, if any of the following are true:
 
 - the `__package.rb` is missing `import`s, and it is not a modularity error to `import` those packages
-- the `__package.rb` is missing `export`s
+- the `__package.rb` is missing `visible_to`, and `--gen-packages-update-visibility-for` flag is passed.
+
+## 3735
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+This error occurs when an invalid import was detected. There are two different scenarios that will produce this error, let's consider the following set of packages:
+
+- `A` - An application package that exports one constant `A::Pub` and keeps `A::Priv` private
+- `B` - A package that imports `A`
+- `Test::A` - A `test!` package, containing tests for the package `A`.
+
+The cases where this error can show up in this set of packages are:
+
+1. If `B` imports `A` with the `uses_internals: true` annotation, as only `test!` packages are allowed to import with `uses_internals: true`.
+2. If `B` imports `Test::A`, as only `test!` packages can import other packages marked `test!`.
+
+## 3736
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+`__package.rb` files can optionally declare a minimum `typed` level that all files in that package must follow (using the `sorbet` directive, see [3729](#3729)). This error occurs when a given file has a `typed` level lower than that minimum.
+
+## 3737
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The constant is private to the package that defines it, because it (or a namespace enclosing it) is marked `package_private!`. Code in other packages can't reference it.
+
+To fix the error, use something else from that package's public API instead. If you own the package and the constant should be usable from other packages, delete the `package_private!` marker on the constant that the error points to. Double check whether it's intentional that the constant was marked private.
+
+If there are some pseudo-private APIs that still must be accessible to other packages, consider using `visible_to` instead of `package_private!`. Note that marking a package `visible_to` another package does not allow access to package private constants, `visible_to` merely permits one package to import another package in the first place.
+
+## 3738
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A class alias of a package-private constant must be package-private too. Otherwise, other packages could use the alias to reach the constants nested inside the package-private class:
+
+```ruby
+class Opus::MyPackage::Outer
+  package_private!
+
+  class Inner; end
+end
+
+module Opus::MyPackage
+  PublicAlias = Outer # error: `PublicAlias` would make `Outer::Inner` public
+end
+```
+
+To fix the error, mark the alias with `package_private!(:PublicAlias)`, or delete the alias and reference the aliased constant directly. If the aliased constant should be usable from other packages, remove its `package_private!` marker instead.
+
+## 3739
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A package can be marked `imported_by_nested_packages!`:
+
+```ruby
+class A < PackageSpec
+  imported_by_nested_packages!
+end
+```
+
+These are special packages where behavior is allowed to live on the package namespace itself, instead of isolating behavior to constants defined somewhere wholly inside the package. (This pattern is generally discouraged, because it adversely affects code loading performance in large codebases.)
+
+One requirement for such a package to be allowed to define behavior on the package namespace is that all nested packages must import the outer package. This guarantees that that behavior is parsed and analyzed entirely before any nested package would attempt to make use of it (and means that Sorbet doesn't have to retroactively invalidate something it already typechecked when such behavior is added).
+
+Put another way, every package nested under `A`, at any depth, must `import` either `A` itself, or a package between `A` and it. For example, if there are packages `A`, `A::B`, and `A::B::C`, then `A::B::C` can `import A::B` instead of `import A`: `A::B` is nested under `A` too, so it has to meet the same requirement. Importing some other package that imports `A` does not count, so this is also an error:
+
+```ruby
+class A::B < PackageSpec # error: `A::B` is nested under `A`, so it must `import A`
+  import A::Other
+end
+```
+
+To fix this error, either add `import A` to the nested package (Sorbet's autocorrect does this), or remove `imported_by_nested_packages!` from `A`.
 
 ## 4001
 
@@ -1108,6 +1195,30 @@ where `...` is some expression which computes a class or module. Sorbet can't kn
 
 `type_member` and `type_template` cannot be used at the top-level of a file. Instead, they must be used inside a class or module definition.
 
+When using `--sorbet-packages`, this error also applies to the root module or class of a package whose namespace contains sub-packages. For example, if there are two packages `Foo` and `Foo::Bar`, the module or class `Foo` may not have `type_member` or `type_template` definitions while `Foo::Bar` would be allowed to. To fix this error, you must either move the generic functionality to a class that's exported by the package, or move its sub-packages to a different place in the package hierarchy.
+
+For example, if you have the following definition for the package namespace `A`, and there are subpackages defined underneath `A`:
+
+```ruby
+module A
+  extend T::Generic
+
+  X = type_member # error
+end
+```
+
+Could be refactored into the following, to avoid this error:
+
+```ruby
+module A
+  class C
+    extend T::Generic
+
+    X = type_member
+  end
+end
+```
+
 ## 4019
 
 This error is only reported when running Sorbet with the `--uniquely-defined-behavior` command line flag (formerly called `--stripe-mode`).
@@ -1284,6 +1395,100 @@ end
 > This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
 
 Each package must have only one definition. A package definition is the place where there is a line like `class Opus::Foo < PackageSpec` in a `__package.rb` file.
+
+## 4028
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+If your package reopens constants from the stdlib or gems to add type members, your package must be marked with `prelude!`. This is to ensure that the constant remains in a consistent state throughout typechecking, even when checking in package dependency order. If we allowed type members to be added on stdlib/gem constants in any package, two parts of the codebase may see the constant with or without that type member present--before or after the type member declaration on the reopened constant.
+
+## 4029
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary Ruby code. The fact that they use Ruby syntax is a convenience so that:
+
+- package declarations get syntax highlighting in all Ruby editors
+- tooling like Sorbet and RuboCop work on `__package.rb` files out of the box
+- Sorbet can support things like jump-to-definition inside `__package.rb` files
+
+But despite that, `__package.rb` files must be completely statically analyzable, which means most forms of Ruby expressions are not allowed in these files.
+
+## 4030
+
+Ruby has separate syntax for marking instance methods and singleton class methods private:
+
+```ruby
+private def some_instance_method; end
+private_class_method def self.some_singleton_class_method; end
+```
+
+Note that the `self.` keyword in the method declaration changes the method from being an instance method to being a class method. In Ruby this `self.` prefix is similar to the `static` keyword on method definitions in languages like C++ or Java.
+
+## 4031
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Class and module definitions must be in their enclosing package's namespace, or an intermediate prefix of that namespace. Constant assignments must be in a namespace owned by the enclosing package, not merely a prefix. Check the names and locations of enclosing and nested `__package.rb` files if a definition unexpectedly belongs to another package.
+
+Explicit-root definitions outside the package namespace require a `prelude!` package. Being a prelude does not permit defining constants in another package's namespace.
+
+These namespace-definition errors previously used [3713](#3713), which remains the code for behavior defined outside the permitted namespace. Invalid definitions are isolated from their source-level namespace, so other references may also report unresolved constants.
+
+## 4032
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+In `--sorbet-packages` mode, all files must belong to a package. We may relax this in the future.
+
+Move the file into an existing package's directory, or add a `__package.rb` file declaring the package in an enclosing folder.
+
+This error previously used code [3705](#3705).
+
+## 4033
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+`package_private` and `package_private_class_method` must be given the methods to make package-private:
+
+```ruby
+class A
+  package_private # error: `package_private` with no arguments is not allowed
+
+  def foo; end
+end
+```
+
+Unlike `private`, a bare `package_private` does not toggle the visibility of the methods defined after it. Pass each method definition (or its name) to `package_private` instead:
+
+```ruby
+class A
+  package_private def foo; end
+end
+```
+
+Alternatively, to make the class itself private to the package, use `package_private!` (note the exclamation mark).
+
+## 4034
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A `package_private!` marker is somewhere it can't be. The error message says why. Usually the fix is to move the marker into the body of what you want to make private:
+
+```ruby
+class Opus::MyPackage::ImplClass
+  # Makes `ImplClass`, and everything nested inside it, private to its package
+  package_private!
+
+  X = 1
+  # Makes only `X` private to its package
+  package_private!(:X)
+end
+```
+
+To control which packages may import your package at all, rather than which of its constants they may use, use `visible_to` in its `__package.rb` file instead.
+
+`package_private!` is for constants. To make a method package-private, use `package_private` (or `package_private_class_method`) instead.
 
 ## 5001
 
@@ -1629,15 +1834,7 @@ To avoid introducing contradictions like this into the type system, Sorbet requi
 
 ## 5016
 
-> Note: more recent versions of Sorbet have eliminated this error--it is now possible to define generic classes with covariant and contravariant type members.
-
-Sorbet does not allow classes to be covariant nor contravariant.
-
-**Why?** The design of generic classes and interfaces in Sorbet was heavily inspired by the design of C#. This exact question has been answered for C# by Eric Lippert, who worked on the design and implementation of C# for many years.
-
-→ [Why isn't there variance for generic classes?](https://stackoverflow.com/questions/2733346/why-isnt-there-generic-variance-for-classes-in-c-sharp-4-0/2734070#2734070)
-
-The answer concludes that the main selling point of having covariant classes is to make immutable generic classes, at the cost of a more complex implementation of generics.
+As of 0.5.10664, Sorbet [no longer](https://github.com/sorbet/sorbet/commit/0574ee3d01aad9e08b8a0568f18a6a634196eddd) reports this error: classes and modules can both declare covariant (`:out`) and contravariant (`:in`) type members. Older versions of Sorbet only allowed them in modules, and reported this error for any class that declared one. For more, see [Generics](generics.md).
 
 ## 5017
 
@@ -2847,6 +3044,106 @@ Sorbet treats the `::Class` and `::Module` classes in the Ruby standard library 
 
 Note that this error is only reported in `# typed: strict` files and above. Downgrading the file that declares an explicit subclass of `Module` to `typed: true` will silence this error. (This also applies to direct subclasses of `Class`, but note that directly subclassing `Class` is rejected by the Ruby VM at runtime.)
 
+## 5082
+
+Using `yield` in a method body means that a method implicitly takes a block argument. Any method with a `sig` that uses `yield` or `block_given?` must explicitly declare a block argument to make the contract clear:
+
+```ruby
+sig { params(blk: T.proc.void).void }
+def foo(&blk)
+  yield # even though `blk` is not mentioned by name here
+end
+```
+
+This is required even if the block is only ever used by way of `yield`, and never with something like `blk.call`. To avoid needing to name the block parameter, consider using Ruby's anonymous block parameter syntax:
+
+```ruby
+sig { params("&": T.proc.void).void }
+def foo(&)
+  yield
+end
+```
+
+**Why?** The distinguishing factor of `# typed: strict` is that every method has an explicit interface with a signature. It's equally important to be explicit about the block argument, if present. For more, see the docs on [strictness levels](static.md#file-level-granularity-strictness-levels).
+
+**Note**: Previously, this requirement was only for `# typed: strict` files (see [3007](#3007)). It is now reported for all methods with `sig`'s on them.
+
+## 5083
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+If a package contains a sub-package, the modules (or classes) that make up the path to that subpackage may not have a superclass or mixins, unless the package is marked `imported_by_nested_packages!`. For example, if there are two packages `A` and `A::B`, package `A` is not allowed to define mixins on the `A` module or class.
+
+In package-directed mode, `A::B` can be typechecked before `A`, so it must not be able to observe `A` changing. Marking `A` with `imported_by_nested_packages!` requires every package nested under `A` to `import A` (see [3739](#3739)), which guarantees that `A` is typechecked first.
+
+Resolving this error involves moving the functionality off of the package namespace symbol `A` and onto a member of the `A` package instead, moving the sub-package to a different place in the package hierarchy, or (if the mixin is intentional) marking `A` with `imported_by_nested_packages!`. For example,
+
+```ruby
+module A
+  extend Foo # error
+end
+```
+
+Could be refactored into:
+
+```ruby
+module A
+  class C
+    extend Foo
+  end
+end
+```
+
+## 5084
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+If your package reopens constants from the stdlib or gems to add mixins, your package must be must be marked with `prelude!`. This ensures that the constant remains consistent throughout type checking, even when checking in package dependency order. If we allowed mixins on stdlib/gem constants to be added in any package, two parts of the codebase may see that constant in different states--before and after the mixin was applied.
+
+## 5085
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+Even though `__package.rb` files use Ruby syntax, they do not allow arbitrary Ruby code. The fact that they use Ruby syntax is a convenience so that:
+
+- package declarations get syntax highlighting in all Ruby editors
+- tooling like Sorbet and RuboCop work on `__package.rb` files out of the box
+- Sorbet can support things like jump-to-definition inside `__package.rb` files
+
+But despite that, `__package.rb` files must be completely statically analyzable, which means most forms of Ruby expressions are not allowed in these files.
+
+## 5086
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+The top-level constant of a packaged file must be owned by or have been imported by the package that the file belongs to. This ensures that Sorbet's constant resolution will match Ruby's, even if Sorbet is processing packages incrementally.
+
+For example, imagine we have two packages: `Opus::Foo` and `Opus::Foo::Bar`, and a file in `Opus::Foo::Bar` is structured as follows:
+
+```ruby
+# typed: true
+
+module Opus::Foo
+  module Bar
+    class Feature
+      ...
+    end
+  end
+end
+```
+
+If `Opus::Foo::Bar` does not import `Opus::Foo` this is an error. The error can be resolved by merging the outer-most modules together into a single module declaration:
+
+```ruby
+# typed: true
+
+module Opus::Foo::Bar
+  class Feature
+    ...
+  end
+end
+```
+
 ## 6001
 
 Certain Ruby keywords like `break`, `next`, and `retry` can only be used inside a Ruby block.
@@ -2923,7 +3220,7 @@ class Abstract
   def foo; end
 end
 
-Abstract.new # error: Attempt to instantiate abstract class `Abstract`
+Abstract.new # error: Attempting to instantiate abstract class `Abstract`
 ```
 
 To fix this error, there are some options:
@@ -3144,7 +3441,24 @@ In Sorbet, it is an error to have provably unreachable code. Because Sorbet is [
 
 Erroring for dead or unreachable code is generally a way to prevent bugs. People don't usually expect that some branch of code is never taken; usually dead code errors come from simple typos or misunderstandings about how Ruby works. In particular: the only two "falsy" values in Ruby are `nil` and `false`.
 
-Note if you intend for code to be dead because you've exhausted all the cases and are trying to raise in the default case, use `T.absurd` to assert that a case analysis is exhaustive. See [Exhaustiveness Checking](exhaustiveness.md) for more information.
+Note: Sorbet allows silencing "This code is unreachable" errors as long as the region of code which is dead ends with a [`T.absurd`](exhaustiveness.md) call. This allows doing things like raising a custom assertion, incrementing a metric, printing an error log, etc. if something which was supposed to be impossible statically actually happens at runtime:
+
+```ruby
+sig { params(x: String).void }
+def handle(x)
+  if x.is_a?(String)
+    puts x
+  else
+    message = "Unexpected value: #{x}"
+    raise message
+    T.absurd(x)
+  end
+end
+```
+
+Put `T.absurd` after the defensive handling, without an intervening conditional or loop. Statements after an unconditional `raise` still produce unreachable-code errors, except for the `T.absurd` assertion itself.
+
+`T.absurd` also checks exhaustiveness: if control flow could reach the `T.absurd` because a case was not handled, Sorbet reports an error. See [Exhaustiveness Checking](exhaustiveness.md) for more information.
 
 Sometimes, dead code errors can be hard to track down. The best way to pinpoint the cause of a dead code error is to wrap variables or expressions in `T.reveal_type(...)` to validate the assumptions that a piece of code is making. For more troubleshooting tips, see [Troubleshooting](troubleshooting.md).
 

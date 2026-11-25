@@ -410,12 +410,8 @@ module T::Configuration
   def self.use_vm_prop_serde?; end
   def self.enable_vm_prop_serde; end
   def self.disable_vm_prop_serde; end
-  def self.hard_assert_handler(str, extra); end
-  def self.hard_assert_handler=(value); end
   def self.inline_type_error_handler(error, opts={}); end
   def self.inline_type_error_handler=(value); end
-  def self.log_info_handler(str, extra); end
-  def self.log_info_handler=(value); end
   def self.module_name_mangler; end
   def self.module_name_mangler=(value); end
   def self.scalar_types; end
@@ -432,11 +428,10 @@ module T::Configuration
   def self.normalize_sensitivity_and_pii_handler; end
   def self.redaction_handler=(handler); end
   def self.redaction_handler; end
-  def self.class_owner_finder=(handler); end
-  def self.class_owner_finder; end
 end
 
 module T::Utils
+  sig { params(method: T.any(Proc, Method, UnboundMethod)).returns(Integer) }
   def self.arity(method); end
 
   # Converts Sorbet type syntax into a T::Types::Base instance to provide
@@ -444,24 +439,78 @@ module T::Utils
   sig {params(val: T.untyped).returns(T::Types::Base)}
   def self.coerce(val); end
 
+  # Unwraps a TypeAlias object to its aliased type, or else returns the input
+  #
+  # ```ruby
+  # resolve_alias(Integer)         # => Integer
+  # resolve_alias(AliasToInteger)  # => Integer
+  # resolve_alias(T.any(A, B))     # => T.any(A, B)
+  # ```
+  sig {
+    type_parameters(:Type)
+      .params(type: T.any(T.type_parameter(:Type), T::Private::Types::TypeAlias))
+      .returns(T.any(T.type_parameter(:Type), T::Types::Base))
+  }
   def self.resolve_alias(type); end
+
+  sig { params(force_type_init: T::Boolean).void }
   def self.run_all_sig_blocks(force_type_init: true); end
   def self.signature_for_method(method); end
   def self.signature_for_instance_method(mod, method_name); end
+
   sig { params(type: T.anything).returns(T.nilable(T::Types::Base)) }
   def self.unwrap_nilable(type); end
   def self.wrap_method_with_call_validation_if_needed(mod, method_sig, original_method); end
+
   def self.check_type_recursive!(value, type); end
 
   # only one caller; delete
   def self.methods_excluding_object(mod); end
+
+  # Force all TypeAlias instances to resolve their effective_aliased_type eagerly.
+  #
+  # Call this while eagerly preloading a codebase (e.g. at service startup) to
+  # optimize for first-call/first-request latency.
+  sig { void }
+  def self.run_all_type_alias_blocks; end
+
+  # Force all T::Props::Serializable decorators to eagerly define their lazily
+  # specialized methods (serialization, deserialization, etc.).
+  #
+  # Call this while eagerly preloading a codebase (e.g. at service startup) to
+  # optimize for first-call/first-request latency.
+  sig { void }
+  def self.eagerly_define_all_lazy_props_methods!; end
+
+  # Force every type object in the process to build its lazily-initialized
+  # fields, so that forked workers don't write onto shared type objects.
+  sig { void }
+  def self.build_all_types; end
+
+  # Free the signatures whose runtime checks never run: the `.checked(:never)`
+  # sigs, plus the `.checked(:tests)` sigs outside of a test environment. After
+  # this call, `T::Utils.signature_for_method` returns `nil` for those methods.
+  #
+  # Call this once after eagerly preloading a codebase (e.g. at service startup)
+  # and after `run_all_sig_blocks`, to trade that introspection for memory.
+  sig { void }
+  def self.drop_unchecked_sigs!; end
 end
 
 
 module T::AbstractUtils
+  sig { params(method: T.any(Method, UnboundMethod)).returns(T::Boolean) }
   def self.abstract_method?(method); end
+
+  sig { params(mod: T::Module[T.anything]).returns(T::Array[UnboundMethod]) }
   def self.abstract_methods_for(mod); end
+
+  # This should have been limited to checking Module.
+  # Have to put it at `BasicObject` because callers assume they can pass anything
+  sig { params(mod: BasicObject).returns(T::Boolean) }
   def self.abstract_module?(mod); end
+
+  sig { params(mod: T::Module[T.anything]).returns(T::Array[UnboundMethod]) }
   def self.declared_abstract_methods_for(mod); end
 end
 

@@ -15,6 +15,11 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      nil
+    end
+
+    # overrides Base
     def name
       "T.attached_class"
     end

@@ -85,7 +85,7 @@ void fillInOrComponents(InlinedVector<TypePtr, 4> &orComponents, const TypePtr &
     }
 }
 
-TypePtr filterOrComponents(const TypePtr &originalType, const InlinedVector<TypePtr, 4> &typeFilter) {
+TypePtr filterOrComponents(const TypePtr &originalType, absl::Span<const TypePtr> typeFilter) {
     auto o = cast_type<OrType>(originalType);
     if (o == nullptr) {
         if (absl::c_linear_search(typeFilter, originalType)) {

@@ -2190,6 +2190,7 @@ array_premature_end: eof
                       $$ = driver.build.condition(self, $1, $2, $3, $4->body,
                         nullptr,
                         else_ ? else_->nod : nullptr, end_t);
+                      driver.rewind_if_dedented($1, end_t);
                     }
                 | kUNLESS expr_value then compstmt opt_else kend_or_eof
                     {
@@ -2287,6 +2288,7 @@ array_premature_end: eof
                     expr_value_do compstmt kend_or_eof
                     {
                       $$ = driver.build.for_(self, $1, $2, $3, $5->nod, $5->tok, $6->body, $7);
+                      driver.rewind_if_dedented($1, $7);
                     }
                 | k_class cpath superclass
                     {
@@ -2326,9 +2328,10 @@ array_premature_end: eof
                       driver.lex.context.inClass = false;
                       driver.local_push();
                     }
-                    bodystmt kEND
+                    bodystmt kend_or_eof
                     {
                       $$ = driver.build.def_sclass(self, $1->token, $2, $3, $6->body, $7);
+                      driver.rewind_if_dedented($1->token, $7);
 
                       driver.local_pop();
                       driver.lex.context.inDef = $1->context.inDef;
@@ -3793,7 +3796,7 @@ regexp_contents: // nothing
                 | tRATIONAL_IMAGINARY
                     {
                       driver.lex.set_state_expr_end();
-                      $$ = driver.build.rational_complex(self, $1);
+                      $$ = driver.build.complex(self, $1);
                     }
                 | tFLOAT_IMAGINARY
                     {

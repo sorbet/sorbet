@@ -54,7 +54,7 @@ class <C <U <root>>> < <C <U Object>> ()
     field <S <C <U F>> $1>#<U @f> -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=50:11 end=50:13}
     method <S <C <U F>> $1>#<U f=> (f, <blk>) -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=56:9 end=56:23}
       argument f<> -> Integer @ Loc {file=test/testdata/desugar/sclass.rb start=55:21 end=55:22}
-      argument <blk><block> -> T.untyped @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
+      argument <blk><block> -> T.noreturn @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
     method <S <C <U F>> $1>#<U initialize> (<blk>) @ Loc {file=test/testdata/desugar/sclass.rb start=49:9 end=49:23}
       argument <blk><block> @ Loc {file=test/testdata/desugar/sclass.rb start=??? end=???}
   class <S <S <C <U F>> $1> $1>[<C <U <AttachedClass>>>] < <C <U Class>> (<C <U Sig>>) @ Loc {file=test/testdata/desugar/sclass.rb start=48:3 end=48:8}

@@ -8,24 +8,33 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   module <emptyTree>::<C M><<C <todo sym>>> < ()
-    class <emptyTree>::<C <describe 'describe'>><<C <todo sym>>> < (::<todo sym>)
-      def <it 'adds a method'><<todo method>>(&<blk>)
-        <emptyTree>
-      end
-
-      class <emptyTree>::<C <describe 'inner'>><<C <todo sym>>> < (<self>)
-        def <it 'inner test'><<todo method>>(&<blk>)
+    begin
+      "describe"
+      class <emptyTree>::<C <describe 'describe'>><<C <todo sym>>> < (::<todo sym>)
+        def <it 'adds a method'><<todo method>>(&<blk>)
           <emptyTree>
+        end
+
+        begin
+          "inner"
+          class <emptyTree>::<C <describe 'inner'>><<C <todo sym>>> < (<self>)
+            def <it 'inner test'><<todo method>>(&<blk>)
+              <emptyTree>
+            end
+          end
         end
       end
     end
 
-    class <emptyTree>::<C <describe 'another'>><<C <todo sym>>> < (::<todo sym>)
-      def <it 'something'><<todo method>>(&<blk>)
-        <self>.foo()
-      end
+    begin
+      "another"
+      class <emptyTree>::<C <describe 'another'>><<C <todo sym>>> < (::<todo sym>)
+        def <it 'something'><<todo method>>(&<blk>)
+          <self>.foo()
+        end
 
-      <self>.include(<emptyTree>::<C Helper>)
+        <self>.include(<emptyTree>::<C Helper>)
+      end
     end
   end
 
@@ -36,9 +45,12 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of test_method>
 
-    class <emptyTree>::<C <describe 'describe'>><<C <todo sym>>> < (<self>)
-      def <it 'adds a method'><<todo method>>(&<blk>)
-        <self>.test_method()
+    begin
+      "describe"
+      class <emptyTree>::<C <describe 'describe'>><<C <todo sym>>> < (<self>)
+        def <it 'adds a method'><<todo method>>(&<blk>)
+          <self>.test_method()
+        end
       end
     end
   end

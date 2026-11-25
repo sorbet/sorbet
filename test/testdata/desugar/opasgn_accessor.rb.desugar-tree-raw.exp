@@ -37,7 +37,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {

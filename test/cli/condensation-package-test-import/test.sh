@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 
-# This test exercises test helper dependencies in the condensation graph,
-# ensuring that we model those dependencies correctly. In the example, the test
-# package for A must be checked after the test package for B, with C existing to
-# push the B test package later in the condensation graph traversal. If the
-# test_import dependency isn't correctly modeled in the condensation graph, A's
-# test package might be checked before B's, at which point we'll see a
-# resolution error for the superclass in A's test.
+# This test exercises dependencies between test packages in the condensation
+# graph. The test package for A must be checked after the test package for B,
+# with C existing to push B's test package later in the traversal. If the import
+# dependency is not modeled correctly, A's test package can be checked first,
+# causing a resolution error for the superclass in A's test.
 
 cd test/cli/condensation-package-test-import || exit 1
 

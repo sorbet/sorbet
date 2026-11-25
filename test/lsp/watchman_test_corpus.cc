@@ -105,20 +105,24 @@ TEST_CASE_FIXTURE(ProtocolTest, "MergesMultipleWatchmanUpdates") {
 
     string buggyFileContents = "# typed: true\nclass Foo1\n  def branch\n    1 + \"stuff\"\n  end\nend\n";
     writeFilesToFS({{"foo.rb", buggyFileContents}, {"bar.rb", buggyFileContents}, {"baz.rb", buggyFileContents}});
+
+    // Clear counters
+    getCounters();
+
     assertErrorDiagnostics(send(move(requests)), {
                                                      {"foo.rb", 3, "Expected `Integer`"},
                                                      {"bar.rb", 3, "Expected `Integer`"},
                                                      {"baz.rb", 3, "Expected `Integer`"},
                                                  });
 
-    // getTypecheckCount tracks the number of times typechecking has run on the same version of the typechecker's
-    // GlobalState. It's reset to 1 after each slow path run, and incremented after every fast path.
-    // We expect the merged case to run 1 slow path (where typecheck count would be 1), and the unmerged case to run
-    // 3 slow paths and 2 fast paths (where typecheck count would be 3).
+    auto counters = getCounters();
+
     INFO(fmt::format("Expected Sorbet to apply multiple Watchman updates in one typechecking run, but Sorbet ran "
                      "typechecking {} times.",
-                     lspWrapper->getTypecheckCount()));
-    CHECK_EQ(lspWrapper->getTypecheckCount(), 1);
+                     counters.getCategoryCounter("lsp.updates", "slowpath")));
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath"), 1);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "fastpath"), 0);
+    CHECK_EQ(counters.getCategoryCounter("lsp.updates", "slowpath_canceled"), 0);
 }
 
 TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
@@ -130,7 +134,6 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
         {"__package.rb", "# typed: strict\n"
                          "# frozen_string_literal: true\n"
                          "class Project < PackageSpec\n"
-                         "  export Project::Bar\n"
                          "end\n"},
 
         {"impl.rb", "# typed: strict\n"
@@ -143,14 +146,13 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
         {"b/__package.rb", "# typed: strict\n"
                            "# frozen_string_literal: frue\n"
                            "class Project::B < PackageSpec\n"
-                           "  export Project::B::Foo\n"
                            "  import Project::C\n"
                            "end\n"},
 
         {"b/impl.rb", "# typed: strict\n"
                       "# frozen_string_literal: true\n"
-                      "module Project\n"
-                      "  class B::Foo\n"
+                      "module Project::B\n"
+                      "  class Foo\n"
                       "    extend T::Sig\n"
                       "    sig { returns(Project::C::Bar) }\n"
                       "    def test\n"
@@ -162,13 +164,12 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
         {"c/__package.rb", "# typed: strict\n"
                            "# frozen_string_literal: true\n"
                            "class Project::C < PackageSpec\n"
-                           "  export Project::C::Bar\n"
                            "end\n"},
 
         {"c/impl.rb", "# typed: strict\n"
                       "# frozen_string_literal: true\n"
-                      "module Project\n"
-                      "  class C::Bar\n"
+                      "module Project::C\n"
+                      "  class Bar\n"
                       "  end\n"
                       "end\n"},
     });
@@ -192,9 +193,9 @@ TEST_CASE_FIXTURE(ProtocolTest, "ZeroingOutPackageFiles") {
     vector<unique_ptr<LSPMessage>> requests;
     requests.push_back(watchmanFileUpdate({"c/__package.rb", "c/impl.rb"}));
     assertErrorDiagnostics(send(move(requests)), {
-                                                     {"b/__package.rb", 4, "Unable to resolve constant"},
-                                                     {"b/impl.rb", 5, "resolves but is not exported"},
-                                                     {"b/impl.rb", 7, "resolves but is not exported"},
+                                                     {"b/__package.rb", 3, "Unable to resolve constant"},
+                                                     {"b/impl.rb", 5, "is not imported"},
+                                                     {"b/impl.rb", 7, "is not imported"},
                                                      {"c/__package.rb", 0, "must contain a package definition"},
                                                  });
 }

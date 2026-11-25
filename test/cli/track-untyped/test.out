@@ -159,20 +159,23 @@ Errors: 11
    "sigil": "Strong",
    "strict": "Strong",
    "min_error_level": "True",
-   "untyped_usages": 8
+   "untyped_usages": 8,
+   "source_size": 274
   },
   {
    "path": "test/cli/track-untyped/b.rb",
    "sigil": "Strong",
    "strict": "Strong",
    "min_error_level": "Strong",
-   "untyped_usages": 1
+   "untyped_usages": 1,
+   "source_size": 49
   },
   {
    "path": "test/cli/track-untyped/c.rb",
    "sigil": "Strong",
    "strict": "Strong",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 177
   }
  ]
 }
@@ -336,19 +339,22 @@ Errors: 11
    "path": "test/cli/track-untyped/a.rb",
    "sigil": "Strong",
    "strict": "Strong",
-   "min_error_level": "True"
+   "min_error_level": "True",
+   "source_size": 274
   },
   {
    "path": "test/cli/track-untyped/b.rb",
    "sigil": "Strong",
    "strict": "Strong",
-   "min_error_level": "Strong"
+   "min_error_level": "Strong",
+   "source_size": 49
   },
   {
    "path": "test/cli/track-untyped/c.rb",
    "sigil": "Strong",
    "strict": "Strong",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 177
   }
  ]
 }
@@ -513,20 +519,23 @@ Errors: 11
    "sigil": "Strong",
    "strict": "Strong",
    "min_error_level": "True",
-   "untyped_usages": 8
+   "untyped_usages": 8,
+   "source_size": 274
   },
   {
    "path": "test/cli/track-untyped/b.rb",
    "sigil": "Strong",
    "strict": "Strong",
    "min_error_level": "Strong",
-   "untyped_usages": 1
+   "untyped_usages": 1,
+   "source_size": 49
   },
   {
    "path": "test/cli/track-untyped/c.rb",
    "sigil": "Strong",
    "strict": "Strong",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 177
   }
  ]
 }

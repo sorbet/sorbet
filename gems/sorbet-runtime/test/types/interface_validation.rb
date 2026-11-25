@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 require_relative '../test_helper'
 
 class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
@@ -83,6 +84,17 @@ class Opus::Types::Test::InterfacesTest < Critic::Unit::UnitTest
     end
     assert_includes(err.message, "not declared with `abstract`")
     assert_includes(err.message, "`bad`")
+  end
+
+  it "allows abstract in DSL form" do
+    mod = Module.new do
+      extend T::Syntax
+      interface!
+      sig { void }
+      abstract def foo; end
+    end
+
+    T::Private::Abstract::Validate.validate_abstract_module(mod)
   end
 
   it "raises an error if an interface has a private method" do

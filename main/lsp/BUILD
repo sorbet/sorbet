@@ -29,9 +29,12 @@ cc_library(
         "json_enums.h",
         "lsp_messages_gen_helpers.h",
         "watchman/WatchmanProcess.h",
+        "watchman/WatchmanShutdown.h",
+        "watchman/WatchmanSubscription.h",
     ],
     hdrs = [
         "ConvertToSingletonClassMethod.h",
+        "CreateMissingMethod.h",
         "DiagnosticSeverity.h",
         "ExtractVariable.h",
         "LSPConfiguration.h",
@@ -57,7 +60,6 @@ cc_library(
         "//common/statsd",
         "//common/web_tracer_framework:tracing",
         "//core",
-        "//core/proto",
         "//core/serialize",
         "//core/sig_finder",
         "//hashing",
@@ -173,6 +175,24 @@ cc_test(
 )
 
 cc_test(
+    name = "undo_state_test",
+    size = "small",
+    srcs = ["test/undo_state_test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "lsp",
+        "//payload",
+        "//test/helpers",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)
+
+cc_test(
     name = "lsp_file_updates_test",
     size = "small",
     srcs = ["test/lsp_file_updates_test.cc"],
@@ -223,5 +243,56 @@ cc_test(
         "//test/helpers",
         "@doctest//doctest",
         "@doctest//doctest:main",
+    ],
+)
+
+cc_test(
+    name = "lsp_configuration_test",
+    size = "small",
+    srcs = ["test/lsp_configuration_test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "lsp",
+        "//payload",
+        "//test/helpers",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)
+
+cc_test(
+    name = "watchman_shutdown_test",
+    size = "small",
+    srcs = ["test/watchman_shutdown_test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "lsp",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)
+
+cc_test(
+    name = "watchman_subscription_test",
+    size = "small",
+    srcs = ["test/watchman_subscription_test.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "lsp",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+        "@rapidjson",
     ],
 )

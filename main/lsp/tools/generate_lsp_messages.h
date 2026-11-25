@@ -467,7 +467,7 @@ public:
 
 class JSONStringEnumType final : public JSONClassType {
 private:
-    std::vector<const std::string> enumValues;
+    std::vector<std::string> enumValues;
 
     // Capitalizes the first character of the input string (e.g., foo => Foo),
     // strips {'.','_','/'}, and capitalizes first letter after those characters.
@@ -492,7 +492,7 @@ private:
     }
 
 public:
-    JSONStringEnumType(std::string_view typeName, std::vector<const std::string> enumValues)
+    JSONStringEnumType(std::string_view typeName, std::vector<std::string> enumValues)
         : JSONClassType(typeName), enumValues(enumValues) {}
 
     BaseKind getCPPBaseKind() const {

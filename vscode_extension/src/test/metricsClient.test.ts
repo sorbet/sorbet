@@ -1,5 +1,6 @@
 import * as path from "path";
 import * as sinon from "sinon";
+import { commands } from "vscode";
 
 import { createLogStub } from "./testUtils";
 import {
@@ -83,5 +84,28 @@ suite(`Test Suite: ${path.basename(__filename, ".test.js")}`, () => {
       expectedCount,
       expectedTags,
     );
+  });
+
+  test("logs at info level, not error, when the metrics command is not registered", async () => {
+    const executeCommandStub = sinon
+      .stub(commands, "executeCommand")
+      .rejects(new Error("command 'sorbet.metrics.getExportedApi' not found"));
+    testRestorables.push(executeCommandStub);
+
+    const log = createLogStub();
+    const infoSpy = sinon.spy(log, "info");
+    const errorSpy = sinon.spy(log, "error");
+    testRestorables.push(infoSpy, errorSpy);
+
+    const client = new MetricsClient(<SorbetExtensionContext>{
+      configuration: { activeLspConfig: undefined },
+      log,
+    });
+    // `initSorbetMetricsApi` isn't awaited by the constructor, so wait on
+    // the same promise indirectly via a metric emission.
+    await client.emitCountMetric("metricClient.test.notRegistered", 1);
+
+    sinon.assert.calledOnce(infoSpy);
+    sinon.assert.notCalled(errorSpy);
   });
 });

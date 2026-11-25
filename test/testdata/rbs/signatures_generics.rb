@@ -18,12 +18,17 @@ module Errors
   # ^^^ error: Failed to parse RBS type parameters (expected ',' or ']' after type parameter, got pEOF)
   class ParseError4; end
 
-  #: [unchecked T]
+  #: [unchecked A]
   #   ^^^^^^^^^^^ error: `unchecked` type parameters are not supported by Sorbet
   class UnsupportedError1; end
 
   class UselessSignature1 #: [U]
   #                       ^^^^^^ error: Unexpected RBS assertion comment found after `class` declaration
+  end
+
+  #: [T]
+  #   ^ error: `T` is not a valid type parameter name. It conflicts with Sorbet's own namespace
+  class UnsupportedTypeParamName
   end
 end
 
@@ -105,14 +110,18 @@ end
 class G4; end
 
 g4 = G4.new #: G4[Integer]
-#                 ^^^^^^^ error-with-dupes: `Integer` is not a subtype of upper bound of type member `::G4::U`
+#                 ^^^^^^^ error: `Integer` is not a subtype of upper bound of type member `::G4::U`
+#                 ^^^^^^^ error: `Integer` is not a subtype of upper bound of type member `::G4::U`
+#                 ^^^^^^^ error: `Integer` is not a subtype of upper bound of type member `::G4::U`
 T.reveal_type(g4) # error: Revealed type: `G4[T.untyped]`
 
 #: [U > BasicObject]
 class G5; end
 
 g5 = G5.new #: G5[String]
-#                 ^^^^^^ error-with-dupes: `String` is not a supertype of lower bound of type member `::G5::U`
+#                 ^^^^^^ error: `String` is not a supertype of lower bound of type member `::G5::U`
+#                 ^^^^^^ error: `String` is not a supertype of lower bound of type member `::G5::U`
+#                 ^^^^^^ error: `String` is not a supertype of lower bound of type member `::G5::U`
 T.reveal_type(g5) # error: Revealed type: `G5[T.untyped]`
 
 #: [U]
@@ -172,7 +181,8 @@ class G11; end
 class G12; end
 
 #: (G12[Object]) -> void
-#       ^^^^^^ error-with-dupes: `Object` is not a subtype of upper bound of type member `::G12::U`
+#       ^^^^^^ error: `Object` is not a subtype of upper bound of type member `::G12::U`
+#       ^^^^^^ error: `Object` is not a subtype of upper bound of type member `::G12::U`
 def take_g12(g12); end
 
 #: [
@@ -190,3 +200,34 @@ x = G13.new #: G13[Integer, String]
 x.foo(1)
 x.foo("a")
 x.foo(nil) # error: Expected `T.any(Integer, String)` but found `NilClass` for argument `x`
+
+# Test deep copy with union types
+#: [U]
+class G14; end
+
+g14 = G14.new #: G14[Integer | String]
+T.reveal_type(g14) # error: Revealed type: `G14[T.any(Integer, String)]`
+
+# Test deep copy with intersection types
+g15 = G14.new #: G14[Numeric & Comparable]
+T.reveal_type(g15) # error: Revealed type: `G14[Numeric]`
+
+# Test deep copy with nested constant path
+module MyModule
+  class MyClass; end
+end
+
+g16 = G14.new #: G14[MyModule::MyClass]
+T.reveal_type(g16) # error: Revealed type: `G14[MyModule::MyClass]`
+
+# Test deep copy with type parameter references
+#: [A, U]
+class G17; end
+
+#: [X] (X) -> G17[X, X]
+def make_g17(x)
+  G17.new #: G17[X, X]
+end
+
+#: [X = void]
+class G18; end

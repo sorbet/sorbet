@@ -1,4 +1,5 @@
 #include "parser/prism/Factory.h"
+#include "core/Symbols.h"
 #include "parser/prism/Helpers.h"
 #include "parser/prism/Parser.h"
 #include <array>
@@ -88,6 +89,11 @@ pm_node_t *Factory::ConstantWriteNode(core::LocOffsets loc, pm_constant_id_t nam
     return up_cast(node);
 }
 
+// @param parent If nullptr, creates a fully qualifier constant reference to `name`,
+//                 * e.g. ConstantPathNode(loc, nullptr, "A") -> `::A`
+//                 * To create non-qualified constants, use `ConstantReadNode()` instead.
+//               If non-null, creates a nested constant under `parent`
+//                 * e.g. ConstantPathNode(loc, ConstantReadNode("A"), "B") -> `A::B`
 pm_node_t *Factory::ConstantPathNode(core::LocOffsets loc, pm_node_t *parent, string_view name) const {
     pm_constant_id_t nameId = addConstantToPool(name);
     pm_location_t pmLoc = parser.convertLocOffsets(loc);
@@ -135,6 +141,16 @@ pm_node_t *Factory::True(core::LocOffsets loc) const {
     return up_cast(trueNode);
 }
 
+pm_node_t *Factory::False(core::LocOffsets loc) const {
+    ENFORCE(loc.exists(), "False: location is required");
+
+    pm_false_node_t *falseNode = allocateNode<pm_false_node_t>();
+
+    *falseNode = (pm_false_node_t){.base = initializeBaseNode(PM_FALSE_NODE, parser.convertLocOffsets(loc))};
+
+    return up_cast(falseNode);
+}
+
 pm_node_t *Factory::Nil(core::LocOffsets loc) const {
     ENFORCE(loc.exists(), "Nil: location is required");
 
@@ -164,7 +180,7 @@ pm_call_node_t *Factory::createCallNode(pm_node_t *receiver, pm_constant_id_t me
                              .name = methodId,
                              .message_loc = messageLoc,
                              .opening_loc = tinyLoc,
-                             .arguments = down_cast<pm_arguments_node_t>(arguments),
+                             .arguments = down_cast_nonnull<pm_arguments_node_t>(arguments),
                              .closing_loc = tinyLoc,
                              .block = block};
 
@@ -264,14 +280,20 @@ pm_node_t *Factory::SorbetPrivateStatic(core::LocOffsets loc) const {
     // Build a root-anchored constant path ::Sorbet::Private::Static
     pm_node_t *sorbet = ConstantPathNode(loc, nullptr, "Sorbet"sv);
     pm_node_t *sorbetPrivate = ConstantPathNode(loc, sorbet, "Private"sv);
-    return ConstantPathNode(loc, sorbetPrivate, "Static"sv);
+    return parser.markResolved(ConstantPathNode(loc, sorbetPrivate, "Static"sv),
+                               core::Symbols::Sorbet_Private_Static());
+}
+
+pm_node_t *Factory::SorbetPrivateStaticVoid(core::LocOffsets loc) const {
+    // Build a root-anchored constant path ::Sorbet::Private::Static::Void
+    return parser.markResolved(ConstantPathNode(loc, SorbetPrivateStatic(loc), "Void"sv), core::Symbols::void_());
 }
 
 pm_node_t *Factory::TSigWithoutRuntime(core::LocOffsets loc) const {
     // Build a root-anchored constant path ::T::Sig::WithoutRuntime
     pm_node_t *tConst = ConstantPathNode(loc, nullptr, "T"sv);
     pm_node_t *tSig = ConstantPathNode(loc, tConst, "Sig"sv);
-    return ConstantPathNode(loc, tSig, "WithoutRuntime"sv);
+    return parser.markResolved(ConstantPathNode(loc, tSig, "WithoutRuntime"sv), core::Symbols::T_Sig_WithoutRuntime());
 }
 
 pm_node_t *Factory::Symbol(core::LocOffsets nameLoc, string_view name) const {
@@ -318,6 +340,18 @@ pm_node_t *Factory::Call(core::LocOffsets loc, pm_node_t *receiver, string_view 
     pm_location_t tinyLoc = parser.convertLocOffsets(loc.copyWithZeroLength());
 
     return up_cast(createCallNode(receiver, methodId, up_cast(arguments), tinyLoc, fullLoc, tinyLoc, block));
+}
+
+pm_node_t *Factory::NilClass(core::LocOffsets loc) const {
+    return parser.markResolved(ConstantReadNode("NilClass"sv, loc), core::Symbols::NilClass());
+}
+
+pm_node_t *Factory::TrueClass(core::LocOffsets loc) const {
+    return parser.markResolved(ConstantPathNode(loc, nullptr, "TrueClass"sv), core::Symbols::TrueClass());
+}
+
+pm_node_t *Factory::FalseClass(core::LocOffsets loc) const {
+    return parser.markResolved(ConstantPathNode(loc, nullptr, "FalseClass"sv), core::Symbols::FalseClass());
 }
 
 pm_node_t *Factory::T(core::LocOffsets loc) const {
@@ -448,7 +482,7 @@ pm_node_t *Factory::TTypeAlias(core::LocOffsets loc, pm_node_t *type) const {
 
     pm_node_t *block = Block(loc, StatementsNode(loc, absl::Span<pm_node_t *>{&type, 1}));
 
-    auto *call = down_cast<pm_call_node_t>(typeAliasCall);
+    auto *call = down_cast_nonnull<pm_call_node_t>(typeAliasCall);
     call->block = block;
 
     return typeAliasCall;
@@ -506,6 +540,14 @@ pm_node_t *Factory::T_Enumerator(core::LocOffsets loc) const {
     return ConstantPathNode(loc, T(loc), "Enumerator"sv);
 }
 
+pm_node_t *Factory::T_Enumerator_Lazy(core::LocOffsets loc) const {
+    return ConstantPathNode(loc, T_Enumerator(loc), "Lazy"sv);
+}
+
+pm_node_t *Factory::T_Enumerator_Chain(core::LocOffsets loc) const {
+    return ConstantPathNode(loc, T_Enumerator(loc), "Chain"sv);
+}
+
 pm_node_t *Factory::T_Hash(core::LocOffsets loc) const {
     return ConstantPathNode(loc, T(loc), "Hash"sv);
 }
@@ -544,6 +586,18 @@ void *Factory::realloc(void *ptr, size_t size) const {
 void Factory::free(void *ptr) const { // see Prism's `include/prism/defines.h`
     ENFORCE(ptr);
     ::xfree(ptr);
+}
+
+pm_node_list_t Factory::emptyNodeList() const {
+    return {.size = 0, .capacity = 0, .nodes = nullptr};
+}
+
+pm_node_list_t Factory::nodeListWithCapacity(size_t capacity) const {
+    if (capacity == 0) {
+        return emptyNodeList();
+    }
+    auto *nodes = calloc<pm_node_t *>(capacity);
+    return {.size = 0, .capacity = capacity, .nodes = nodes};
 }
 
 } // namespace sorbet::parser::Prism

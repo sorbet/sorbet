@@ -13,6 +13,8 @@ class Foo < PackageSpec
            # ^^^^^^^^^^^^^^^^^^^^ error: Argument to `visible_to` must be a constant or
 
   visible_to Nested::*
+  visible_to Quux::*
+           # ^^^^ error: Unable to resolve constant `Quux`
 
   visible_to Nested::*(0)
            # ^^^^^^^^^^^^ error: Argument to `visible_to` must be a constant or

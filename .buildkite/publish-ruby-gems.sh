@@ -2,13 +2,18 @@
 
 set -euo pipefail
 
-if [ "${PUBLISH_TO_RUBYGEMS:-}" == "" ]; then
-  echo "Skipping because this build is not the nightly RubyGems scheduled build"
+if [ "${BUILDKITE_BRANCH:-}" != "master" ]; then
+  echo "Skipping because this is not the master branch"
+  exit 0
+fi
+
+if [ "${PUBLISH_TO_RUBYGEMS:-}" == "" ] && git diff --quiet HEAD^..HEAD -- gems/; then
+  echo "Skipping because this is not the nightly RubyGems scheduled build and gems/ was not changed"
   exit 0
 fi
 
 git_commit_count=$(git rev-list --count HEAD)
-prefix="0.6"
+prefix=$(.buildkite/tools/sorbet-version-prefix.sh)
 release_version="$prefix.${git_commit_count}"
 
 echo "--- Dowloading artifacts"
@@ -22,22 +27,10 @@ mkdir -p "$HOME/.gem"
 printf -- $'---\n:rubygems_api_key: %s\n' "$SORBET_RUBYGEMS_API_KEY" > "$HOME/.gem/credentials"
 chmod 600 "$HOME/.gem/credentials"
 
+# shellcheck source-path=SCRIPTDIR/..
 source .buildkite/tools/with_backoff.sh
 
 rbenv install --skip-existing
-
-echo "--- Patching rubygems/package.rb"
-# There's a bug in rubygems/package.rb where if there's a GZip reader error, in
-# the process of reporting a good error saying what failed, there's a
-# NoMethodError.
-# https://github.com/rubygems/rubygems/pull/7539
-package_rb="$HOME/.rbenv/versions/3.1.2/lib/ruby/3.1.0/rubygems/package.rb"
-if [ -f "$package_rb" ]; then
-  echo "Using sed to patch rubygems/package.rb"
-  sed -i 's/@path = source.path/@path = source.is_a?(String) ? source : source.path/' "$package_rb"
-else
-  echo "Could not find rubygems/package.rb, skipping"
-fi
 
 publish_sorbet_static_gem() {
   gem_archive=$1

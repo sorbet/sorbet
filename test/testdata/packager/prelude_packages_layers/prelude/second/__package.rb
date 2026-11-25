@@ -3,12 +3,10 @@
 # enable-packager: true
 
 class Prelude::Second < PackageSpec
-  prelude_package
+  prelude!
 
   layer "utility"
   strict_dependencies "dag"
 
   import Prelude::First # error: Layering violation
-
-  export Prelude::Second::B
 end

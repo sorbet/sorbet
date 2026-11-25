@@ -39,7 +39,38 @@ class AbstractMethodNotClass
   extend T::Helpers
 
   sig {returns(T.untyped).abstract}
-  def f; end # error: you must mark your class/module as abstract
+  def f; end
+# ^^^^^ error: you must mark your class/module as abstract
+end
+
+class NeedsTHelpersAndAbstract
+  extend T::Sig
+
+  def some_other_method; end
+
+  sig {abstract.returns(T.untyped)}
+  def f; end
+# ^^^^^ error: you must mark your class/module as abstract
+end
+
+class NeedsTHelpersAndAbstract2
+  extend T::Sig
+
+  def some_other_method; end
+
+  sig {abstract.returns(T.untyped)}
+  def self.f; end
+# ^^^^^^^^^^ error: you must mark your class/module as abstract
+end
+
+class NeedsTHelpersAndAbstract3
+  class << self
+    extend T::Sig
+
+    sig {abstract.returns(T.untyped)}
+    def f; end
+  # ^^^^^ error: you must mark your class/module as abstract
+  end
 end
 
 module InterfaceModule
@@ -49,7 +80,18 @@ module InterfaceModule
   interface!
 
   sig {returns(T.untyped)}
-  def f # error: must be declared abstract
+  def f
+# ^^^^^ error: must be declared abstract
     0
   end
+end
+
+class AbstractAttrReader
+  extend T::Sig, T::Helpers
+
+  abstract!
+
+  sig { abstract.returns(Integer) }
+  attr_reader :foo
+  #            ^^^ error: Abstract methods must not contain any code in their body
 end

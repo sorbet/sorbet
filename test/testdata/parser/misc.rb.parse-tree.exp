@@ -145,6 +145,7 @@ Begin {
       }
       params = NULL
       body = NULL
+      style = braces
     }
     Case {
       condition = Send {
@@ -467,10 +468,16 @@ Begin {
       }
     }
     Rational {
-      val = "4"
+      val = "1"
+    }
+    Rational {
+      val = "1.23"
     }
     Complex {
-      value = "5"
+      value = "1r"
+    }
+    Complex {
+      value = "1.23r"
     }
     Kwbegin {
       stmts = [
@@ -589,22 +596,6 @@ Begin {
         }
       ]
     }
-    Block {
-      send = Send {
-        receiver = NULL
-        method = <U proc>
-        args = [
-        ]
-      }
-      params = Params {
-        params = [
-          Shadowarg {
-            name = <U x>
-          }
-        ]
-      }
-      body = NULL
-    }
     Break {
       exprs = [
         Block {
@@ -619,6 +610,7 @@ Begin {
           }
           params = NULL
           body = NULL
+          style = do-end
         }
       ]
     }
@@ -638,7 +630,7 @@ Begin {
       params = Params {
         params = [
           Kwrestarg {
-            name = <P <U **> $2>
+            name = <U **>
           }
         ]
       }
@@ -682,6 +674,7 @@ Begin {
               }
             ]
           }
+          style = braces
         }
       }
     }

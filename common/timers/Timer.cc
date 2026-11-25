@@ -55,29 +55,17 @@ Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_li
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev, initializer_list<pair<ConstExprStr, string>> args,
              initializer_list<int> histogramBuckets)
-    : Timer(log, name, prev, args, clock_gettime_coarse(), histogramBuckets){};
+    : Timer(log, name, prev, args, clock_gettime_coarse(), histogramBuckets) {};
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<pair<ConstExprStr, string>> args)
-    : Timer(log, name, FlowId{0}, args, {}){};
+    : Timer(log, name, FlowId{0}, args, {}) {};
 
 Timer::Timer(spdlog::logger &log, ConstExprStr name, initializer_list<int> histogramBuckets)
     : Timer(log, name, FlowId{0}, {}, histogramBuckets) {}
 
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev,
-             initializer_list<pair<ConstExprStr, string>> args)
-    : Timer(*log, name, prev, args, {}){};
-
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name,
-             initializer_list<pair<ConstExprStr, string>> args)
-    : Timer(*log, name, args){};
-
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name)
-    : Timer(*log, name, initializer_list<pair<ConstExprStr, string>>{}){};
-Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name, FlowId prev) : Timer(*log, name, prev, {}, {}){};
-
 Timer::Timer(spdlog::logger &log, ConstExprStr name)
-    : Timer(log, name, initializer_list<pair<ConstExprStr, string>>{}){};
-Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev) : Timer(log, name, prev, {}, {}){};
+    : Timer(log, name, initializer_list<pair<ConstExprStr, string>>{}) {};
+Timer::Timer(spdlog::logger &log, ConstExprStr name, FlowId prev) : Timer(log, name, prev, {}, {}) {};
 
 // Explicitly define to avoid reporting the timer twice.
 Timer::Timer(Timer &&timer)
@@ -155,7 +143,7 @@ Timer::~Timer() {
         auto one_week = microseconds{24LL * 60 * 60 * 1000 * 1000};
         if (dur.usec > one_week.usec) {
             log.error("msg=\"timer_exceeds_one_week\" name={} dur_usec={} sorbet_version={}", this->name.str, dur.usec,
-                      sorbet_full_version_string);
+                      sorbet::full_version_string);
         }
     }
 }

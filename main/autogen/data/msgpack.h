@@ -28,8 +28,7 @@ protected:
 
     uint32_t strictLevelToInt(core::StrictLevel strictLevel);
 
-    virtual void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
-                                const AutogenConfig &autogenCfg) = 0;
+    virtual void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def) = 0;
     virtual void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref) = 0;
 
     void writeSymbols(core::Context ctx, mpack_writer_t *writer, const std::vector<core::NameRef> &symbols);
@@ -57,8 +56,7 @@ class MsgpackWriterFull : public MsgpackWriterBase {
 protected:
     // a bunch of helpers
     void packRange(mpack_writer_t *writer, uint32_t begin, uint32_t end);
-    virtual void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
-                                const AutogenConfig &autogenCfg);
+    virtual void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def);
     virtual void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref);
     static int assertValidVersion(int version) {
         return validateVersion(version, AutogenVersion::MIN_VERSION, AutogenVersion::MAX_VERSION);
@@ -72,7 +70,7 @@ public:
     MsgpackWriterFull(int version);
 
     static std::string msgpackGlobalHeader(int version, size_t numFiles);
-    virtual std::string pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg);
+    virtual std::string pack(core::Context ctx, ParsedFile &pf);
 };
 
 // Lightweight version of writer that skips all reference metadata like expression ranges, inheritance information,
@@ -85,8 +83,7 @@ private:
         return validateVersion(version, AutogenVersion::MIN_VERSION, AutogenVersion::MAX_VERSION);
     }
 
-    void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def,
-                        const AutogenConfig &autogenCfg);
+    void packDefinition(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Definition &def);
     void packReference(mpack_writer_t *writer, core::Context ctx, ParsedFile &pf, Reference &ref);
 
 public:
@@ -97,7 +94,7 @@ public:
     MsgpackWriterLite(int version);
 
     static std::string msgpackGlobalHeader(int version, size_t numFiles);
-    std::string pack(core::Context ctx, ParsedFile &pf, const AutogenConfig &autogenCfg);
+    std::string pack(core::Context ctx, ParsedFile &pf);
 };
 
 void packString(mpack_writer_t *writer, std::string_view str);

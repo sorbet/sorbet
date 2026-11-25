@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_LSPPREPROCESSOR_H
 
 #include "absl/synchronization/mutex.h"
+#include "absl/synchronization/notification.h"
 #include "main/lsp/LSPConfiguration.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/MessageQueueState.h"
@@ -17,7 +18,23 @@ class DidOpenTextDocumentParams;
 class WatchmanQueryResponse;
 class CancelParams;
 
+// Test-only gates for the next scheduled preemption and preprocessing of a selected request.
+struct PreemptionTestHooks {
+    const MessageId requestId;
+    absl::Notification resumeProcessing;
+    absl::Notification processingReadyToAwait;
+    absl::Notification preemptionReadyToFinish;
+    absl::Notification resumePreemption;
+    absl::Notification preprocessingFinished;
+
+    explicit PreemptionTestHooks(MessageId requestId) : requestId(std::move(requestId)) {}
+};
+
 class TaskQueue final {
+public:
+    using QueueType = std::deque<std::unique_ptr<LSPTask>>;
+
+private:
     absl::Mutex stateMutex;
 
     std::deque<std::unique_ptr<LSPTask>> pendingTasks ABSL_GUARDED_BY(stateMutex);
@@ -29,6 +46,8 @@ class TaskQueue final {
     CounterState counters ABSL_GUARDED_BY(stateMutex);
 
 public:
+    std::shared_ptr<PreemptionTestHooks> preemptionTestHooks ABSL_GUARDED_BY(stateMutex);
+
     TaskQueue() = default;
 
     TaskQueue(const TaskQueue &other) = delete;
@@ -49,8 +68,8 @@ public:
 
     CounterState &getCounters() ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
 
-    const std::deque<std::unique_ptr<LSPTask>> &tasks() const ABSL_SHARED_LOCKS_REQUIRED(stateMutex);
-    std::deque<std::unique_ptr<LSPTask>> &tasks() ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
+    const QueueType &tasks() const ABSL_SHARED_LOCKS_REQUIRED(stateMutex);
+    QueueType &tasks() ABSL_EXCLUSIVE_LOCKS_REQUIRED(stateMutex);
 
     absl::Mutex *getMutex() ABSL_LOCK_RETURNED(stateMutex);
 
@@ -107,7 +126,7 @@ class LSPPreprocessor final {
 
     std::unique_ptr<LSPTask> getTaskForMessage(LSPMessage &msg);
 
-    std::vector<std::string_view> openFilePaths() const;
+    std::vector<std::string> openFilePaths() const;
 
 public:
     LSPPreprocessor(std::shared_ptr<LSPConfiguration> config, std::shared_ptr<TaskQueue> taskQueue,

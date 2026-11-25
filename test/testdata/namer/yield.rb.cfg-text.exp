@@ -34,10 +34,10 @@ method ::Main#yielder {
 
 bb0[firstDead=6]():
     <self>: Main = cast(<self>: NilClass, Main);
-    <blk>: T.untyped = load_arg(<blk>)
+    <implicit yield>: T.untyped = load_arg(<blk>)
     <statTemp>$5: Integer(1) = 1
-    a: T.untyped = <blk>: T.untyped.call(<statTemp>$5: Integer(1))
-    <returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(a: T.untyped)
+    a: T.untyped = <implicit yield>: T.untyped.call(<statTemp>$5: Integer(1))
+    <returnMethodTemp>$2: T.untyped = <implicit yield>: T.untyped.call(a: T.untyped)
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped
     <unconditional> -> bb1
 
@@ -88,7 +88,7 @@ method ::Main#blockyield {
 
 bb0[firstDead=-1]():
     <self>: Main = cast(<self>: NilClass, Main);
-    <blk>: T.untyped = load_arg(<blk>)
+    <implicit yield>: T.untyped = load_arg(<blk>)
     <block-pre-call-temp>$4: Sorbet::Private::Static::Void = <self>: Main.yielder()
     <selfRestore>$5: Main = <self>
     <unconditional> -> bb2
@@ -101,7 +101,7 @@ bb1[firstDead=-1]():
 # backedges
 # - bb0
 # - bb5
-bb2[firstDead=-1](<self>: Main, <blk>: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main):
+bb2[firstDead=-1](<self>: Main, <implicit yield>: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main):
     # outerLoops: 1
     <block-call> -> (NilClass ? bb5 : bb3)
 
@@ -114,12 +114,12 @@ bb3[firstDead=2](<block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRe
 
 # backedges
 # - bb2
-bb5[firstDead=5](<self>: Main, <blk>: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main):
+bb5[firstDead=5](<self>: Main, <implicit yield>: T.untyped, <block-pre-call-temp>$4: Sorbet::Private::Static::Void, <selfRestore>$5: Main):
     # outerLoops: 1
     <self>: Main = loadSelf(yielder)
     <blk>$6: T.untyped = load_yield_params(yielder)
     i$1: T.untyped = yield_load_arg(0, <blk>$6: T.untyped)
-    <blockReturnTemp>$7: T.untyped = <blk>: T.untyped.call(i$1: T.untyped)
+    <blockReturnTemp>$7: T.untyped = <implicit yield>: T.untyped.call(i$1: T.untyped)
     <blockReturnTemp>$10: T.noreturn = blockreturn<yielder> <blockReturnTemp>$7: T.untyped
     <unconditional> -> bb2
 

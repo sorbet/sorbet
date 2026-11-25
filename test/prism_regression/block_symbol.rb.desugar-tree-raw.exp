@@ -1,0 +1,94 @@
+ClassDef{
+  kind = class
+  name = EmptyTree
+  symbol = <C <U <root>>>
+  ancestors = [ConstantLit{
+      symbol = (class ::<todo sym>)
+      orig = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = {}
+      name = <U f><<U <todo method>>>
+      params = [UnresolvedIdent{
+          kind = Local
+          name = <U x>
+        }, BlockParam{ expr = UnresolvedIdent{
+          kind = Local
+          name = <U <blk>>
+        } }]
+      rhs = Send{
+        flags = {}
+        recv = UnresolvedIdent{
+          kind = Local
+          name = <U x>
+        }
+        fun = <U map>
+        block = Block {
+          params = [
+            RestParam{ expr = UnresolvedIdent{
+              kind = Local
+              name = <D <U <block-pass>> $2>
+            } }
+          ]
+          body = Send{
+            flags = {}
+            recv = ConstantLit{
+              symbol = (class ::<Magic>)
+              orig = nullptr
+            }
+            fun = <U <call-with-splat>>
+            block = nullptr
+            pos_args = 3
+            args = [
+              Send{
+                flags = {}
+                recv = UnresolvedIdent{
+                  kind = Local
+                  name = <D <U <block-pass>> $2>
+                }
+                fun = <U []>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Literal{ value = 0 }
+                ]
+              }
+              Literal{ value = :field }
+              Send{
+                flags = {}
+                recv = ConstantLit{
+                  symbol = (class ::<Magic>)
+                  orig = nullptr
+                }
+                fun = <U <splat>>
+                block = nullptr
+                pos_args = 1
+                args = [
+                  Send{
+                    flags = {}
+                    recv = UnresolvedIdent{
+                      kind = Local
+                      name = <D <U <block-pass>> $2>
+                    }
+                    fun = <U []>
+                    block = nullptr
+                    pos_args = 2
+                    args = [
+                      Literal{ value = 1 }
+                      Literal{ value = 9223372036854775807 }
+                    ]
+                  }
+                ]
+              }
+              Literal{ value = nil }
+            ]
+          }
+        }
+        pos_args = 0
+        args = [
+        ]
+      }
+    }
+  ]
+}

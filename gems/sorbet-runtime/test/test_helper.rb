@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 
 # Ideally we might run tests with warnings enabled, but currently this triggers
 # a number of uninitialized instance variable warnings.
@@ -11,7 +12,7 @@ require 'mocha/minitest'
 require 'pathname'
 require 'tempfile'
 require 'json'
-require 'subprocess'
+require 'open3'
 
 require_relative '../lib/sorbet-runtime'
 

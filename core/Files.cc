@@ -1,3 +1,6 @@
+// Must go before xxhash include. Makes a noticeable performance improvement (~10%).
+#define XXH_INLINE_ALL
+
 #include "core/Files.h"
 #include "common/FileOps.h"
 #include "core/Context.h"
@@ -13,6 +16,16 @@ template class std::shared_ptr<sorbet::core::File>;
 using namespace std;
 
 namespace sorbet::core {
+
+static_assert(is_nothrow_constructible_v<FileRef>);
+static_assert(is_nothrow_default_constructible_v<FileRef>);
+static_assert(is_nothrow_copy_constructible_v<FileRef>);
+static_assert(is_nothrow_move_constructible_v<FileRef>);
+static_assert(is_nothrow_assignable_v<FileRef, FileRef>);
+static_assert(is_nothrow_copy_assignable_v<FileRef>);
+static_assert(is_nothrow_move_assignable_v<FileRef>);
+static_assert(is_nothrow_destructible_v<FileRef>);
+static_assert(is_nothrow_swappable_v<FileRef>);
 
 namespace {
 
@@ -133,18 +146,16 @@ const shared_ptr<const FileHash> &File::getFileHash() const {
     return hash_;
 }
 
-FileRef::FileRef(unsigned int id) : _id(id) {}
+FileRef::FileRef(unsigned int id) noexcept : _id(id) {}
 
 const File &FileRef::data(const GlobalState &gs) const {
     ENFORCE(gs.files->get(_id));
-    ENFORCE(gs.files->get(_id)->sourceType != File::Type::TombStone);
     ENFORCE(gs.files->get(_id)->sourceType != File::Type::NotYetRead);
     return dataAllowingUnsafe(gs);
 }
 
 File &FileRef::data(GlobalState &gs) const {
     ENFORCE(gs.files->get(_id));
-    ENFORCE(gs.files->get(_id)->sourceType != File::Type::TombStone);
     ENFORCE(gs.files->get(_id)->sourceType != File::Type::NotYetRead);
     return dataAllowingUnsafe(gs);
 }
@@ -161,14 +172,7 @@ File &FileRef::dataAllowingUnsafe(GlobalState &gs) const {
 
 bool FileRef::isPackage(const GlobalState &gs) const {
     ENFORCE(gs.files->get(_id));
-    ENFORCE(gs.files->get(_id)->sourceType != File::Type::TombStone);
     return dataAllowingUnsafe(gs).isPackage(gs);
-}
-
-bool FileRef::isTestPackage(const GlobalState &gs) const {
-    ENFORCE(gs.files->get(_id));
-    ENFORCE(gs.files->get(_id)->sourceType != File::Type::TombStone);
-    return dataAllowingUnsafe(gs).isTestPackage(gs);
 }
 
 string_view File::path() const {
@@ -176,9 +180,12 @@ string_view File::path() const {
 }
 
 string_view File::source() const {
-    ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
     return this->source_;
+}
+
+size_t File::sourceSize() const {
+    return this->source_.size();
 }
 
 StrictLevel File::minErrorLevel() const {
@@ -220,15 +227,6 @@ bool File::isPackage(const GlobalState &gs) const {
     return hasPackageRbPath() && gs.packageDB().enabled();
 }
 
-bool File::isTestPackage(const GlobalState &gs) const {
-    // If the `__package.rb` file is at `typed: ignore`, then we haven't even parsed it.
-    // Any loop over "all package files" really only wants "all non-ignored package files."
-    //
-    // Checks `packageDB()` last because probably we have better locality on the `flags` for the
-    // common case of this not being a `__package.rb` file.
-    return hasPackageRbPath() && this->flags.isTestPath && gs.packageDB().enabled();
-}
-
 bool File::isOpenInClient() const {
     return this->flags.isOpenInClient;
 }
@@ -238,7 +236,6 @@ void File::setIsOpenInClient(bool isOpenInClient) {
 }
 
 absl::Span<const uint32_t> File::lineBreaks() const {
-    ENFORCE(this->sourceType != File::Type::TombStone);
     ENFORCE(this->sourceType != File::Type::NotYetRead);
     auto ptr = atomic_load(&lineBreaks_);
     if (ptr != nullptr) {
@@ -290,10 +287,6 @@ bool File::isPackagedTest() const {
     return flags.isTestFile || flags.isTestPath;
 }
 
-bool File::isPackagedTestHelper() const {
-    return flags.isTestPath && !flags.isTestFile;
-}
-
 bool File::isPackageRBI() const {
     return flags.hasPackageRBIPath;
 }
@@ -304,6 +297,17 @@ bool File::hasIndexErrors() const {
 
 void File::setHasIndexErrors(bool value) {
     flags.hasIndexErrors = value;
+}
+
+absl::Span<const uint8_t> File::sourceHash() const {
+    ENFORCE(this->sourceType != File::Type::NotYetRead);
+    if (!this->sourceHashComputed_) {
+        XXH64_hash_t seed = 0L;
+        this->sourceHash_ = XXH3_128bits_withSeed(this->source_.data(), this->source_.size(), seed);
+        this->sourceHashComputed_ = true;
+    }
+
+    return absl::Span(reinterpret_cast<uint8_t *>(&this->sourceHash_), sizeof(XXH128_hash_t));
 }
 
 } // namespace sorbet::core

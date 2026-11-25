@@ -74,6 +74,7 @@ def protocol_tests(cc_files):
                 "//main/lsp",
                 "//payload",
                 "//test/helpers",
+                "@com_google_absl//absl/cleanup",
                 "@doctest//doctest",
                 "@doctest//doctest:main",
             ],

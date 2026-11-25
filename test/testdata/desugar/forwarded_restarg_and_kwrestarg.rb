@@ -36,3 +36,9 @@ def baz(*, **, &)
   all_the_args(1, **, &)
   all_the_args(1, b: 3, &)
 end
+
+sig { params("**": Integer).void }
+def buzz(**); end
+buzz(a: 1)
+buzz(a: "hello")
+#    ^^^^^^^^^^ error: Expected `Integer` but found `String("hello")` for argument `"**":`

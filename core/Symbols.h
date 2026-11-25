@@ -9,6 +9,7 @@
 #include "core/SymbolRef.h"
 #include "core/Types.h"
 #include "core/packages/MangledName.h"
+#include <bit>
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -95,9 +96,7 @@ public:
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));
             static_assert(sizeof(Flags) == sizeof(VALID_BITS_MASK));
-            // Can replace this with std::bit_cast in C++20
-            auto rawBits = *reinterpret_cast<const uint16_t *>(this);
-            static_assert(sizeof(Flags) == sizeof(rawBits));
+            auto rawBits = std::bit_cast<uint16_t>(*this);
 
             // We need to mask the valid bits since uninitialized memory isn't zeroed in C++.
             return rawBits & VALID_BITS_MASK;
@@ -234,22 +233,20 @@ public:
         bool isStaticFieldTypeAlias : 1;
         bool isStaticFieldPrivate : 1;
 
-        // Can only export a static field
-        bool isExported : 1;
+        // Can only mark a static field, with `package_private!(:NAME)`
+        bool isPackagePrivate : 1;
 
         constexpr static uint8_t NUMBER_OF_FLAGS = 5;
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isField(false), isStaticField(false), isStaticFieldTypeAlias(false), isStaticFieldPrivate(false),
-              isExported(false) {}
+              isPackagePrivate(false) {}
 
         uint8_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint8_t));
             static_assert(sizeof(Flags) == sizeof(VALID_BITS_MASK));
-            // Can replace this with std::bit_cast in C++20
-            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
-            static_assert(sizeof(Flags) == sizeof(rawBits));
+            auto rawBits = std::bit_cast<uint8_t>(*this);
             // We need to mask the valid bits since uninitialized memory isn't zeroed in C++.
             return rawBits & VALID_BITS_MASK;
         }
@@ -322,9 +319,7 @@ public:
         uint8_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint8_t));
             static_assert(sizeof(Flags) == sizeof(VALID_BITS_MASK));
-            // Can replace this with std::bit_cast in C++20
-            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
-            static_assert(sizeof(Flags) == sizeof(rawBits));
+            auto rawBits = std::bit_cast<uint8_t>(*this);
             // Mask the valid bits since uninitialized bits can be any value.
             return rawBits & VALID_BITS_MASK;
         }
@@ -402,23 +397,24 @@ public:
         bool isSealed : 1;
         bool isPrivate : 1;
         bool isDeclared : 1;
-        bool isExported : 1;
+        bool isDeclaredInPackage : 1;
         bool isBehaviorDefining : 1;
+        // Marked with `package_private!`. Constants nested inside it are package-private too, but this bit is only set
+        // on the marked class itself.
+        bool isPackagePrivate : 1;
 
-        constexpr static uint16_t NUMBER_OF_FLAGS = 11;
+        constexpr static uint16_t NUMBER_OF_FLAGS = 12;
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isClass(false), isModule(false), isAbstract(false), isInterface(false), isLinearizationComputed(false),
-              isFinal(false), isSealed(false), isPrivate(false), isDeclared(false), isExported(false),
-              isBehaviorDefining(false) {}
+              isFinal(false), isSealed(false), isPrivate(false), isDeclared(false), isDeclaredInPackage(false),
+              isBehaviorDefining(false), isPackagePrivate(false) {}
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));
             static_assert(sizeof(Flags) == sizeof(VALID_BITS_MASK));
-            // Can replace this with std::bit_cast in C++20
-            auto rawBits = *reinterpret_cast<const uint16_t *>(this);
-            static_assert(sizeof(Flags) == sizeof(rawBits));
+            auto rawBits = std::bit_cast<uint16_t>(*this);
             // Mask the valid bits since uninitialized bits can be any value.
             return rawBits & VALID_BITS_MASK;
         }
@@ -430,10 +426,10 @@ public:
     void addLoc(const core::GlobalState &gs, core::Loc loc);
     void removeLocsForFile(core::FileRef file);
 
-    uint32_t hash(const GlobalState &gs, bool includeTypeMemberNames) const;
+    uint32_t hash(const GlobalState &gs, bool shapeHash) const;
     uint32_t classOrModuleShapeHash(const GlobalState &gs) const {
-        auto skipTypeMemberNames = true;
-        return hash(gs, skipTypeMemberNames);
+        auto shapeHash = true;
+        return hash(gs, shapeHash);
     }
 
     std::vector<TypePtr> selfTypeArgs(const GlobalState &gs) const;
@@ -539,6 +535,18 @@ public:
         }
     }
 
+    inline bool isDeclaredInPackage() const {
+        return flags.isDeclaredInPackage;
+    }
+
+    inline void setDeclaredInPackage() {
+        ENFORCE(isDeclared());
+
+        if (!flags.isDeclaredInPackage) {
+            flags.isDeclaredInPackage = true;
+        }
+    }
+
     inline void unsetClassOrModuleLinearizationComputed() {
         flags.isLinearizationComputed = false;
     }
@@ -555,7 +563,7 @@ public:
     MethodRef findParentMethodTransitive(const GlobalState &gs, NameRef name) const;
     MethodRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
 
-    /* transitively finds a member with the most similar name */
+    /* transitively finds methods or constants with the most similar name */
 
     struct FuzzySearchResult {
         SymbolRef symbol;
@@ -563,7 +571,9 @@ public:
         int distance;
     };
 
-    std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    std::vector<FuzzySearchResult> findMethodFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    std::vector<FuzzySearchResult>
+    findConstantFuzzyMatch(Context ctx, NameRef name, packages::MangledName filterToPackage, int betterThan = -1) const;
 
     // Returns true if the symbol or any of its children are not in the symbol table. False otherwise.
     bool isPrintable(const GlobalState &gs) const;
@@ -620,17 +630,20 @@ public:
     // Might correspond to an intermediate `<PackageSpecRegistry>` namespace (not a package), but at least
     // will always correspond to the tightest possible namespace in the `<PackageSpecRegistry>` subtree.
     //
-    // Only set if `gs.packageDB().enabled()`
+    // Normally, only set if `gs.packageDB().enabled()`, though `<root>` and `<PackageSpecRegistry>`
+    // are initialized to contain `<PackageSpecRegistry>`.
+    //
+    // Unpackaged namespaces outside the package-name hierarchy, like `::Regexp`, have no registry
+    // cursor (the default).
     //
     // - Given ::<root>, contains ::<PackageSpecRegistry>
     // - Given ::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
     // - Given ::Opus::MyPkg::Foo, contains ::<PackageSpecRegistry>::Opus::MyPkg::Foo
     // - Given ::Opus::MyPkg::Foo::InnerPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg::Foo::InnerPkg
-    // - Given ::Test, contains ::<PackageSpecRegistry>
-    // - Given ::Test::Opus::MyPkg, contains ::<PackageSpecRegistry>::Opus::MyPkg
+    // - Given an unpackaged namespace like ::Regexp, contains ::<none>
     //
     // When set to `::<none>`, inherit whatever our owner has for `package`.
-    ClassOrModuleRef packageRegistryOwner = core::Symbols::PackageSpecRegistry();
+    ClassOrModuleRef packageRegistryOwner = core::Symbols::noClassOrModule();
 
     // The package that this symbol belongs to.
     //
@@ -647,6 +660,16 @@ public:
     //
     // TODO(jez) Ban defining a package called `Test`
     packages::MangledName package;
+
+    // Returns true if this class or module corresponds to the root of a package namespace. For example, for the package
+    // named `::A::B`, this method returns true when called on the `B` symbol.
+    bool isPackageNamespace() const {
+        if (!this->package.exists()) {
+            return false;
+        }
+
+        return this->package.owner == this->packageRegistryOwner;
+    }
 
     // The class or module that this class or module is nested inside of.
     //
@@ -669,8 +692,10 @@ public:
     NameRef name; // todo: move out? it should not matter but it's important for name resolution
     TypePtr resultType;
 
+private:
     UnorderedMap<NameRef, SymbolRef> members_;
 
+public:
     UnorderedMap<NameRef, SymbolRef> &members() {
         return members_;
     };
@@ -705,10 +730,8 @@ private:
     friend class serialize::SerializerImpl;
     friend class GlobalState;
 
-    FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, Levenstein &levenstein,
+    FuzzySearchResult findMethodFuzzyMatchUTF8(const GlobalState &gs, NameRef name, Levenstein &levenstein,
                                                int betterThan = -1) const;
-    std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
-                                                                int betterThan = -1) const;
 
     /*
      * mixins and superclasses: `superClass` is *not* included in the

@@ -15,7 +15,9 @@ public:
 
     std::unique_ptr<ResponseMessage> runRequest(LSPTypecheckerDelegate &typechecker) override;
 
-    bool needsMultithreading(const LSPIndexer &indexer) const override;
+    bool canPreempt(const LSPIndexer &indexer) const override;
+
+    core::packages::Stratum preemptionStratum(FileStratumMapping info) const override;
 };
 
 } // namespace sorbet::realmain::lsp

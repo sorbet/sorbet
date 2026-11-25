@@ -34,3 +34,50 @@ p6, (x2,) = [[1, 2], [3, 4]]
 
 for p7, (x2,) in a
 end
+
+# `MultiTargetNode` in method parameter lists
+
+def method_empty((x, y))
+end
+
+def method_single((x, y))
+  statement1()
+end
+
+def method_multi((x, y))
+  statement1()
+  statement2()
+end
+
+
+def self.method_empty((x, y))
+end
+
+def self.method_single((x, y))
+  statement1()
+end
+
+def self.method_multi((x, y))
+  statement1()
+  statement2()
+end
+
+# `MultiTargetNode` in block parameter lists\
+
+block_empty do |(x, y)|
+end
+
+block_single do |(x, y)|
+   statement1()
+end
+
+block_multi do |(x, y)|
+   statement1()
+   statement2()
+end
+
+# `MultiTargetNode` in lambda parameter lists
+
+-> ((x, y)) {}
+-> ((x, y)) { statement1() }
+-> ((x, y)) { statement1(); statement2() }

@@ -38,7 +38,7 @@ class A
 
   sig {returns(NilClass)}
   def extra_block
-    noblock do |x|
+    noblock do |x| # error: does not take a block
       x + 1 # Should be typed as untyped
     end
   end

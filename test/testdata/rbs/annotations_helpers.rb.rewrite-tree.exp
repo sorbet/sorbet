@@ -17,6 +17,14 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.abstract!()
   end
 
+  class <emptyTree>::<C AbstractMalformedHelper><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C <ConstantNameMissing>>::<C Helpers>)
+
+    <self>.extend(::<root>::<C T>::<C Helpers>)
+
+    <self>.abstract!()
+  end
+
   class <emptyTree>::<C Abstract4><<C <todo sym>>> < (::<todo sym>)
     <self>.extend(::<root>::<C T>::<C Helpers>)
 
@@ -145,5 +153,8 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.requires_ancestor() do ||
       <emptyTree>::<C Multiple1>::<C Multiple2>
     end
+  end
+
+  class <emptyTree>::<C UnknownAnnotation><<C <todo sym>>> < (::<todo sym>)
   end
 end

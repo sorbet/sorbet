@@ -25,5 +25,15 @@ module T::Types
     def new(...)
       Range.new(...)
     end
+
+    class Untyped < TypedRange
+      def initialize
+        super(T::Types::Untyped::Private::INSTANCE)
+      end
+
+      def valid?(obj)
+        obj.is_a?(Range)
+      end
+    end
   end
 end

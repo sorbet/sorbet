@@ -1,7 +1,5 @@
 # typed: strict
 
-extend T::Sig
-
 module Wrong
   class Inside; end
 end
@@ -35,6 +33,7 @@ end
 
 module Root
   extend T::Sig
+
   NOT_IN_PACKAGE = T.let(1, Integer)
 
   sig {returns(NilClass)}

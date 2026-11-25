@@ -1,5 +1,7 @@
 #include "common/kvstore/KeyValueStore.h"
+#include "absl/cleanup/cleanup.h"
 #include "common/EarlyReturnWithCode.h"
+#include "common/kvstore/CacheLock.h"
 #include "common/strings/formatting.h"
 #include "common/timers/Timer.h"
 #include "lmdb.h"
@@ -7,6 +9,7 @@
 
 // TODO(jez) We do not use lmdb when building for emscripten, so we're guaranteed that the pinned
 // LLVM we compile Sorbet with has a libc++ version high enough to use `<filesystem>` (from C++17)
+#include <cerrno>
 #include <filesystem>
 
 #include <utility>
@@ -15,7 +18,14 @@ using namespace std;
 namespace sorbet {
 constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
 struct KeyValueStore::DBState {
-    MDB_env *env;
+    MDB_env *env = nullptr;
+    const CacheLock accessLock;
+
+    explicit DBState(CacheLock accessLock) : accessLock(move(accessLock)) {}
+
+    ~DBState() {
+        mdb_env_close(env);
+    }
 };
 
 struct OwnedKeyValueStore::TxnState {
@@ -76,62 +86,79 @@ bool hasNoOutstandingReaders(MDB_env *env, string_view path) {
 
 KeyValueStore::KeyValueStore(shared_ptr<spdlog::logger> logger, string version, string path, string flavor,
                              size_t maxSize)
-    : version(move(version)), path(move(path)), flavor(move(flavor)), dbState(make_unique<DBState>()),
-      logger(move(logger)) {
+    : version(move(version)), path(move(path)), flavor(move(flavor)), logger(move(logger)) {
     ENFORCE(!this->version.empty());
-    bool expected = false;
-    if (!kvstoreInUse.compare_exchange_strong(expected, true)) {
-        throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0, path);
+    int rc = 0;
+    try {
+        filesystem::create_directories(this->path);
+    } catch (filesystem::filesystem_error &e) {
+        rc = e.code().value();
+        if (rc == ENOTDIR || rc == EACCES) {
+            goto fail;
+        }
+        fmt::print(stderr,
+                   "'{}' does not exist and could not be created. "
+                   "When using --cache-dir, create the directory before hand.\n",
+                   this->path);
+        throw EarlyReturnWithCode(1);
     }
 
-    int rc = mdb_env_create(&dbState->env);
-    if (rc != 0) {
-        goto fail;
-    }
-    rc = mdb_env_set_mapsize(dbState->env, maxSize);
-    if (rc != 0) {
-        goto fail;
-    }
-    rc = mdb_env_set_maxdbs(dbState->env, 3);
-    if (rc != 0) {
-        goto fail;
-    }
-    // _disable_ thread local storage so that the writer thread can close/abort a reader transaction.
-    // MDB_NOTLS instructs LMDB to store transactions into the `MDB_txn` objects rather than thread-local storage.
-    // It allows read-only transactions to migrate across threads (letting the writer thread clean up reader
-    // transactions), but users are expected to manage concurrent access. We already restrict concurrent access by
-    // manually maintaining a map from thread to transaction.
-    // Avoids MDB_READERS_FULL issues with concurrent Sorbet processes.
-    rc = mdb_env_open(dbState->env, this->path.c_str(), MDB_NOTLS, 0664);
-    if (rc == ENOENT) {
-        try {
-            filesystem::create_directories(this->path);
-        } catch (filesystem::filesystem_error &e) {
-            fmt::print(stderr,
-                       "'{}' does not exist and could not be created. "
-                       "When using --cache-dir, create the directory before hand.\n",
-                       this->path);
-            throw EarlyReturnWithCode(1);
+    {
+        // Acquire the coordination lock before LMDB opens either of its files. Keep it until mdb_env_close completes.
+        auto accessLock = CacheLock::acquireShared(this->path);
+        if (!accessLock.has_value()) {
+            rc = errno;
+            goto fail;
         }
+        dbState = make_unique<DBState>(move(accessLock.value()));
+
+        bool expected = false;
+        if (!kvstoreInUse.compare_exchange_strong(expected, true)) {
+            throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0, this->path);
+        }
+        absl::Cleanup releaseSlotOnFailure = [this] {
+            dbState.reset();
+            kvstoreInUse.store(false);
+        };
+
+        rc = mdb_env_create(&dbState->env);
+        if (rc != 0) {
+            goto fail;
+        }
+        rc = mdb_env_set_mapsize(dbState->env, maxSize);
+        if (rc != 0) {
+            goto fail;
+        }
+        rc = mdb_env_set_maxdbs(dbState->env, 3);
+        if (rc != 0) {
+            goto fail;
+        }
+
+        // _disable_ thread local storage so that the writer thread can close/abort a reader transaction.
+        // MDB_NOTLS instructs LMDB to store transactions into the `MDB_txn` objects rather than thread-local storage.
+        // It allows read-only transactions to migrate across threads (letting the writer thread clean up reader
+        // transactions), but users are expected to manage concurrent access. We already restrict concurrent access by
+        // manually maintaining a map from thread to transaction.
+        // Avoids MDB_READERS_FULL issues with concurrent Sorbet processes.
         rc = mdb_env_open(dbState->env, this->path.c_str(), MDB_NOTLS, 0664);
         if (rc != 0) {
             goto fail;
         }
-    } else if (rc == ENOTDIR) {
+        std::move(releaseSlotOnFailure).Cancel();
+    }
+    return;
+fail:
+    if (rc == ENOTDIR) {
         fmt::print(stderr, "'{}' is not a directory, and so cannot store the Sorbet disk cache.\n", this->path);
         throw EarlyReturnWithCode(1);
     } else if (rc == EACCES) {
         fmt::print(stderr, "No read permissions for '{}'\n", this->path);
         throw EarlyReturnWithCode(1);
-    } else if (rc != 0) {
-        goto fail;
     }
-    return;
-fail:
-    throw_mdb_error("failed to create database"sv, rc, path);
+    throw_mdb_error("failed to create database"sv, rc, this->path);
 }
 KeyValueStore::~KeyValueStore() noexcept(false) {
-    mdb_env_close(dbState->env);
+    dbState.reset();
     bool expected = true;
     if (!kvstoreInUse.compare_exchange_strong(expected, false)) {
         throw_mdb_error("Cannot create two kvstore instances simultaneously.", 0, path);

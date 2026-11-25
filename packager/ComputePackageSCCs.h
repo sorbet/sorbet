@@ -34,7 +34,7 @@ class ComputePackageSCCs {
     // determine all packages in the SCC.
     std::vector<core::packages::MangledName> stack;
 
-    core::packages::Condensation condensation;
+    core::packages::CondensationBuilder condensation;
 
     ComputePackageSCCs(core::GlobalState &gs) : gs{gs} {
         auto numPackages = gs.packageDB().packages().size();
@@ -44,7 +44,7 @@ class ComputePackageSCCs {
 
     // DFS traversal for Tarjan's algorithm starting from pkgName, along with keeping track of some metadata needed for
     // detecting SCCs.
-    template <core::packages::ImportType EdgeType, typename P>
+    template <typename P>
     void strongConnect(core::packages::MangledName pkgName, NodeInfo &infoAtEntry, P &packageGraph) {
         auto &packageDB = gs.packageDB();
         if (!packageDB.getPackageInfo(pkgName).exists()) {
@@ -59,18 +59,12 @@ class ComputePackageSCCs {
         infoAtEntry.onStack = true;
 
         for (auto &i : packageGraph.getImports(pkgName)) {
-            // We want to consider all imports from test code, but only normal imports for application code.
-            if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                if (i.type != core::packages::ImportType::Normal) {
-                    continue;
-                }
-            }
             // We need to be careful with this; it's not valid after a call to `strongConnect`,
             // because our reference might disappear from underneath us during that call.
             auto &importInfo = this->nodeMap[i.mangledName];
             if (importInfo.index == NodeInfo::UNVISITED) {
                 // This is a tree edge (ie. a forward edge that we haven't visited yet).
-                this->strongConnect<EdgeType>(i.mangledName, importInfo, packageGraph);
+                this->strongConnect(i.mangledName, importInfo, packageGraph);
 
                 // Need to re-lookup for the reason above.
                 auto &importInfo = this->nodeMap[i.mangledName];
@@ -105,8 +99,7 @@ class ComputePackageSCCs {
             // top of the stack are in the same SCC. Pop the stack until we reach the root of the SCC, and assign them
             // the same SCC ID.
             core::packages::MangledName poppedPkgName;
-            auto &condensationNode =
-                this->condensation.pushNode(EdgeType, packageDB.getPackageInfo(pkgName).isPreludePackage());
+            auto &condensationNode = this->condensation.pushNode(packageDB.getPackageInfo(pkgName).isPreludePackage());
             auto sccId = condensationNode.id;
 
             // Set the SCC ids for all of the members of the SCC
@@ -116,22 +109,7 @@ class ComputePackageSCCs {
                 this->stack.pop_back();
                 this->nodeMap[poppedPkgName].onStack = false;
 
-                if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                    packageGraph.setSCCId(poppedPkgName, sccId);
-                } else if constexpr (EdgeType != core::packages::ImportType::Normal) {
-                    packageGraph.setTestSCCId(poppedPkgName, sccId);
-
-                    // If this is a test-only package, we also set the non-test SCC id to this same id.
-                    if (gs.packageDB().getPackageInfo(poppedPkgName).file.isTestPackage(gs)) {
-                        packageGraph.setSCCId(poppedPkgName, sccId);
-                    } else {
-                        // However, if this is the test package for application code, we add an implicit dependency on
-                        // the application SCC. Those scc ids must exist at this point, as we've already traversed all
-                        // packages once.
-                        auto appSccId = packageGraph.getSCCId(poppedPkgName);
-                        condensationNode.imports.insert(appSccId);
-                    }
-                }
+                packageGraph.setSCCId(poppedPkgName, sccId);
             } while (poppedPkgName != pkgName);
 
             // Iterate the imports of each member, building the edges of the condensation. This step is performed after
@@ -143,20 +121,7 @@ class ComputePackageSCCs {
                         continue;
                     }
 
-                    int impId = 0;
-
-                    if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                        if (i.type != core::packages::ImportType::Normal) {
-                            continue;
-                        }
-                        impId = packageGraph.getSCCId(i.mangledName);
-                    } else {
-                        // If we're processing imports from a test package, we can't tell if those imports are used only
-                        // at application time, or application and test time. Conservatively, we consider the import to
-                        // be to the test package, which transitively depends on the application code, ensuring the
-                        // correct ordering for test packages.
-                        impId = packageGraph.getTestSCCId(i.mangledName);
-                    }
+                    int impId = packageGraph.getSCCId(i.mangledName);
 
                     if (impId == sccId) {
                         continue;
@@ -169,20 +134,12 @@ class ComputePackageSCCs {
     }
 
     // Tarjan's algorithm for finding strongly connected components
-    template <core::packages::ImportType EdgeType, typename P> void tarjan(P &packageGraph) {
-        this->nodeMap.clear();
+    template <typename P> void tarjan(P &packageGraph) {
         ENFORCE(this->stack.empty());
         for (auto package : gs.packageDB().packages()) {
-            // We skip test-only packages when we're processing application edges.
-            if constexpr (EdgeType == core::packages::ImportType::Normal) {
-                if (gs.packageDB().getPackageInfo(package).file.isTestPackage(gs)) {
-                    continue;
-                }
-            }
-
             auto &info = this->nodeMap[package];
             if (info.index == NodeInfo::UNVISITED) {
-                this->strongConnect<EdgeType>(package, info, packageGraph);
+                this->strongConnect(package, info, packageGraph);
             }
         }
     }
@@ -194,12 +151,9 @@ public:
         Timer timeit(gs.tracer(), "packager::computeSCCs");
         ComputePackageSCCs scc(gs);
 
-        // First, compute the SCCs for application code, and then for test code. This allows us to have more granular
-        // SCCs, as test_import edges aren't subject to the same restrictions that import edges are.
-        scc.tarjan<core::packages::ImportType::Normal>(packageGraph);
-        scc.tarjan<core::packages::ImportType::TestHelper>(packageGraph);
+        scc.tarjan(packageGraph);
 
-        return std::move(scc.condensation);
+        return std::move(scc.condensation).build();
     }
 };
 

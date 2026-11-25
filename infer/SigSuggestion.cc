@@ -50,27 +50,28 @@ core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchC
     return to;
 }
 
-void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, cfg::Send *snd,
+void extractSendArgumentKnowledge(core::Context ctx, cfg::CFG &cfg, core::LocOffsets bindLoc, cfg::Send *snd,
                                   const UnorderedMap<cfg::LocalRef, InlinedVector<core::NameRef, 1>> &blockLocals,
                                   UnorderedMap<core::NameRef, core::TypePtr> &blockArgRequirements,
                                   const core::NameRef currentMethodName) {
     InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> typeAndOriginsOwner;
     InlinedVector<const core::TypeAndOrigins *, 2> args;
 
-    args.reserve(snd->args.size());
-    for (cfg::VariableUseSite &arg : snd->args) {
+    auto argTypes = snd->argTypes();
+    args.reserve(argTypes.size());
+    for (core::TypePtr &arg : argTypes) {
         auto &t = typeAndOriginsOwner.emplace_back(make_unique<core::TypeAndOrigins>());
-        t->type = arg.type;
+        t->type = arg;
         t->origins.emplace_back(core::Loc::none());
         args.emplace_back(t.get());
     }
 
     core::CallLocs locs{
-        ctx.file, bindLoc, snd->receiverLoc, snd->funLoc, snd->argLocs,
+        ctx.file, bindLoc, snd->receiverLoc, snd->funLoc, snd->argLocs(),
     };
 
     auto numPosArgs = snd->numPosArgs;
-    auto numKwArgs = snd->args.size() - numPosArgs;
+    auto numKwArgs = snd->argRefs().size() - numPosArgs;
     bool hasKwSplat = numKwArgs % 2 == 1;
 
     // Since this is a "fake" dispatch and we are not going to display the errors anyway,
@@ -87,7 +88,7 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
                                     snd->recv.type,
                                     wrappedFullType,
                                     snd->recv.type,
-                                    snd->link.get(),
+                                    snd->link.data(cfg).get(),
                                     originForUninitialized,
                                     snd->isPrivateOk,
                                     suppressErrors,
@@ -96,14 +97,15 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
 
     // See if we can learn what types should they have
     bool inKwArgs = false;
-    for (int i = 0, argIdx = 0; i < snd->args.size(); i++, argIdx++) {
+    auto argRefs = snd->argRefs();
+    for (int i = 0, argIdx = 0; i < argRefs.size(); i++, argIdx++) {
         inKwArgs = inKwArgs || (i >= numPosArgs && !hasKwSplat);
 
         // extract the keyword argument name when the send contains inlined keyword arguments
         optional<core::NameRef> keyword;
         if (inKwArgs) {
-            if (core::isa_type<core::NamedLiteralType>(snd->args[i].type)) {
-                auto lit = core::cast_type_nonnull<core::NamedLiteralType>(snd->args[i].type);
+            if (core::isa_type<core::NamedLiteralType>(argTypes[i])) {
+                auto lit = core::cast_type_nonnull<core::NamedLiteralType>(argTypes[i]);
                 if (lit.kind == core::NamedLiteralType::Kind::Symbol) {
                     keyword = lit.name;
                 }
@@ -113,10 +115,10 @@ void extractSendArgumentKnowledge(core::Context ctx, core::LocOffsets bindLoc, c
             i++;
         }
 
-        auto &arg = snd->args[i];
+        auto var = argRefs[i];
 
         // See if we can learn about what functions are expected to exist on arguments
-        auto fnd = blockLocals.find(arg.variable);
+        auto fnd = blockLocals.find(var);
         if (fnd == blockLocals.end()) {
             continue;
         }
@@ -201,8 +203,8 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
             } else if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value)) {
                 // see if we have at least a single call argument that is a method argument
                 bool shouldFindArgumentTypes = false;
-                for (auto &arg : snd->args) {
-                    auto fnd = blockLocals.find(arg.variable);
+                for (auto &arg : snd->argRefs()) {
+                    auto fnd = blockLocals.find(arg);
                     if (fnd != blockLocals.end() && !fnd->second.empty()) {
                         shouldFindArgumentTypes = true;
                         break;
@@ -211,7 +213,7 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
 
                 if (shouldFindArgumentTypes) {
                     auto currentMethodName = cfg.symbol.data(ctx)->name;
-                    extractSendArgumentKnowledge(ctx, bind.loc, snd, blockLocals, blockArgRequirements,
+                    extractSendArgumentKnowledge(ctx, cfg, bind.loc, snd, blockLocals, blockArgRequirements,
                                                  currentMethodName);
                 }
             }
@@ -226,8 +228,12 @@ UnorderedMap<core::NameRef, core::TypePtr> guessArgumentTypes(core::Context ctx,
         }
     }
 
+    // TODO: there's an assumption in the loop below that `core::Types::glb` for a given variable will converge after
+    // enough traversals of the CFG. That appears to be not true, so we bound argument guessing to 10 iterations over
+    // the CFG. The choice of 10 is arbitrary, and a more reasonable bound might be the maximum loop depth of the CFG,
+    // but 10 is probably good enough for most cases.
     bool changed = true;
-    while (changed) {
+    for (int attempt = 0; changed && attempt < 10; ++attempt) {
         changed = false;
         for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
             cfg::BasicBlock *bb = *it;
@@ -368,7 +374,16 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
     if (closestMethod.exists()) {
         auto closestReturnType = closestMethod.data(ctx)->resultType;
         if (closestReturnType && !closestReturnType.isUntyped()) {
-            guessedReturnType = closestReturnType;
+            closestReturnType =
+                core::Types::resultTypeAsSeenFrom(ctx, closestReturnType, closestMethod.data(ctx)->owner,
+                                                  enclosingClass, enclosingClass.data(ctx)->selfTypeArgs(ctx));
+            // Only correct the guessed return type if the guess isn't subtype compatible (allow narrower guess),
+            // or if the guess is `NilClass`, because that makes it harder to add new, empty method
+            // implementations and rely on the autocorrect to copy the parent signature down.
+            if (guessedReturnType == core::Types::nilClass() ||
+                !core::Types::isSubType(ctx, guessedReturnType, closestReturnType)) {
+                guessedReturnType = closestReturnType;
+            }
         }
 
         for (const auto &param : closestMethod.data(ctx)->parameters) {
@@ -451,9 +466,8 @@ optional<core::AutocorrectSuggestion> SigSuggestion::maybeSuggestSig(core::Conte
         return nullopt;
     }
 
-    bool suggestsVoid = methodSymbol.data(ctx)->name == core::Names::initialize() ||
-                        (core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType) &&
-                         !guessedReturnType.isUntyped() && !guessedReturnType.isBottom());
+    bool suggestsVoid =
+        methodSymbol.data(ctx)->name == core::Names::initialize() || (guessedReturnType.hasTopLevelVoid());
 
     if (suggestsVoid) {
         fmt::format_to(std::back_inserter(ss), "void }}");

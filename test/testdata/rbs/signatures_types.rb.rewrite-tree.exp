@@ -1,5 +1,53 @@
 class <emptyTree><<C <root>>> < (::<todo sym>)
   ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::NilClass)
+  end
+
+  def returns_nil<<todo method>>(&<blk>)
+    nil
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:n, ::NilClass).void()
+  end
+
+  def takes_nil<<todo method>>(n, &<blk>)
+    <emptyTree>::<C T>.reveal_type(n)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::FalseClass)
+  end
+
+  def returns_false<<todo method>>(&<blk>)
+    false
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:f, ::FalseClass).void()
+  end
+
+  def takes_false<<todo method>>(f, &<blk>)
+    <emptyTree>::<C T>.reveal_type(f)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::TrueClass)
+  end
+
+  def returns_true<<todo method>>(&<blk>)
+    true
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:t, ::TrueClass).void()
+  end
+
+  def takes_true<<todo method>>(t, &<blk>)
+    <emptyTree>::<C T>.reveal_type(t)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
     <self>.returns(<emptyTree>::<C Foo>)
   end
 
@@ -76,6 +124,22 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   def class_singleton_type5<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.class_of(<emptyTree>::<C GenericSingleton1>).[](<emptyTree>::<C GenericSingleton1>, <emptyTree>::<C Integer>))
+  end
+
+  def class_singleton_generic_type1<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.class_of(<emptyTree>::<C GenericSingleton2>).[](<emptyTree>::<C GenericSingleton2>, <emptyTree>::<C Integer>, <emptyTree>::<C String>))
+  end
+
+  def class_singleton_generic_type2<<todo method>>(&<blk>)
     <emptyTree>::<C T>.unsafe(nil)
   end
 
@@ -432,7 +496,23 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   ::T::Sig::WithoutRuntime.sig() do ||
-    <self>.returns(::<root>::<C T>.proc().params(:arg0, <emptyTree>::<C Integer>, :arg1, <emptyTree>::<C String>).returns(<emptyTree>::<C String>))
+    <self>.returns({:optional => <emptyTree>::<C String>, :required => <emptyTree>::<C String>})
+  end
+
+  def shape_type4<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns({:k1 => <emptyTree>::<C String>, :k2 => <emptyTree>::<C Integer>})
+  end
+
+  def shape_type5<<todo method>>(&<blk>)
+    <emptyTree>::<C T>.unsafe(nil)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.returns(::<root>::<C T>.proc().params(:a, <emptyTree>::<C Integer>, :arg1, <emptyTree>::<C String>, :c, <emptyTree>::<C Symbol>, :arg3, <emptyTree>::<C Float>).returns(<emptyTree>::<C String>))
   end
 
   def proc_type1<<todo method>>(&<blk>)
@@ -517,6 +597,24 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
+  <runtime method definition of returns_nil>
+
+  <emptyTree>::<C T>.reveal_type(<self>.returns_nil())
+
+  <runtime method definition of takes_nil>
+
+  <runtime method definition of returns_false>
+
+  <emptyTree>::<C T>.reveal_type(<self>.returns_false())
+
+  <runtime method definition of takes_false>
+
+  <runtime method definition of returns_true>
+
+  <emptyTree>::<C T>.reveal_type(<self>.returns_true())
+
+  <runtime method definition of takes_true>
+
   <runtime method definition of class_instance_type1>
 
   <emptyTree>::<C T>.reveal_type(<self>.class_instance_type1())
@@ -556,6 +654,28 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <runtime method definition of class_singleton_type5>
 
   <emptyTree>::<C T>.reveal_type(<self>.class_singleton_type5())
+
+  class <emptyTree>::<C GenericSingleton1><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <emptyTree>::<C T1> = <self>.type_template()
+  end
+
+  class <emptyTree>::<C GenericSingleton2><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <emptyTree>::<C T1> = <self>.type_template()
+
+    <emptyTree>::<C T2> = <self>.type_template()
+  end
+
+  <runtime method definition of class_singleton_generic_type1>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_singleton_generic_type1())
+
+  <runtime method definition of class_singleton_generic_type2>
+
+  <emptyTree>::<C T>.reveal_type(<self>.class_singleton_generic_type2())
 
   <runtime method definition of union_type1>
 
@@ -768,6 +888,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <runtime method definition of shape_type3>
 
   <emptyTree>::<C T>.reveal_type(<self>.shape_type3())
+
+  <runtime method definition of shape_type4>
+
+  <runtime method definition of shape_type5>
 
   <runtime method definition of proc_type1>
 

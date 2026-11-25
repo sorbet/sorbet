@@ -2,5 +2,4 @@
 # typed: strict
 
 class Application < PackageSpec
-  export Application::B
 end

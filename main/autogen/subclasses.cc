@@ -162,7 +162,7 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
 
         string parentName = parentRef.show(gs);
 
-        auto type = children.classKind == ClassKind::Class ? "class" : "module";
+        auto type = children.classKind == ClassKind::Class ? "c" : "m";
         descendantsMapSerialized.emplace_back(fmt::format("{} {}", type, parentName));
 
         auto subclassesStart = descendantsMapSerialized.size();
@@ -170,8 +170,9 @@ vector<string> Subclasses::serializeSubclassMap(const core::GlobalState &gs, con
             auto loc = info.defining_ref.value_or(childRef.data(gs)->loc());
             string_view path = gs.getPrintablePath(loc.file().data(gs).path());
             string childName = childRef.show(gs);
-            auto type = childRef.data(gs)->isClass() ? "class" : "module";
-            descendantsMapSerialized.emplace_back(fmt::format(" {} {} {}", type, childName, path));
+            auto type = childRef.data(gs)->isClass() ? "c" : "m";
+            auto abstract = childRef.data(gs)->flags.isAbstract ? "a" : "c";
+            descendantsMapSerialized.emplace_back(fmt::format(" {} {} {} {}", type, childName, path, abstract));
         }
 
         fast_sort_range(descendantsMapSerialized.begin() + subclassesStart, descendantsMapSerialized.end());

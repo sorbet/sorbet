@@ -19,4 +19,5 @@ T.reveal_type(xs) # error: `T::Array[Integer]`
 # type if we did not set returnTypeBeforeSolve directly to a type that does not
 # have any T.type_parameter in it.
 xs = T::Array[Integer].new("") {}
+#                              ^^ error: does not take a block
 T.reveal_type(xs) # error: `T::Array[Integer]`

@@ -13,6 +13,12 @@ namespace sorbet::core::packages {
 
 class PackageDB;
 
+enum class GenPackagesMode : uint8_t {
+    Disabled,
+    Normal,
+    Strict,
+};
+
 class UnfreezePackages final {
 public:
     PackageDB &db;
@@ -23,9 +29,11 @@ public:
 
 class PackageDB final {
     friend class core::GlobalState;
+    friend class UnfreezePackages;
 
 public:
-    static constexpr NameRef TEST_NAMESPACE = core::Names::Constants::Test();
+    // If `sym` is a `T::Enum` value, the enum class it belongs to. Otherwise, `noSymbol`.
+    static core::SymbolRef getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym);
 
     MangledName enterPackage(std::unique_ptr<PackageInfo> pkg);
 
@@ -33,12 +41,21 @@ public:
     // associated package for the file.
     const MangledName getPackageNameForFile(FileRef file) const;
 
+    // Returns the package for an ordinary source file, or nullptr when packages are disabled,
+    // the file is a package spec (__package.rb), or no existing package is associated with it.
+    const PackageInfo *getPackageForSourceFile(const core::GlobalState &gs, FileRef file) const;
+
     // Set the associated package for the file.
     void setPackageNameForFile(FileRef file, MangledName mangledName);
 
     MangledName findPackageByPath(const core::GlobalState &gs, core::FileRef file) const;
+    MangledName findPackageByPath(const core::GlobalState &gs, const core::File &fileData) const;
+
     const PackageInfo &getPackageInfo(MangledName mangledName) const;
     PackageInfo *getPackageInfoNonConst(MangledName mangledName);
+
+    // Get the mangled name of the next package up in the hierarchy from `pkg`, if one exists.
+    MangledName getParentPackage(const core::GlobalState &gs, MangledName pkg) const;
 
     // Get mangled names for all packages.
     // Packages are ordered lexicographically with respect to the NameRef's that make up their
@@ -60,15 +77,22 @@ public:
         return this->enabled_;
     }
 
-    // Whether the --gen-packages mode is active.
-    bool genPackages() const {
-        return this->genPackages_;
+    GenPackagesMode genPackagesMode() const {
+        return this->genPackagesMode_;
     }
 
-    absl::Span<const std::string> extraPackageFilesDirectoryUnderscorePrefixes() const;
+    // Whether --gen-packages-allow-relaxing-test-visibility is active.
+    bool allowRelaxingTestVisibility() const {
+        return this->allowRelaxingTestVisibility_;
+    }
+
+    // Whether to attribute errors to a package in the command line error output
+    bool packageAttributedErrors() const {
+        return this->packageAttributedErrors_;
+    }
+
     absl::Span<const std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashPrefixes() const;
-    absl::Span<const std::string> skipRBIExportEnforcementDirs() const;
     // Possible layers for packages to be in. The layers are ordered lowest to highest.
     // Ie. {'util', 'app'} means that code in `app` can call code in `util`, but code in `util` cannot call code in
     // `app`.
@@ -82,8 +106,11 @@ public:
     // Expects to be called after packages have been defined, so that string package names provided
     // at the command line can be resolved to actual packages.
     void resolvePackagesWithRelaxedChecks(GlobalState &gs);
+    void resolvePackagesToUpdateVisibilityFor(GlobalState &gs);
 
     bool allowRelaxedPackagerChecksFor(const MangledName mangledName) const;
+    bool updateVisibilityFor(const MangledName mangledName) const;
+    bool anyUpdateVisibilityFor() const;
 
     // Overwrite the condensation graph for the current package set. This method is only meant to be used from
     // `ComputePackageSCCs::run`.
@@ -97,14 +124,16 @@ public:
 
 private:
     bool enabled_ = false;
-    bool genPackages_ = false;
-    std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes_;
+    GenPackagesMode genPackagesMode_ = GenPackagesMode::Disabled;
+    bool allowRelaxingTestVisibility_ = false;
+    bool packageAttributedErrors_ = false;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;
-    std::vector<std::string> skipRBIExportEnforcementDirs_;
     std::vector<std::string> allowRelaxedPackagerChecksFor_;
     UnorderedSet<MangledName> packagesWithRelaxedChecks_;
+    std::vector<std::string> updateVisibilityFor_;
+    UnorderedSet<MangledName> packagesToUpdateVisibilityFor_;
     std::vector<core::NameRef> layers_;
 
     // This vector is kept in sync with the size of the file table in the global state by `setPackageNameForFile`.
@@ -119,8 +148,6 @@ private:
     std::thread::id writerThread;
 
     Condensation condensation_;
-
-    friend class UnfreezePackages;
 };
 
 } // namespace sorbet::core::packages

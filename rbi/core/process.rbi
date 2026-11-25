@@ -2100,7 +2100,7 @@ class Process::Tms < Struct
 
   def self.members; end
 
-  def self.new(*_); end
+  def initialize(*_); end
 end
 
 class Process::Waiter < Thread

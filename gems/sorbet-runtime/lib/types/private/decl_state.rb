@@ -12,9 +12,18 @@ class T::Private::DeclState
 
   attr_accessor :active_declaration
   attr_accessor :skip_on_method_added
+  attr_accessor :previous_declaration
+  attr_accessor :last_method_key
 
   def reset!
     self.active_declaration = nil
+    @previous_declaration = nil
+  end
+
+  def consume!
+    @previous_declaration = self.active_declaration
+    self.active_declaration = nil
+    @previous_declaration
   end
 
   def without_on_method_added

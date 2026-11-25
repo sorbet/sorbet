@@ -49,7 +49,7 @@ class AdvancedODM
 
     prop :enum_prop, String, enum: ["hello", "goodbye"]
 
-    prop :foreign, String, foreign: ForeignClass # error: must be a lambda
+    prop :foreign, String, foreign: ForeignClass
     prop :foreign_lazy, String, foreign: -> {ForeignClass}
     prop :foreign_proc, String, foreign: proc {ForeignClass}
     prop :foreign_invalid, String, foreign: proc { :not_a_type }
@@ -86,9 +86,12 @@ end
 
 class EncryptedProp
   include T::Props
-  def self.encrypted_prop(opts={}); end
-  encrypted_prop :foo
-  encrypted_prop :bar, migrating: true, immutable: true
+  def self.encrypted_prop(name, type, kind: nil, **opts); end
+  encrypted_prop :foo, Opus::DB::Model::Mixins::Encryptable::EncryptedValue
+  encrypted_prop :bar, Opus::DB::Model::Mixins::Encryptable::EncryptedValue, migrating: true, immutable: true
+  encrypted_prop :baz, EncryptedProp
+  encrypted_prop :with_errors, "".dne
+                                # ^^^ error: Method `dne` does not exist on `String` component of `String("")`
 end
 
 def main
@@ -111,12 +114,12 @@ def main
     T.reveal_type(AdvancedODM.new.enum_prop) # error: Revealed type: `String`
     AdvancedODM.new.enum_prop = "hello"
 
-    T.reveal_type(AdvancedODM.new.foreign_) # error: Revealed type: `T.nilable(ForeignClass)`
-    T.reveal_type(AdvancedODM.new.foreign_!) # error: Revealed type: `ForeignClass`
-    T.reveal_type(AdvancedODM.new.foreign_lazy_) # error: Revealed type: `T.nilable(ForeignClass)`
+    AdvancedODM.new.foreign_ # error: does not exist
+    AdvancedODM.new.foreign_! # error: does not exist
+    AdvancedODM.new.foreign_lazy_ # error: does not exist
 
     # Check that the method still exists even if we can't parse the type
-    AdvancedODM.new.foreign_invalid_
+    AdvancedODM.new.foreign_invalid_ # error: does not exist
 
     T.reveal_type(PropHelpers.new.token) # error: Revealed type: `String`
     PropHelpers.new.token = "tok_token"
@@ -135,9 +138,11 @@ def main
 
     T.reveal_type(EncryptedProp.new.foo) # error: Revealed type: `T.nilable(String)`
     T.reveal_type(EncryptedProp.new.encrypted_foo) # error: Revealed type: `T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)`
+    T.reveal_type(EncryptedProp.new.encrypted_baz) # error: Revealed type: `T.nilable(EncryptedProp)`
     EncryptedProp.new.foo = "hello"
     EncryptedProp.new.foo = nil
     EncryptedProp.new.bar = "hello" # error: Setter method `bar=` does not exist
+    EncryptedProp.new.with_errors # error: Method `with_errors` does not exist
 
     T.reveal_type(AdvancedODM.new.ifunset) # error: Revealed type: `String`
     T.reveal_type(AdvancedODM.new.ifunset_nilable) # error: Revealed type: `T.nilable(String)`

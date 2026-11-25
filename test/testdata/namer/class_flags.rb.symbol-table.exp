@@ -1,0 +1,34 @@
+class ::<root> < ::Object ()
+  class ::<Class:<root>>[<AttachedClass>] < ::<Class:Object> ()
+    method ::<Class:<root>>#<static-init> (<blk>) @ test/testdata/namer/class_flags.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/namer/class_flags.rb start=??? end=???}
+  class ::AbstractClass < ::Object () : abstract @ test/testdata/namer/class_flags.rb:3
+  class ::<Class:AbstractClass>[<AttachedClass>] < ::<Class:Object> (Helpers) : abstract @ test/testdata/namer/class_flags.rb:3
+    type-member(+) ::<Class:AbstractClass>::<AttachedClass> -> T.attached_class (of AbstractClass) @ test/testdata/namer/class_flags.rb:3
+    method ::<Class:AbstractClass>#<static-init> (<blk>) @ test/testdata/namer/class_flags.rb:3
+      argument <blk><block> @ Loc {file=test/testdata/namer/class_flags.rb start=??? end=???}
+  class ::FinalClass < ::Object () : final @ test/testdata/namer/class_flags.rb:13
+  class ::<Class:FinalClass>[<AttachedClass>] < ::<Class:Object> (Helpers) : final @ test/testdata/namer/class_flags.rb:13
+    type-member(+) ::<Class:FinalClass>::<AttachedClass> -> T.attached_class (of FinalClass) @ test/testdata/namer/class_flags.rb:13
+    method ::<Class:FinalClass>#<static-init> (<blk>) @ test/testdata/namer/class_flags.rb:13
+      argument <blk><block> @ Loc {file=test/testdata/namer/class_flags.rb start=??? end=???}
+  module ::Interface < ::Sorbet::Private::Static::ImplicitModuleSuperclass () : abstract|interface @ test/testdata/namer/class_flags.rb:8
+  class ::<Class:Interface>[<AttachedClass>] < ::Module (Helpers) : abstract @ test/testdata/namer/class_flags.rb:8
+    type-member(+) ::<Class:Interface>::<AttachedClass> -> T.attached_class (of Interface) @ test/testdata/namer/class_flags.rb:8
+    method ::<Class:Interface>#<static-init> (<blk>) @ test/testdata/namer/class_flags.rb:8
+      argument <blk><block> @ Loc {file=test/testdata/namer/class_flags.rb start=??? end=???}
+  class ::SealedClass < ::Object () : sealed @ test/testdata/namer/class_flags.rb:18
+  class ::<Class:SealedClass>[<AttachedClass>] < ::<Class:Object> (Helpers) @ test/testdata/namer/class_flags.rb:18
+    type-member(+) ::<Class:SealedClass>::<AttachedClass> -> T.attached_class (of SealedClass) @ test/testdata/namer/class_flags.rb:18
+    method ::<Class:SealedClass>#<static-init> (<blk>) @ test/testdata/namer/class_flags.rb:18
+      argument <blk><block> @ Loc {file=test/testdata/namer/class_flags.rb start=??? end=???}
+    method ::<Class:SealedClass>#sealed_subclasses (<blk>) -> T::Set[T.noreturn] @ test/testdata/namer/class_flags.rb:20
+      argument <blk><block> @ Loc {file=??? start=??? end=???}
+  class ::SeveralFlags < ::Object () : abstract|sealed @ test/testdata/namer/class_flags.rb:23
+  class ::<Class:SeveralFlags>[<AttachedClass>] < ::<Class:Object> (Helpers) : abstract @ test/testdata/namer/class_flags.rb:23
+    type-member(+) ::<Class:SeveralFlags>::<AttachedClass> -> T.attached_class (of SeveralFlags) @ test/testdata/namer/class_flags.rb:23
+    method ::<Class:SeveralFlags>#<static-init> (<blk>) @ test/testdata/namer/class_flags.rb:23
+      argument <blk><block> @ Loc {file=test/testdata/namer/class_flags.rb start=??? end=???}
+    method ::<Class:SeveralFlags>#sealed_subclasses (<blk>) -> T::Set[T.noreturn] @ test/testdata/namer/class_flags.rb:26
+      argument <blk><block> @ Loc {file=??? start=??? end=???}
+

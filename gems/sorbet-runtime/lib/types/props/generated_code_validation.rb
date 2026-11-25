@@ -119,7 +119,7 @@ module T::Props
 
     private_class_method def self.validate_deserialize_ivar_set(clause)
       # %<accessor_key>s = if val.nil?
-      #   found -= 1 unless hash.key?(%<serialized_form>s)
+      #   found -= 1 unless hash.key?(%<serialized_form>s.freeze)
       #   %<nil_handler>s
       # else
       #   %<serialized_val>s
@@ -143,7 +143,13 @@ module T::Props
       receiver, method, arg = found_condition.children
       assert_equal(s(:lvar, :hash), receiver)
       assert_equal(:key?, method)
-      assert_equal(:str, arg.type)
+      # hash.key?(%<serialized_form>s.freeze), where `.freeze` on a string
+      # literal is side-effect-free (and avoids a per-call allocation)
+      assert_equal(:send, arg.type)
+      arg_receiver, arg_method, *arg_rest = arg.children
+      assert_equal(:str, arg_receiver.type)
+      assert_equal(:freeze, arg_method)
+      assert_equal([], arg_rest)
       assert_equal(nil, found_if_body)
       assert_equal(s(:op_asgn, s(:lvasgn, :found), :-, s(:int, 1)), found_else_body)
 
@@ -262,7 +268,7 @@ module T::Props
       @whitelisted_methods_for_serialize ||= {
         lvar: %i{dup map transform_values transform_keys each_with_object nil? []= serialize},
         ivar: %i[dup map transform_values transform_keys each_with_object serialize],
-        const: %i[checked_serialize deep_clone_object],
+        const: %i[checked_serialize deep_clone deep_clone_object],
       }
     end
 
@@ -270,7 +276,7 @@ module T::Props
     private_class_method def self.whitelisted_methods_for_deserialize
       @whitelisted_methods_for_deserialize ||= {
         lvar: %i{dup map transform_values transform_keys each_with_object nil? []= to_f},
-        const: %i[deserialize from_hash deep_clone_object],
+        const: %i[deserialize from_hash deep_clone deep_clone_object],
       }
     end
   end

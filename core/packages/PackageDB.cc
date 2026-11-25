@@ -18,7 +18,7 @@ UnfreezePackages::UnfreezePackages(PackageDB &db) : db(db) {
 
 UnfreezePackages::~UnfreezePackages() {
     ENFORCE(!db.frozen);
-    db.writerThread = std::thread::id();
+    db.writerThread = thread::id();
     db.frozen = true;
 }
 
@@ -53,10 +53,44 @@ const MangledName PackageDB::getPackageNameForFile(FileRef file) const {
     return this->packageForFile_[file.id()];
 }
 
+const PackageInfo *PackageDB::getPackageForSourceFile(const core::GlobalState &gs, FileRef file) const {
+    if (!enabled() || file.data(gs).isPackage(gs)) {
+        return nullptr;
+    }
+
+    auto packageName = getPackageNameForFile(file);
+    if (!packageName.exists()) {
+        return nullptr;
+    }
+
+    auto &package = getPackageInfo(packageName);
+    ENFORCE(package.exists());
+    return &package;
+}
+
+MangledName PackageDB::getParentPackage(const GlobalState &gs, MangledName pkg) const {
+    ENFORCE(pkg.exists());
+
+    auto ownerSym = pkg.owner.data(gs)->owner;
+    while (ownerSym.exists() && ownerSym != core::Symbols::PackageSpecRegistry()) {
+        auto &owner = this->getPackageInfo(MangledName(ownerSym));
+
+        if (owner.exists()) {
+            return MangledName(ownerSym);
+        }
+
+        ownerSym = ownerSym.data(gs)->owner;
+    }
+
+    return MangledName();
+}
+
 void PackageDB::setPackageNameForFile(FileRef file, MangledName mangledName) {
     if (this->packageForFile_.size() <= file.id()) {
         this->packageForFile_.resize(file.id() + 1, MangledName());
     }
+
+    this->getPackageInfoNonConst(mangledName)->numFilesInPackage++;
 
     this->packageForFile_[file.id()] = mangledName;
 }
@@ -71,6 +105,10 @@ MangledName PackageDB::findPackageByPath(const core::GlobalState &gs, core::File
     // See https://github.com/sorbet/sorbet/pull/5291 for more information.
     auto &fileData = file.dataAllowingUnsafe(gs);
 
+    return this->findPackageByPath(gs, fileData);
+}
+
+MangledName PackageDB::findPackageByPath(const core::GlobalState &gs, const core::File &fileData) const {
     string_view path = fileData.path();
     int curPrefixPos = path.find_last_of('/');
     while (curPrefixPos > 0) {
@@ -108,10 +146,6 @@ absl::Span<const MangledName> PackageDB::packages() const {
     return absl::MakeSpan(mangledNames);
 }
 
-absl::Span<const string> PackageDB::skipRBIExportEnforcementDirs() const {
-    return absl::MakeSpan(skipRBIExportEnforcementDirs_);
-}
-
 absl::Span<const core::NameRef> PackageDB::layers() const {
     return absl::MakeSpan(layers_);
 }
@@ -119,15 +153,11 @@ absl::Span<const core::NameRef> PackageDB::layers() const {
 const int PackageDB::layerIndex(core::NameRef layer) const {
     auto findResult = absl::c_find(layers_, layer);
     ENFORCE(findResult != layers_.end());
-    return std::distance(layers_.begin(), findResult);
+    return distance(layers_.begin(), findResult);
 }
 
 const bool PackageDB::enforceLayering() const {
     return !layers_.empty();
-}
-
-absl::Span<const string> PackageDB::extraPackageFilesDirectoryUnderscorePrefixes() const {
-    return absl::MakeSpan(extraPackageFilesDirectoryUnderscorePrefixes_);
 }
 
 absl::Span<const string> PackageDB::extraPackageFilesDirectorySlashDeprecatedPrefixes() const {
@@ -143,17 +173,27 @@ const string_view PackageDB::errorHint() const {
 }
 
 void PackageDB::resolvePackagesWithRelaxedChecks(GlobalState &gs) {
-    UnorderedSet<MangledName> packagesWithRelaxedChecks;
-    for (const auto &pkgName : allowRelaxedPackagerChecksFor_) {
-        auto pkgNameParts = absl::StrSplit(pkgName, "::");
-        auto mangledName = MangledName::lookupMangledName(gs, pkgNameParts);
-        packagesWithRelaxedChecks.emplace(mangledName);
+    this->packagesWithRelaxedChecks_ = MangledName::parseNames(gs, allowRelaxedPackagerChecksFor_);
+}
+
+void PackageDB::resolvePackagesToUpdateVisibilityFor(GlobalState &gs) {
+    if (updateVisibilityFor_.empty()) {
+        return;
     }
-    this->packagesWithRelaxedChecks_ = move(packagesWithRelaxedChecks);
+
+    this->packagesToUpdateVisibilityFor_ = MangledName::parseNames(gs, updateVisibilityFor_);
 }
 
 bool PackageDB::allowRelaxedPackagerChecksFor(MangledName mangledName) const {
     return this->packagesWithRelaxedChecks_.contains(mangledName);
+}
+
+bool PackageDB::updateVisibilityFor(MangledName mangledName) const {
+    return this->packagesToUpdateVisibilityFor_.contains(mangledName);
+}
+
+bool PackageDB::anyUpdateVisibilityFor() const {
+    return this->packagesToUpdateVisibilityFor_.size() > 0;
 }
 
 PackageDB PackageDB::deepCopy() const {
@@ -169,15 +209,17 @@ PackageDB PackageDB::deepCopy() const {
     // This assumes that the GlobalState this PackageDB is getting copied into also has these
     // interned mangledName NameRefs at the same IDs as the current PackageDB.
     result.mangledNames = this->mangledNames;
+    // Likewise, this assumes that the GlobalState this PackageDB is getting copied into also has
+    // the same set of files available.
+    result.packageForFile_ = this->packageForFile_;
 
     // --- options ---
     result.enabled_ = this->enabled_;
-    result.genPackages_ = this->genPackages_;
-    result.extraPackageFilesDirectoryUnderscorePrefixes_ = this->extraPackageFilesDirectoryUnderscorePrefixes_;
+    result.genPackagesMode_ = this->genPackagesMode_;
+    result.allowRelaxingTestVisibility_ = this->allowRelaxingTestVisibility_;
     result.extraPackageFilesDirectorySlashDeprecatedPrefixes_ =
         this->extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     result.extraPackageFilesDirectorySlashPrefixes_ = this->extraPackageFilesDirectorySlashPrefixes_;
-    result.skipRBIExportEnforcementDirs_ = this->skipRBIExportEnforcementDirs_;
     // This assumes that the GlobalState this PackageDB is getting copied into also has these
     // interned layer NameRefs at the same IDs as the current PackageDB.
     result.layers_ = this->layers_;
@@ -185,6 +227,8 @@ PackageDB PackageDB::deepCopy() const {
     // Likewise, this assumes that we've entered MangledNames in the target GlobalState, but ALSO
     // that we've copied symbols, because MangledNames store ClassOrModuleRef's now
     result.packagesWithRelaxedChecks_ = this->packagesWithRelaxedChecks_;
+    result.updateVisibilityFor_ = this->updateVisibilityFor_;
+    result.packagesToUpdateVisibilityFor_ = this->packagesToUpdateVisibilityFor_;
     result.errorHint_ = this->errorHint_;
 
     return result;
@@ -195,11 +239,37 @@ UnfreezePackages PackageDB::unfreeze() {
 }
 
 void PackageDB::setCondensation(Condensation &&condensation) {
-    this->condensation_ = std::move(condensation);
+    this->condensation_ = move(condensation);
 }
 
 const Condensation &PackageDB::condensation() const {
     return this->condensation_;
+}
+
+core::SymbolRef PackageDB::getEnumClassForEnumValue(const core::GlobalState &gs, core::SymbolRef sym) {
+    if (!sym.isStaticField(gs) || !sym.owner(gs).isClassOrModule()) {
+        return core::Symbols::noSymbol();
+    }
+
+    // The `T::Enum` rewriter turns `X = new` into `class X$1 < MyEnum; end; X = X$1.new`. Look for that hidden class
+    // rather than checking whether `MyEnum`'s superclass is `T::Enum`, so that this works before resolver has resolved
+    // superclasses.
+    auto uniqueName = gs.lookupNameUnique(core::UniqueNameKind::TEnum, sym.name(gs), 1);
+    if (!uniqueName.exists()) {
+        return core::Symbols::noSymbol();
+    }
+    auto hiddenClassName = gs.lookupNameConstant(uniqueName);
+    if (!hiddenClassName.exists()) {
+        return core::Symbols::noSymbol();
+    }
+
+    auto owner = sym.owner(gs).asClassOrModuleRef();
+    auto hiddenClass = owner.data(gs)->findMemberNoDealias(hiddenClassName);
+    if (!hiddenClass.exists() || !hiddenClass.isClassOrModule()) {
+        return core::Symbols::noSymbol();
+    }
+
+    return owner;
 }
 
 } // namespace sorbet::core::packages

@@ -21,7 +21,7 @@ struct NameDef {
             throw std::logic_error("Only pass one arg for '" + string(val) + "'");
         }
     }
-    NameDef(string_view srcName) : srcName(string(srcName)), val(string(srcName)), isConstant(false){};
+    NameDef(string_view srcName) : srcName(string(srcName)), val(string(srcName)), isConstant(false) {};
 };
 
 NameDef names[] = {
@@ -56,7 +56,7 @@ NameDef names[] = {
     {"orOp", "|"},
     {"backtick", "`"},
     {"defined_p", "defined?"},
-    {"undef"},
+    {"undef", "<undef>"},
     {"each"},
     {"subclasses"},
     {"transpose"},
@@ -128,6 +128,7 @@ NameDef names[] = {
     {"returns"},
     {"packagePrivate", "package_private"},
     {"packagePrivateClassMethod", "package_private_class_method"},
+    {"packagePrivateBang", "package_private!"},
     {"void_", "void"},
     {"VOID", "VOID", true},
     {"checked"},
@@ -214,7 +215,6 @@ NameDef names[] = {
     {"timestampedTokenProp", "timestamped_token_prop"},
     {"createdProp", "created_prop"},
     {"updatedProp", "updated_prop"},
-    {"merchantProp", "merchant_prop"},
     {"merchantTokenProp", "merchant_token_prop"},
     {"name"},
     {"encryptedProp", "encrypted_prop"},
@@ -228,8 +228,6 @@ NameDef names[] = {
     {"created"},
     {"updated"},
     {"merchant"},
-    {"foreign"},
-    {"allowDirectMutation", "allow_direct_mutation"},
     {"ifunset"},
     {"instanceVariableGet", "instance_variable_get"},
     {"instanceVariableSet", "instance_variable_set"},
@@ -281,6 +279,7 @@ NameDef names[] = {
     {"its"},
     {"isExpected", "is_expected"},
     {"expect"},
+    {"describedClass", "described_class"},
     {"before"},
     {"beforeAngles", "<before>"},
     {"after"},
@@ -294,6 +293,7 @@ NameDef names[] = {
     {"includeExamples", "include_examples"},
     {"includeContext", "include_context"},
     {"itBehavesLike", "it_behaves_like"},
+    {"localContext", "local_context"},
     {"RSpec", "RSpec", true},
     {"Core", "Core", true},
     {"ExampleGroup", "ExampleGroup", true},
@@ -312,12 +312,9 @@ NameDef names[] = {
 
     {"keywordInit", "keyword_init"},
 
-    {"DB", "DB", true},
-    {"Model", "Model", true},
-    {"Mixins", "Mixins", true},
-    {"Encryptable", "Encryptable", true},
-    {"EncryptedValue", "EncryptedValue", true},
     {"Command", "Command", true},
+    {"configureCommand", "configure_command"},
+    {"loggingDisabled_p", "logging_disabled?"},
     {"Enum", "Enum", true},
 
     {"ActiveRecord", "ActiveRecord", true},
@@ -361,6 +358,8 @@ NameDef names[] = {
     // on a class to lookup an associated symbol with some extra info.
     {"sealedSubclasses", "sealed_subclasses"},
 
+    {"caseAngles", "<case>"},
+
     // Used to store arguments to a "mixes_in_class_methods()" call
     {"mixedInClassMethods", "<mixed_in_class_methods>"},
     {"mixesInClassMethods", "mixes_in_class_methods"},
@@ -378,6 +377,7 @@ NameDef names[] = {
     {"kwargs", "<kwargs>"},
     {"restargs", "<restargs>"},
     {"blkArg", "<blk>"},
+    {"implicitYield", "<implicit yield>"},
     {"blockGiven_p", "block_given?"},
     {"anonymousBlock", "<anonymous-block>"},
 
@@ -447,6 +447,7 @@ NameDef names[] = {
     {"max"},
     {"sum"},
     {"sample"},
+    {"slice"},
     {"at"},
 
     // Argument forwarding
@@ -481,13 +482,10 @@ NameDef names[] = {
 
     // Packager
     {"import"},
-    {"testImport", "test_import"},
-    {"export_", "export"},
     {"legacy"},
     {"strict"},
     {"visibleTo", "visible_to"},
     {"tests"},
-    {"exportAll", "export_all!"},
     {"layer"},
     {"strictDependencies", "strict_dependencies"},
     {"false_", "false"},
@@ -496,12 +494,12 @@ NameDef names[] = {
     {"dag"},
     {"sorbet"},
     {"minTypedLevel", "min_typed_level"},
-    {"testsMinTypedLevel", "tests_min_typed_level"},
     {"PackageSpec", "PackageSpec", true},
     {"PackageSpecRegistry", "<PackageSpecRegistry>", true},
-    {"only"},
-    {"testRb", "test_rb"},
-    {"preludePackage", "prelude_package"},
+    {"prelude_bang", "prelude!"},
+    {"test_bang", "test!"},
+    {"importedByNestedPackages", "imported_by_nested_packages!"},
+    {"usesInternals", "uses_internals"},
 
     // GlobalState initEmpty()
     {"Top", "T.anything", true},
@@ -540,8 +538,10 @@ NameDef names[] = {
     {"Regexp", "Regexp", true},
     {"Exception", "Exception", true},
     {"StandardError", "StandardError", true},
-    {"Complex", "Complex", true},
-    {"Rational", "Rational", true},
+    {"Complex", "Complex", true},   // The `::Complex` class
+    {"KernelComplex", "Complex"},   // The `Kernel.Complex` method
+    {"Rational", "Rational", true}, // The `::Rational` class
+    {"KernelRational", "Rational"}, // The `Kernel.Rational` method
     // A magic non user-creatable class with methods to keep state between passes
     {"Magic", "<Magic>", true},
     // A magic non user-creatable class to attach symbols for blaming untyped to
@@ -604,13 +604,10 @@ NameDef names[] = {
     {"VERSION", "VERSION", true},
     {"Thread", "Thread", true},
     {"Configuration", "Configuration", true},
-    {"Test", "Test", true},
     {"Autogen", "Autogen", true},
     {"Tokens", "Tokens", true},
     {"AccountModelMerchant", "AccountModelMerchant", true},
     {"Token", "Token", true},
-    {"Account", "Account", true},
-    {"Merchant", "Merchant", true},
 
     // RBS
     {"RBSBind", "<RBSBind>", true},
@@ -662,14 +659,25 @@ void emit_register(ostream &out) {
 }
 
 int main(int argc, char **argv) {
-    int constantI = 0;
     int utf8I = 0;
+    sorbet::UnorderedMap<string, int> utf8Ids;
+    // Deduplicates the given name, so a constant and non-constant entry
+    // with the same string will reuse the same id.
+    auto enterUTF8Name = [&utf8Ids, &utf8I](NameDef &name) {
+        auto [it, inserted] = utf8Ids.emplace(name.val, utf8I);
+        if (inserted) {
+            utf8I++;
+        }
+        return it->second;
+    };
+
+    int constantI = 0;
     for (auto &name : names) {
         if (name.isConstant) {
-            utf8I++;
+            enterUTF8Name(name);
             name.id = constantI++;
         } else {
-            name.id = utf8I++;
+            name.id = enterUTF8Name(name);
         }
     }
     int lastConstantId = constantI;

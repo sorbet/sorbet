@@ -5,18 +5,20 @@
 using namespace std;
 namespace sorbet::core {
 
-NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : toGlobalStateId(to.globalStateId) {
+NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to)
+    : toNameTableId(to.nameTable->nameTableId) {
     Timer timeit(to.tracer(), "NameSubstitution.new", from.creation);
 
     SLOW_DEBUG_ONLY(from.sanityCheck());
 
     {
         UnfreezeNameTable unfreezeNames(to);
-        utf8NameSubstitution.reserve(from.utf8Names.size());
-        constantNameSubstitution.reserve(from.constantNames.size());
-        uniqueNameSubstitution.reserve(from.uniqueNames.size());
+        const auto &fromNames = *from.nameTable;
+        utf8NameSubstitution.reserve(fromNames.utf8Names.size());
+        constantNameSubstitution.reserve(fromNames.constantNames.size());
+        uniqueNameSubstitution.reserve(fromNames.uniqueNames.size());
         int i = -1;
-        for (const UTF8Name &nm : from.utf8Names) {
+        for (const UTF8Name &nm : fromNames.utf8Names) {
             i++;
             ENFORCE_NO_TIMER(utf8NameSubstitution.size() == i, "UTF8 name substitution has wrong size");
             utf8NameSubstitution.emplace_back(to.enterNameUTF8(nm.utf8));
@@ -25,14 +27,14 @@ NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : t
         // crashing. We process UniqueNames first because there are fewer of them, so fewer loop iterations require
         // this special check. Tested in `core_test.cc`.
         i = -1;
-        for (const UniqueName &nm : from.uniqueNames) {
+        for (const UniqueName &nm : fromNames.uniqueNames) {
             i++;
             ENFORCE(uniqueNameSubstitution.size() == i, "Unique name substitution has wrong size");
             if (nm.original.kind() == NameKind::CONSTANT &&
                 nm.original.constantIndex() >= constantNameSubstitution.size()) {
                 // Note: Duplicate of loop body below. If you change one, change the other!
                 for (uint32_t i = constantNameSubstitution.size(); i <= nm.original.constantIndex(); i++) {
-                    auto &cnst = from.constantNames[i];
+                    auto &cnst = fromNames.constantNames[i];
                     ENFORCE_NO_TIMER(constantNameSubstitution.size() == i, "Constant name substitution has wrong size");
                     // N.B.: cnst may reference a UniqueName, but since names are linearizeable we should have
                     // already substituted it by now.
@@ -42,9 +44,9 @@ NameSubstitution::NameSubstitution(const GlobalState &from, GlobalState &to) : t
 
             uniqueNameSubstitution.emplace_back(to.freshNameUnique(nm.uniqueNameKind, substitute(nm.original), nm.num));
         }
-        for (i = constantNameSubstitution.size(); i < from.constantNames.size(); i++) {
+        for (i = constantNameSubstitution.size(); i < fromNames.constantNames.size(); i++) {
             ENFORCE_NO_TIMER(constantNameSubstitution.size() == i, "Constant name substitution has wrong size");
-            auto &nm = from.constantNames[i];
+            auto &nm = fromNames.constantNames[i];
             constantNameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.original)));
         }
     }

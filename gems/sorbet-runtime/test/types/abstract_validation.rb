@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 require_relative '../test_helper'
 
 class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
@@ -50,7 +51,7 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
 
     assert_includes(
       err.message,
-      "Defining an overridable class method (via .abstract) on a module is not allowed.",
+      "Defining an overridable class method (via abstract) on a module is not allowed.",
     )
   end
 
@@ -103,6 +104,32 @@ class Opus::Types::Test::AbstractValidationTest < Critic::Unit::UnitTest
       "The method `foo` on #<Class:Opus::Types::Test::AbstractValidationTest::AbstractClass> is declared as `abstract`. It does not have an implementation.",
       err.message
     )
+  end
+
+  it "supports abstract method names that are not valid Ruby identifiers" do
+    method_name = :"method name with spaces"
+    implementation_ran = false
+    abstract_class = Class.new do
+      extend T::Sig
+      extend T::Helpers
+      abstract!
+
+      sig { abstract.void }
+      define_method(method_name) {}
+    end
+    concrete_class = Class.new(abstract_class) do
+      extend T::Sig
+
+      sig { override.void }
+      define_method(method_name) { implementation_ran = true }
+    end
+
+    concrete_class.new.public_send(method_name)
+    assert(implementation_ran)
+
+    assert_raises(NotImplementedError) do
+      abstract_class.allocate.public_send(method_name)
+    end
   end
 
   it "succeeds if a concrete module implements all abstract methods" do

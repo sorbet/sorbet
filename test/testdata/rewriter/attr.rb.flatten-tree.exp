@@ -6,6 +6,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def initialize(<blk>)
       begin
+        @attr1 = <cast:let>(0, Integer, ::Integer)
+        @attr2 = <cast:let>(0, Integer, ::Integer)
+        @attr3 = <cast:let>(0, Integer, ::Integer)
+        @attr4 = <cast:let>(0, Integer, ::Integer)
+        @attr5 = <cast:let>(0, Integer, ::Integer)
+        @attr_no_writer = <cast:let>(0, Integer, ::Integer)
+        @attr_with_writer = <cast:let>(0, Integer, ::Integer)
         @v1 = <cast:let>(0, Integer, ::Integer)
         @v2 = <cast:let>("", String, ::String)
         @v6 = <cast:let>("", String, ::String)
@@ -19,8 +26,76 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       <self>.returns(::Integer)
     end
 
-    def v1(<blk>)
-      @v1
+    <self>.sig() do ||
+      <self>.returns(::Integer)
+    end
+
+    def attr1(<blk>)
+      @attr1
+    end
+
+    <self>.sig() do ||
+      <self>.returns(::Integer)
+    end
+
+    def attr2(<blk>)
+      @attr2
+    end
+
+    <self>.sig() do ||
+      <self>.returns(::Integer)
+    end
+
+    def attr3(<blk>)
+      @attr3
+    end
+
+    <self>.sig() do ||
+      <self>.returns(::Integer)
+    end
+
+    def attr3(<blk>)
+      @attr3
+    end
+
+    <self>.sig() do ||
+      <self>.returns(::Integer)
+    end
+
+    def attr4(<blk>)
+      @attr4
+    end
+
+    <self>.sig() do ||
+      <self>.returns(::Integer)
+    end
+
+    def attr5(<blk>)
+      @attr5
+    end
+
+    <self>.sig() do ||
+      <self>.returns(::Integer)
+    end
+
+    def attr_no_writer(<blk>)
+      @attr_no_writer
+    end
+
+    <self>.sig() do ||
+      <self>.returns(::Integer)
+    end
+
+    def attr_with_writer(<blk>)
+      @attr_with_writer
+    end
+
+    <self>.sig() do ||
+      <self>.params(:attr_with_writer, ::Integer).returns(::Integer)
+    end
+
+    def attr_with_writer=(attr_with_writer, <blk>)
+      @attr_with_writer = attr_with_writer
     end
 
     <self>.sig() do ||
@@ -99,7 +174,25 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <runtime method definition of initialize>
 
-    <runtime method definition of v1>
+    <self>.attr()
+
+    <runtime method definition of attr1>
+
+    <runtime method definition of attr2>
+
+    <runtime method definition of attr3>
+
+    <runtime method definition of attr3>
+
+    <runtime method definition of attr4>
+
+    <runtime method definition of attr5>
+
+    <runtime method definition of attr_no_writer>
+
+    <runtime method definition of attr_with_writer>
+
+    <runtime method definition of attr_with_writer=>
 
     <runtime method definition of v1=>
 

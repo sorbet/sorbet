@@ -46,6 +46,9 @@ bool bindThreadToCore(pthread_t handle, int coreId);
 bool stopInDebugger();
 bool amIBeingDebugged();
 
+/** Returns the amount of swap currently used by this process, in KiB, if supported by the platform. */
+std::optional<size_t> getCurrentProcessSwapUsageKb();
+
 void intentionallyLeakMemory(void *ptr);
 
 void initializeSymbolizer(char *argv0);

@@ -11,7 +11,9 @@ module T::Types
 
     def initialize(variance)
       case variance
-      when Hash then raise ArgumentError.new("Pass bounds using a block. Got: #{variance}")
+      when Hash
+        raise ArgumentError.new("Pass bounds using a block. Got: #{variance}")
+        T.absurd(variance)
       when *VALID_VARIANCES then nil
       else
         raise TypeError.new("invalid variance #{variance}")
@@ -20,6 +22,11 @@ module T::Types
     end
 
     def build_type
+      nil
+    end
+
+    # overrides Base
+    def build_lazy_fields
       nil
     end
 

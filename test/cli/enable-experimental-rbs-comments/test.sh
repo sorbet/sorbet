@@ -1,0 +1,42 @@
+#!/bin/bash
+
+set -euo pipefail
+
+rbs_example=$(cat <<'EOF'
+#: (Object) -> Integer
+def demo(x)
+  x #: as String
+end
+EOF
+)
+
+common_args=(
+  -e "$rbs_example"
+  --silence-dev-message
+  --quiet
+  --no-error-count
+  --print=desugar-tree
+  --stop-after=desugarer
+)
+
+echo "==== test correct usage ===="
+main/sorbet "${common_args[@]}" --enable-experimental-rbs-comments --parser=prism 2>&1
+
+echo "==== test error with unset parser ===="
+if main/sorbet "${common_args[@]}" --enable-experimental-rbs-comments 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
+
+echo "==== test error with original parser ===="
+if main/sorbet "${common_args[@]}" --enable-experimental-rbs-comments --parser=original 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
+
+echo "==== test deprecated '--enable-experimental-rbs-signatures' ===="
+main/sorbet "${common_args[@]}" --enable-experimental-rbs-signatures --parser=prism 2>&1
+
+echo "==== test deprecated '--enable-experimental-rbs-assertions' ===="
+main/sorbet "${common_args[@]}" --enable-experimental-rbs-assertions --parser=prism 2>&1
+

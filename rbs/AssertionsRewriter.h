@@ -1,10 +1,14 @@
 #ifndef SORBET_RBS_ASSERTIONS_REWRITER_H
 #define SORBET_RBS_ASSERTIONS_REWRITER_H
 
-#include "parser/parser.h"
+#include "parser/prism/Helpers.h"
+#include "parser/prism/Parser.h"
 #include "rbs/CommentsAssociator.h"
 #include "rbs/rbs_common.h"
-#include <memory>
+
+extern "C" {
+#include "prism.h"
+}
 
 namespace sorbet::rbs {
 
@@ -24,36 +28,38 @@ struct InlineComment {
 
 class AssertionsRewriter {
 public:
-    AssertionsRewriter(core::MutableContext ctx, std::map<parser::Node *, std::vector<CommentNode>> &commentsByNode)
-        : ctx(ctx), commentsByNode(commentsByNode){};
-    std::unique_ptr<parser::Node> run(std::unique_ptr<parser::Node> tree);
+    AssertionsRewriter(core::MutableContext ctx, parser::Prism::Parser &parser,
+                       UnorderedMap<pm_node_t *, std::vector<CommentNode>> &commentsByNode)
+        : ctx(ctx), parser(parser), prism(parser), commentsByNode(commentsByNode) {};
+    // Rewrite the RBS assertions in the Prism AST, in-place.
+    void run(pm_node_t *node);
 
 private:
     core::MutableContext ctx;
-    std::map<parser::Node *, std::vector<CommentNode>> &commentsByNode;
+    parser::Prism::Parser &parser;
+    parser::Prism::Factory prism;
+    UnorderedMap<pm_node_t *, std::vector<CommentNode>> &commentsByNode;
     std::vector<std::pair<core::LocOffsets, core::NameRef>> typeParams = {};
     std::set<std::pair<uint32_t, uint32_t>> consumedComments = {};
     size_t totalComments = 0;
 
     void consumeComment(core::LocOffsets loc);
     bool hasConsumedComment(core::LocOffsets loc);
-    std::optional<InlineComment> commentForPos(uint32_t fromPos, std::vector<char> allowedTokens);
-    std::optional<InlineComment> commentForNode(const std::unique_ptr<parser::Node> &node);
+    std::optional<InlineComment> commentForNode(pm_node_t *node);
 
-    std::unique_ptr<parser::Node> rewriteBody(std::unique_ptr<parser::Node> tree);
-    std::unique_ptr<parser::Node> rewriteNode(std::unique_ptr<parser::Node> tree);
-    parser::NodeVec rewriteNodesAsArray(const std::unique_ptr<parser::Node> &node, parser::NodeVec nodes);
-    void rewriteNodes(parser::NodeVec *nodes);
+    core::LocOffsets translateLocation(pm_location_t location);
 
-    bool saveTypeParams(parser::Block *block);
-    std::unique_ptr<parser::Node> maybeInsertCast(std::unique_ptr<parser::Node> node);
-    std::unique_ptr<parser::Node> replaceSyntheticBind(std::unique_ptr<parser::Node> node);
-    std::unique_ptr<parser::Node>
-    insertCast(std::unique_ptr<parser::Node> node,
-               std::optional<std::pair<std::unique_ptr<parser::Node>, InlineComment::Kind>> pair);
+    void rewriteStatements(pm_statements_node_t *stmts);
+    pm_node_t *rewriteNode(pm_node_t *tree);
+    pm_node_t *rewriteNullableNode(pm_node_t *tree);
+    void rewriteNodes(pm_node_list_t &nodes);
+    void rewriteArgumentsNode(pm_arguments_node_t *args);
+    void rewriteNodesAsArray(pm_node_t *node, pm_node_list_t &nodes);
 
-    void checkDanglingCommentWithDecl(uint32_t nodeEnd, uint32_t declEnd, std::string kind);
-    void checkDanglingComment(uint32_t nodeEnd, std::string kind);
+    bool saveMethodTypeParams(pm_node_t *call);
+    pm_node_t *maybeInsertCast(pm_node_t *node);
+    pm_node_t *insertCast(pm_node_t *node, std::optional<std::pair<pm_node_t *, InlineComment::Kind>> pair);
+    pm_node_t *replaceSyntheticBind(pm_node_t *node);
 };
 
 } // namespace sorbet::rbs

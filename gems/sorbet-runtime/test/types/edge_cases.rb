@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 require_relative '../test_helper'
 require 'concurrent/atomic/cyclic_barrier'
 
@@ -54,14 +55,33 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     assert_equal('bar', mod.foo('bar'))
   end
 
-  private def counting_allocations
-    before = GC.stat[:total_allocated_objects]
+  def counting_allocations(&blk)
+    # This might trigger a constcache object to get allocated, depending on
+    # whether any intervening methods/classes have been defined.
+    # We don't want to include allocations from the instrumentation itself.
+    gc = GC
+
+    before = gc.stat(:total_allocated_objects)
     yield
-    GC.stat[:total_allocated_objects] - before - 1 # Subtract one for the allocation by GC.stat itself
+    gc.stat(:total_allocated_objects) - before
   end
 
-  private def check_alloc_counts
-    @check_alloc_counts = Gem::Version.new(RUBY_VERSION) < Gem::Version.new('3.0')
+  def trace_counting_allocations(&blk)
+    require 'objspace'
+    gc = GC
+    object_space = ObjectSpace
+    gc.start
+    generation = gc.count
+    allocs = 0
+    object_space.trace_object_allocations do
+      before = gc.stat(:total_allocated_objects)
+      yield
+      allocs = gc.stat(:total_allocated_objects) - before
+    end
+    puts
+    object_space.dump_all(output: :stdout, since: generation)
+    puts "------------------------------------------------------------"
+    allocs
   end
 
   describe 'aliasing' do
@@ -87,7 +107,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Should use fast path
         obj = klass.new
         allocs = counting_allocations { obj.bar }
-        assert_operator(allocs, :<, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5)
       end
 
       it 'handles alias_method without runtime checking' do
@@ -106,7 +126,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = klass.new
         allocs = counting_allocations { obj.bar }
-        assert_equal(0, allocs) if check_alloc_counts
+        assert_equal(1, allocs)
+        allocs = counting_allocations { obj.bar }
+        assert_equal(0, allocs)
       end
 
       it 'handles alias with runtime checking' do
@@ -130,7 +152,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Should use fast path
         obj = klass.new
         allocs = counting_allocations { obj.bar }
-        assert_operator(allocs, :<, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5)
       end
 
       it 'handles alias without runtime checking' do
@@ -149,7 +171,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = klass.new
         allocs = counting_allocations { obj.bar }
-        assert_equal(0, allocs) if check_alloc_counts
+        assert_equal(1, allocs)
+        allocs = counting_allocations { obj.bar }
+        assert_equal(0, allocs)
       end
 
       it 'handles alias to superclass method with runtime checking' do
@@ -178,7 +202,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Should use fast path
         obj = subclass.new
         allocs = counting_allocations { obj.bar }
-        assert_operator(allocs, :<, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5)
       end
 
       it 'handles alias to superclass method without runtime checking' do
@@ -202,7 +226,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = subclass.new
         allocs = counting_allocations { obj.bar }
-        assert_equal(0, allocs) if check_alloc_counts
+        assert_equal(1, allocs)
+        allocs = counting_allocations { obj.bar }
+        assert_equal(0, allocs)
       end
 
       it 'handles alias_method to included method with runtime checking' do
@@ -231,7 +257,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Should use fast path
         obj = klass.new
         allocs = counting_allocations { obj.bar }
-        assert_operator(allocs, :<, 5) if check_alloc_counts
+        assert_operator(allocs, :<=, 5)
       end
 
       it 'handles alias_method to included method without runtime checking' do
@@ -255,7 +281,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         obj = klass.new
         allocs = counting_allocations { obj.bar }
-        assert_equal(0, allocs) if check_alloc_counts
+        assert_equal(1, allocs)
+        allocs = counting_allocations { obj.bar }
+        assert_equal(0, allocs)
       end
     end
 
@@ -282,7 +310,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         allocs = counting_allocations { klass.bar }
-        assert_operator(allocs, :<, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5)
       end
 
       it 'handles alias_method without runtime checking' do
@@ -303,7 +331,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         klass.bar # Need extra call since first one came before `foo` unwrap
         allocs = counting_allocations { klass.bar }
-        assert_equal(0, allocs) if check_alloc_counts
+        assert_equal(0, allocs)
+        allocs = counting_allocations { klass.bar }
+        assert_equal(0, allocs)
       end
 
       it 'handles alias with runtime checking' do
@@ -328,7 +358,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         allocs = counting_allocations { klass.bar }
-        assert_operator(allocs, :<, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5)
       end
 
       it 'handles alias without runtime checking' do
@@ -349,7 +379,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
         # Shouldn't add overhead
         klass.bar # Need extra call since first one came before `foo` unwrap
         allocs = counting_allocations { klass.bar }
-        assert_equal(0, allocs) if check_alloc_counts
+        assert_equal(0, allocs)
+        allocs = counting_allocations { klass.bar }
+        assert_equal(0, allocs)
       end
 
       it 'handles alias_method to superclass method with runtime checking' do
@@ -379,7 +411,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         allocs = counting_allocations { subclass.bar }
-        assert_operator(allocs, :<, 5) if check_alloc_counts
+        assert_operator(allocs, :<, 5)
       end
 
       it 'handles alias_method to superclass method without runtime checking' do
@@ -404,7 +436,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         allocs = counting_allocations { subclass.bar }
-        assert_equal(0, allocs) if check_alloc_counts
+        assert_equal(1, allocs)
+        allocs = counting_allocations { subclass.bar }
+        assert_equal(0, allocs)
       end
 
       it 'handles alias_method to extended method with runtime checking' do
@@ -435,7 +469,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Should use fast path
         allocs = counting_allocations { klass.bar }
-        assert_operator(allocs, :<, 5) if check_alloc_counts
+        assert_operator(allocs, :<=, 5)
       end
 
       it 'handles alias_method to extended method without runtime checking' do
@@ -461,7 +495,9 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
 
         # Shouldn't add overhead
         allocs = counting_allocations { klass.bar }
-        assert_equal(0, allocs) if check_alloc_counts
+        assert_equal(1, allocs)
+        allocs = counting_allocations { klass.bar }
+        assert_equal(0, allocs)
       end
 
       it 'handles method reference without sig' do
@@ -891,29 +927,65 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     e = assert_raises { instance.foo }
     assert_equal("foo", e.message)
     e = assert_raises { instance.foo }
-    assert_match(/A previous invocation of #<UnboundMethod: /, e.message)
+    assert_match(/A previous invocation of #<Class:/, e.message)
   end
 
-  it 'does not crash when two threads call the same wrapper' do
-    begin
+  %i[run_sig_block_for_key run_builder build_sig].each do |pause_at|
+    it "does not crash when two threads call the same wrapper at #{pause_at}" do
       barrier = Concurrent::CyclicBarrier.new(2)
       mutex = Mutex.new
-      replaced = T::Private::ClassUtils.replace_method(T::Private::Methods.singleton_class, :run_sig_block_for_method) do |*args|
-        barrier.wait
-        mutex.synchronize { replaced.bind_call(T::Private::Methods, *args) }
+      main_thread = Thread.current
+      mod = T::Private::Methods.singleton_class
+      original_method = mod.instance_method(pause_at)
+      original_visibility = T::Private::ClassUtils.visibility_method_name(mod, pause_at)
+      paused = false
+      thread = nil
+      T::Private::ClassUtils.replace_method(original_method, mod, pause_at) do |*args|
+        if Thread.current != main_thread && !paused
+          paused = true
+          barrier.wait
+          mutex.synchronize { original_method.bind_call(T::Private::Methods, *args) }
+        else
+          original_method.bind_call(T::Private::Methods, *args)
+        end
       end
 
       klass = Class.new do
         extend T::Sig
-        sig { void }
-        def self.hello; end
+        sig { params(value: String).returns(String) }
+        def self.hello(value)
+          value
+        end
       end
 
-      thread = Thread.new { klass.hello }
-      klass.hello
+      mutex.synchronize do
+        thread = Thread.new do
+          Thread.current.report_on_exception = false
+          klass.hello('first')
+        end
+        barrier.wait
+        # Finish initialization before letting the other caller proceed.
+        assert_equal('second', klass.hello('second'))
+      end
+      assert_equal('first', thread.value)
+
+      error = assert_raises(TypeError) { klass.hello(123) }
+      assert_includes(error.message, "Parameter 'value'")
     ensure
-      thread&.join
-      replaced&.restore
+      if thread&.alive?
+        thread.kill
+        thread.join
+      end
+
+      # We can directly restore this by redefining the method because we know
+      # that the intercepted method was defined on
+      # `T::Private::Methods.singleton_class`, not an ancestor.
+      #
+      # (If that weren't the case, we'd have to restore via `remove_method`)
+      T::Configuration.without_ruby_warnings do
+        mod.send(:define_method, original_method.name, original_method)
+        mod.send(original_visibility, original_method.name)
+      end
     end
   end
 
@@ -923,7 +995,7 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     klass = Class.new do
       define_singleton_method(:method_added) do |name|
         # Reaching into a private method for testing purposes
-        visibility = T::Private::ClassUtils.send(:visibility_method_name, self, name)
+        visibility = T::Private::ClassUtils.visibility_method_name(self, name)
 
         method_redefinitions << [name, visibility]
 
@@ -968,12 +1040,277 @@ class Opus::Types::Test::EdgeCasesTest < Critic::Unit::UnitTest
     ], unique_method_redefinitions.sort)
   end
 
+  it 'drops an un-evaluated sig if the method is redefined' do
+    klass = Class.new do
+      extend T::Sig
+      sig { returns(Integer) }
+      def foo; 0; end
+
+      define_method(:foo) { "not an int" }
+    end
+
+    assert_equal("not an int", klass.new.foo)
+    assert_nil(T::Utils.signature_for_method(klass.instance_method(:foo)))
+  end
+
+  it 'does not drop sig when method_added fires multiple times for one def' do
+    # When `extend T::Sig` is called on a class before `Module.include(T::Sig)`,
+    # the method_added super chain ends up with two MethodHooks entries
+    # (one from the class, one from Module's prepend). This causes
+    # _on_method_added to fire twice for a single `def`.
+    #
+    # This must be tested in a subprocess because `Module.include(T::Sig)`
+    # irreversibly changes the method_added chain for all classes.
+    fixture = "#{__dir__}/fixtures/duplicate_method_added.rb"
+    result, status = Open3.capture2("ruby", fixture)
+    assert(status.success?, "fixture failed (exit #{status.exitstatus}): #{result}")
+    assert_equal("PASS\n", result)
+  end
+
+  it 'does not validate a captured old method against a new sig' do
+    orig_foo = nil
+    klass = Class.new do
+      extend T::Sig
+
+      sig { params(bad: T::Boolean).returns(Integer) }
+      def self.foo(bad)
+        bad ? "not an int" : 0
+      end
+
+      orig_foo = method(:foo)
+
+      sig { params(bad: T::Boolean).returns(Float) }
+      def self.foo(bad)
+        bad ? "not a float" : 0.0
+      end
+    end
+
+    # Call new method first, to be sure that the new method doesn't overwrite
+    # the old method.
+
+    # New method validates against Float sig
+    assert_equal(0.0, klass.foo(false))
+    err = assert_raises(TypeError) { klass.foo(true) }
+    assert_match(/Expected type Float/, err.message)
+
+    # Old captured method validates against Integer sig (its own), not Float
+    assert_equal(0, orig_foo.call(false))
+    err = assert_raises(TypeError) { orig_foo.call(true) }
+    assert_match(/Expected type Integer/, err.message)
+  end
+
+  it 'preserves define_method wrapper when sig is evaluated via bind_call' do
+    klass = Class.new do
+      extend T::Sig
+
+      sig { returns(String) }
+      def foo
+        "original"
+      end
+
+      orig_foo = instance_method(:foo)
+
+      define_method(:foo) do
+        "wrapped(#{orig_foo.bind_call(self)})"
+      end
+    end
+
+    obj = klass.new
+    assert_equal("wrapped(original)", obj.foo)
+    assert_equal("wrapped(original)", obj.foo)
+  end
+
+  it 'handles module_function when instance sig is evaluated before singleton call' do
+    mod = Module.new do
+      extend T::Sig
+
+      sig { params(x: Integer).returns(Integer) }
+      module_function def foo(x)
+        x
+      end
+    end
+
+    # Evaluate the instance method's sig first, but don't actually call the
+    # method. This just touches the `sig_block`, but doesn't actually update
+    # the built sig in the wrapper method's closure.
+    T::Utils.signature_for_method(mod.instance_method(:foo))
+
+    # Call the singleton method version. Its first-call wrapper shares the same
+    # DeclarationBlock, which has already been consumed.
+    assert_equal(42, mod.foo(42))
+  end
+
+  it 'does not validate module_function singleton call against a redefined sig' do
+    mod = Module.new do
+      extend T::Sig
+
+      sig { params(x: Integer).returns(Integer) }
+      module_function def foo(x)
+        x
+      end
+
+      T::Utils.signature_for_method(instance_method(:foo))
+
+      # Redefine foo with a new sig that has a different return type.
+      sig { params(x: String).returns(String) }
+      def foo(x)
+        x
+      end
+    end
+
+    T::Utils.signature_for_method(mod.instance_method(:foo))
+
+    # Call the original module_function singleton copy. It should validate
+    # against the Integer sig not the String sig, because we only redefined the
+    # instance method.
+    assert_equal(42, mod.foo(42))
+    err = assert_raises(TypeError) { mod.foo("hello") }
+    assert_match(/Expected type Integer/, err.message)
+  end
+
+  it 'works with BasicObject subclass' do
+    mod = Module.new do
+      extend T::Sig
+      sig { returns(Integer) }
+      def foo
+        42
+      end
+    end
+
+    klass = Class.new(BasicObject) do
+      include mod
+    end
+
+    obj = klass.new
+    assert_equal(42, obj.foo)
+    assert_equal(42, obj.foo)
+  end
+
   it "can mark a class abstract! even if it defines a method called method" do
     Class.new do
       extend T::Helpers
       # bad override of Object#method
       def self.method; end
       abstract!
+    end
+  end
+
+  it 'handles alias_method + redefinition: call patched first' do
+    klass = Class.new do
+      extend T::Sig
+
+      sig { returns(T::Array[Symbol]) }
+      def test_alias_method
+        [:unpatch]
+      end
+
+      alias_method :test_alias_method_old, :test_alias_method
+      def test_alias_method
+        [:patch] + test_alias_method_old
+      end
+    end
+
+    obj = klass.new
+    3.times do
+      assert_equal(%i[patch unpatch], obj.test_alias_method)
+    end
+  end
+
+  it 'handles alias_method + redefinition: call old directly first' do
+    klass = Class.new do
+      extend T::Sig
+
+      sig { returns(T::Array[Symbol]) }
+      def test_alias_method
+        [:unpatch]
+      end
+
+      alias_method :test_alias_method_old, :test_alias_method
+      def test_alias_method
+        [:patch] + test_alias_method_old
+      end
+    end
+
+    obj = klass.new
+    # Calling _old directly triggers the wrapper with __callee__ != method_name.
+    # Must not overwrite _old with the redefined (patched) method.
+    3.times do
+      assert_equal([:unpatch], obj.test_alias_method_old)
+    end
+  end
+
+  it 'handles alias_method + redefinition that calls old method' do
+    klass = Class.new do
+      extend T::Sig
+
+      sig { returns(T::Array[Symbol]) }
+      def test_alias_method
+        [:unpatch]
+      end
+
+      alias_method :test_alias_method_old, :test_alias_method
+      def test_alias_method
+        [:patch] + test_alias_method_old
+      end
+    end
+
+    obj = klass.new
+    # Unwrap _old via direct call first
+    assert_equal([:unpatch], obj.test_alias_method_old)
+    # Then the patched method must still work (calling through _old)
+    3.times do
+      assert_equal(%i[patch unpatch], obj.test_alias_method)
+    end
+  end
+
+  it 'handles alias_method + redefinition: call patched then old directly' do
+    klass = Class.new do
+      extend T::Sig
+
+      sig { returns(T::Array[Symbol]) }
+      def test_alias_method
+        [:unpatch]
+      end
+
+      alias_method :test_alias_method_old, :test_alias_method
+      def test_alias_method
+        [:patch] + test_alias_method_old
+      end
+    end
+
+    obj = klass.new
+    # Patched calls through _old (triggers wrapper on _old via that path)
+    assert_equal(%i[patch unpatch], obj.test_alias_method)
+    # Then calling _old directly must still return the original behavior
+    3.times do
+      assert_equal([:unpatch], obj.test_alias_method_old)
+    end
+  end
+
+  it 'handles define_method redefinition: call via original UnboundMethod' do
+    original_um = nil
+    klass = Class.new do
+      extend T::Sig
+
+      sig { returns(T::Array[Symbol]) }
+      def test_patch_method
+        [:unpatch]
+      end
+
+      original_um = instance_method(:test_patch_method)
+      define_method(:test_patch_method) do
+        [:patch] + original_um.bind_call(self)
+      end
+    end
+
+    obj = klass.new
+    # Calling via the captured UnboundMethod triggers the wrapper directly
+    3.times do
+      assert_equal([:unpatch], original_um.bind_call(obj))
+    end
+    # The patched method still works
+    3.times do
+      assert_equal(%i[patch unpatch], obj.test_patch_method)
     end
   end
 end

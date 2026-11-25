@@ -11,7 +11,6 @@
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
 #include "core/hashing/hashing.h"
-#include "core/lsp/Task.h"
 #include "core/lsp/TypecheckEpochManager.h"
 #include <string_view>
 #include <utility>
@@ -263,38 +262,48 @@ ClassOrModuleRef GlobalState::synthesizeClass(NameRef name, uint32_t superclass,
 }
 
 atomic<int> globalStateIdCounter(1);
+atomic<int> nameTableIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
+
+NameTable::NameTable() : NameTable(nameTableIdCounter.fetch_add(1)) {}
+
+NameTable::NameTable(int nameTableId) : nameTableId(nameTableId) {}
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
     : GlobalState(move(errorQueue), make_shared<lsp::TypecheckEpochManager>()) {}
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager)
-    : GlobalState(move(errorQueue), move(epochManager), make_shared<FileTable>(), globalStateIdCounter.fetch_add(1)) {}
+    : GlobalState(move(errorQueue), move(epochManager), make_shared<FileTable>(), globalStateIdCounter.fetch_add(1),
+                  make_shared<NameTable>()) {}
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue, shared_ptr<lsp::TypecheckEpochManager> epochManager,
-                         shared_ptr<FileTable> files, int globalStateId)
+                         shared_ptr<FileTable> files, int globalStateId, shared_ptr<NameTable> nameTable)
     : globalStateId(globalStateId), errorQueue(std::move(errorQueue)), lspQuery(lsp::Query::noQuery()),
-      epochManager(move(epochManager)), files(move(files)) {
+      epochManager(move(epochManager)), nameTable(move(nameTable)), files(move(files)) {
+    auto &names = *this->nameTable;
     // Reserve memory in internal vectors for the contents of payload.
-    utf8Names.reserve(PAYLOAD_MAX_UTF8_NAME_COUNT);
-    constantNames.reserve(PAYLOAD_MAX_CONSTANT_NAME_COUNT);
-    uniqueNames.reserve(PAYLOAD_MAX_UNIQUE_NAME_COUNT);
+    names.utf8Names.reserve(PAYLOAD_MAX_UTF8_NAME_COUNT);
+    names.constantNames.reserve(PAYLOAD_MAX_CONSTANT_NAME_COUNT);
+    names.uniqueNames.reserve(PAYLOAD_MAX_UNIQUE_NAME_COUNT);
     classAndModules.reserve(PAYLOAD_MAX_CLASS_AND_MODULE_COUNT);
     methods.reserve(PAYLOAD_MAX_METHOD_COUNT);
     fields.reserve(PAYLOAD_MAX_FIELD_COUNT);
     typeParameters.reserve(PAYLOAD_MAX_TYPE_ARGUMENT_COUNT);
     typeMembers.reserve(PAYLOAD_MAX_TYPE_MEMBER_COUNT);
 
-    int namesByHashSize = nextPowerOfTwo(
-        2 * (PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT + PAYLOAD_MAX_UNIQUE_NAME_COUNT));
-    namesByHash.resize(namesByHashSize);
+    uint32_t namesByHashSize = NameHash::sizeFor(PAYLOAD_MAX_UTF8_NAME_COUNT + PAYLOAD_MAX_CONSTANT_NAME_COUNT +
+                                                 PAYLOAD_MAX_UNIQUE_NAME_COUNT);
+    names.namesByHash.resize(namesByHashSize);
+
+    this->symbolOffsets.emplace_back();
 }
 
 unique_ptr<GlobalState> GlobalState::makeEmptyGlobalStateForHashing(spdlog::logger &logger) {
     // Note: Private constructor.
     unique_ptr<GlobalState> rv(
         new GlobalState(make_shared<core::ErrorQueue>(logger, logger, make_shared<core::NullFlusher>()),
-                        make_shared<lsp::TypecheckEpochManager>(), make_shared<FileTable>(), -1));
+                        make_shared<lsp::TypecheckEpochManager>(), make_shared<FileTable>(), -1,
+                        shared_ptr<NameTable>(new NameTable(-1))));
     rv->initEmpty();
     return rv;
 }
@@ -325,6 +334,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::bottom());
     klass = synthesizeClass(core::Names::Constants::Root(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::root());
+    klass.data(*this)->packageRegistryOwner = Symbols::PackageSpecRegistry();
 
     klass = core::Symbols::root().data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::rootSingleton());
@@ -358,6 +368,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::TSingleton());
     klass = synthesizeClass(core::Names::Constants::Class(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::Class());
+    // Unlike some other classes that pass `0` here, BasicObject *actually* has no superclass, similar to `top`.
     klass = synthesizeClass(core::Names::Constants::BasicObject(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::BasicObject());
     method = enterMethod(*this, Symbols::BasicObject(), Names::initialize()).build();
@@ -382,11 +393,11 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::Complex());
     klass = synthesizeClass(core::Names::Constants::Rational());
     ENFORCE_NO_TIMER(klass == Symbols::Rational());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Array());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Array());
     ENFORCE_NO_TIMER(klass == Symbols::T_Array());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Hash());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Hash());
     ENFORCE_NO_TIMER(klass == Symbols::T_Hash());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Proc());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Proc());
     ENFORCE_NO_TIMER(klass == Symbols::T_Proc());
     klass = synthesizeClass(core::Names::Constants::Proc());
     ENFORCE_NO_TIMER(klass == Symbols::Proc());
@@ -400,53 +411,58 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(klass == Symbols::File());
     klass = synthesizeClass(core::Names::Constants::Sorbet());
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet(), core::Names::Constants::Private());
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private(), core::Names::Constants::Static());
     klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static());
     klass = Symbols::Sorbet_Private_Static().data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_StaticSingleton());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
+    klass =
+        enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubModule());
     klass.data(*this)->setIsModule(true);
     ENFORCE_NO_TIMER(klass == Symbols::StubModule());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
+    klass =
+        enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubMixin());
     klass.data(*this)->setIsModule(true);
     ENFORCE_NO_TIMER(klass == Symbols::StubMixin());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::PlaceholderMixin());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
+                                     core::Names::Constants::PlaceholderMixin());
     klass.data(*this)->setIsModule(true);
     ENFORCE_NO_TIMER(klass == Symbols::PlaceholderMixin());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::StubSuperClass());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
+                                     core::Names::Constants::StubSuperClass());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::StubSuperClass());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerable());
     ENFORCE_NO_TIMER(klass == Symbols::T_Enumerable());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Range());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Range());
     ENFORCE_NO_TIMER(klass == Symbols::T_Range());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Set());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Set());
     ENFORCE_NO_TIMER(klass == Symbols::T_Set());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Void());
     ENFORCE_NO_TIMER(klass == Symbols::void_());
     klass = synthesizeClass(core::Names::Constants::TypeAlias(), 0);
     ENFORCE_NO_TIMER(klass == Symbols::typeAliasTemp());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Configuration());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), Names::Constants::Configuration());
     ENFORCE_NO_TIMER(klass == Symbols::T_Configuration());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Generic());
     ENFORCE_NO_TIMER(klass == Symbols::T_Generic());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Tuple());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Tuple());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Tuple());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Shape());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Shape());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Shape());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Subclasses());
+    klass =
+        enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::Subclasses());
     ENFORCE_NO_TIMER(klass == Symbols::Subclasses());
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
-                             core::Names::Constants::ImplicitModuleSuperclass());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
+                                     core::Names::Constants::ImplicitModuleSuperclass());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ImplicitModuleSuperClass());
-    klass =
-        enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), core::Names::Constants::ReturnTypeInference());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(),
+                                     core::Names::Constants::ReturnTypeInference());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Sorbet_Private_Static_ReturnTypeInference());
     typeParameter = enterTypeParameter(Loc::none(), Symbols::noMethod(), Names::Constants::TodoTypeParameter(),
@@ -472,7 +488,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(
         typeParameter ==
         Symbols::Sorbet_Private_Static_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Sig());
     ENFORCE_NO_TIMER(klass == Symbols::T_Sig());
 
     // A magic non user-creatable class with methods to keep state between passes
@@ -486,7 +502,7 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(method == Symbols::Sorbet_Private_Static_badAliasMethodStub());
 
     // T::Helpers
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Helpers());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Helpers());
     ENFORCE_NO_TIMER(klass == Symbols::T_Helpers());
 
     // SigBuilder magic class
@@ -495,69 +511,64 @@ void GlobalState::initEmpty() {
     klass = Symbols::DeclBuilderForProcs().data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::DeclBuilderForProcsSingleton());
 
-    // Ruby 2.5 Hack
-    klass = synthesizeClass(core::Names::Constants::Net(), 0, true);
-    ENFORCE_NO_TIMER(klass == Symbols::Net());
-    klass = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::IMAP());
-    Symbols::Net_IMAP().data(*this)->setIsModule(false);
-    ENFORCE_NO_TIMER(klass == Symbols::Net_IMAP());
-    klass = enterClassSymbol(Loc::none(), Symbols::Net(), core::Names::Constants::Protocol());
-    ENFORCE_NO_TIMER(klass == Symbols::Net_Protocol());
-    Symbols::Net_Protocol().data(*this)->setIsModule(false);
-
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Sig(), core::Names::Constants::WithoutRuntime());
     klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
     ENFORCE_NO_TIMER(klass == Symbols::T_Sig_WithoutRuntime());
 
     klass = synthesizeClass(core::Names::Constants::Enumerator());
     ENFORCE_NO_TIMER(klass == Symbols::Enumerator());
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerator());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enumerator());
     ENFORCE_NO_TIMER(klass == Symbols::T_Enumerator());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Enumerator(), core::Names::Constants::Lazy());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Enumerator(), core::Names::Constants::Lazy());
     ENFORCE_NO_TIMER(klass == Symbols::T_Enumerator_Lazy());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Enumerator(), core::Names::Constants::Chain());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Enumerator(), core::Names::Constants::Chain());
     ENFORCE_NO_TIMER(klass == Symbols::T_Enumerator_Chain());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Struct());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Struct());
 
     klass = synthesizeClass(core::Names::Constants::Singleton(), 0, true);
     ENFORCE_NO_TIMER(klass == Symbols::Singleton());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Enum());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Enum());
+
+    // T::Enum#<case>
+    // Synthetic method used to power expanding MyEnum.case into a case statement via completion
+    method = enterMethod(*this, Symbols::T_Enum(), Names::caseAngles()).buildWithResultUntyped();
+    ENFORCE_NO_TIMER(method == Symbols::T_Enum_caseAngles());
 
     // T::Sig#sig
     method = enterMethod(*this, Symbols::T_Sig(), Names::sig()).defaultArg(Names::arg0()).build();
     ENFORCE_NO_TIMER(method == Symbols::sig());
 
     // Enumerator::Lazy
-    klass = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Lazy());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Enumerator_Lazy());
 
     // Enumerator::Chain
-    klass = enterClassSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Chain());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Enumerator(), core::Names::Constants::Chain());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Enumerator_Chain());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), Names::Constants::Private());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), Names::Constants::Private());
     ENFORCE_NO_TIMER(klass == Symbols::T_Private());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Types());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Types());
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Types());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Types(), Names::Constants::Void());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Private_Types(), Names::Constants::Void());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Types_Void());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Private_Types_Void(), Names::Constants::VOID());
     klass.data(*this)->setIsModule(true); // explicitly set isModule so we can immediately call singletonClass
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Types_Void_VOID());
     klass = klass.data(*this)->singletonClass(*this);
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Types_Void_VOIDSingleton());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Methods());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Private(), Names::Constants::Methods());
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Methods());
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Private_Methods(), Names::Constants::DeclBuilder());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Private_Methods(), Names::Constants::DeclBuilder());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Private_Methods_DeclBuilder());
 
@@ -579,11 +590,15 @@ void GlobalState::initEmpty() {
         enterMethod(*this, Symbols::T_Sig_WithoutRuntimeSingleton(), Names::sig()).defaultArg(Names::arg0()).build();
     ENFORCE_NO_TIMER(method == Symbols::sigWithoutRuntime());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpecRegistry());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::root(), Names::Constants::PackageSpecRegistry());
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpecRegistry());
 
+    // Ensure that we propagate packageRegistryOwner information by making PackageSpecRegistry own itself in the
+    // registry hierarchy.
+    klass.data(*this)->packageRegistryOwner = klass;
+
     // PackageSpec is a class that can be subclassed.
-    klass = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::PackageSpec());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::PackageSpec());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::PackageSpec());
 
@@ -605,27 +620,27 @@ void GlobalState::initEmpty() {
     ENFORCE_NO_TIMER(method == Symbols::rootStaticInit());
 
     // Magic classes for special proc bindings
-    klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToAttachedClass());
     ENFORCE_NO_TIMER(klass == Symbols::MagicBindToAttachedClass());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToSelfType());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::BindToSelfType());
     ENFORCE_NO_TIMER(klass == Symbols::MagicBindToSelfType());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Types());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Types());
     ENFORCE_NO_TIMER(klass == Symbols::T_Types());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T_Types(), core::Names::Constants::Base());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T_Types(), core::Names::Constants::Base());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::T_Types_Base());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::root(), core::Names::Constants::Data());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::root(), core::Names::Constants::Data());
     klass.data(*this)->setIsModule(false);
     ENFORCE_NO_TIMER(klass == Symbols::Data());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Class());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Class());
     ENFORCE_NO_TIMER(klass == Symbols::T_Class());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Module());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Module());
     ENFORCE_NO_TIMER(klass == Symbols::T_Module());
 
     method = enterMethod(*this, Symbols::T_Generic(), Names::squareBrackets()).repeatedTopArg(Names::args()).build();
@@ -667,7 +682,7 @@ void GlobalState::initEmpty() {
     // Sorbet::Private::Static::VERSION
     field = enterStaticFieldSymbol(Loc::none(), Symbols::Sorbet_Private_Static(), Names::Constants::VERSION());
     field.data(*this)->resultType =
-        make_type<NamedLiteralType>(Symbols::String(), enterNameUTF8(sorbet_full_version_string));
+        make_type<NamedLiteralType>(Symbols::String(), enterNameUTF8(sorbet::full_version_string));
 
     // ::<ErrorNode>
     field = enterStaticFieldSymbol(Loc::none(), Symbols::root(), Names::Constants::ErrorNode());
@@ -766,6 +781,11 @@ void GlobalState::initEmpty() {
     // Synthesize <Magic>.<retry>() => Void
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::retry()).buildWithResult(Types::void_());
 
+    // Synthesize <Magic>.<undef>(*arg0: Symbol) => Void
+    method = enterMethod(*this, Symbols::MagicSingleton(), Names::undef())
+                 .repeatedTypedArg(Names::arg0(), Types::Symbol())
+                 .buildWithResult(Types::void_());
+
     // Synthesize <Magic>.<blockBreak>(args: T.untyped) => T.untyped
     method = enterMethod(*this, Symbols::MagicSingleton(), Names::blockBreak())
                  .untypedArg(Names::arg0())
@@ -848,7 +868,7 @@ void GlobalState::initEmpty() {
     Symbols::StubSuperClass().data(*this)->setIsModule(false);
     Symbols::StubSuperClass().data(*this)->setSuperClass(Symbols::Object());
 
-    klass = enterClassSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::UntypedSource());
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::Magic(), core::Names::Constants::UntypedSource());
     ENFORCE_NO_TIMER(klass == Symbols::Magic_UntypedSource());
 
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::super());
@@ -913,6 +933,11 @@ void GlobalState::initEmpty() {
         classAndModules[i].singletonClass(*this);
     }
 
+    // top() and BasicObject have no superclass, so their singleton classes can't use the
+    // normal "follow the attached class's superclass" logic in finalizeAncestors.
+    Symbols::top().data(*this)->singletonClass(*this).data(*this)->setSuperClass(Symbols::Class());
+    Symbols::BasicObject().data(*this)->singletonClass(*this).data(*this)->setSuperClass(Symbols::Class());
+
     // This fills in all the way up to MAX_SYNTHETIC_CLASS_SYMBOLS
     ENFORCE_NO_TIMER(classAndModules.size() < Symbols::Proc0().id());
     while (classAndModules.size() < Symbols::Proc0().id()) {
@@ -963,7 +988,6 @@ void GlobalState::initEmpty() {
 
     // First file is used to indicate absence of a file
     files->initEmpty();
-    symbolsReferencedByFile.emplace_back();
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();
@@ -997,8 +1021,7 @@ void GlobalState::computeLinearization() {
     Timer timer(this->tracer(), "resolver.compute_linearization");
 
     // TODO: this does not support `prepend`
-    for (int i = 1; i < this->classAndModulesUsed(); ++i) {
-        const auto &ref = core::ClassOrModuleRef(*this, i);
+    for (auto ref : this->newClassOrModules()) {
         computeClassLinearization(*this, ref);
     }
 }
@@ -1030,13 +1053,15 @@ void GlobalState::preallocateTables(uint32_t classAndModulesSize, uint32_t metho
     expandNames(utf8NameSizeScaled, constantNameSizeScaled, uniqueNameSizeScaled);
     sanityCheck();
 
+    const auto &names = *this->nameTable;
     trace(fmt::format("Preallocated symbol and name tables. classAndModules={} methods={} fields={} typeParameters={} "
                       "typeMembers={} utf8Names={} constantNames={} uniqueNames={}",
                       classAndModules.capacity(), methods.capacity(), fields.capacity(), typeParameters.capacity(),
-                      typeMembers.capacity(), utf8Names.capacity(), constantNames.capacity(), uniqueNames.capacity()));
+                      typeMembers.capacity(), names.utf8Names.capacity(), names.constantNames.capacity(),
+                      names.uniqueNames.capacity()));
 }
 
-constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
+constexpr decltype(NameTable::STRINGS_PAGE_SIZE) NameTable::STRINGS_PAGE_SIZE;
 
 namespace {
 bool matchesArityHash(const GlobalState &gs, ArityHash arityHash, MethodRef method) {
@@ -1149,12 +1174,22 @@ SymbolRef GlobalState::findRenamedSymbol(ClassOrModuleRef owner, SymbolRef sym) 
     }
 }
 
-ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
+namespace {
+
+bool isMangledNamespaceName(const GlobalState &gs, NameRef name) {
+    while (name.hasUniqueNameKind(gs, UniqueNameKind::Singleton)) {
+        name = name.dataUnique(gs)->original;
+    }
+    return name.hasUniqueNameKind(gs, UniqueNameKind::MangleRename);
+}
+
+} // namespace
+
+ClassOrModuleRef GlobalState::enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef owner, NameRef name) {
     // ENFORCE_NO_TIMER(!owner.exists()); // Owner may not exist on purely synthetic symbols.
     ENFORCE_NO_TIMER(name.isClassName(*this));
-    // We should never enter mangled classes (incremental fast path relies on all constants being
-    // defined first).
-    ENFORCE_NO_TIMER(!name.hasUniqueNameKind(*this, core::UniqueNameKind::MangleRename));
+    // Package namespace violations are entered with mangled names so that they cannot claim a constant belonging to
+    // another package.
     ClassOrModuleData ownerScope = owner.dataAllowingNone(*this);
 
     auto &store = ownerScope->members()[name];
@@ -1164,6 +1199,7 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
     auto ret = ClassOrModuleRef(*this, classAndModules.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on classAndModules invalidates `store`
     classAndModules.emplace_back();
@@ -1173,17 +1209,27 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     data->addLoc(*this, loc);
     DEBUG_ONLY(categoryCounterInc("symbols", "class"));
 
+    auto packageInfo = packageInfoForClassOrModule(owner, name);
+    data->packageRegistryOwner = packageInfo.packageRegistryOwner;
+    data->package = packageInfo.package;
+
+    return ret;
+}
+
+GlobalState::ClassOrModulePackageInfo GlobalState::packageInfoForClassOrModule(ClassOrModuleRef owner,
+                                                                               NameRef name) const {
     if (!this->packageDB().enabled()) {
         // Note that this case also initializes `<PackageSpecRegistry>` itself as being not owned by
-        // a package, because we run initEmpty without the package DB enabled.
-        data->packageRegistryOwner = Symbols::noClassOrModule();
-        return ret;
+        // a package. We manually set it back to Symbols::PackageSpecRegistry() in `initEmpty` to
+        // ensure that the ownership propagates through to package symbols that are entered later.
+        return {Symbols::noClassOrModule(), packages::MangledName()};
     }
 
-    if (owner == Symbols::root() && name == packages::PackageDB::TEST_NAMESPACE) {
-        // Leave packageRegistryOwner as `<PackageSpecRegistry>` (essentially, skip over `Test` when
-        // searching for package names). Leave `package` as the non-existent package name.
-        return ret;
+    // A mangled class is a separate recovery symbol, whether created for a package violation or a
+    // constant-kind conflict. It must not inherit the original constant's package ownership or registry
+    // cursor: doing so could let rejected definitions claim a namespace belonging to another package.
+    if (isMangledNamespaceName(*this, name)) {
+        return {Symbols::noClassOrModule(), packages::MangledName()};
     }
 
     auto ownerData = owner.data(*this);
@@ -1191,40 +1237,35 @@ ClassOrModuleRef GlobalState::enterClassSymbol(Loc loc, ClassOrModuleRef owner, 
     if (!ownerPackageRegistryOwner.exists()) {
         // Our owner was already past the end of the PackageSpecRegistry namespace.
         // Propogate that we are too, and mark us as being owned by whatever package our owner was.
-        data->packageRegistryOwner = Symbols::noClassOrModule();
-        data->package = ownerData->package;
-        return ret;
+        return {Symbols::noClassOrModule(), ownerData->package};
     }
 
     auto registryName = name;
     while (registryName.hasUniqueNameKind(*this, UniqueNameKind::Singleton)) {
         registryName = registryName.dataUnique(*this)->original;
     }
-    auto packageRegistryOwner = ownerPackageRegistryOwner.data(*this)->findMember(*this, registryName);
-    data->packageRegistryOwner = packageRegistryOwner.exists() && packageRegistryOwner.isClassOrModule()
-                                     // Found narrower entry in <PackageSpecRegistry> hierarchy
-                                     ? packageRegistryOwner.asClassOrModuleRef()
-                                     // Set to `noClassOrModule()` to ensure that we don't keep
-                                     // looking for something (e.g., don't want Opus::A::B::C::D
-                                     // to find <PackageSpecRegistry>::Opus::A::D even if it
-                                     // exists--the intermediate namespaces were missing).
-                                     : Symbols::noClassOrModule();
+    auto packageRegistryMember = ownerPackageRegistryOwner.data(*this)->findMember(*this, registryName);
+    auto packageRegistryOwner = packageRegistryMember.exists() && packageRegistryMember.isClassOrModule()
+                                    // Found narrower entry in <PackageSpecRegistry> hierarchy
+                                    ? packageRegistryMember.asClassOrModuleRef()
+                                    // Set to `noClassOrModule()` to ensure that we don't keep
+                                    // looking for something (e.g., don't want Opus::A::B::C::D
+                                    // to find <PackageSpecRegistry>::Opus::A::D even if it
+                                    // exists--the intermediate namespaces were missing).
+                                    : Symbols::noClassOrModule();
 
-    if (!data->packageRegistryOwner.exists()) {
-        data->package = ownerData->package;
-        return ret;
+    if (!packageRegistryOwner.exists()) {
+        return {packageRegistryOwner, ownerData->package};
     }
 
-    auto pkg = packages::MangledName(data->packageRegistryOwner);
+    auto pkg = packages::MangledName(packageRegistryOwner);
     if (this->packageDB().getPackageInfo(pkg).exists()) {
-        data->package = pkg;
+        return {packageRegistryOwner, pkg};
     } else {
         // We narrowed the packageRegistryOwner to an intermediate namespace (not an actual package),
         // so our package is still the same as the package of our owner.
-        data->package = ownerData->package;
+        return {packageRegistryOwner, ownerData->package};
     }
-
-    return ret;
 }
 
 TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance) {
@@ -1252,6 +1293,17 @@ TypeMemberRef GlobalState::enterTypeMember(Loc loc, ClassOrModuleRef owner, Name
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
+
+    auto contiguousStrataUntil = this->contiguousStrataUntil();
+    const auto &boundary = this->symbolOffsets[contiguousStrataUntil.rawId()];
+    if (owner.exists() && owner.id() < boundary.classAndModulesOffset) {
+        Exception::raise("Entering type member `{}` at {} into `{}`, which belongs to an earlier stratum: owner_id={} "
+                         "contiguous_strata_until={} class_boundary={}",
+                         name.show(*this), loc.showRaw(*this), owner.show(*this), owner.id(),
+                         contiguousStrataUntil.rawId(), boundary.classAndModulesOffset);
+    }
+
     auto result = TypeMemberRef(*this, typeMembers.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on typeMembers invalidates `store`
     typeMembers.emplace_back();
@@ -1304,6 +1356,7 @@ TypeParameterRef GlobalState::enterTypeParameter(Loc loc, MethodRef owner, NameR
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
     auto result = TypeParameterRef(*this, this->typeParameters.size());
     this->typeParameters.emplace_back();
 
@@ -1328,6 +1381,7 @@ MethodRef GlobalState::enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRe
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
 
     auto result = MethodRef(*this, methods.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on methods invalidates `store`
@@ -1392,6 +1446,7 @@ FieldRef GlobalState::enterFieldSymbol(Loc loc, ClassOrModuleRef owner, NameRef 
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
 
     auto result = FieldRef(*this, fields.size());
     store = result; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
@@ -1430,6 +1485,7 @@ FieldRef GlobalState::enterStaticFieldSymbol(Loc loc, ClassOrModuleRef owner, Na
     }
 
     ENFORCE_NO_TIMER(!symbolTableFrozen);
+    ENFORCE_NO_TIMER(!newSymbolsForbidden, "Entering a new symbol while new symbols are forbidden");
 
     auto ret = FieldRef(*this, fields.size());
     store = ret; // DO NOT MOVE this assignment down. emplace_back on fields invalidates `store`
@@ -1474,13 +1530,14 @@ string_view GlobalState::enterString(string_view nm) {
             ENFORCE(nm.find(">") == string::npos);
         }
     });
-    auto ret = strings.enterString(nm);
+    auto ret = nameTable->strings.enterString(nm);
     return ret;
 }
 
 NameRef GlobalState::lookupNameUTF8(string_view nm) const {
+    const auto &names = *this->nameTable;
     auto hash = NameHash::hashMixUTF8(nm);
-    auto &bucket = this->namesByHash.lookupBucket(hash, NameHash::Bucket::isUtf8(*this, nm));
+    auto &bucket = names.namesByHash.lookupBucket(hash, NameHash::Bucket::isUtf8(*this, nm));
 
     if (!bucket.present()) {
         return NameRef::noName();
@@ -1490,55 +1547,55 @@ NameRef GlobalState::lookupNameUTF8(string_view nm) const {
 }
 
 NameRef GlobalState::enterNameUTF8(string_view nm) {
+    auto &names = *this->nameTable;
     auto hash = NameHash::hashMixUTF8(nm);
-    auto *bucket = &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isUtf8(*this, nm));
+    auto *bucket = &names.namesByHash.lookupBucket(hash, NameHash::Bucket::isUtf8(*this, nm));
     if (bucket->present()) {
         return NameRef::fromRaw(*this, bucket->rawId);
     }
 
-    ENFORCE_NO_TIMER(!nameTableFrozen);
+    ENFORCE_NO_TIMER(!names.nameTableFrozen);
 
-    if (utf8Names.size() == utf8Names.capacity()) {
-        expandNames(utf8Names.capacity() * 2, constantNames.capacity(), uniqueNames.capacity());
-        bucket = &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+    if (names.utf8Names.size() == names.utf8Names.capacity()) {
+        expandNames(names.utf8Names.capacity() * 2, names.constantNames.capacity(), names.uniqueNames.capacity());
+        bucket = &names.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
     }
 
-    auto name = NameRef(*this, NameKind::UTF8, utf8Names.size());
+    auto name = NameRef(*this, NameKind::UTF8, names.utf8Names.size());
     bucket->hash = hash;
     bucket->rawId = name.rawId();
-    utf8Names.emplace_back(UTF8Name{enterString(nm)});
+    names.utf8Names.emplace_back(UTF8Name{enterString(nm)});
 
     ENFORCE(NameHash::hashNameRef(*this, name) == hash);
     categoryCounterInc("names", "utf8");
 
-    wasNameTableModified_ = true;
     return name;
 }
 
 NameRef GlobalState::enterNameConstant(NameRef original) {
+    auto &names = *this->nameTable;
     ENFORCE_NO_TIMER(original.exists(), "making a constant name over non-existing name");
     ENFORCE_NO_TIMER(original.isValidConstantName(*this), "making a constant name over wrong name kind");
 
     const auto hash = NameHash::hashMixConstant(original.rawId());
-    auto *bucket = &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isConstant(*this, original));
+    auto *bucket = &names.namesByHash.lookupBucket(hash, NameHash::Bucket::isConstant(*this, original));
     if (bucket->present()) {
         return NameRef::fromRaw(*this, bucket->rawId);
     }
 
-    ENFORCE_NO_TIMER(!nameTableFrozen);
+    ENFORCE_NO_TIMER(!names.nameTableFrozen);
 
-    if (constantNames.size() == constantNames.capacity()) {
-        expandNames(utf8Names.capacity(), constantNames.capacity() * 2, uniqueNames.capacity());
-        bucket = &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+    if (names.constantNames.size() == names.constantNames.capacity()) {
+        expandNames(names.utf8Names.capacity(), names.constantNames.capacity() * 2, names.uniqueNames.capacity());
+        bucket = &names.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
     }
 
-    auto name = NameRef(*this, NameKind::CONSTANT, constantNames.size());
+    auto name = NameRef(*this, NameKind::CONSTANT, names.constantNames.size());
     bucket->hash = hash;
     bucket->rawId = name.rawId();
 
-    constantNames.emplace_back(ConstantName{original});
+    names.constantNames.emplace_back(ConstantName{original});
     ENFORCE(NameHash::hashNameRef(*this, name) == hash);
-    wasNameTableModified_ = true;
     categoryCounterInc("names", "constant");
     return name;
 }
@@ -1548,8 +1605,9 @@ NameRef GlobalState::enterNameConstant(string_view original) {
 }
 
 NameRef GlobalState::lookupNameConstant(NameRef original) const {
+    const auto &names = *this->nameTable;
     auto hash = NameHash::hashMixConstant(original.rawId());
-    auto &bucket = this->namesByHash.lookupBucket(hash, NameHash::Bucket::isConstant(*this, original));
+    auto &bucket = names.namesByHash.lookupBucket(hash, NameHash::Bucket::isConstant(*this, original));
 
     if (!bucket.present()) {
         return NameRef::noName();
@@ -1586,7 +1644,7 @@ void NameHash::moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned
 }
 
 void NameHash::expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize) {
-    uint32_t hashTableSize = 2 * nextPowerOfTwo(utf8NameSize + constantNameSize + uniqueNameSize);
+    uint32_t hashTableSize = NameHash::sizeFor(utf8NameSize + constantNameSize + uniqueNameSize);
 
     if (hashTableSize > buckets_.size()) {
         vector<Bucket> new_namesByHash(hashTableSize);
@@ -1597,17 +1655,19 @@ void NameHash::expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uin
 
 void GlobalState::expandNames(uint32_t utf8NameSize, uint32_t constantNameSize, uint32_t uniqueNameSize) {
     sanityCheck();
-    utf8Names.reserve(utf8NameSize);
-    constantNames.reserve(constantNameSize);
-    uniqueNames.reserve(uniqueNameSize);
-    namesByHash.expandNames(utf8NameSize, constantNameSize, uniqueNameSize);
+    auto &names = *this->nameTable;
+    names.utf8Names.reserve(utf8NameSize);
+    names.constantNames.reserve(constantNameSize);
+    names.uniqueNames.reserve(uniqueNameSize);
+    names.namesByHash.expandNames(utf8NameSize, constantNameSize, uniqueNameSize);
 }
 
 NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num) const {
+    const auto &names = *this->nameTable;
     ENFORCE_NO_TIMER(num > 0, "num == 0, name overflow");
     auto hash = NameHash::hashMixUnique(uniqueNameKind, num, original.rawId());
     auto &bucket =
-        this->namesByHash.lookupBucket(hash, NameHash::Bucket::isUnique(*this, uniqueNameKind, original, num));
+        names.namesByHash.lookupBucket(hash, NameHash::Bucket::isUnique(*this, uniqueNameKind, original, num));
     if (!bucket.present()) {
         return NameRef::noName();
     }
@@ -1616,28 +1676,28 @@ NameRef GlobalState::lookupNameUnique(UniqueNameKind uniqueNameKind, NameRef ori
 }
 
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, uint32_t num) {
+    auto &names = *this->nameTable;
     ENFORCE_NO_TIMER(num > 0, "num == 0, name overflow");
     auto hash = NameHash::hashMixUnique(uniqueNameKind, num, original.rawId());
     auto *bucket =
-        &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isUnique(*this, uniqueNameKind, original, num));
+        &names.namesByHash.lookupBucket(hash, NameHash::Bucket::isUnique(*this, uniqueNameKind, original, num));
     if (bucket->present()) {
         return NameRef::fromRaw(*this, bucket->rawId);
     }
 
-    ENFORCE_NO_TIMER(!nameTableFrozen);
+    ENFORCE_NO_TIMER(!names.nameTableFrozen);
 
-    if (uniqueNames.size() == uniqueNames.capacity()) {
-        expandNames(utf8Names.capacity(), constantNames.capacity(), uniqueNames.capacity() * 2);
-        bucket = &this->namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
+    if (names.uniqueNames.size() == names.uniqueNames.capacity()) {
+        expandNames(names.utf8Names.capacity(), names.constantNames.capacity(), names.uniqueNames.capacity() * 2);
+        bucket = &names.namesByHash.lookupBucket(hash, NameHash::Bucket::isEmpty());
     }
 
-    auto name = NameRef(*this, NameKind::UNIQUE, uniqueNames.size());
+    auto name = NameRef(*this, NameKind::UNIQUE, names.uniqueNames.size());
     bucket->hash = hash;
     bucket->rawId = name.rawId();
 
-    uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
+    names.uniqueNames.emplace_back(UniqueName{original, num, uniqueNameKind});
     ENFORCE(NameHash::hashNameRef(*this, name) == hash);
-    wasNameTableModified_ = true;
     categoryCounterInc("names", "unique");
     return name;
 }
@@ -1645,16 +1705,8 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 FileRef GlobalState::enterFile(shared_ptr<File> file) {
     ENFORCE_NO_TIMER(!fileTableFrozen);
 
-    SLOW_DEBUG_ONLY(for (auto &f
-                         : this->getFiles()) {
-        if (f) {
-            if (f->path() == file->path()) {
-                Exception::raise("Request to `enterFile` for already-entered file path?");
-            }
-        }
-    })
+    ENFORCE(!findFileByPath(file->path()).exists(), "Request to `enterFile` for already-entered file path?");
 
-    symbolsReferencedByFile.emplace_back();
     return files->emplace(std::move(file));
 }
 
@@ -1800,22 +1852,6 @@ unsigned int GlobalState::filesUsed() const {
     return files->size();
 }
 
-unsigned int GlobalState::namesUsedTotal() const {
-    return utf8Names.size() + constantNames.size() + uniqueNames.size();
-}
-
-unsigned int GlobalState::utf8NamesUsed() const {
-    return utf8Names.size();
-}
-
-unsigned int GlobalState::constantNamesUsed() const {
-    return constantNames.size();
-}
-
-unsigned int GlobalState::uniqueNamesUsed() const {
-    return uniqueNames.size();
-}
-
 unsigned int GlobalState::symbolsUsedTotal() const {
     return classAndModulesUsed() + methodsUsed() + fieldsUsed() + typeParametersUsed() + typeMembersUsed();
 }
@@ -1833,17 +1869,18 @@ void GlobalState::sanityCheckTableSizes() const {
         return;
     }
 
+    const auto &names = *this->nameTable;
     Timer timeit(tracer(), "GlobalState::sanityCheckTableSizes");
     ENFORCE_NO_TIMER(namesUsedTotal() > 0, "empty name table size");
-    ENFORCE_NO_TIMER(!strings.empty(), "empty string table size");
-    ENFORCE_NO_TIMER(!namesByHash.empty(), "empty name hash table size");
-    ENFORCE_NO_TIMER((namesByHash.size() & (namesByHash.size() - 1)) == 0,
+    ENFORCE_NO_TIMER(!names.strings.empty(), "empty string table size");
+    ENFORCE_NO_TIMER(!names.namesByHash.empty(), "empty name hash table size");
+    ENFORCE_NO_TIMER((names.namesByHash.size() & (names.namesByHash.size() - 1)) == 0,
                      "name hash table size is not a power of two");
-    ENFORCE_NO_TIMER(nextPowerOfTwo(utf8Names.capacity() + constantNames.capacity() + uniqueNames.capacity()) * 2 ==
-                         namesByHash.capacity(),
+    ENFORCE_NO_TIMER(NameHash::sizeFor(names.utf8Names.capacity() + names.constantNames.capacity() +
+                                       names.uniqueNames.capacity()) == names.namesByHash.capacity(),
                      "name table and hash name table sizes out of sync names.capacity={} namesByHash.capacity={}",
-                     namesUsedTotal(), namesByHash.capacity());
-    ENFORCE_NO_TIMER(namesByHash.size() == namesByHash.capacity(), "hash name table not at full capacity");
+                     namesUsedTotal(), names.namesByHash.capacity());
+    ENFORCE_NO_TIMER(names.namesByHash.size() == names.namesByHash.capacity(), "hash name table not at full capacity");
 }
 
 void GlobalState::sanityCheckNames() const {
@@ -1856,17 +1893,18 @@ void GlobalState::sanityCheckNames() const {
         return;
     }
 
+    const auto &names = *this->nameTable;
     Timer timeit(tracer(), "GlobalState::sanityCheck (names)");
 
-    for (uint32_t i = 0; i < utf8Names.size(); i++) {
+    for (uint32_t i = 0; i < names.utf8Names.size(); i++) {
         NameRef(*this, NameKind::UTF8, i).sanityCheck(*this);
     }
 
-    for (uint32_t i = 0; i < constantNames.size(); i++) {
+    for (uint32_t i = 0; i < names.constantNames.size(); i++) {
         NameRef(*this, NameKind::CONSTANT, i).sanityCheck(*this);
     }
 
-    for (uint32_t i = 0; i < uniqueNames.size(); i++) {
+    for (uint32_t i = 0; i < names.uniqueNames.size(); i++) {
         NameRef(*this, NameKind::UNIQUE, i).sanityCheck(*this);
     }
 }
@@ -1926,7 +1964,7 @@ void GlobalState::sanityCheck() const {
                 sym.sanityCheck(*this);
             }
         }
-        for (auto &ent : namesByHash.buckets()) {
+        for (auto &ent : nameTable->namesByHash.buckets()) {
             if (ent.rawId == 0) {
                 continue;
             }
@@ -1937,8 +1975,9 @@ void GlobalState::sanityCheck() const {
 }
 
 bool GlobalState::freezeNameTable() {
-    bool old = this->nameTableFrozen;
-    this->nameTableFrozen = true;
+    auto &names = *this->nameTable;
+    bool old = names.nameTableFrozen;
+    names.nameTableFrozen = true;
     return old;
 }
 
@@ -1955,8 +1994,9 @@ bool GlobalState::freezeSymbolTable() {
 }
 
 bool GlobalState::unfreezeNameTable() {
-    bool old = this->nameTableFrozen;
-    this->nameTableFrozen = false;
+    auto &names = *this->nameTable;
+    bool old = names.nameTableFrozen;
+    names.nameTableFrozen = false;
     return old;
 }
 
@@ -1983,6 +2023,7 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->cacheSensitiveOptions = other.cacheSensitiveOptions;
     this->ruby3KeywordArgs = other.ruby3KeywordArgs;
     this->parseWithPrism = other.parseWithPrism;
+    this->experimentalMethodModifiers = other.experimentalMethodModifiers;
     this->suppressPayloadSuperclassRedefinitionFor = other.suppressPayloadSuperclassRedefinitionFor;
     this->trackUntyped = other.trackUntyped;
     this->highlightUntypedDiagnosticSeverity = other.highlightUntypedDiagnosticSeverity;
@@ -1996,6 +2037,37 @@ void GlobalState::copyOptions(const core::GlobalState &other) {
     this->pathPrefix = other.pathPrefix;
 }
 
+unique_ptr<NameTable> NameTable::deepCopy(bool keepId) const {
+    auto result = make_unique<NameTable>();
+
+    if (keepId) {
+        result->nameTableId = this->nameTableId;
+    }
+    result->deepCloneHistory = this->deepCloneHistory;
+    result->deepCloneHistory.emplace_back(
+        DeepCloneHistoryEntry{this->nameTableId, utf8NamesUsed(), constantNamesUsed(), uniqueNamesUsed()});
+
+    result->strings = this->strings;
+    result->utf8Names.reserve(this->utf8Names.capacity());
+    result->constantNames.reserve(this->constantNames.capacity());
+    result->uniqueNames.reserve(this->uniqueNames.capacity());
+    result->utf8Names = this->utf8Names;
+    if (keepId) {
+        result->constantNames = this->constantNames;
+        result->uniqueNames = this->uniqueNames;
+    } else {
+        for (const auto &name : this->constantNames) {
+            result->constantNames.emplace_back(name.deepCopy(*result));
+        }
+        for (const auto &name : this->uniqueNames) {
+            result->uniqueNames.emplace_back(name.deepCopy(*result));
+        }
+    }
+
+    result->namesByHash = this->namesByHash;
+    return result;
+}
+
 unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     Timer timeit(tracer(), "GlobalState::deepCopy", this->creation);
     this->sanityCheck();
@@ -2006,41 +2078,11 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
     if (keepId) {
         result->globalStateId = this->globalStateId;
     }
-    result->deepCloneHistory = this->deepCloneHistory;
-    result->deepCloneHistory.emplace_back(
-        DeepCloneHistoryEntry{this->globalStateId, utf8NamesUsed(), constantNamesUsed(), uniqueNamesUsed()});
+    result->nameTable = this->nameTable->deepCopy(keepId);
 
-    result->strings = this->strings;
     result->files = make_shared<FileTable>(*this->files);
-    result->symbolsReferencedByFile = this->symbolsReferencedByFile;
     result->lspQuery = this->lspQuery;
     result->kvstoreUuid = this->kvstoreUuid;
-    result->lspTypecheckCount = this->lspTypecheckCount;
-    result->utf8Names.reserve(this->utf8Names.capacity());
-    result->constantNames.reserve(this->constantNames.capacity());
-    result->uniqueNames.reserve(this->uniqueNames.capacity());
-    if (keepId) {
-        result->utf8Names.resize(this->utf8Names.size());
-        ::memcpy(result->utf8Names.data(), this->utf8Names.data(), this->utf8Names.size() * sizeof(UTF8Name));
-        result->constantNames.resize(this->constantNames.size());
-        ::memcpy(result->constantNames.data(), this->constantNames.data(),
-                 this->constantNames.size() * sizeof(ConstantName));
-        result->uniqueNames.resize(this->uniqueNames.size());
-        ::memcpy(result->uniqueNames.data(), this->uniqueNames.data(), this->uniqueNames.size() * sizeof(UniqueName));
-    } else {
-        for (auto &utf8Name : this->utf8Names) {
-            result->utf8Names.emplace_back(utf8Name.deepCopy(*result));
-        }
-        for (auto &constantName : this->constantNames) {
-            result->constantNames.emplace_back(constantName.deepCopy(*result));
-        }
-        for (auto &uniqueName : this->uniqueNames) {
-            result->uniqueNames.emplace_back(uniqueName.deepCopy(*result));
-        }
-    }
-
-    result->namesByHash.reserve(this->namesByHash.size());
-    result->namesByHash = this->namesByHash;
 
     result->classAndModules.reserve(this->classAndModules.capacity());
     for (auto &sym : this->classAndModules) {
@@ -2071,15 +2113,16 @@ unique_ptr<GlobalState> GlobalState::deepCopyGlobalState(bool keepId) const {
         Timer timeit2(tracer(), "GlobalState::deepCopyOut");
         result->creation = timeit2.getFlowEdge();
     }
+    result->symbolOffsets = this->symbolOffsets;
+    result->earliestReopenedStratum = this->earliestReopenedStratum;
     return result;
 }
 
 unique_ptr<GlobalState> GlobalState::copyForIndexThread(
-    const bool packagerEnabled, const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
-    const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-    const vector<string> &extraPackageFilesDirectorySlashPrefixes,
-    const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
-    const vector<string> &packagerLayers, string errorHint, bool genPackages) const {
+    const bool packagerEnabled, const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashPrefixes, const vector<string> &allowRelaxedPackagerChecksFor,
+    const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
+    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors) const {
     ENFORCE(fileTableFrozen);
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
@@ -2089,29 +2132,32 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     // We share the file table here insead of copying it, to avoid the allocation and overhead of merging back together
     // on an indexing thread.
     result->files = this->files;
-    // Skipping copying symbolsReferencedByFile, should not be used before VisibilityChecker.
 
     // Additional options that might be used during indexing are manually copied over here
     result->kvstoreUuid = this->kvstoreUuid;
 
+    // The rewriter runs semantic extensions on every class body, so index threads need them too.
+    for (auto &semanticExtension : this->semanticExtensions) {
+        result->semanticExtensions.emplace_back(semanticExtension->deepCopy(*this, *result));
+    }
+
     if (packagerEnabled) {
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint, genPackages);
+        result->setPackagerOptions(extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes, allowRelaxedPackagerChecksFor,
+                                   updateVisibilityFor, packagerLayers, errorHint, genPackagesMode,
+                                   allowRelaxingTestVisibility, packageAttributedErrors);
     }
 
     return result;
 }
 
 unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
-    const bool packagerEnabled, const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
-    const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-    const vector<string> &extraPackageFilesDirectorySlashPrefixes,
-    const vector<string> &packageSkipRBIExportEnforcementDirs, const vector<string> &allowRelaxedPackagerChecksFor,
-    const vector<string> &packagerLayers, string errorHint, bool genPackages) const {
+    const bool packagerEnabled, const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashPrefixes, const vector<string> &allowRelaxedPackagerChecksFor,
+    const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
+    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     result->initEmpty();
@@ -2119,27 +2165,31 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
 
     // Additional options that might be used during indexing are manually copied over here
     result->files = make_shared<FileTable>(*this->files);
-    result->symbolsReferencedByFile = vector<UnorderedSet<SymbolRef>>{this->files->size(), UnorderedSet<SymbolRef>{}};
     result->kvstoreUuid = this->kvstoreUuid;
 
     if (packagerEnabled) {
+        // This option only makes sense in CLI mode
+        auto packageAttributedErrors = false;
+
         core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint, genPackages);
+        result->setPackagerOptions(extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                   extraPackageFilesDirectorySlashPrefixes, allowRelaxedPackagerChecksFor,
+                                   updateVisibilityFor, packagerLayers, errorHint, genPackagesMode,
+                                   allowRelaxingTestVisibility, packageAttributedErrors);
     }
 
     return result;
 }
-unique_ptr<GlobalState>
-GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                             const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                             const vector<string> &extraPackageFilesDirectorySlashPrefixes,
-                             const vector<string> &packageSkipRBIExportEnforcementDirs,
-                             const vector<string> &allowRelaxedPackagerChecksFor, const vector<string> &packagerLayers,
-                             string errorHint, bool genPackages) const {
+
+unique_ptr<GlobalState> GlobalState::copyForSlowPath(
+    const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    const vector<string> &extraPackageFilesDirectorySlashPrefixes, const vector<string> &allowRelaxedPackagerChecksFor,
+    const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
+    packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors,
+    core::packages::Stratum toStratum) const {
+    Timer timeit(this->tracer(), "copyForSlowPath");
+
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
     // We omit a call to `initEmpty` here, as the only intended use of this function is to have its symbol table
@@ -2147,16 +2197,16 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
 
     result->copyOptions(*this);
 
-    // We share the file table entries with the original GlobalState, and then copy the content of the name table,
-    // string storage, and uuid to ensure that we remain compatible with the session cache.
+    // We share the file table entries with the original GlobalState, and uuid to ensure that we remain compatible with
+    // the session cache.
     result->files = make_shared<FileTable>(*this->files);
-    result->symbolsReferencedByFile = vector<UnorderedSet<SymbolRef>>{this->files->size(), UnorderedSet<SymbolRef>{}};
     result->kvstoreUuid = this->kvstoreUuid;
-    result->strings = this->strings;
-    result->utf8Names = this->utf8Names;
-    result->constantNames = this->constantNames;
-    result->uniqueNames = this->uniqueNames;
-    result->namesByHash = this->namesByHash;
+
+    // NOTE: This the only situation where we share the name table, as this GlobalState will be stashed away in LSP's
+    // undo state while the copy is used for typechecking. As there's only ever one in use at a given time, it's safe to
+    // allow those two references to exist. If we ever switch to using this stale global state for operations while the
+    // slow path is running, we'll need to revisit this.
+    result->nameTable = this->nameTable;
 
     // Reserve space for the symbol tables, under the assumption that we'll probably grow to a similar size on the slow
     // path.
@@ -2167,15 +2217,97 @@ GlobalState::copyForSlowPath(const vector<string> &extraPackageFilesDirectoryUnd
     result->typeMembers.reserve(this->typeMembers.capacity());
 
     if (packageDB().enabled()) {
-        core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
-        core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
-        result->setPackagerOptions(extraPackageFilesDirectoryUnderscorePrefixes,
-                                   extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                                   extraPackageFilesDirectorySlashPrefixes, packageSkipRBIExportEnforcementDirs,
-                                   allowRelaxedPackagerChecksFor, packagerLayers, errorHint, genPackages);
+        {
+            core::UnfreezeNameTable unfreezeToEnterPackagerOptionsGS(*result);
+            core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
+            result->setPackagerOptions(extraPackageFilesDirectorySlashDeprecatedPrefixes,
+                                       extraPackageFilesDirectorySlashPrefixes, allowRelaxedPackagerChecksFor,
+                                       updateVisibilityFor, packagerLayers, errorHint, genPackagesMode,
+                                       allowRelaxingTestVisibility, packageAttributedErrors);
+        }
+
+        result->copySymbolTableFrom(*this, toStratum);
+    } else {
+        ENFORCE(toStratum == packages::Stratum(0),
+                "Cannot copy a nonzero symbol table prefix when packages are disabled");
     }
 
     return result;
+}
+
+void GlobalState::copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum) {
+    const auto &names = *this->nameTable;
+    const auto &otherNames = *other.nameTable;
+    // Copying a prefix of the symbol tables assumes that this global state derives from `other`.
+    ENFORCE(this->files->size() == other.files->size());
+    ENFORCE(names.constantNames.size() == otherNames.constantNames.size());
+    ENFORCE(names.uniqueNames.size() == otherNames.uniqueNames.size());
+    ENFORCE(names.namesByHash.size() == otherNames.namesByHash.size());
+    ENFORCE(other.packageDB().enabled(), "Copying a prefix of the symbol table requires --sorbet-packages");
+
+    // At stratum zero there is no prefix to copy.
+    if (toStratum == packages::Stratum(0)) {
+        return;
+    }
+    ENFORCE(toStratum.rawId() < other.symbolOffsets.size(), "No symbol table offset recorded for stratum {}",
+            toStratum.rawId());
+
+    ENFORCE(!other.earliestReopenedStratum.has_value() || toStratum <= other.earliestReopenedStratum.value(),
+            "Copying the symbol table up to stratum {}, but stratum {} was re-populated by a fast path",
+            toStratum.rawId(), other.earliestReopenedStratum.value_or(packages::Stratum(0)).rawId());
+
+    this->packageDB_ = other.packageDB().deepCopy();
+
+    this->symbolOffsets.clear();
+    this->symbolOffsets.reserve(other.symbolOffsets.size());
+    this->symbolOffsets.insert(this->symbolOffsets.begin(), other.symbolOffsets.begin(),
+                               other.symbolOffsets.begin() + toStratum.rawId() + 1);
+
+    auto offsets = other.symbolOffsets[toStratum.rawId()];
+
+    ENFORCE(this->classAndModules.empty());
+    for (auto i = 0; i < offsets.classAndModulesOffset; ++i) {
+        this->classAndModules.emplace_back(other.classAndModules[i].deepCopy(*this));
+    }
+
+    // TODO(trevor): multiplex this with the worker pool
+    for (auto &sym : this->classAndModules) {
+        absl::erase_if(sym.members(), [offsets](pair<NameRef, SymbolRef> e) {
+            auto sym = e.second;
+            switch (sym.kind()) {
+                case SymbolRef::Kind::ClassOrModule:
+                    return sym.asClassOrModuleRef().id() >= offsets.classAndModulesOffset;
+                case SymbolRef::Kind::Method:
+                    return sym.asMethodRef().id() >= offsets.methodsOffset;
+                case SymbolRef::Kind::FieldOrStaticField:
+                    return sym.asFieldRef().id() >= offsets.fieldsOffset;
+                case SymbolRef::Kind::TypeParameter:
+                    return sym.asTypeParameterRef().id() >= offsets.typeParametersOffset;
+                case SymbolRef::Kind::TypeMember:
+                    return sym.asTypeMemberRef().id() >= offsets.typeMembersOffset;
+            }
+        });
+    }
+
+    ENFORCE(this->methods.empty());
+    for (auto i = 0; i < offsets.methodsOffset; ++i) {
+        this->methods.emplace_back(other.methods[i].deepCopy(*this));
+    }
+
+    ENFORCE(this->fields.empty());
+    for (auto i = 0; i < offsets.fieldsOffset; ++i) {
+        this->fields.emplace_back(other.fields[i].deepCopy(*this));
+    }
+
+    ENFORCE(this->typeParameters.empty());
+    for (auto i = 0; i < offsets.typeParametersOffset; ++i) {
+        this->typeParameters.emplace_back(other.typeParameters[i].deepCopy(*this));
+    }
+
+    ENFORCE(this->typeMembers.empty());
+    for (auto i = 0; i < offsets.typeMembersOffset; ++i) {
+        this->typeMembers.emplace_back(other.typeMembers[i].deepCopy(*this));
+    }
 }
 
 string_view GlobalState::getPrintablePath(string_view path) const {
@@ -2261,9 +2393,6 @@ bool GlobalState::shouldReportErrorOn(FileRef file, ErrorClass what) const {
         // Custom rules
         if (level == StrictLevel::Autogenerated) {
             level = StrictLevel::True;
-            if (what == errors::Resolver::StubConstant || what == errors::Infer::UntypedMethod) {
-                return false;
-            }
         } else if (level == StrictLevel::Stdlib) {
             level = StrictLevel::Strict;
             if (what == errors::Resolver::OverloadNotAllowed || what == errors::Infer::UntypedMethod) {
@@ -2276,8 +2405,19 @@ bool GlobalState::shouldReportErrorOn(FileRef file, ErrorClass what) const {
     return level >= what.minLevel;
 }
 
-bool GlobalState::wasNameTableModified() const {
-    return wasNameTableModified_;
+void GlobalState::markNameTableAsCached() {
+    auto &names = *this->nameTable;
+    names.utf8NamesWritten_ = names.utf8Names.size();
+    names.constantNamesWritten_ = names.constantNames.size();
+    names.uniqueNamesWritten_ = names.uniqueNames.size();
+}
+
+void GlobalState::setNameTableDiffCount(uint32_t count) {
+    nameTable->nameTableDiffCount = count;
+}
+
+void GlobalState::incrementNameTableDiffCount() {
+    nameTable->nameTableDiffCount++;
 }
 
 void GlobalState::trace(string_view msg) const {
@@ -2318,21 +2458,22 @@ packages::PackageDB &GlobalState::packageDB() {
     return packageDB_;
 }
 
-void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                                     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                      const vector<string> &extraPackageFilesDirectorySlashPrefixes,
-                                     const vector<string> &packageSkipRBIExportEnforcementDirs,
                                      const vector<string> &allowRelaxedPackagerChecksFor,
-                                     const vector<string> &packagerLayers, string errorHint, bool genPackages) {
+                                     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers,
+                                     string errorHint, packages::GenPackagesMode genPackagesMode,
+                                     bool allowRelaxingTestVisibility, bool packageAttributedErrors) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
-    packageDB_.genPackages_ = genPackages;
-    packageDB_.extraPackageFilesDirectoryUnderscorePrefixes_ = extraPackageFilesDirectoryUnderscorePrefixes;
+    packageDB_.genPackagesMode_ = genPackagesMode;
+    packageDB_.allowRelaxingTestVisibility_ = allowRelaxingTestVisibility;
+    packageDB_.packageAttributedErrors_ = packageAttributedErrors;
     packageDB_.extraPackageFilesDirectorySlashDeprecatedPrefixes_ = extraPackageFilesDirectorySlashDeprecatedPrefixes;
     packageDB_.extraPackageFilesDirectorySlashPrefixes_ = extraPackageFilesDirectorySlashPrefixes;
-    packageDB_.skipRBIExportEnforcementDirs_ = packageSkipRBIExportEnforcementDirs;
     packageDB_.allowRelaxedPackagerChecksFor_ = allowRelaxedPackagerChecksFor;
+    packageDB_.updateVisibilityFor_ = updateVisibilityFor;
     absl::c_transform(packagerLayers, std::back_inserter(packageDB_.layers_),
                       [this](const auto &layer) { return enterNameUTF8(layer); });
     packageDB_.errorHint_ = errorHint;
@@ -2340,12 +2481,6 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
 
 packages::UnfreezePackages GlobalState::unfreezePackages() {
     return packageDB_.unfreeze();
-}
-
-unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState> what, FileRef fref) {
-    ENFORCE_NO_TIMER(fref.id() < what->filesUsed());
-    what->files->get(fref.id())->sourceType = File::Type::TombStone;
-    return what;
 }
 
 unique_ptr<LocalSymbolTableHashes> GlobalState::hash(uint32_t foundClassesHash) const {
@@ -2431,13 +2566,13 @@ unique_ptr<LocalSymbolTableHashes> GlobalState::hash(uint32_t foundClassesHash) 
         if (!sym.ignoreInHashing(*this)) {
             auto &target = retypecheckableSymbolHashesMap[WithoutUniqueNameHash(*this, sym.name)];
             target = mix(target, sym.hash(*this));
-            auto needMethodShapeHash = sym.name == Names::unresolvedAncestors() ||
-                                       sym.name == Names::requiredAncestors() ||
-                                       sym.name == Names::requiredAncestorsLin();
+            auto needMethodShapeHash =
+                sym.name == Names::unresolvedAncestors() || sym.name == Names::requiredAncestors() ||
+                sym.name == Names::requiredAncestorsLin() || sym.name == Names::mixedInClassMethods();
             if (needMethodShapeHash) {
                 uint32_t methodShapeHash = sym.methodShapeHash(*this);
                 hierarchyHash = mix(hierarchyHash, methodShapeHash);
-                // The only three methods that trigger a method change anymore all relate to inheritance.
+                // The only methods that trigger a method change anymore all relate to inheritance.
                 // Let's blame this to a change to class symbols, not to methods
                 classModuleHash = mix(classModuleHash, methodShapeHash);
             }
@@ -2513,6 +2648,30 @@ MethodRef GlobalState::lookupStaticInitForFile(FileRef file) const {
 
 spdlog::logger &GlobalState::tracer() const {
     return errorQueue->tracer;
+}
+
+SymbolTableOffsets::SymbolTableOffsets(const core::GlobalState &gs)
+    : classAndModulesOffset{gs.classAndModulesUsed()}, methodsOffset{gs.methodsUsed()}, fieldsOffset{gs.fieldsUsed()},
+      typeMembersOffset{gs.typeMembersUsed()}, typeParametersOffset{gs.typeParametersUsed()} {}
+
+SymbolRange<ClassOrModuleRef> SymbolTableOffsets::classOrModuleRefs(const GlobalState &gs) const {
+    return SymbolRange<ClassOrModuleRef>(this->classAndModulesOffset, gs.classAndModulesUsed());
+}
+
+SymbolRange<MethodRef> SymbolTableOffsets::methodRefs(const GlobalState &gs) const {
+    return SymbolRange<MethodRef>(this->methodsOffset, gs.methodsUsed());
+}
+
+SymbolRange<FieldRef> SymbolTableOffsets::fieldRefs(const GlobalState &gs) const {
+    return SymbolRange<FieldRef>(this->fieldsOffset, gs.fieldsUsed());
+}
+
+SymbolRange<TypeMemberRef> SymbolTableOffsets::typeMemberRefs(const GlobalState &gs) const {
+    return SymbolRange<TypeMemberRef>(this->typeMembersOffset, gs.typeMembersUsed());
+}
+
+SymbolRange<TypeParameterRef> SymbolTableOffsets::typeParameterRefs(const GlobalState &gs) const {
+    return SymbolRange<TypeParameterRef>(this->typeParametersOffset, gs.typeParametersUsed());
 }
 
 } // namespace sorbet::core

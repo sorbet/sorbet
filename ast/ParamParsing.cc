@@ -39,7 +39,8 @@ core::ParsedParam parseParam(const ast::ExpressionPtr &param) {
                 parsedParam.local = local.localVariable;
                 parsedParam.loc = local.loc;
                 cursor = nullptr;
-            });
+            },
+            [&](const ast::ExpressionPtr &expr) { ENFORCE(false, "Unexpected node type in argument position."); });
     }
 
     return parsedParam;
@@ -71,10 +72,9 @@ ExpressionPtr getDefaultValue(ExpressionPtr param) {
 
 vector<core::ParsedParam> ParamParsing::parseParams(const ast::MethodDef::PARAMS_store &params) {
     vector<core::ParsedParam> parsedParams;
+    parsedParams.reserve(params.size());
+
     for (auto &param : params) {
-        if (!ast::isa_reference(param)) {
-            Exception::raise("Must be a reference!");
-        }
         parsedParams.emplace_back(parseParam(param));
     }
 

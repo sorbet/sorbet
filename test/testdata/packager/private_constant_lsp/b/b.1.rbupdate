@@ -1,0 +1,5 @@
+# typed: true
+# exclude-from-file-update: true
+module Root::B
+  Root::A::Inner::X
+end

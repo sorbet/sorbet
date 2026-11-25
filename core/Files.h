@@ -5,6 +5,8 @@
 #include "core/LocOffsets.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
+#include "xxhash.h"
+#include <array>
 #include <string>
 #include <string_view>
 
@@ -23,7 +25,6 @@ public:
         PayloadGeneration, // Files marked during --store-state
         Payload,           // Files loaded from the binary payload
         Normal,
-        TombStone,
     };
 
     // Epoch is _only_ used in LSP mode. Do not depend on it elsewhere.
@@ -37,6 +38,9 @@ public:
 
     std::string_view path() const;
     std::string_view source() const;
+    // Should be used in preference to `source().size()`, as future changes to `source()`
+    // may require re-materialization of the source from some other location.
+    size_t sourceSize() const;
     Type sourceType;
 
     bool isPayload() const;
@@ -51,7 +55,6 @@ public:
 
     bool hasPackageRbPath() const;
     bool isPackage(const GlobalState &gs) const;
-    bool isTestPackage(const GlobalState &gs) const;
 
     // Whether the file is open in the LSP client. (Always false if not running under LSP.)
     bool isOpenInClient() const;
@@ -60,8 +63,8 @@ public:
     void setIsOpenInClient(bool isOpenInClient);
 
     // flag accessors
+    // TODO(jez) Delete this, replace with configurable patterns or accessing the packageDB
     bool isPackagedTest() const;
-    bool isPackagedTestHelper() const;
 
     bool hasIndexErrors() const;
     void setHasIndexErrors(bool value);
@@ -92,6 +95,9 @@ public:
 
     static constexpr std::string_view URL_PREFIX = "https://github.com/sorbet/sorbet/tree/master/";
     static std::string censorFilePathForSnapshotTests(std::string_view orig);
+
+    // Returns the hash of the file content. Requires that the file has been read.
+    absl::Span<const uint8_t> sourceHash() const;
 
 private:
     struct Flags {
@@ -124,6 +130,10 @@ private:
     // for that file, and computing lazily allows saving space.
     mutable std::shared_ptr<std::vector<uint32_t>> lineBreaks_;
 
+    // This is the XXH128 hash of the source, lazily computed.
+    mutable XXH128_hash_t sourceHash_;
+
+    mutable bool sourceHashComputed_ = false;
     mutable StrictLevel minErrorLevel_ = StrictLevel::Max;
 
 public:
@@ -134,7 +144,7 @@ private:
     std::shared_ptr<const FileHash> hash_;
 };
 
-CheckSize(File, 96, 8);
+CheckSize(File, 112, 8);
 
 template <typename H> H AbslHashValue(H h, const FileRef &m) {
     return H::combine(std::move(h), m.id());

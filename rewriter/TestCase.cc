@@ -14,7 +14,7 @@ void TestCase::run(core::MutableContext ctx, ast::ClassDef *klass) {
     for (auto &stat : klass->rhs) {
         if (auto send = ast::cast_tree<ast::Send>(stat)) {
             if (send->fun == core::Names::test()) {
-                if (send->numPosArgs() == 1 && !send->hasKwArgs() && send->hasBlock()) {
+                if (send->numPosArgs() == 1 && send->hasBlock()) {
                     auto arg0 = ast::cast_tree<ast::Literal>(send->getPosArg(0));
 
                     if (arg0 && arg0->isString()) {

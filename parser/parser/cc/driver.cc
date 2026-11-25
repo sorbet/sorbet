@@ -7,10 +7,10 @@
 
 namespace ruby_parser {
 
-base_driver::base_driver(ruby_version version, std::string_view source, sorbet::StableStringStorage<> &scratch,
-                         const struct builder &builder, bool traceLexer, bool indentationAware)
-    : build(builder), lex(diagnostics, version, source, scratch, traceLexer), pending_error(false), def_level(0),
-      ast(nullptr), indentationAware(indentationAware) {}
+base_driver::base_driver(std::string_view source, sorbet::StableStringStorage<> &scratch, const struct builder &builder,
+                         bool traceLexer, bool indentationAware)
+    : build(builder), lex(diagnostics, source, scratch, traceLexer), pending_error(false), def_level(0), ast(nullptr),
+      indentationAware(indentationAware) {}
 
 const char *const base_driver::token_name(token_type type) {
     // We have several tokens that have the same human-readable string, but Bison won't
@@ -153,6 +153,15 @@ ForeignPtr base_driver::rewind_and_munge_body_if_dedented(SelfPtr self, token_t 
         // But bodyStartToken is tNL if empty body, which fails the assertion in compare_indent_level
         this->rewind_to_tok_start(endToken);
         return body;
+    } else if (bodyStartToken->type() == token_type::tNL) {
+        // There are some cases where the file is so messed up that the parse is very unexpected.
+        // The `tNL` token can sneak in when the grammar decided to produce an empty `stmts`. When
+        // there's an empty production, the @$ (the yyloc information) uses whatever happened to be
+        // the most recent token, which might be a `tNL`. `compare_indent_level` only works when
+        // comparing non-`tNL` tokens, so we actually need to be very defensive against there being
+        // sneaky tNL tokens. Give up, and say that the method body was properly indented
+        this->rewind_to_tok_start(endToken);
+        return body;
     } else if (this->lex.compare_indent_level(bodyStartToken, beginToken) <= 0) {
         // Not even the very first thing in the body is indented. Treat this like empty method.
         this->rewind_and_reset(headerEndPos);
@@ -216,7 +225,7 @@ void base_driver::local_pop() {
 
 typedruby_release::typedruby_release(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                      const struct builder &builder, bool traceLexer, bool indentationAware)
-    : base_driver(ruby_version::RUBY_31, source, scratch, builder, traceLexer, indentationAware) {}
+    : base_driver(source, scratch, builder, traceLexer, indentationAware) {}
 
 ForeignPtr typedruby_release::parse(SelfPtr self, bool) {
     bison::typedruby_release::parser p(*this, self);
@@ -226,7 +235,7 @@ ForeignPtr typedruby_release::parse(SelfPtr self, bool) {
 
 typedruby_debug::typedruby_debug(std::string_view source, sorbet::StableStringStorage<> &scratch,
                                  const struct builder &builder, bool traceLexer, bool indentationAware)
-    : base_driver(ruby_version::RUBY_31, source, scratch, builder, traceLexer, indentationAware) {}
+    : base_driver(source, scratch, builder, traceLexer, indentationAware) {}
 
 ForeignPtr typedruby_debug::parse(SelfPtr self, bool traceParser) {
     bison::typedruby_debug::parser p(*this, self);

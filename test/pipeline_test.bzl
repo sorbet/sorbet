@@ -13,7 +13,6 @@ def dropExtension(p):
     return p.partition(".")[0]
 
 _TEST_SCRIPT = """#!/usr/bin/env bash
-export ASAN_SYMBOLIZER_PATH=`pwd`/external/llvm_toolchain_15_0_7/bin/llvm-symbolizer
 set -x
 exec {runner} --single_test "{test}" {parser}
 """
@@ -28,10 +27,7 @@ def _exp_test_impl(ctx):
         ),
     )
 
-    runfiles = ctx.runfiles(files = ctx.files.runner + ctx.files.test + ctx.files.data)
-    runfiles = runfiles.merge(ctx.attr._llvm_symbolizer[DefaultInfo].default_runfiles)
-
-    return [DefaultInfo(runfiles = runfiles)]
+    return [DefaultInfo(runfiles = ctx.runfiles(files = ctx.files.runner + ctx.files.test + ctx.files.data))]
 
 exp_test = rule(
     implementation = _exp_test_impl,
@@ -48,9 +44,6 @@ exp_test = rule(
             cfg = "target",
             allow_files = True,
         ),
-        "_llvm_symbolizer": attr.label(
-            default = "//test:llvm-symbolizer",
-        ),
         "parser": attr.string(mandatory = False),
     },
 )
@@ -59,6 +52,7 @@ _TEST_RUNNERS = {
     "PosTests": ":pipeline_test_runner",
     "PrismPosTests": ":pipeline_test_runner",
     "LSPTests": ":lsp_test_runner",
+    "PrismLSPTests": ":lsp_test_runner",
     "WhitequarkParserTests": ":parser_test_runner",
     "PackagerTests": ":pipeline_test_runner",
 }

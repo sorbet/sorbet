@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSPLOOP_H
 
 #include "core/core.h"
+#include "main/cache/cache.h"
 #include "main/lsp/LSPIndexer.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPPreprocessor.h"
@@ -22,12 +23,8 @@ namespace sorbet::realmain::lsp {
 class MarkupContent;
 class LSPInput;
 class LSPConfiguration;
-class LSPQueuePreemptionTask;
 
 class LSPLoop {
-    friend class LSPWrapper;
-    friend class LSPQueuePreemptionTask;
-
     /** Encapsulates the active configuration for the language server. */
     const std::shared_ptr<const LSPConfiguration> config;
     /** Protects outgoingQueue. */
@@ -60,8 +57,8 @@ class LSPLoop {
     std::vector<std::unique_ptr<LSPTask>> commitAndGetTasksForMessage(LSPMessage &msg);
 
 public:
-    LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers,
-            const std::shared_ptr<LSPConfiguration> &config, std::unique_ptr<KeyValueStore> kvstore);
+    LSPLoop(std::unique_ptr<core::GlobalState> initialGS, WorkerPool &workers, std::shared_ptr<LSPConfiguration> config,
+            std::unique_ptr<cache::SessionCache> sessionCache);
     /**
      * Runs the language server on a dedicated thread. Returns the final global state if it exits cleanly, or nullopt
      * on error.
@@ -75,10 +72,6 @@ public:
      * Processes a batch of requests. Performs pre-processing to avoid unnecessary work.
      */
     void processRequests(std::vector<std::unique_ptr<LSPMessage>> messages);
-    /**
-     * (For tests only) Retrieve the number of times typechecking has run.
-     */
-    int getTypecheckCount();
 
     /**
      * (For tests only) Set a flag that forces the slow path to block indefinitely after saving undo state. Setting
@@ -87,6 +80,14 @@ public:
     void setSlowPathBlocked(bool blocked) {
         typecheckerCoord.setSlowPathBlocked(blocked);
     }
+
+    /**
+     * (For tests only) Control processing and completion of the next scheduled preemption.
+     */
+    void setPreemptionTestHooks(std::shared_ptr<PreemptionTestHooks> hooks);
+
+    /** (For tests only) Acquire and release the task queue mutex to synchronize with a thread releasing it. */
+    void synchronizeTaskQueueForTest();
 };
 
 // TODO(jvilk): Move to LSPTask.
@@ -96,6 +97,10 @@ std::unique_ptr<MarkupContent> formatRubyMarkup(MarkupKind markupKind, std::stri
                                                 std::optional<std::string_view> explanation);
 std::string prettyTypeForConstant(const core::GlobalState &gs, core::SymbolRef constant);
 SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef sym, bool isAttrBestEffortUIOnly);
+
+std::vector<std::unique_ptr<TextDocumentEdit>>
+autocorrect2DocumentEdits(const LSPConfiguration &config, const core::GlobalState &gs,
+                          const std::vector<core::AutocorrectSuggestion::Edit> &edits);
 
 void addOtherAccessorSymbols(const core::GlobalState &gs, core::SymbolRef symbol,
                              core::lsp::Query::Symbol::STORAGE &symbols);

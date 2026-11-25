@@ -2,6 +2,10 @@
 
 namespace sorbet::rbs {
 
+rbs_string_t makeRBSString(std::string_view str) {
+    return rbs_string_new(str.data(), str.data() + str.size());
+}
+
 core::LocOffsets RBSDeclaration::commentLoc() const {
     return comments.front().commentLoc.join(comments.back().commentLoc);
 }
@@ -14,9 +18,9 @@ core::LocOffsets RBSDeclaration::fullTypeLoc() const {
     return comments.front().typeLoc.join(comments.back().typeLoc);
 }
 
-core::LocOffsets RBSDeclaration::typeLocFromRange(const rbs_range_t &range) const {
-    int rangeOffset = range.start.char_pos;
-    int rangeLength = range.end.char_pos - range.start.char_pos;
+core::LocOffsets RBSDeclaration::typeLocFromRange(const rbs_location_range &range) const {
+    int rangeOffset = range.start_byte;
+    int rangeLength = range.end_byte - range.start_byte;
 
     for (const auto &comment : comments) {
         int commentTypeLength = comment.typeLoc.endLoc - comment.typeLoc.beginLoc;
@@ -30,8 +34,10 @@ core::LocOffsets RBSDeclaration::typeLocFromRange(const rbs_range_t &range) cons
 
             return core::LocOffsets{beginLoc, endLoc};
         }
-        rangeOffset -= commentTypeLength;
+        // Include the newline inserted between comment strings by RBSDeclaration.
+        rangeOffset -= commentTypeLength + 1;
     }
     return comments.front().typeLoc;
 }
+
 } // namespace sorbet::rbs

@@ -3,6 +3,4 @@
 
 class Dep < PackageSpec
   import Package
-
-  export Dep::Exports::ExportedClass
 end

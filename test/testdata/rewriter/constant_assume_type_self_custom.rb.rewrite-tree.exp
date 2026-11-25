@@ -1,0 +1,82 @@
+class <emptyTree><<C <root>>> < (::<todo sym>)
+  <self>.sig() do ||
+    <self>.returns(<emptyTree>::<C Integer>)
+  end
+
+  def new<<todo method>>(&<blk>)
+    0
+  end
+
+  class <emptyTree>::<C NilableNew><<C <todo sym>>> < (::<todo sym>)
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C T>.nilable(<emptyTree>::<C T>.attached_class()))
+    end
+
+    def self.new<<todo method>>(&<blk>)
+      begin
+        if [true, false].sample()
+          return <emptyTree>
+        else
+          <emptyTree>
+        end
+        <self>.<super>(ZSuperArgs)
+      end
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of self.new>
+
+    <emptyTree>::<C INSTANCE> = <cast:<assume type>>(<self>.new(), <todo sym>, <self>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C NilableNew>::<C INSTANCE>)
+
+  class <emptyTree>::<C GenericNew><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <emptyTree>::<C Elem> = <self>.type_member()
+
+    <emptyTree>::<C INSTANCE> = <cast:<assume type>>(<self>.new(), <todo sym>, <self>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C GenericNew>::<C INSTANCE>)
+
+  class <emptyTree>::<C FixedNew><<C <todo sym>>> < (::<todo sym>)
+    <self>.extend(<emptyTree>::<C T>::<C Generic>)
+
+    <emptyTree>::<C Elem> = <self>.type_member() do ||
+      {:fixed => <emptyTree>::<C Integer>}
+    end
+
+    <emptyTree>::<C INSTANCE> = <cast:<assume type>>(<self>.new(), <todo sym>, <self>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C FixedNew>::<C INSTANCE>)
+
+  module <emptyTree>::<C ModuleNew><<C <todo sym>>> < ()
+    <self>.sig() do ||
+      <self>.returns(<emptyTree>::<C Integer>)
+    end
+
+    def self.new<<todo method>>(&<blk>)
+      0
+    end
+
+    <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+    <runtime method definition of self.new>
+
+    <emptyTree>::<C INSTANCE> = <cast:<assume type>>(<self>.new(), <todo sym>, <self>)
+  end
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C ModuleNew>::<C INSTANCE>)
+
+  <self>.extend(<emptyTree>::<C T>::<C Sig>)
+
+  <runtime method definition of new>
+
+  <emptyTree>::<C TOP_LEVEL> = <self>.new()
+
+  <emptyTree>::<C T>.reveal_type(<emptyTree>::<C TOP_LEVEL>)
+end

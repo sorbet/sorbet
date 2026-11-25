@@ -6,8 +6,10 @@
 #include "common/strings/ConstExprStr.h"
 #include "core/StrictLevel.h"
 #include "core/TrackUntyped.h"
+#include "core/packages/PackageDB.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include "spdlog/spdlog.h"
+#include <bit>
 #include <optional>
 
 namespace sorbet::realmain::options {
@@ -68,20 +70,12 @@ struct Printers {
     PrinterConfig TypedSource;
     PrinterConfig SymbolTable;
     PrinterConfig SymbolTableRaw;
-    PrinterConfig SymbolTableProto;
-    PrinterConfig SymbolTableMessagePack;
     PrinterConfig SymbolTableJson;
     PrinterConfig SymbolTableFull;
     PrinterConfig SymbolTableFullRaw;
-    PrinterConfig SymbolTableFullProto;
-    PrinterConfig SymbolTableFullMessagePack;
     PrinterConfig SymbolTableFullJson;
     PrinterConfig FileTableJson;
-    PrinterConfig FileTableProto;
-    PrinterConfig FileTableMessagePack;
     PrinterConfig FileTableFullJson;
-    PrinterConfig FileTableFullProto;
-    PrinterConfig FileTableFullMessagePack;
     PrinterConfig MissingConstants;
     PrinterConfig Autogen;
     PrinterConfig AutogenMsgPack;
@@ -98,6 +92,7 @@ struct Printers {
 enum class Phase {
     INIT,
     PARSER,
+    RBS_REWRITER,
     DESUGARER,
     REWRITER,
     LOCAL_VARS,
@@ -145,7 +140,7 @@ struct Options {
     bool disableWatchman = false;
     std::string watchmanNamespace;
     std::string watchmanPath = "watchman";
-    std::string watchmanPauseStateName;
+    std::vector<std::string> watchmanPauseStateNames;
     bool stressIncrementalResolver = false;
     std::optional<int> sleepInSlowPathSeconds = std::nullopt;
     bool traceLexer = false;
@@ -161,11 +156,15 @@ struct Options {
     int autogenVersion = 0;
     bool uniquelyDefinedBehavior = false;
     std::string sorbetPackagesHint = "";
-    std::vector<std::string> extraPackageFilesDirectoryUnderscorePrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     std::vector<std::string> allowRelaxedPackagerChecksFor;
+    std::vector<std::string> updateVisibilityFor;
     std::vector<std::string> packagerLayers;
+    // Focus on these packages when typechecking
+    std::vector<std::string> focusPackages;
+    core::packages::FocusExtent focusExtent = core::packages::FocusExtent::Full;
+    bool focusAssumePackageDependenciesTypecheck = false;
     std::string typedSource = "";
     std::string cacheDir = "";
     // This configured both maximum filesystem db size and max virtual memory usage
@@ -189,50 +188,46 @@ struct Options {
         // Ideally, we would have named this option something like `--stdlib=false`, because by
         // nature of this option being a boolean option with cxxopts, you can do `--no-stdlib=false`
         // which is a no-op, and also confusing.
-        bool noStdlib : 1;
+        bool noStdlib : 1 = false;
 
-        bool typedSuper : 1;
+        bool typedSuper : 1 = true;
 
         // Enable experimental support for RBS signatures and assertions
-        bool rbsEnabled : 1;
+        bool rbsEnabled : 1 = false;
 
         // Experimental feature `requires_ancestor`
-        bool requiresAncestorEnabled : 1;
+        bool requiresAncestorEnabled : 1 = false;
 
-        bool rspecRewriterEnabled : 1;
+        bool rspecRewriterEnabled : 1 = false;
 
-        bool runningUnderAutogen : 1;
+        bool runningUnderAutogen : 1 = false;
 
-        bool sorbetPackages : 1;
+        bool sorbetPackages : 1 = false;
 
         // The two parsers can produce slightly different desugar trees or
         // error messages, which we don't want to intermix.
-        bool usePrismParser : 1;
+        bool usePrismParser : 1 = false;
 
         // HELLO! adding/removing MUST also change this number!!
         constexpr static uint8_t NUMBER_OF_FLAGS = 8;
-
-        // In C++20 we can replace this with bit field initializers
-        CacheSensitiveOptions()
-            : noStdlib(false), typedSuper(true), rbsEnabled(false), requiresAncestorEnabled(false),
-              rspecRewriterEnabled(false), runningUnderAutogen(false), sorbetPackages(false), usePrismParser(false) {}
 
         constexpr static uint8_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         uint8_t serialize() const {
             static_assert(sizeof(CacheSensitiveOptions) == sizeof(uint8_t));
             static_assert(sizeof(CacheSensitiveOptions) == sizeof(VALID_BITS_MASK));
-            // Can replace this with std::bit_cast in C++20
-            auto rawBits = *reinterpret_cast<const uint8_t *>(this);
-            static_assert(sizeof(CacheSensitiveOptions) == sizeof(rawBits));
+            auto rawBits = std::bit_cast<uint8_t>(*this);
             // Mask the valid bits since uninitialized bits can be any value.
             return rawBits & VALID_BITS_MASK;
         }
     };
     CacheSensitiveOptions cacheSensitiveOptions;
 
-    bool packageDirected = false;
+    // Enable support experimental method modifiers, such as `abstract def foo; end`
+    bool experimentalMethodModifiers = false;
 
+    bool packageAttributedErrors = false;
+    bool packageDirected = false;
     uint32_t reserveClassTableCapacity = 0;
     uint32_t reserveMethodTableCapacity = 0;
     uint32_t reserveFieldTableCapacity = 0;
@@ -242,27 +237,31 @@ struct Options {
     uint32_t reserveConstantNameTableCapacity = 0;
     uint32_t reserveUniqueNameTableCapacity = 0;
 
-    /* The maximum number of files that are permitted to typecheck on the fast path concurrently. Not exposed on CLI.
-     * Placed on Options for convenience so tests can override. */
+    /* The maximum number of files that are permitted to typecheck on the fast path concurrently. */
     uint32_t lspMaxFilesOnFastPath = 50;
     /* The maximum number of errors to report to the client when in LSP mode. Prevents editor UI slowdown
      * related to large error lists. 0 means no limit. */
     uint32_t lspErrorCap = 1000;
 
+    std::optional<uint32_t> minStratumSize;
+    std::optional<uint32_t> stratumSplitThreshold;
+
     std::string statsdHost;
     std::string statsdPrefix = "ruby_typer.unknown";
     int statsdPort = 8200;
+    bool statsdTagRevision = true;
 
     std::string metricsFile;
     std::string metricsRepo = "none";
     std::string metricsPrefix = "ruby_typer.unknown";
     std::string metricsBranch = "none";
     std::string metricsSha = "none";
-    std::map<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
+    UnorderedMap<std::string, std::string> metricsExtraTags; // be super careful with cardinality here
+    std::string metricsLatestVersionFile;
 
     std::string dumpPackageInfo = "";
-    std::vector<std::string> packageSkipRBIExportEnforcementDirs;
-    bool genPackages = false;
+    core::packages::GenPackagesMode genPackagesMode = core::packages::GenPackagesMode::Disabled;
+    bool allowRelaxingTestVisibility = false;
 
     // Contains the allowed extensions Sorbet can parse.
     UnorderedSet<std::string> allowedExtensions = {".rb", ".rbi"};
@@ -282,8 +281,6 @@ struct Options {
     std::vector<std::string> autogenSubclassesAbsoluteIgnorePatterns;
     // Ignore patterns that can occur anywhere in a file's path from an input folder.
     std::vector<std::string> autogenSubclassesRelativeIgnorePatterns;
-    // Allow RBI files to define behavior if they are in one of these paths.
-    std::vector<std::string> autogenBehaviorAllowedInRBIFilesPaths;
     // When set, msgpack serialization of references skips extra metadata like inheritance information and expression
     // ranges.
     bool autogenMsgpackSkipReferenceMetadata;
@@ -292,14 +289,13 @@ struct Options {
     // sorbet: URIs to clients that support them.
     std::vector<std::string> lspDirsMissingFromClient;
     // Path to the executable used for document formatting
-    std::string rubyfmtPath = "rubyfmt";
     // Enable stable-but-not-yet-shipped features suitable for late-stage beta-testing.
     bool lspAllBetaFeaturesEnabled = false;
     // Booleans enabling various experimental LSP features. Each will be removed once corresponding feature stabilizes.
     bool lspDocumentHighlightEnabled = false;
-    bool lspDocumentFormatRubyfmtEnabled = false;
     bool lspSignatureHelpEnabled = false;
     bool lspExtractToVariableEnabled = false;
+    bool lspCreateMissingMethodEnabled = false;
     bool forciblySilenceLspMultipleDirError = false;
     // Enables out-of-order reference checking
     bool outOfOrderReferenceChecksEnabled = false;

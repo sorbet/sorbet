@@ -15,8 +15,8 @@ ReferencesTask::ReferencesTask(const LSPConfiguration &config, MessageId id, uni
     : LSPRequestTask(config, move(id), LSPMethod::TextDocumentReferences), params(move(params)),
       hierarchyReferences(hierarchyReferences) {}
 
-bool ReferencesTask::needsMultithreading(const LSPIndexer &indexer) const {
-    return true;
+bool ReferencesTask::canPreempt(const LSPIndexer &indexer) const {
+    return false;
 }
 
 namespace {
@@ -45,22 +45,12 @@ core::lsp::Query::Symbol::STORAGE getSymsToCheckWithinPackage(const core::Global
     }
 
     core::lsp::Query::Symbol::STORAGE result;
-    vector<core::SymbolRef> namespacesToCheck = {
-        core::Symbols::root(),
-        core::Symbols::root().data(gs)->findMember(gs, core::packages::PackageDB::TEST_NAMESPACE),
-    };
 
-    for (auto &namespaceToCheck : namespacesToCheck) {
-        if (!namespaceToCheck.exists()) {
-            continue;
-        }
-
-        auto symFound = findSym(gs, fullName, namespaceToCheck);
-        // Do nothing if the symbol is not found or is from the same package -- i.e. for class ... < PackageSpec
-        // declarations
-        if (symFound.exists() && symFound.enclosingClass(gs).data(gs)->package != packageName) {
-            result.emplace_back(std::move(symFound));
-        }
+    auto symFound = findSym(gs, fullName, core::Symbols::root());
+    // Do nothing if the symbol is not found or is from the same package -- i.e. for class ... < PackageSpec
+    // declarations
+    if (symFound.exists() && symFound.enclosingClass(gs).data(gs)->package != packageName) {
+        result.emplace_back(std::move(symFound));
     }
 
     return result;
@@ -177,17 +167,8 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
                 //    ...
                 //
                 //    import Bar
-                //          ^^^
-                //  Returns all usages of `Bar` or `Test::Bar` *within* the Foo package only.
-                //
-                // Case 3. get-refs on an export statement
-                //
-                //  class Foo < PackageSpec
-                //    ...
-                //
-                //    export Foo::A
-                //                ^
-                //  Returns all global usages of Foo::A
+                //           ^^^
+                // Returns all usages of `Bar` within the Foo package only.
 
                 auto packageName = gs.packageDB().getPackageNameForFile(fref);
                 auto symsToCheck = getSymsToCheckWithinPackage(gs, constResp->symbolBeforeDealias, packageName);
@@ -286,6 +267,11 @@ unique_ptr<ResponseMessage> ReferencesTask::runRequest(LSPTypecheckerDelegate &t
             make_unique<NotificationMessage>("2.0", LSPMethod::WindowShowMessage, move(params))));
     }
     return response;
+}
+
+core::packages::Stratum ReferencesTask::preemptionStratum(FileStratumMapping info) const {
+    // We can't tell how much of the codebase we'd need to see, so we conservatively default to the whole thing.
+    return info.getLastStratum();
 }
 
 } // namespace sorbet::realmain::lsp

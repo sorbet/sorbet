@@ -15,6 +15,8 @@ namespace sorbet::realmain::lsp {
 
 class DeserializationError : public std::runtime_error {
 public:
+    // The error message, without the generic prefix that `what()` includes.
+    const std::string message;
     DeserializationError(std::string_view message);
 };
 
@@ -43,6 +45,8 @@ public:
 
 class SerializationError : public std::runtime_error {
 public:
+    // The error message, without the generic prefix that `what()` includes.
+    const std::string message;
     SerializationError(std::string_view message);
 };
 
@@ -84,8 +88,7 @@ public:
 
 class InvalidTypeError final : public SerializationError {
 public:
-    InvalidTypeError(std::string_view fieldName, std::string_view expectedType,
-                     const std::unique_ptr<rapidjson::Value> &found);
+    InvalidTypeError(std::string_view fieldName, std::string_view expectedType, const rapidjson::Value &found);
 };
 
 class JSONBaseType {

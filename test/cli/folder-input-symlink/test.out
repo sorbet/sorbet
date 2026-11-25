@@ -4,12 +4,14 @@
   {
    "path": "./bar.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   },
   {
    "path": "./foo.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   }
  ]
 }
@@ -19,22 +21,26 @@
   {
    "path": "./bar.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   },
   {
    "path": "./foo.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   },
   {
    "path": "./references/bar.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   },
   {
    "path": "./references/lib/baz.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   }
  ]
 }
@@ -44,17 +50,20 @@
   {
    "path": "./bar.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   },
   {
    "path": "./foo.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   },
   {
    "path": "./references/lib/baz.rb",
    "strict": "False",
-   "min_error_level": "Max"
+   "min_error_level": "Max",
+   "source_size": 0
   }
  ]
 }

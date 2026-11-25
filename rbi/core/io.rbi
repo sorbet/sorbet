@@ -2825,8 +2825,8 @@ class IO < Object
   # doesn't move the current file offset.
   sig do
     params(
-        src: T.any(String, IO, Tempfile),
-        dst: T.any(String, IO, Tempfile),
+        src: T.any(String, IO, StringIO, Tempfile),
+        dst: T.any(String, IO, StringIO, Tempfile),
         copy_length: Integer,
         src_offset: Integer,
     )
@@ -3539,6 +3539,13 @@ class IO < Object
   # [`fileno`](https://docs.ruby-lang.org/en/2.7.0/IO.html#method-i-fileno)
   sig {returns(Integer)}
   def to_i(); end
+
+  # Waits until IO is readable and returns a truthy value, or a falsy value when
+  # times out. Returns a truthy value immediately when buffered data is available.
+  #
+  # You must require 'io/wait' to use this method.
+  sig { params(timeout: T.nilable(T.any(Float, Integer, Rational))).returns(T.nilable(T.any(IO, T::Boolean))) }
+  def wait_readable(timeout = nil); end
 
   # Writes the given string to *ios* using the write(2) system call after
   # O\_NONBLOCK is set for the underlying file descriptor.

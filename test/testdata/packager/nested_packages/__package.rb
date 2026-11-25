@@ -4,5 +4,4 @@
 
 class Package < PackageSpec
   import Package::Subpackage
-  export Package::PackageClass
 end

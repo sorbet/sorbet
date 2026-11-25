@@ -74,11 +74,27 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   end
 
   begin
-    <assignTemp>$2 = <emptyTree>::<C BasicObject>.new()
+    <assignTemp>$2 = begin
+      <assignTemp>$3 = <self>.foo()
+      if ::NilClass.===(<assignTemp>$3)
+        ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$3)
+      else
+        <assignTemp>$3.bar()
+      end
+    end
     if ::NilClass.===(<assignTemp>$2)
       ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$2)
     else
-      <assignTemp>$2.__id__()
+      <assignTemp>$2.baz()
+    end
+  end
+
+  begin
+    <assignTemp>$4 = <emptyTree>::<C BasicObject>.new()
+    if ::NilClass.===(<assignTemp>$4)
+      ::<Magic>.<nil-for-safe-navigation>(<assignTemp>$4)
+    else
+      <assignTemp>$4.__id__()
     end
   end
 

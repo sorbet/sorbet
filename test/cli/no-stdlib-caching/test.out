@@ -6,9 +6,14 @@ test.rb:3: Revealed type: `T.class_of(Net::BufferedIO)` https://srb.help/7014
      3 |T.reveal_type(Net::BufferedIO)
                       ^^^^^^^^^^^^^^^
 Errors: 1
-test.rb:3: Unable to resolve constant `BufferedIO` https://srb.help/5002
+test.rb:3: Unable to resolve constant `Net` https://srb.help/5002
      3 |T.reveal_type(Net::BufferedIO)
-                      ^^^^^^^^^^^^^^^
+                      ^^^
+  Did you mean `Set`? Use `-a` to autocorrect
+    test.rb:3: Replace with `Set`
+     3 |T.reveal_type(Net::BufferedIO)
+                      ^^^
+    ???: `Set` defined here
 
 test.rb:3: Revealed type: `T.untyped` https://srb.help/7014
      3 |T.reveal_type(Net::BufferedIO)

@@ -4,7 +4,8 @@ require: rubocop-performance
 AllCops:
   NewCops: disable
   SuggestExtensions: false
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 3.3
+  AllowSymlinksInCacheRootDirectory: true
   Exclude:
     - 'vendor/**/*'
     - 'test/wholesome/vendor/**/*'
@@ -42,6 +43,8 @@ Style/RedundantSelf:
   Enabled: false
 Style/WordArray:
   Enabled: false
+Style/NumericPredicate:
+  Enabled: false
 
 # This doesn't play very well with implementations of Sorbet abstract methods
 Lint/UnusedMethodArgument:
@@ -49,6 +52,10 @@ Lint/UnusedMethodArgument:
 
 # Prone to false positives when we care about which class owns a method
 Lint/UselessMethodDefinition:
+  Enabled: false
+
+# Sorbet's "This code is unreachable" is canonical
+Lint/UnreachableCode:
   Enabled: false
 
 # Ratcheting these down is kind of outside the purview of a linter

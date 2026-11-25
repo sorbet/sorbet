@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace spdlog {
 class logger;
@@ -53,13 +54,16 @@ class SessionCache {
 public:
     static const std::string_view SESSION_DIR_PREFIX;
 
+    // Retained to clean up staging directories created by older versions.
+    static const std::string_view STAGING_DIR_PREFIX;
+
     // Removes the session cache.
     ~SessionCache() noexcept(false);
 
     // The path to the unique copy.
     std::string_view kvstorePath() const;
 
-    // Look for old session caches in the cache directory, and remove them if their Sorbet process is no longer active.
+    // Remove old session caches and publication staging directories whose Sorbet process is no longer active.
     static void reapOldCaches(const options::Options &opts);
 
     // Close out the kvstore, and create a copy that's stored at `opts.cacheDir + '/' + randomUuid`. If the creation
@@ -67,8 +71,16 @@ public:
     static std::unique_ptr<SessionCache> make(std::unique_ptr<const OwnedKeyValueStore> kvstore,
                                               ::spdlog::logger &logger, const options::Options &opts);
 
-    // Open the session cache for use.
-    std::unique_ptr<KeyValueStore> open(std::shared_ptr<::spdlog::logger> logger, const options::Options &opts) const;
+    // Open the session cache, acquiring ownership on the calling thread.
+    std::unique_ptr<OwnedKeyValueStore> open(std::shared_ptr<::spdlog::logger> logger,
+                                             const options::Options &opts) const;
+
+    // Copy the committed session contents back to opts.cacheDir without consuming the session cache.
+    // All handles to the session and shared cache in this process must be closed before calling this method.
+    // Attempts a nonblocking exclusive lock on the shared cache before replacement.
+    // Does nothing if caching is disabled or the session cache is gone. Skips publication if lock acquisition fails,
+    // incrementing cache.publish_failed. Throws on other failures.
+    void commit(::spdlog::logger &logger, const options::Options &opts) const;
 };
 
 } // namespace sorbet::realmain::cache

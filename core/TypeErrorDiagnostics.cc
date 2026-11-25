@@ -48,15 +48,16 @@ void TypeErrorDiagnostics::insertTypeArguments(const GlobalState &gs, ErrorBuild
     // if we're already looking at `T::Array` instead.
     klass = klass.maybeUnwrapBuiltinGenericForwarder();
     auto typePrefixSym = klass.forwarderForBuiltinGeneric();
-    if (!typePrefixSym.exists()) {
-        typePrefixSym = klass;
-    }
 
     auto loc = replaceLoc;
     if (loc.exists()) {
         if (klass == core::Symbols::Hash() || klass == core::Symbols::T_Hash()) {
             // Hash is special because it has arity 3 but you're only supposed to write the first 2
-            e.replaceWith("Add type arguments", loc, "{}[T.untyped, T.untyped]", typePrefixSym.show(gs));
+            if (typePrefixSym.exists()) {
+                e.replaceWith("Add type arguments", loc, "{}[T.untyped, T.untyped]", typePrefixSym.show(gs));
+            } else {
+                e.replaceWith("Add type arguments", loc.copyEndWithZeroLength(), "[T.untyped, T.untyped]");
+            }
         } else {
             auto numTypeArgs = klass.data(gs)->typeArity(gs);
             auto arg = ((klass == Symbols::Class() || klass == Symbols::T_Class()) ||
@@ -67,7 +68,12 @@ void TypeErrorDiagnostics::insertTypeArguments(const GlobalState &gs, ErrorBuild
             for (int i = 0; i < numTypeArgs; i++) {
                 untypeds.emplace_back(arg);
             }
-            e.replaceWith("Add type arguments", loc, "{}[{}]", typePrefixSym.show(gs), absl::StrJoin(untypeds, ", "));
+            if (typePrefixSym.exists()) {
+                e.replaceWith("Add type arguments", loc, "{}[{}]", typePrefixSym.show(gs),
+                              absl::StrJoin(untypeds, ", "));
+            } else {
+                e.replaceWith("Add type arguments", loc.copyEndWithZeroLength(), "[{}]", absl::StrJoin(untypeds, ", "));
+            }
         }
     }
 }
@@ -122,11 +128,36 @@ optional<core::AutocorrectSuggestion::Edit> autocorrectEditForDSLMethod(const Gl
 }
 } // namespace
 
+namespace {
+// Given a location, returns the insertion location (the start of the line after the line of the given location)
+// and the correct indentation if you were to insert at the insertion location
+// Useful for calculating the indentation of the next line after something like `class Foo`
+optional<pair<Loc, int>> calculateIndentedNextLine(const GlobalState &gs, const Loc &loc) {
+    auto [classStart, classEnd] = loc.toDetails(gs);
+
+    auto [_, thisLinePadding] = loc.findStartOfIndentation(gs);
+
+    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
+    auto nextLineLoc = core::Loc::fromDetails(gs, loc.file(), nextLineStart, nextLineStart);
+    if (!nextLineLoc.has_value()) {
+        return nullopt;
+    }
+    auto [_nextLineIndented, nextLinePadding] = nextLineLoc.value().findStartOfIndentation(gs);
+
+    return {{nextLineLoc.value(), max(thisLinePadding + 2, nextLinePadding)}};
+}
+} // namespace
+
 // dslOwner can be noClassOrModule() to simply unconditionally insert the `dsl` string
 // dsl can be `""` to simply insert `extend {dslOwner}` if dslOwner is not already an ancestor
 optional<core::AutocorrectSuggestion::Edit>
 TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit, Loc defaultInsertLoc,
                                        ClassOrModuleRef inWhatRef, ClassOrModuleRef dslOwner, string_view dsl) {
+    if (!inWhatRef.exists()) {
+        // e.g., the DSL method was called on an instance, so there's no class to insert into
+        return nullopt;
+    }
+
     auto inWhat = inWhatRef.data(gs);
     auto inWhatSingleton = inWhat->lookupSingletonClass(gs);
 
@@ -154,20 +185,13 @@ TypeErrorDiagnostics::editForDSLMethod(const GlobalState &gs, FileRef fileToEdit
         }
     }
 
-    auto [classStart, classEnd] = classLoc->toDetails(gs);
-
-    auto [_, thisLinePadding] = classLoc->findStartOfIndentation(gs);
-
-    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
-    auto nextLineLoc = core::Loc::fromDetails(gs, classLoc->file(), nextLineStart, nextLineStart);
-    if (!nextLineLoc.has_value()) {
+    auto nextLineRes = calculateIndentedNextLine(gs, *classLoc);
+    if (!nextLineRes.has_value()) {
         return nullopt;
     }
-    auto [replacementLoc, nextLinePadding] = nextLineLoc.value().findStartOfIndentation(gs);
-
-    // Preserve the indentation of the line below us.
-    string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return autocorrectEditForDSLMethod(gs, nextLineLoc.value(), prefix, dslOwner, dsl, needsDslOwner);
+    auto [insertLoc, padding] = nextLineRes.value();
+    string prefix(padding, ' ');
+    return autocorrectEditForDSLMethod(gs, insertLoc, prefix, dslOwner, dsl, needsDslOwner);
 }
 
 void TypeErrorDiagnostics::maybeInsertDSLMethod(const GlobalState &gs, ErrorBuilder &e, FileRef fileToEdit,

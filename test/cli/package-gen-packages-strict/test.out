@@ -1,0 +1,146 @@
+###### gen-packages=strict mode not allowed with gen-packages-update-visibility-for ######
+--gen-packages=strict can not be used when --gen-packages-update-visibility-for is also enabled
+
+###### Running gen-packages=strict ######
+A/__package.rb:3: `A` has changes https://srb.help/3734
+     3 |class A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+A/test/__package.rb:9: Package `B` includes explicit visibility modifiers and cannot be imported from `Test::A` https://srb.help/3723
+     9 |  import B
+          ^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `B`
+
+A/test/__package.rb:3: `Test::A` has changes https://srb.help/3734
+     3 |class Test::A < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+E/__package.rb:7: Strict dependencies violation: All of `E`'s `import`s must be `layered` or higher https://srb.help/3727
+     7 |  import D
+          ^^^^^^^^
+    D/__package.rb:5: `D`'s `strict_dependencies` level declared here
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+
+E/__package.rb:3: `E` has changes https://srb.help/3734
+     3 |class E < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+B/__package.rb:3: `B` has changes https://srb.help/3734
+     3 |class B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+D/__package.rb:3: `D` has changes https://srb.help/3734
+     3 |class D < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+B/test/__package.rb:8: Package `B` includes explicit visibility modifiers and cannot be imported from `Test::B` https://srb.help/3723
+     8 |  import B
+          ^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `B`
+
+B/test/__package.rb:3: `Test::B` has changes https://srb.help/3734
+     3 |class Test::B < PackageSpec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Done
+
+C/__package.rb:8: Strict dependencies violation: All of `C`'s `import`s must be `dag` or higher https://srb.help/3727
+     8 |  import B
+          ^^^^^^^^
+    B/__package.rb:5: `B`'s `strict_dependencies` level declared here
+     5 |  strict_dependencies 'false'
+                              ^^^^^^^
+
+C/__package.rb:8: Strict dependencies violation: importing `B` will put `C` into a cycle, which is not valid at `strict_dependencies 'dag'` https://srb.help/3727
+     8 |  import B
+          ^^^^^^^^
+  Note:
+    Path from `B` to `C`:
+    `B` →
+    `C`
+
+
+C/__package.rb:8: Package `B` includes explicit visibility modifiers and cannot be imported from `C` https://srb.help/3723
+     8 |  import B
+          ^^^^^^^^
+  Note:
+    Please consult with the owning team before adding a `visible_to` line to the package `B`
+Errors: 12
+
+###### cat A/__package.rb ######
+# typed: strict
+
+class A < PackageSpec
+  foo 'a'
+  layer 'app'
+  strict_dependencies 'false'
+
+  # strict_dependencies 'false':
+  import B
+
+  # strict_dependencies 'layered' or more strict:
+  import Prelude
+end
+
+###### cat A/test/__package.rb ######
+# typed: strict
+
+class Test::A < PackageSpec
+  test!
+  layer 'test'
+  strict_dependencies 'false'
+
+  # strict_dependencies 'false':
+  import B
+end
+
+###### cat B/__package.rb ######
+# typed: strict
+
+class B < PackageSpec
+  layer 'util'
+  strict_dependencies 'false'
+
+  # layering violations:
+  import A
+
+  # strict_dependencies 'layered' or more strict:
+  import C
+  import D
+
+  visible_to A
+end
+
+###### cat C/__package.rb ######
+# typed: strict
+
+class C < PackageSpec
+  layer 'util'
+  strict_dependencies 'dag'
+
+  # strict_dependencies 'false', 'layered', or 'layered_dag':
+  import B
+end
+
+###### cat D/__package.rb ######
+# typed: strict
+
+class D < PackageSpec
+  layer 'util'
+  strict_dependencies 'dag'
+end
+
+###### cat E/__package.rb ######
+# typed: strict
+
+class E < PackageSpec
+  layer 'util'
+  strict_dependencies 'dag'
+end

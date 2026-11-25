@@ -7,6 +7,9 @@ ClassDef{
       orig = nullptr
     }]
   rhs = [
-    EmptyTree
+    ConstantLit{
+      symbol = (static-field ::<ErrorNode>)
+      orig = nullptr
+    }
   ]
 }

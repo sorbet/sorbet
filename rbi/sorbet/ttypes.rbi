@@ -14,6 +14,13 @@ class T::Types::Base
   sig { abstract.params(obj: Kernel).returns(T::Boolean) }
   def valid?(obj); end
 
+  sig { abstract.void }
+  def build_type; end
+
+  sig { abstract.void }
+  def build_lazy_fields; end
+
+  sig { overridable.params(obj: Kernel).returns(T::Boolean) }
   def recursively_valid?(obj); end
 
   # Should return `String` but this is hard because technically
@@ -25,6 +32,7 @@ class T::Types::Base
   def subtype_of?(t2); end
   def to_s; end
   def describe_obj(obj); end
+  sig { params(obj: Kernel).returns(T.nilable(String)) }
   def error_message_for_obj(obj); end
   def error_message_for_obj_recursive(obj); end
   def validate!(obj); end
@@ -53,6 +61,9 @@ class T::Types::Simple < T::Types::Base
 
   sig { returns(T::Module[T.anything]) }
   def raw_type; end
+
+  sig { returns(T::Types::Union) }
+  def to_nilable; end
 end
 
 class T::Types::Union < T::Types::Base
@@ -233,6 +244,7 @@ end
 # --- user-defined generics ---
 
 class T::Types::TypeVariable < T::Types::Base
+  sig { params(variance: Symbol).void }
   def initialize(variance); end
 
   sig { override.returns(String) }
@@ -254,6 +266,7 @@ class T::Types::TypeTemplate < T::Types::TypeVariable
 end
 
 class T::Types::TypeParameter < T::Types::Base
+  sig { params(name: Symbol).void }
   def initialize(name); end
 
   sig { override.params(obj: Kernel).returns(T::Boolean) }
@@ -264,6 +277,7 @@ class T::Types::TypeParameter < T::Types::Base
   sig { override.returns(String) }
   def name; end
 
+  sig { params(name: Symbol).returns(T::Types::TypeParameter) }
   def self.make(name); end
 end
 

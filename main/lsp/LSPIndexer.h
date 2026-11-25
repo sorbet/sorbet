@@ -2,6 +2,7 @@
 #define RUBY_TYPER_LSP_LSPINDEXER_H
 
 #include "core/core.h"
+#include "main/cache/cache.h"
 #include "main/lsp/LSPFileUpdates.h"
 #include "main/lsp/LSPMessage.h"
 #include "main/lsp/LSPPreprocessor.h"
@@ -10,7 +11,6 @@
 
 namespace sorbet {
 class WorkerPool;
-class KeyValueStore;
 } // namespace sorbet
 
 namespace sorbet::realmain::lsp {
@@ -26,14 +26,35 @@ class LSPConfiguration;
  * The actual work of typechecking is undertaken by LSPTypechecker.
  */
 class LSPIndexer final {
+public:
+    struct TypecheckingPathResult {
+        TypecheckingPath path = TypecheckingPath::Slow;
+
+        LSPFileUpdates::FastPathFilesToTypecheckResult files;
+
+        // The indexer's commit count when this result was computed. This result must be discarded if this value is less
+        // than the indexer's current count.
+        const uint32_t commitCount = 0;
+
+        TypecheckingPathResult() = delete;
+        explicit TypecheckingPathResult(uint32_t commitCount) : commitCount{commitCount} {}
+
+        TypecheckingPathResult(const TypecheckingPathResult &other) = default;
+        TypecheckingPathResult(TypecheckingPathResult &&other) = default;
+
+        TypecheckingPathResult &operator=(const TypecheckingPathResult &other) = delete;
+        TypecheckingPathResult &operator=(TypecheckingPathResult &&other) = delete;
+    };
+
+private:
     bool initialized = false;
     /** Encapsulates the active configuration for the language server. */
     const std::shared_ptr<const LSPConfiguration> config;
     /** Global state that we keep up-to-date with file edits. We do _not_ typecheck using this global state, as it will
      * never have a populated symbol table. */
     std::unique_ptr<core::GlobalState> gs;
-    /** Key-value store used during initialization. */
-    std::unique_ptr<KeyValueStore> kvstore;
+    /** Session cache transferred to the typechecker during initialization. */
+    std::unique_ptr<cache::SessionCache> sessionCache;
     /** Contains a copy of the last edit committed on the slow path. Used in slow path cancelation logic. */
     LSPFileUpdates pendingTypecheckUpdates;
     /** Contains a clone of the latency timers for each new edit in the pending typecheck operation. Is used to ensure
@@ -44,37 +65,47 @@ class LSPIndexer final {
     /** A WorkerPool with 0 workers. */
     std::unique_ptr<WorkerPool> emptyWorkers;
 
+    /**
+     * A count of the number of times we've run `commitEdit`. The results of `provisionalTypecheckingPath` are tagged
+     * with this value, so that we can know when their results have become potentially invalid.
+     */
+    uint32_t commitCount = 0;
+
     void computeFileHashes(const std::vector<std::shared_ptr<core::File>> &files, WorkerPool &workers) const;
 
     /**
-     * Determines if the given edit can take the fast path relative to the most recently committed edit.
-     * It compares the file hashes in the files in `edit` to those in `evictedFiles` and `gs` (in that order).
+     * Decides the typechecking path of an edit that `commitEdit` is committing, and records the fast path files in
+     * `edit`. It compares the file hashes in the files in `edit` to those in `evictedFiles` and `gs` (in that order).
+     *
+     * `provisionalTypecheckingPath` predicts this decision for edits that haven't been committed yet.
      */
     TypecheckingPath
-    getTypecheckingPath(LSPFileUpdates &edit,
-                        const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
-
-    struct TypecheckingPathResult {
-        TypecheckingPath path = TypecheckingPath::Slow;
-        LSPFileUpdates::FastPathFilesToTypecheckResult files;
-    };
+    decideTypecheckingPath(LSPFileUpdates &edit,
+                           const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
     /**
+     * The computation shared by `decideTypecheckingPath` and `provisionalTypecheckingPath`.
+     *
      * INVARIANT: `changedFiles` must have hashes computed.
      */
     TypecheckingPathResult
-    getTypecheckingPathInternal(const std::vector<std::shared_ptr<core::File>> &changedFiles,
-                                const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
+    computeTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles,
+                            const UnorderedMap<core::FileRef, std::shared_ptr<core::File>> &evictedFiles) const;
 
 public:
     LSPIndexer(std::shared_ptr<const LSPConfiguration> config, std::unique_ptr<core::GlobalState> gs,
-               std::unique_ptr<KeyValueStore> kvstore);
+               std::unique_ptr<cache::SessionCache> sessionCache);
     ~LSPIndexer();
 
     /**
-     * Determines if the given files can take the fast path relative to the latest committed edit.
+     * Predicts the typechecking path that `commitEdit` would decide for these files, if it committed them now (relative
+     * to the latest committed edit), without committing them. When they can take the fast path, the result also
+     * describes which files outside of `changedFiles` the fast path would typecheck.
+     *
+     * Used to decide whether a queued edit can preempt a slow path, and at which stratum.
      */
-    TypecheckingPath getTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
+    TypecheckingPathResult
+    provisionalTypecheckingPath(const std::vector<std::shared_ptr<core::File>> &changedFiles) const;
 
     /**
      * Computes state hashes for the given set of files. Is a no-op if the provided files all have hashes.
@@ -104,6 +135,11 @@ public:
     const core::File &getFile(core::FileRef fref) const;
 
     /**
+     * Given a File, return true if it is new, or differs from the version currently in the indexer's file table.
+     */
+    bool wouldUpdateFileTable(const core::File &file) const;
+
+    /**
      * Given a reference to the InitializedTask, transfer ownership of the global state out for initialization in the
      * typechecker thread. The task argument is unused, and is present only to make it difficult to get the global state
      * out in a context that's not the InitializedTask's index function.
@@ -111,6 +147,14 @@ public:
     void transferInitializeState(InitializedTask &task);
 
     void updateConfigAndGsFromOptions(const DidChangeConfigurationParams &options) const;
+
+    // Determines if it's possible for the head of the task queue to run during preemption.
+    bool preemptionPossible(const TaskQueue::QueueType &tasks) const;
+
+    // Indicates if a typechecking path prediction is still valid given the current state of the indexer's name table.
+    bool isTypecheckingPathValid(const TypecheckingPathResult &result) const {
+        return this->commitCount == result.commitCount;
+    }
 };
 
 } // namespace sorbet::realmain::lsp

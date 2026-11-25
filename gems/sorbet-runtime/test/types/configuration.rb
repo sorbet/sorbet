@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 require_relative '../test_helper'
 
 module Opus::Types::Test
@@ -187,7 +188,7 @@ module Opus::Types::Test
           end
           assert_includes(
             ex.message,
-            "You marked `foo` as .override, but that method doesn't already exist"
+            "You marked `foo` as override, but that method doesn't already exist"
           )
         end
       end
@@ -205,7 +206,7 @@ module Opus::Types::Test
 
         it 'handles a sig build error' do
           CustomReceiver.expects(:receive).once.with do |error, opts|
-            error.message.include?("You marked `foo` as .override, but that method doesn't already exist") &&
+            error.message.include?("You marked `foo` as override, but that method doesn't already exist") &&
               error.is_a?(RuntimeError) &&
               opts.is_a?(Hash) &&
               opts[:method].is_a?(UnboundMethod) &&
@@ -364,28 +365,6 @@ module Opus::Types::Test
             T.let("foo", Integer)
           end
           assert_equal('T.let: Expected type Integer, got type String', e.message.split("\n").first)
-        end
-      end
-
-      describe 'enable_vm_prop_serde' do
-        it "fails if the VM doesn't support it" do
-          return if T::Configuration.can_enable_vm_prop_serde?
-
-          assert_raises(RuntimeError) do
-            T::Configuration.enable_vm_prop_serde
-          end
-        end
-
-        it "succeeds if the VM does support it" do
-          return unless T::Configuration.can_enable_vm_prop_serde?
-
-          was_enabled = T::Configuration.use_vm_prop_serde?
-
-          begin
-            T::Configuration.enable_vm_prop_serde
-          ensure
-            T::Configuration.disable_vm_prop_serde unless was_enabled
-          end
         end
       end
     end

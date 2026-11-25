@@ -9,7 +9,7 @@ class Abstract
   def foo; end
 end
 
-Abstract.new # error: Attempt to instantiate abstract class `Abstract`
+Abstract.new # error: Attempting to instantiate abstract class `Abstract`
 
 class SubclassOfAbstract < Abstract
   def foo; end

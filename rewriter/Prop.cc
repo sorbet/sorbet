@@ -95,8 +95,6 @@ struct PropInfo {
     ast::ExpressionPtr default_;
     core::NameRef computedByMethodName;
     core::LocOffsets computedByMethodNameLoc;
-    ast::ExpressionPtr foreignKwLit;
-    ast::ExpressionPtr foreign;
     ast::ExpressionPtr enum_;
     ast::ExpressionPtr ifunset;
 };
@@ -205,25 +203,6 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                                                                                  core::Names::Constants::Numeric()));
             break;
         }
-        case core::Names::merchantProp().rawId():
-            ret.isImmutable = true;
-            // This is a lie; technically the API allows an optional `name:` keyword arg to
-            // customize the method name. It defaults to `:merchant`
-            ret.name = core::Names::merchant();
-            // 5 is the length of the _prop suffix
-            ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
-            ret.type = ast::MK::Constant(send->loc, core::Symbols::String());
-            ret.foreign = ast::MK::UnresolvedConstant(
-                send->loc,
-                ast::MK::UnresolvedConstant(
-                    send->loc,
-                    ast::MK::UnresolvedConstant(
-                        send->loc,
-                        ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(), core::Names::Constants::Opus()),
-                        core::Names::Constants::Account()),
-                    core::Names::Constants::Model()),
-                core::Names::Constants::Merchant());
-            break;
         case core::Names::merchantTokenProp().rawId():
             ret.isImmutable = true;
             // This is a lie; technically the API allows an optional `merchant:` keyword arg to
@@ -232,19 +211,10 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             // 5 is the length of the _prop suffix
             ret.nameLoc = core::LocOffsets{send->loc.beginPos(), send->loc.endPos() - 5};
 
-            ret.type = ast::MK::UnresolvedConstant(
+            ret.type = ast::MK::UnresolvedConstantParts(
                 send->loc,
-                ast::MK::UnresolvedConstant(
-                    send->loc,
-                    ast::MK::UnresolvedConstant(
-                        send->loc,
-                        ast::MK::UnresolvedConstant(send->loc,
-                                                    ast::MK::UnresolvedConstant(send->loc, ast::MK::EmptyTree(),
-                                                                                core::Names::Constants::Opus()),
-                                                    core::Names::Constants::Autogen()),
-                        core::Names::Constants::Tokens()),
-                    core::Names::Constants::AccountModelMerchant()),
-                core::Names::Constants::Token());
+                {core::Names::Constants::Opus(), core::Names::Constants::Autogen(), core::Names::Constants::Tokens(),
+                 core::Names::Constants::AccountModelMerchant(), core::Names::Constants::Token()});
             break;
 
         default:
@@ -271,6 +241,9 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
             return nullopt;
         }
         ret.name = sym->asSymbol();
+        if (!ASTUtil::validAttrName(ctx, sym->loc, ret.name)) {
+            return nullopt;
+        }
         ENFORCE(ctx.locAt(sym->loc).exists());
         ENFORCE(!ctx.locAt(sym->loc).source(ctx).value().empty() && ctx.locAt(sym->loc).source(ctx).value()[0] == ':');
         ret.nameLoc = core::LocOffsets{sym->loc.beginPos() + 1, sym->loc.endPos()};
@@ -351,23 +324,6 @@ optional<PropInfo> parseProp(core::MutableContext ctx, const ast::Send *send) {
                 ret.computedByMethodName = lit->asSymbol();
             } else if (auto e = ctx.beginIndexerError(val.loc(), core::errors::Rewriter::ComputedBySymbol)) {
                 e.setHeader("Value for `{}` must be a symbol literal", "computed_by");
-            }
-        }
-
-        auto [fk, foreignTree] = ASTUtil::extractHashValue(ctx, *rules, core::Names::foreign());
-        if (foreignTree != nullptr) {
-            ret.foreign = move(foreignTree);
-            ret.foreignKwLit = move(fk);
-            if (auto body = ASTUtil::thunkBody(ctx, ret.foreign)) {
-                ret.foreign = std::move(body);
-            } else {
-                if (auto e = ctx.beginIndexerError(ret.foreign.loc(), core::errors::Rewriter::PropForeignStrict)) {
-                    e.setHeader("The argument to `{}` must be a lambda", "foreign:");
-                    auto foreignLoc = core::Loc{ctx.file, ret.foreign.loc()};
-                    if (auto foreignSource = foreignLoc.source(ctx)) {
-                        e.replaceWith("Convert to lambda", foreignLoc, "-> {{ {} }}", foreignSource.value());
-                    }
-                }
             }
         }
 
@@ -487,6 +443,7 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
 
     // Generate a real prop body for computed_by: props so Sorbet can assert the
     // existence of the computed_by: method.
+    ast::ExpressionPtr readerBody;
     if (computedByMethodName.exists()) {
         // Given `const :foo, type, computed_by: <name>`, where <name> is a Symbol pointing to a class method,
         // assert that the method takes 1 argument (of any type), and returns the same type as the prop,
@@ -499,25 +456,23 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
                            computedByMethodNameLocZero, std::move(raiseUnimplemented));
         auto assertTypeMatches =
             ast::MK::AssertType(computedByMethodNameLoc, std::move(sendComputedMethod), ASTUtil::dupType(getType));
-        auto insSeq = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseTypedUnimplemented(loc));
-        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(insSeq)));
+        readerBody = ast::MK::InsSeq1(loc, std::move(assertTypeMatches), ast::MK::RaiseTypedUnimplemented(loc));
     } else if (prop.ifunset == nullptr) {
         if (wantSimpleIVarGet(propContext.syntacticSuperClass)) {
-            ast::MethodDef::Flags flags;
             if (wantTypedInitialize(propContext.syntacticSuperClass)) {
-                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::Instance(nameLoc, ivarName), flags));
+                readerBody = ast::MK::Instance(nameLoc, ivarName);
             } else {
                 // Need to hide the instance variable access, because there wasn't a typed constructor to declare it
-                auto ivarGet = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(), locZero,
-                                              ast::MK::Symbol(nameLoc, ivarName));
-                nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(ivarGet), flags));
+                readerBody = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::instanceVariableGet(), locZero,
+                                            ast::MK::Symbol(nameLoc, ivarName));
             }
         } else {
-            nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc)));
+            readerBody = ast::MK::RaiseTypedUnimplemented(loc);
         }
     } else {
-        nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, ast::MK::RaiseTypedUnimplemented(loc)));
+        readerBody = ast::MK::RaiseTypedUnimplemented(loc);
     }
+    nodes.emplace_back(ASTUtil::mkGet(ctx, loc, name, std::move(readerBody)));
 
     core::NameRef setName = name.addEq(ctx);
 
@@ -531,80 +486,26 @@ vector<ast::ExpressionPtr> processProp(core::MutableContext ctx, PropInfo &prop,
         auto writerSig = ast::MK::Sig(loc, std::move(sigArgs), ASTUtil::dupType(setType), move(prop.setterOverride));
         nodes.emplace_back(std::move(writerSig));
 
+        ast::ExpressionPtr writerBody;
         if (prop.enum_ == nullptr) {
             if (knownNonDocument(propContext.syntacticSuperClass)) {
                 if (wantTypedInitialize(propContext.syntacticSuperClass)) {
-                    auto ivarSet = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
-                                                   ast::MK::Local(nameLoc, core::Names::arg0()));
-                    nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
+                    writerBody = ast::MK::Assign(loc, ast::MK::Instance(nameLoc, ivarName),
+                                                 ast::MK::Local(nameLoc, core::Names::arg0()));
                 } else {
                     // need to hide the instance variable access, because there wasn't a typed constructor to declare it
-                    auto ivarSet = ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(), locZero,
-                                                  ast::MK::Symbol(nameLoc, ivarName),
-                                                  ast::MK::Local(nameLoc, core::Names::arg0()));
-                    nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(ivarSet)));
+                    writerBody = ast::MK::Send2(loc, ast::MK::Self(loc), core::Names::instanceVariableSet(), locZero,
+                                                ast::MK::Symbol(nameLoc, ivarName),
+                                                ast::MK::Local(nameLoc, core::Names::arg0()));
                 }
             } else {
-                nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseTypedUnimplemented(loc)));
+                writerBody = ast::MK::RaiseTypedUnimplemented(loc);
             }
         } else {
-            nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, ast::MK::RaiseTypedUnimplemented(loc)));
-        }
-    }
-
-    // Compute the `_` foreign accessor
-    if (prop.foreign) {
-        ast::ExpressionPtr type;
-        ast::ExpressionPtr nonNilType;
-        if (ASTUtil::dupType(prop.foreign) == nullptr) {
-            // If it's not a valid type, just use untyped
-            type = ast::MK::Untyped(loc);
-            nonNilType = ast::MK::Untyped(loc);
-        } else {
-            type = ast::MK::Nilable(loc, ASTUtil::dupType(prop.foreign));
-            nonNilType = ASTUtil::dupType(prop.foreign);
+            writerBody = ast::MK::RaiseTypedUnimplemented(loc);
         }
 
-        // sig {params(allow_direct_mutation: T.nilable(T::Boolean)).returns(T.nilable($foreign))}
-        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
-                                         ast::MK::Nilable(loc, ast::MK::T_Boolean(loc)), std::move(type)));
-
-        // def $fk_method(allow_direct_mutation: nil)
-        //  T.unsafe(nil)
-        // end
-
-        auto fkMethod = ctx.state.enterNameUTF8(name.show(ctx) + "_");
-
-        auto arg = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
-        ast::MethodDef::Flags fkFlags;
-        fkFlags.discardDef = true;
-
-        core::LocOffsets methodLoc;
-        if (prop.foreignKwLit != nullptr) {
-            methodLoc = prop.foreignKwLit.loc();
-        } else {
-            methodLoc = loc;
-        }
-
-        auto fkMethodDef = ast::MK::SyntheticMethod1(loc, methodLoc, fkMethod, std::move(arg),
-                                                     ast::MK::RaiseTypedUnimplemented(loc), fkFlags);
-        nodes.emplace_back(std::move(fkMethodDef));
-
-        // sig {params(opts: T.untyped).returns($foreign)}
-        nodes.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(nameLoc, core::Names::allowDirectMutation()),
-                                         ast::MK::Nilable(loc, ast::MK::T_Boolean(loc)), std::move(nonNilType)));
-
-        // def $fk_method_!(**opts)
-        //  T.unsafe(nil)
-        // end
-
-        auto fkMethodBang = ctx.state.enterNameUTF8(name.show(ctx) + "_!");
-        auto arg2 = ast::MK::KeywordArgWithDefault(nameLoc, core::Names::allowDirectMutation(), ast::MK::Nil(loc));
-        ast::MethodDef::Flags fkBangFlags;
-        fkBangFlags.discardDef = true;
-        auto fkMethodDefBang = ast::MK::SyntheticMethod1(loc, loc, fkMethodBang, std::move(arg2),
-                                                         ast::MK::RaiseTypedUnimplemented(loc), fkBangFlags);
-        nodes.emplace_back(std::move(fkMethodDefBang));
+        nodes.emplace_back(ASTUtil::mkSet(ctx, loc, setName, nameLoc, std::move(writerBody)));
     }
 
     return nodes;

@@ -17,6 +17,12 @@ module T::Types
     end
 
     # overrides Base
+    def build_lazy_fields
+      build_inner_lazy_fields(type)
+      nil
+    end
+
+    # overrides Base
     def name
       "T::Class[#{type.name}]"
     end

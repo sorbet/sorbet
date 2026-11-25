@@ -138,7 +138,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -171,7 +171,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -211,7 +211,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -244,7 +244,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -284,7 +284,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -332,7 +332,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -380,7 +380,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -441,7 +441,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -474,7 +474,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -507,7 +507,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -561,7 +561,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -601,7 +601,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -675,7 +675,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -766,7 +766,7 @@ ClassDef{
             }
           }
           rhs = Send{
-            flags = {privateOk}
+            flags = {privateOk, bracesBlock}
             recv = Self
             fun = <U type_member>
             block = Block {
@@ -815,7 +815,7 @@ ClassDef{
         }]
       rhs = [
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {
@@ -911,7 +911,7 @@ ClassDef{
         }
 
         Send{
-          flags = {privateOk}
+          flags = {privateOk, bracesBlock}
           recv = Self
           fun = <U sig>
           block = Block {

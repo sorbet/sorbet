@@ -36,7 +36,22 @@ EOF
 # Uses script + stty to make the output appear like it's 90 columns,
 # which is the largest we can get and not have scrollbars appear when viewing
 # the docs site on a desktop browser with a large screen.
-script -q /dev/null bash -c "stty cols 90 && \"$sorbet_orig\" --help" 2>&1 | \
+script_cmd() {
+  case "$(uname -s)" in
+      Linux*)
+        script -q -c "stty cols 90 && \"$sorbet_orig\" --help" /dev/null 2>&1
+        ;;
+      Darwin*)
+        script -q /dev/null bash -c "stty cols 90 && \"$sorbet_orig\" --help" 2>&1
+        ;;
+      *)
+        >&2 echo "Unrecognized platform"
+        exit 1
+        ;;
+  esac
+}
+
+script_cmd | \
   # I have no idea what's making this get into the output
   sed -e $'s/^\^D\x08\x08//' | \
   # It seems like when the output is to a tty, lines end with \r\n
@@ -44,8 +59,11 @@ script -q /dev/null bash -c "stty cols 90 && \"$sorbet_orig\" --help" 2>&1 | \
   sed -e $'s/\\\r\\\r*$//' | \
   # Get rid of trailing spaces to make it look nice when reading the markdown
   sed -e 's/ *$//' | \
-  # CI has different number of cores, so the `--max-threads` help output changes
-  sed -e 's/^\( *\)[1-9][0-9]*)/\1number of cores on the system)/' | \
+  # CI has different number of cores, so the `--max-threads` help output changes.
+  # Only rewrite the default in that option's entry (from its first line to the
+  # first line ending in `)`), whether or not it wraps onto its own line.
+  sed -e '/--max-threads/,/)$/s/(default: [1-9][0-9]*)/(default: number of cores on the system)/' \
+      -e '/--max-threads/,/)$/s/^\( *\)[1-9][0-9]*)/\1number of cores on the system)/' | \
   # Convert help sections into markdown sections
   sed -e $'s/^ \\([A-Z].* options\\):/```\\\n\\\n## \\1\\\n\\\n```plaintext/'
 

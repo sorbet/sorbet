@@ -8,6 +8,10 @@ module T::Props
 
       SetterProc = T.type_alias { T.proc.params(val: T.untyped).void }
       ValueValidationProc = T.type_alias { T.proc.params(val: T.untyped).void }
+      # Same validation/assignment as SetterProc, but takes the instance
+      # explicitly so per-prop construction/prop_set paths skip the
+      # self-rebinding instance_exec dispatch.
+      BoundSetterProc = T.type_alias { T.proc.params(instance: T.untyped, val: T.untyped).void }
       ValidateProc = T.type_alias { T.proc.params(prop: Symbol, value: T.untyped).void }
 
       sig do
@@ -16,7 +20,7 @@ module T::Props
           prop: Symbol,
           rules: T::Hash[Symbol, T.untyped]
         )
-        .returns([SetterProc, ValueValidationProc])
+        .returns([SetterProc, ValueValidationProc, BoundSetterProc])
         .checked(:never)
       end
       def self.build_setter_proc(klass, prop, rules)
@@ -56,7 +60,7 @@ module T::Props
           non_nil_type: T::Module[T.anything],
           klass: T.all(T::Module[T.anything], T::Props::ClassMethods),
         )
-        .returns([SetterProc, ValueValidationProc])
+        .returns([SetterProc, ValueValidationProc, BoundSetterProc])
       end
       private_class_method def self.simple_non_nil_proc(prop, accessor_key, non_nil_type, klass)
         [
@@ -81,6 +85,19 @@ module T::Props
               )
             end
           end,
+          # The ivar set is unconditional, exactly as above: the value must
+          # still be set when call_validation_error_handler does not raise.
+          proc do |instance, val|
+            unless val.is_a?(non_nil_type)
+              T::Props::Private::SetterFactory.raise_pretty_error(
+                klass,
+                prop,
+                T::Utils.coerce(non_nil_type),
+                val,
+              )
+            end
+            instance.instance_variable_set(accessor_key, val)
+          end,
         ]
       end
 
@@ -92,7 +109,7 @@ module T::Props
           klass: T.all(T::Module[T.anything], T::Props::ClassMethods),
           validate: T.nilable(ValidateProc)
         )
-        .returns([SetterProc, ValueValidationProc])
+        .returns([SetterProc, ValueValidationProc, BoundSetterProc])
       end
       private_class_method def self.non_nil_proc(prop, accessor_key, non_nil_type, klass, validate)
         [
@@ -131,6 +148,21 @@ module T::Props
               )
             end
           end,
+          # The ivar set is unconditional, exactly as above: the value must
+          # still be set when call_validation_error_handler does not raise.
+          proc do |instance, val|
+            if non_nil_type.recursively_valid?(val)
+              validate&.call(prop, val)
+            else
+              T::Props::Private::SetterFactory.raise_pretty_error(
+                klass,
+                prop,
+                non_nil_type,
+                val,
+              )
+            end
+            instance.instance_variable_set(accessor_key, val)
+          end,
         ]
       end
 
@@ -141,7 +173,7 @@ module T::Props
           non_nil_type: T::Module[T.anything],
           klass: T.all(T::Module[T.anything], T::Props::ClassMethods),
         )
-        .returns([SetterProc, ValueValidationProc])
+        .returns([SetterProc, ValueValidationProc, BoundSetterProc])
       end
       private_class_method def self.simple_nilable_proc(prop, accessor_key, non_nil_type, klass)
         [
@@ -166,6 +198,19 @@ module T::Props
               )
             end
           end,
+          # The ivar set is unconditional, exactly as above: the value must
+          # still be set when call_validation_error_handler does not raise.
+          proc do |instance, val|
+            unless val.nil? || val.is_a?(non_nil_type)
+              T::Props::Private::SetterFactory.raise_pretty_error(
+                klass,
+                prop,
+                T::Utils.coerce(non_nil_type),
+                val,
+              )
+            end
+            instance.instance_variable_set(accessor_key, val)
+          end,
         ]
       end
 
@@ -177,7 +222,7 @@ module T::Props
           klass: T.all(T::Module[T.anything], T::Props::ClassMethods),
           validate: T.nilable(ValidateProc),
         )
-        .returns([SetterProc, ValueValidationProc])
+        .returns([SetterProc, ValueValidationProc, BoundSetterProc])
       end
       private_class_method def self.nilable_proc(prop, accessor_key, non_nil_type, klass, validate)
         [
@@ -218,6 +263,24 @@ module T::Props
                 non_nil_type,
                 val,
               )
+            end
+          end,
+          # Branch structure (including the set-after-soft-error in the
+          # invalid arm) replicated exactly from the first proc above.
+          proc do |instance, val|
+            if val.nil?
+              instance.instance_variable_set(accessor_key, nil)
+            elsif non_nil_type.recursively_valid?(val)
+              validate&.call(prop, val)
+              instance.instance_variable_set(accessor_key, val)
+            else
+              T::Props::Private::SetterFactory.raise_pretty_error(
+                klass,
+                prop,
+                non_nil_type,
+                val,
+              )
+              instance.instance_variable_set(accessor_key, val)
             end
           end,
         ]

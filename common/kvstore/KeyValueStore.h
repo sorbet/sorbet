@@ -21,13 +21,14 @@ class KeyValueStore final {
     const std::string path;
     const std::string flavor;
     struct DBState;
-    const std::unique_ptr<DBState> dbState;
+    std::unique_ptr<DBState> dbState;
     const std::shared_ptr<spdlog::logger> logger;
 
 public:
     /**
      * A KeyValueStore lives at a given `path` on disk, which must be
      * a pre-existing, writeable, directory.
+     * Holds a shared lock on CacheLock::ACCESS_LOCK_FILE until the environment is closed.
      *
      * `version` contains a string naming the format of the data
      * contained therein. If the format or semantics of the serialized

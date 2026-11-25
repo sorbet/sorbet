@@ -9,7 +9,7 @@
 #include <memory>
 
 #include "cfg/Instructions.h"
-
+#include "cfg/LinkRef.h"
 //
 // This file defines the IR that the inference algorithm operates on.
 // A CFG (control flow graph) is a directed graph of "basic blocks" which are
@@ -36,7 +36,7 @@ public:
     bool isUnconditional() const {
         return thenb == elseb;
     }
-    BlockExit() : cond(), thenb(nullptr), elseb(nullptr){};
+    BlockExit() : cond(), thenb(nullptr), elseb(nullptr) {};
 };
 
 class Binding final {
@@ -58,10 +58,8 @@ public:
     std::vector<VariableUseSite> args;
     int id = 0;
     struct Flags {
-        bool isLoopHeader : 1;
-        bool wasJumpDestination : 1;
-        // In C++20 we can replace this with bit field initializers
-        Flags() : isLoopHeader(false), wasJumpDestination(false) {}
+        bool isLoopHeader : 1 = false;
+        bool wasJumpDestination : 1 = false;
     };
     Flags flags;
     int outerLoops = 0;
@@ -110,6 +108,7 @@ public:
     };
 
     friend class CFGBuilder;
+    friend class LinkRef;
     friend class LocalRef;
     friend class UnfreezeCFGLocalVariables;
     /**
@@ -163,11 +162,6 @@ public:
     // Verbose debug output
     std::string showRaw(core::Context ctx) const;
 
-    // special minLoops
-    static constexpr int MIN_LOOP_FIELD = -1;
-    // static constexpr int MIN_LOOP_GLOBAL = -2;
-    static constexpr int MIN_LOOP_LET = -3;
-
     // special ruby region id offsets for exception handling
     static constexpr int HANDLERS_REGION_OFFSET = 1;
     static constexpr int ENSURE_REGION_OFFSET = 2;
@@ -190,11 +184,13 @@ public:
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
     LocalRef enterLocal(core::LocalVariable variable);
 
+    LinkRef enterLink(core::NameRef fun, core::LocOffsets loc, std::vector<core::ParamInfo::Flags> &&paramFlags);
+
 private:
     CFG();
     BasicBlock *freshBlock(int outerLoops);
     void enterLocalInternal(core::LocalVariable variable, LocalRef &ref);
-    std::vector<int> minLoops;
+    std::vector<MinLoops> minLoops;
     std::vector<int> maxLoopWrite;
     bool localVariablesFrozen = true;
     /**
@@ -206,6 +202,8 @@ private:
      * Map from LocalVariable -> LocalRef. Used to de-dupe variables in localVariables.
      */
     UnorderedMap<core::LocalVariable, LocalRef> localVariableToLocalRef;
+
+    std::vector<std::shared_ptr<core::SendAndBlockLink>> links;
 };
 
 } // namespace sorbet::cfg

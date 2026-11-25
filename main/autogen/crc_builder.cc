@@ -10,7 +10,7 @@ class CRCBuilderImpl : public CRCBuilder {
 
 public:
     CRCBuilderImpl() : lookupTable(CRC::CRC_32()) {}
-    ~CRCBuilderImpl(){
+    ~CRCBuilderImpl() {
         // see https://eli.thegreenplace.net/2010/11/13/pure-virtual-destructors-in-c
     };
 

@@ -4,13 +4,12 @@
 class Project::MainLib::Lib
   Project::Util::MyUtil.new
 
-  # Normal code is not allowed to access names from `test_import`
   Project::TestOnly::SomeHelper.new
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Used `test_import` constant `Project::TestOnly::SomeHelper` in non-test file
+# ^^^^^^^^^^^^^^^^^ error: `Project::TestOnly` is not imported
 
   Test::Project::Util::UtilHelper
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::UtilHelper` is defined in a test namespace
+# ^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util` cannot be referenced here because `Project::MainLib` may not reference `test!` packages
 
   Test::Project::Util::Unexported
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util::Unexported` is defined in a test namespace
+# ^^^^^^^^^^^^^^^^^^^ error: `Test::Project::Util` cannot be referenced here because `Project::MainLib` may not reference `test!` packages
 end

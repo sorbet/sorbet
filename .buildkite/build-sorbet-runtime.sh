@@ -2,15 +2,22 @@
 
 set -eo pipefail
 
+prefix=$(.buildkite/tools/sorbet-version-prefix.sh)
+
 pushd gems/sorbet-runtime
 
 echo "--- setup :ruby:"
 eval "$(rbenv init -)"
 
-runtime_versions=(3.1.2 3.3.0)
+runtime_versions=(3.3.12 3.4.9)
 
 for runtime_version in "${runtime_versions[@]}"; do
-  rbenv install --skip-existing "$runtime_version"
+  # Only uncomment this to iterate on something. Uncommenting this will make
+  # all builds needlessly slower.
+  # Prefer updating sorbet-build-image to pre-install the Ruby version.
+
+  # rbenv install --skip-existing "$runtime_version"
+
   rbenv shell "$runtime_version"
   rbenv exec bundle config set path 'vendor/bundle'
   rbenv exec bundle install
@@ -23,7 +30,6 @@ for runtime_version in "${runtime_versions[@]}"; do
 
   failed=
 
-  # Our Rubocop version doesn't understand Ruby 3.1 as a valid Ruby version
   echo "+++ rubocop ($runtime_version)"
   if ! rbenv exec bundle exec rake rubocop; then
     failed=1
@@ -52,7 +58,7 @@ done
 
 echo "--- build"
 git_commit_count=$(git rev-list --count HEAD)
-release_version="0.6.${git_commit_count}"
+release_version="${prefix}.${git_commit_count}"
 sed -i.bak "s/0\\.0\\.0/${release_version}/" sorbet-runtime.gemspec
 gem build sorbet-runtime.gemspec
 popd

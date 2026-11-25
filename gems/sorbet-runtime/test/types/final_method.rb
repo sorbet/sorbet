@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# typed: ignore
 require_relative '../test_helper'
 
 class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
@@ -13,6 +14,7 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
 
   CLASS_REGEX_STR = "#<Class:0x[0-9a-f]+>"
   CLASS_CLASS_REGEX_STR = "#<Class:#<Class:0x[0-9a-f]+>>"
+  INSTANCE_CLASS_REGEX_STR = "#<Class:#<#<Class:0x[0-9a-f]+>:0x[0-9a-f]+>>"
   MODULE_REGEX_STR = "#<Module:0x[0-9a-f]+>"
 
   private def assert_msg_matches(regex, final_line, method_line, explanation, err)
@@ -123,278 +125,6 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       end
     end
     assert_match(/^The method `foo` on #<Class:#<Class:0x[0-9a-f]+>> was declared as final and cannot be redefined$/, err.message)
-  end
-
-  it "forbids redefining a secretly-declared final instance method with a final sig" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def i_am_secretly_final; end
-        end
-
-        sig(:final) { void }
-        def i_am_secretly_final; end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final', CLASS_REGEX_STR, __LINE__ - 7, __LINE__ - 3, err)
-  end
-
-  it "forbids redefining a secretly-declared final instance method with a regular sig" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def i_am_secretly_final; end
-        end
-
-        sig { void }
-        def i_am_secretly_final; end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final', CLASS_REGEX_STR, __LINE__ - 7, __LINE__ - 3, err)
-  end
-
-  it "forbids redefining a secretly-declared final instance method with no sig" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def i_am_secretly_final; end
-        end
-
-        def i_am_secretly_final; end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final', CLASS_REGEX_STR, __LINE__ - 6, __LINE__ - 3, err)
-  end
-
-  it "forbids redefining a secretly-declared final instance method with a secretly-declared final method" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def i_am_secretly_final; end
-        end
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def i_am_secretly_final; end
-        end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final', CLASS_REGEX_STR, __LINE__ - 12, __LINE__ - 4, err)
-  end
-
-  it "forbids redefining a secretly-declared final instance method with a secretly-declared method with a regular sig" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def i_am_secretly_final; end
-        end
-
-        built_sig = T::Private::Methods._declare_sig(self) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def i_am_secretly_final; end
-        end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final', CLASS_REGEX_STR, __LINE__ - 12, __LINE__ - 4, err)
-  end
-
-  it "forbids redefining a secretly-declared final instance method with a secretly-declared method with no sig" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def i_am_secretly_final; end
-        end
-
-        T::Private::Methods._with_declared_signature(self, nil) do
-          def i_am_secretly_final; end
-        end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final', CLASS_REGEX_STR, __LINE__ - 8, __LINE__ - 4, err)
-  end
-
-  it "forbids redefining a secretly-declared final class method with a final sig" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def self.i_am_secretly_final2; end
-        end
-
-        sig(:final) { void }
-        def self.i_am_secretly_final2; end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final2', CLASS_CLASS_REGEX_STR, __LINE__ - 7, __LINE__ - 3, err)
-  end
-
-  it "forbids redefining a secretly-declared final class method with a regular sig" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def self.i_am_secretly_final2; end
-        end
-
-        sig { void }
-        def self.i_am_secretly_final2; end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final2', CLASS_CLASS_REGEX_STR, __LINE__ - 7, __LINE__ - 3, err)
-  end
-
-  it "forbids redefining a secretly-declared final class method with no sig" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def self.i_am_secretly_final2; end
-        end
-
-        def self.i_am_secretly_final2; end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final2', CLASS_CLASS_REGEX_STR, __LINE__ - 6, __LINE__ - 3, err)
-  end
-
-  it "forbids redefining a secretly-declared final class method with a secretly-declared final method" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def self.i_am_secretly_final2; end
-        end
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def self.i_am_secretly_final2; end
-        end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final2', CLASS_CLASS_REGEX_STR, __LINE__ - 12, __LINE__ - 4, err)
-  end
-
-  it "forbids redefining a secretly-declared final class method with a secretly-declared method with a regular sig" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def self.i_am_secretly_final2; end
-        end
-
-        built_sig = T::Private::Methods._declare_sig(self) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def self.i_am_secretly_final2; end
-        end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final2', CLASS_CLASS_REGEX_STR, __LINE__ - 12, __LINE__ - 4, err)
-  end
-
-  it "forbids redefining a secretly-declared final class method with a secretly-declared method with no sig" do
-    err = assert_raises(RuntimeError) do
-      Class.new do
-        extend T::Sig
-        extend T::Helpers
-
-        built_sig = T::Private::Methods._declare_sig(self, :final) do
-          void
-        end
-
-        T::Private::Methods._with_declared_signature(self, built_sig) do
-          def self.i_am_secretly_final2; end
-        end
-
-        T::Private::Methods._with_declared_signature(self, nil) do
-          def self.i_am_secretly_final2; end
-        end
-      end
-    end
-    assert_redefined_err('i_am_secretly_final2', CLASS_CLASS_REGEX_STR, __LINE__ - 8, __LINE__ - 4, err)
   end
 
   it "forbids redefinition with .checked(:never)" do
@@ -623,7 +353,23 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
         extend m2, m1
       end
     end
-    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_REGEX_STR, __LINE__ - 10, __LINE__ - 3, err)
+    assert_overridden_err('foo', MODULE_REGEX_STR, CLASS_CLASS_REGEX_STR, __LINE__ - 10, __LINE__ - 3, err)
+  end
+
+  it "forbids overriding a final method via `class << self`" do
+    parent = Class.new do
+      extend T::Sig
+      sig(:final) { void }
+      def self.foo; end
+    end
+    err = assert_raises(RuntimeError) do
+      Class.new(parent) do
+        class << self
+          def foo; end
+        end
+      end
+    end
+    assert_overridden_err('foo', CLASS_CLASS_REGEX_STR, CLASS_CLASS_REGEX_STR, __LINE__ - 9, __LINE__ - 4, err)
   end
 
   it "allows calling final methods" do
@@ -739,6 +485,21 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
     end
   end
 
+  it "forbids overriding a final method on an instance's singleton class via extend" do
+    m = Module.new do
+      extend T::Sig
+      sig(:final) { void }
+      def foo; end
+    end
+    klass = Class.new
+    instance = klass.new
+    instance.extend(m)
+    err = assert_raises(RuntimeError) do
+      def instance.foo; end
+    end
+    assert_overridden_err('foo', MODULE_REGEX_STR, INSTANCE_CLASS_REGEX_STR, __LINE__ - 8, __LINE__ - 2, err)
+  end
+
   it "allows extending modules again" do
     m1 = Module.new do
       extend T::Sig
@@ -760,5 +521,79 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
       m.foo
     end
     assert_includes(err.message, "The syntax for declaring a method final is `sig(:final) {...}`, not `sig {final. ...}`")
+  end
+
+  it 'does not drop signatures when _check_final_ancestors is triggered but finds no violation' do
+    Class.new do
+      extend T::Sig
+      sig(:final) { returns(String) }
+      def foo = "unrelated"
+    end
+
+    parent = Class.new do
+      extend T::Sig
+      sig(:final) { returns(String) }
+      def some_other_final_method = "hello"
+    end
+
+    child = Class.new(parent) do
+      sig { returns(String) }
+      def foo = "world"
+    end
+
+    sig = T::Utils.signature_for_method(child.instance_method(:foo))
+    refute_nil(sig)
+    assert_equal(:foo, sig.method_name)
+  end
+
+  it 'does not store sig when a swallowed final violation occurs' do
+    parent = Class.new do
+      extend T::Sig
+      sig(:final) { returns(String) }
+      def foo = "parent"
+    end
+
+    T::Configuration.sig_validation_error_handler = lambda do |error, opts|
+      # no-op to swallow the final error
+    end
+
+    begin
+      child = Class.new(parent) do
+        extend T::Sig
+        sig { returns(String) }
+        def foo = "child"
+      end
+    ensure
+      T::Configuration.sig_validation_error_handler = nil
+    end
+
+    sig = T::Utils.signature_for_method(child.instance_method(:foo))
+    assert_nil(sig)
+  end
+
+  it 'reports all final violations to the handler when including a module with multiple overrides' do
+    mod = Module.new do
+      def foo = "m2"
+      def bar = "m2"
+    end
+
+    violations = []
+    T::Configuration.sig_validation_error_handler = lambda do |error, _opts|
+      violations << error
+    end
+
+    Class.new do
+      extend T::Sig
+      sig(:final) { returns(String) }
+      def foo = "m1"
+      sig(:final) { returns(String) }
+      def bar = "m1"
+
+      include mod
+    end
+
+    assert_equal(2, violations.length)
+  ensure
+    T::Configuration.sig_validation_error_handler = nil
   end
 end

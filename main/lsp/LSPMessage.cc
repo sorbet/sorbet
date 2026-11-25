@@ -58,7 +58,8 @@ bool MessageId::equals(const MessageId &id) const {
     }
 }
 
-unique_ptr<LSPMessage> makeSorbetError(LSPErrorCodes code, string_view message, optional<int> id = nullopt) {
+unique_ptr<LSPMessage> makeSorbetError(LSPErrorCodes code, string_view message,
+                                       optional<variant<int, string>> id = nullopt) {
     auto errorParams = make_unique<SorbetErrorParams>((int)code, string(message));
     if (id) {
         auto req = make_unique<RequestMessage>("2.0", *id, LSPMethod::SorbetError, move(errorParams));
@@ -78,9 +79,14 @@ unique_ptr<LSPMessage> LSPMessage::fromClient(string_view json) {
     }
 
     // Grab ID before parsing, as the value may get moved out.
-    optional<int> id;
-    if (d.HasMember("id") && d["id"].IsInt()) {
-        id = d["id"].GetInt();
+    optional<variant<int, string>> id;
+    if (d.HasMember("id")) {
+        auto &idValue = d["id"];
+        if (idValue.IsInt()) {
+            id = idValue.GetInt();
+        } else if (idValue.IsString()) {
+            id = string(idValue.GetString(), idValue.GetStringLength());
+        }
     }
 
     try {
@@ -92,12 +98,25 @@ unique_ptr<LSPMessage> LSPMessage::fromClient(string_view json) {
                                    id);
         } else {
             return makeSorbetError(LSPErrorCodes::InvalidParams,
-                                   fmt::format("Unable to deserialize LSP request: {}", e.what()), id);
+                                   fmt::format("Unable to deserialize LSP request: {}", e.message), id);
         }
+    } catch (InvalidDiscriminantValueError e) {
+        // The method is one we support, but the message has the wrong shape for it: either a notification method was
+        // sent with an `id`, or a request method was sent without one.
+        return makeSorbetError(LSPErrorCodes::InvalidRequest,
+                               fmt::format("LSP method `{}` was sent as a {}, which it does not support",
+                                           e.discriminantValue, id.has_value() ? "request" : "notification"),
+                               id);
     } catch (DeserializationError e) {
         // The client request was valid JSON, but was invalid in some way.
         return makeSorbetError(LSPErrorCodes::InvalidParams,
-                               fmt::format("Unable to deserialize LSP request: {}", e.what()), id);
+                               fmt::format("Unable to deserialize LSP request: {}", e.message), id);
+    } catch (SerializationError e) {
+        // Some generated validation is shared between serializing and deserializing and throws a `SerializationError`
+        // either way (e.g. an out-of-range value for an integer enum). When deserializing a client message, that is
+        // still a problem with the message, not a bug in Sorbet.
+        return makeSorbetError(LSPErrorCodes::InvalidParams,
+                               fmt::format("Unable to deserialize LSP request: {}", e.message), id);
     }
 }
 

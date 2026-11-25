@@ -90,6 +90,7 @@ genrule(
     $(location //main:sorbet-orig) \
         --silence-dev-message \
         --no-error-count \
+        --color=always \
         --store-state $(location state-payload-raw-symbol-table),$(location state-payload-raw-name-table),$(location state-payload-raw-file-table)
     """,
     tools = ["//main:sorbet-orig"],

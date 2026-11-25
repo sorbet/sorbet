@@ -29,4 +29,12 @@ UnfreezeFileTable::~UnfreezeFileTable() {
     gs.freezeFileTable();
 }
 
+ForbidNewSymbols::ForbidNewSymbols(GlobalState &gs) : gs(gs), old(gs.newSymbolsForbidden) {
+    gs.newSymbolsForbidden = true;
+}
+
+ForbidNewSymbols::~ForbidNewSymbols() {
+    gs.newSymbolsForbidden = old;
+}
+
 } // namespace sorbet::core

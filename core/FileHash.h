@@ -2,6 +2,8 @@
 #define RUBY_TYPER_FILE_HASH_H
 #include "common/common.h"
 #include "core/ArityHash.h"
+#include <compare>
+
 namespace sorbet::core {
 class NameRef;
 class GlobalState;
@@ -12,25 +14,35 @@ class SerializerImpl;
 class WithoutUniqueNameHash {
 public:
     static void sortAndDedupe(std::vector<core::WithoutUniqueNameHash> &hashes);
+    // Returns `true` if the two vectors share a value, and `false` otherwise. This requires that the two vectors are
+    // sorted, which is also a requirement of using `absl::c_set_intersetion`, so this is a drop-in replacement when the
+    // resulting set isn't needed.
+    static bool sortedIntersects(const std::vector<WithoutUniqueNameHash> &a,
+                                 const std::vector<WithoutUniqueNameHash> &b);
 
     WithoutUniqueNameHash(const GlobalState &gs, NameRef nm);
     inline bool isDefined() const {
         return _hashValue != 0;
     }
     WithoutUniqueNameHash(const WithoutUniqueNameHash &nm) noexcept = default;
-    WithoutUniqueNameHash() noexcept : _hashValue(0){};
-    inline bool operator==(const WithoutUniqueNameHash &rhs) const noexcept {
+    WithoutUniqueNameHash() noexcept : _hashValue(0) {};
+
+    auto operator<=>(const WithoutUniqueNameHash &rhs) const noexcept {
         ENFORCE_NO_TIMER(isDefined());
         ENFORCE_NO_TIMER(rhs.isDefined());
-        return _hashValue == rhs._hashValue;
+        return _hashValue <=> rhs._hashValue;
     }
 
-    inline bool operator!=(const WithoutUniqueNameHash &rhs) const noexcept {
-        return !(rhs == *this);
+    bool operator==(const WithoutUniqueNameHash &rhs) const noexcept {
+        return std::is_eq(*this <=> rhs);
     }
 
-    inline bool operator<(const WithoutUniqueNameHash &rhs) const noexcept {
-        return this->_hashValue < rhs._hashValue;
+    bool operator!=(const WithoutUniqueNameHash &rhs) const noexcept {
+        return std::is_neq(*this <=> rhs);
+    }
+
+    bool operator<(const WithoutUniqueNameHash &rhs) const noexcept {
+        return std::is_lt(*this <=> rhs);
     }
 
     uint32_t _hashValue;
@@ -50,19 +62,24 @@ public:
         return _hashValue != 0;
     }
     FullNameHash(const FullNameHash &nm) noexcept = default;
-    FullNameHash() noexcept : _hashValue(0){};
-    inline bool operator==(const FullNameHash &rhs) const noexcept {
+    FullNameHash() noexcept : _hashValue(0) {};
+
+    inline auto operator<=>(const FullNameHash &rhs) const noexcept {
         ENFORCE_NO_TIMER(isDefined());
         ENFORCE_NO_TIMER(rhs.isDefined());
-        return _hashValue == rhs._hashValue;
+        return _hashValue <=> rhs._hashValue;
     }
 
-    inline bool operator!=(const FullNameHash &rhs) const noexcept {
-        return !(rhs == *this);
+    bool operator==(const FullNameHash &rhs) const noexcept {
+        return std::is_eq(*this <=> rhs);
     }
 
-    inline bool operator<(const FullNameHash &rhs) const noexcept {
-        return this->_hashValue < rhs._hashValue;
+    bool operator!=(const FullNameHash &rhs) const noexcept {
+        return std::is_neq(*this <=> rhs);
+    }
+
+    bool operator<(const FullNameHash &rhs) const noexcept {
+        return std::is_lt(*this <=> rhs);
     }
 
     uint32_t _hashValue;
@@ -87,10 +104,7 @@ struct SymbolHash {
     SymbolHash(WithoutUniqueNameHash nameHash, uint32_t symbolHash) noexcept
         : nameHash(nameHash), symbolHash(symbolHash) {}
 
-    inline bool operator<(const SymbolHash &h) const noexcept {
-        // Take advantage of lexicographic ordering with std::tie
-        return std::tie(this->nameHash, this->symbolHash) < std::tie(h.nameHash, h.symbolHash);
-    }
+    auto operator<=>(const SymbolHash &h) const noexcept = default;
 };
 CheckSize(SymbolHash, 8, 4);
 

@@ -2,8 +2,11 @@
 // has to go first as it violates our requirements
 #include "absl/strings/match.h"
 #include "absl/strings/str_replace.h"
+#include "absl/synchronization/notification.h"
 #include "common/FileOps.h"
 #include "common/common.h"
+#include "common/exception/Exception.h"
+#include "common/kvstore/CacheLock.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
@@ -15,6 +18,7 @@
 #include "spdlog/sinks/null_sink.h"
 #include "test/helpers/CounterStateDatabase.h"
 #include "test/helpers/lsp.h"
+#include "test/helpers/packages.h"
 #include "test/lsp/ProtocolTest.h"
 #include <sys/wait.h>
 
@@ -62,6 +66,9 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
     auto updatedKey = core::serialize::Serializer::fileKey(
         core::File(string(filePath), string(updatedFileContents), core::File::Type::Normal, 0));
 
+    // Keys don't change with the file contents.
+    REQUIRE_EQ(key, updatedKey);
+
     // LSP should write a cache to disk corresponding to initialization state.
     {
         writeFilesToFS({{relativeFilepath, fileContents}});
@@ -86,10 +93,15 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         auto sink = make_shared<spdlog::sinks::null_sink_mt>();
         auto logger = make_shared<spdlog::logger>("null", sink);
         unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
-        CHECK_EQ(kvstore->read(updatedKey).data, nullptr);
+        auto updatedContents = kvstore->read(updatedKey);
+        REQUIRE_NE(updatedContents.data, nullptr);
 
         auto contents = kvstore->read(key);
         REQUIRE_NE(contents.data, nullptr);
+
+        // Files only have one slot in the cache, so these should point to the same data. However, we should only be
+        // able to deserialize if we provide the file that contains the original contents.
+        REQUIRE_EQ(updatedContents.data, contents.data);
 
         auto gs = make_unique<core::GlobalState>(make_shared<core::ErrorQueue>(*logger, *logger));
         payload::createInitialGlobalState(*gs, *opts, kvstore);
@@ -105,6 +117,10 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
         // Loading should fail if file is too small
         core::File smallFile{"", "", core::File::Type::Normal};
         CHECK_EQ(core::serialize::Serializer::loadTree(*gs, smallFile, contents.data), nullptr);
+
+        // Loading should fail if we use the updated text.
+        core::File updatedFile{string(filePath), string(updatedFileContents), core::File::Type::Normal};
+        CHECK_EQ(core::serialize::Serializer::loadTree(*gs, updatedFile, contents.data), nullptr);
     }
 
     // LSP should read from the cache when files on disk match. There should be no cache misses this time since disk
@@ -155,7 +171,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesCache") {
     }
 }
 
-TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
+TEST_CASE_FIXTURE(CacheProtocolTest, "LSPUsesSessionCacheIfSharedCacheModified") {
     // Write a file to disk.
     auto relativeFilepath = "test.rb";
     auto filePath = fmt::format("{}/{}", rootPath, relativeFilepath);
@@ -203,7 +219,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
         CHECK_NE(file.getFileHash(), nullptr);
     }
 
-    // LSP should read from disk when the cache gets updated by a different process mid-process.
+    // LSP should retain its initial snapshot when another process updates the shared cache.
     {
         // Note: I had trouble getting signals to work in CI. Even in a loop where the parent process sent a signal
         // to the child, the child never received the signal. So, I'm using a file to communicate instead.
@@ -253,10 +269,11 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "LSPDoesNotUseCacheIfModified") {
                 initializeLSP(),
                 {{relativeFilepath, 4, "Expected `Integer` but found `String(\"hello\")` for method result type"}});
 
-            // We should not use the cache since it has been dirtied.
+            // The session still contains the original file, despite the shared cache changing.
             auto counters = getCounters();
-            CHECK_EQ(counters.getCounter("types.input.files.kvstore.hit"), 0);
-            CHECK_EQ(counters.getCounter("cache.committed"), 0);
+            CHECK_GT(counters.getCounter("types.input.files.kvstore.hit"), 0);
+            CHECK_EQ(counters.getCounter("types.input.files.kvstore.miss"), 0);
+            CHECK_EQ(counters.getCounter("cache.committed"), 1);
         }
     }
 }
@@ -379,7 +396,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
 
     // Create a session copy of the cache, consuming the original
     auto sessionCache = realmain::cache::SessionCache::make(std::move(kvstore), *logger, *opts);
-    auto copy = make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
+    auto copy = sessionCache->open(logger, *opts);
 
     // Make sure that the same key exists
     vector<uint8_t> copyContent;
@@ -415,7 +432,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
     OwnedKeyValueStore::abort(std::move(kvstore));
 
     // Reopen the copy, and make sure it still has our new value
-    copy = make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
+    copy = sessionCache->open(logger, *opts);
 
     {
         auto contents = copy->read("new key");
@@ -424,6 +441,52 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "CopyCacheAfterInit") {
         REQUIRE_EQ(value, readValue);
     }
 
+    OwnedKeyValueStore::abort(std::move(copy));
+
+    // Add an entry to the shared cache, to show that committing the session cache will overwrite it.
+    {
+        auto shared = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+        shared->writeString("shared only", "not in the session");
+        OwnedKeyValueStore::bestEffortCommit(*logger, std::move(shared));
+    }
+
+    // Committing will fail while the shared cache still has active shared locks.
+    {
+        auto sharedLock = CacheLock::acquireShared(opts->cacheDir);
+        REQUIRE(sharedLock.has_value());
+        auto sharedDataPath = fmt::format("{}/data.mdb", opts->cacheDir);
+        auto originalData = FileOps::read(sharedDataPath);
+        absl::Notification finished;
+        auto publisher = runInAThread("cache-publisher", [&]() {
+            CHECK_NOTHROW(sessionCache->commit(*logger, *opts));
+            finished.Notify();
+        });
+        CHECK(finished.WaitForNotificationWithTimeout(absl::Seconds(5)));
+        CHECK_EQ(FileOps::read(sharedDataPath), originalData);
+        sharedLock.reset();
+        publisher.reset();
+        CHECK_FALSE(FileOps::exists(fmt::format("{}/data.mdb.staging", opts->cacheDir)));
+    }
+    sessionCache->commit(*logger, *opts);
+
+    // The staged copy of the kvstore should have been moved over the old db at this point.
+    CHECK_FALSE(FileOps::exists(fmt::format("{}/data.mdb.staging", opts->cacheDir)));
+
+    // Verify that committing the session cache overwrites the shared one by checking that the `shared only` key is
+    // missing.
+    {
+        auto shared = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+        auto contents = shared->read("new key");
+        REQUIRE_NE(contents.data, nullptr);
+        CHECK_EQ(vector<uint8_t>(contents.data, contents.data + contents.len), value);
+        CHECK_FALSE(shared->readString("shared only").has_value());
+    }
+
+    // The session cache can still be used after it's been committed back to the shared cache.
+    copy = sessionCache->open(logger, *opts);
+    auto contents = copy->read("new key");
+    REQUIRE_NE(contents.data, nullptr);
+    CHECK_EQ(vector<uint8_t>(contents.data, contents.data + contents.len), value);
     OwnedKeyValueStore::abort(std::move(copy));
 
     // Close the session cache, and make sure that it removes the directory.
@@ -503,21 +566,22 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "RemoveSessionCacheDirectory") {
     auto start = toRemove.front().rfind('/');
     string sessionCacheDir = toRemove.front().substr(0, start);
 
-    // Verify that we can't open when the database files have been removed
+    // Removing the database files leaves an empty cache that can be reopened.
     for (auto &file : toRemove) {
         FileOps::removeFile(file);
     }
 
     {
         auto copy = sessionCache->open(logger, *opts);
-        REQUIRE_EQ(copy, nullptr);
+        REQUIRE_NE(copy, nullptr);
+        CHECK_EQ(copy->read(key).data, nullptr);
     }
 
-    // Verify that we can't open when the database directory has been removed (the previous open attempt will create an
-    // empty db, so we have to remove the files again again)
+    // Removing the entire session directory prevents reopening the cache.
     for (auto &file : toRemove) {
         FileOps::removeFile(file);
     }
+    FileOps::removeFile(fmt::format("{}/{}", sessionCacheDir, CacheLock::ACCESS_LOCK_FILE));
     FileOps::removeDir(sessionCacheDir);
 
     {
@@ -567,7 +631,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReopenExistingSessionCacheDir") {
     auto sessionCache = realmain::cache::SessionCache::make(std::move(kvstore), *logger, *opts);
 
     // Ensure that we can open it
-    auto copy = make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
+    auto copy = sessionCache->open(logger, *opts);
     REQUIRE(copy != nullptr);
     OwnedKeyValueStore::abort(std::move(copy));
 
@@ -581,6 +645,17 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReopenExistingSessionCacheDir") {
     REQUIRE(FileOps::exists(sessionPath));
     sessionCache.reset();
     REQUIRE(FileOps::exists(sessionPath));
+
+    // Refuse to reuse the directory when an old database entry cannot be removed.
+    auto blockedDataPath = fmt::format("{}/data.mdb", sessionPath);
+    FileOps::createDir(blockedDataPath);
+    auto blockerPath = fmt::format("{}/keep-around", blockedDataPath);
+    FileOps::write(blockerPath, "");
+    kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+    CHECK_THROWS_AS(realmain::cache::SessionCache::make(std::move(kvstore), *logger, *opts), RemoveDirException);
+    REQUIRE(FileOps::exists(blockerPath));
+    FileOps::removeFile(blockerPath);
+    FileOps::removeDir(blockedDataPath);
 
     // Write empty lock and data files to simulate an existing cache, and remove the temp file that was used to persist
     // the directory.
@@ -596,7 +671,7 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReopenExistingSessionCacheDir") {
     REQUIRE_EQ(sessionPath, sessionCache->kvstorePath());
 
     // Ensure that we can still open this copy
-    copy = make_unique<OwnedKeyValueStore>(sessionCache->open(logger, *opts));
+    copy = sessionCache->open(logger, *opts);
     REQUIRE(copy != nullptr);
     OwnedKeyValueStore::abort(std::move(copy));
 
@@ -607,6 +682,14 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReopenExistingSessionCacheDir") {
 }
 
 TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
+    string_view prefix;
+    SUBCASE("Session caches") {
+        prefix = realmain::cache::SessionCache::SESSION_DIR_PREFIX;
+    }
+    SUBCASE("Legacy publication staging directories") {
+        prefix = realmain::cache::SessionCache::STAGING_DIR_PREFIX;
+    }
+
     auto opts = lspWrapper->opts;
     REQUIRE(!opts->cacheDir.empty());
 
@@ -632,13 +715,13 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
 
             --needed;
 
-            const auto &path = caches.emplace_back(
-                fmt::format("{}/{}{}", opts->cacheDir, realmain::cache::SessionCache::SESSION_DIR_PREFIX, pid));
+            const auto &path = caches.emplace_back(fmt::format("{}/{}{}", opts->cacheDir, prefix, pid));
             FileOps::createDir(path);
 
             // Create data and lock files to simulate a fully populated cache
             FileOps::write(fmt::format("{}/data.mdb", path), "");
             FileOps::write(fmt::format("{}/lock.mdb", path), "");
+            FileOps::write(fmt::format("{}/{}", path, CacheLock::ACCESS_LOCK_FILE), "");
         }
     }
 
@@ -667,9 +750,92 @@ TEST_CASE_FIXTURE(CacheProtocolTest, "ReapOldCacheDirectories") {
     REQUIRE(!FileOps::exists(fmt::format("{}/lock.mdb", path)));
     REQUIRE(FileOps::exists(fmt::format("{}/keep-around", path)));
 
+    // Reaping caches again should be fine, and should leave the cache dir in the same state.
+    realmain::cache::SessionCache::reapOldCaches(*opts);
+    REQUIRE(!FileOps::exists(fmt::format("{}/data.mdb", path)));
+    REQUIRE(!FileOps::exists(fmt::format("{}/lock.mdb", path)));
+    REQUIRE(FileOps::exists(fmt::format("{}/keep-around", path)));
+
     // Clean up
     FileOps::removeFile(fmt::format("{}/keep-around", path));
     FileOps::removeDir(path);
+
+    // Leave caches belonging to active processes alone.
+    auto activePath = fmt::format("{}/{}{}", opts->cacheDir, prefix, getpid());
+    FileOps::createDir(activePath);
+    auto dataPath = fmt::format("{}/data.mdb", activePath);
+    FileOps::write(dataPath, "");
+    realmain::cache::SessionCache::reapOldCaches(*opts);
+    CHECK(FileOps::exists(dataPath));
+    FileOps::removeFile(dataPath);
+    FileOps::removeDir(activePath);
+}
+
+TEST_CASE_FIXTURE(CacheProtocolTest, "CachePopulationWithPackages") {
+    // We're re-initializing everything for sorbet-packages, so we have to release the initial cache.
+    this->lspWrapper = nullptr;
+
+    {
+        auto opts = make_shared<realmain::options::Options>();
+        opts->cacheSensitiveOptions.sorbetPackages = true;
+        SUBCASE("Monolithic") {
+            opts->packageDirected = false;
+            resetState(opts);
+        }
+        SUBCASE("PackageDirected") {
+            opts->packageDirected = true;
+            resetState(opts);
+        }
+    }
+
+    REQUIRE_NE(this->lspWrapper, nullptr);
+
+    vector<pair<string, string>> files = {
+        {"__package.rb", PackageTextBuilder().withName("Root").build()},
+        {"a.rb", "# typed: true\n"
+                 "module Root\n"
+                 "  class A\n"
+                 "    def fun\n"
+                 "    end\n"
+                 "  end\n"
+                 "end\n"},
+        {"foo/__package.rb", PackageTextBuilder().withName("Root::Foo").withImports({"Root"}).build()},
+        {"foo/a.rb", "# typed: true\n"
+                     "module Root::Foo\n"
+                     "  class A\n"
+                     "    def foo\n"
+                     "      Root::A.new()\n"
+                     "    end\n"
+                     "  end\n"
+                     "end\n"},
+    };
+
+    writeFilesToFS(files);
+
+    for (auto &[path, _] : files) {
+        this->lspWrapper->opts->inputFileNames.emplace_back(fmt::format("{}/{}", this->rootPath, path));
+    }
+
+    // LSP should write a cache to disk corresponding to initialization state.
+    assertErrorDiagnostics(initializeLSP(), {});
+
+    auto opts = lspWrapper->opts;
+
+    // Close our handle to the cache.
+    this->lspWrapper = nullptr;
+
+    auto sink = make_shared<spdlog::sinks::null_sink_mt>();
+    auto logger = make_shared<spdlog::logger>("null", sink);
+    unique_ptr<const OwnedKeyValueStore> kvstore = realmain::cache::maybeCreateKeyValueStore(logger, *opts);
+
+    // The files should all exist in the cache
+    for (auto &[path, _] : files) {
+        auto fullPath = fmt::format("{}/{}", this->rootPath, path);
+        INFO("Checking ", fullPath);
+        auto val = kvstore->read(fullPath);
+        CHECK_NE(val.len, 0);
+        CHECK_NE(val.data, nullptr);
+    }
 }
 
 } // namespace sorbet::test::lsp

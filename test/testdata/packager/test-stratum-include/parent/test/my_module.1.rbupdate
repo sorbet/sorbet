@@ -1,0 +1,7 @@
+# typed: strict
+# frozen_string_literal: true
+# exclude-from-file-update: true
+# stratum: 2
+
+module Test::Parent::TestMixin
+end

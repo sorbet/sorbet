@@ -142,7 +142,7 @@ class Main
   extend T::Sig
 
   # (2) Use .on_failure in the sig for a method
-  #                                       ┌───────────────┐
+  #                                        ┌───────────────┐
   sig { params(argv: T::Array[String]).void.on_failure(:log) }
   def self.main(argv)
     puts argv
@@ -177,7 +177,7 @@ end
 
 # ...
 
-#                                       ┌─────────────────┐
+#                                        ┌─────────────────┐
 sig { params(argv: T::Array[String]).void.on_failure(:raise) }
 ```
 
@@ -195,14 +195,14 @@ But in some cases, especially when calling certain methods in tight loops or oth
 
 ```ruby
 # (1) Runtime checks always run.
-sig { params(xs: T::Array[String]).void.checked(:always) }
+sig { returns(String).checked(:always) }
 
 # (2) Runtime checks only run in "tests" (see below).
 # In non-tests, this sig specifically has no runtime overhead.
-sig { params(xs: T::Array[String]).void.checked(:tests) }
+sig { returns(String).checked(:tests) }
 
 # (3) Never runs the runtime checks. Careful!
-sig { params(xs: T::Array[String]).void.checked(:never) }
+sig { returns(String).checked(:never) }
 ```
 
 If `.checked(...)` is omitted on a sig, the default is `.checked(:always)`. The default checked level can also be configured. For example:
@@ -224,6 +224,35 @@ T::Configuration.enable_checking_for_sigs_marked_checked_tests
 This can also be set via the `SORBET_RUNTIME_ENABLE_CHECKING_IN_TESTS` environment variable, see [Environment Variables](tconfiguration.md#environment-variables) for more.
 
 For example, this should probably be placed as the first line of any `rake test` target, as well as any other entry point to a project's tests. If this line is absent, `.checked(:tests)` sigs behave as if they had been `.checked(:never)`.
+
+### `.checked(:tests)` and `.void`
+
+As of sorbet-runtime 0.6.13065, using `.checked(:tests)` on a sig that returns `.void` makes the sig behave like `.returns(T.anything)` at runtime, that is: the return value is not substituted with a dummy value. (Statically, `.void` and `.returns(T.anything)` remain equivalent).
+
+Normally, putting `.void` in a signature means that the return value will be discarded at runtime and [replaced with a dummy value](sigs.md#returns--void-annotating-return-types). For `.checked(:tests)` (as of `0.6.13065`), that dummy value replacement does not happen, and the original return value is returned untouched. This applies even if the `:tests` checked level of the sig was set implicitly by `default_checked_level = :tests`.
+
+This doesn't affect any other checking for the signature: call arguments will be checked at runtime against the declared parameter types in tests but not outside of tests (according to `enable_checking_for_sigs_marked_checked_tests`), like normal.
+
+This behavior leads to fewer discrepancies between test and non-test environments, making tests catch more problems.
+
+To avoid this behavior, there are some options:
+
+- Don't use `default_checked_level = :tests`. There are other reasons why runtime checking for signatures is important (e.g., if code is expecting and rescuing `TypeError`, then the test and non-test behavior will differ).
+
+- Explicitly return a dummy value, like `nil`, and enforce this via `returns(NilClass)`, or invent some other dummy value, like with an enum:
+
+  ```ruby
+  class Void < T::Enum
+    enums { VOID = new }
+  end
+
+  sig { returns(Void) }
+  def returns_void
+    Void::VOID
+  end
+  ```
+
+- Mark the sig `.checked(:always)`. This will mean that the arguments will always be checked, even in non-test environments, but it also means that the return value will be intercepted in all environments.
 
 ## `T::Sig::WithoutRuntime.sig`
 

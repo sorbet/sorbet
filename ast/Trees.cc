@@ -10,6 +10,22 @@ using namespace std;
 
 namespace sorbet::ast {
 
+static_assert(is_nothrow_constructible_v<ExpressionPtr>);
+static_assert(is_nothrow_default_constructible_v<ExpressionPtr>);
+static_assert(is_nothrow_move_constructible_v<ExpressionPtr>);
+static_assert(is_nothrow_assignable_v<ExpressionPtr, ExpressionPtr>);
+static_assert(is_nothrow_move_assignable_v<ExpressionPtr>);
+static_assert(is_nothrow_destructible_v<ExpressionPtr>);
+static_assert(is_nothrow_swappable_v<ExpressionPtr>);
+
+static_assert(is_nothrow_constructible_v<ParsedFile>);
+static_assert(is_nothrow_default_constructible_v<ParsedFile>);
+static_assert(is_nothrow_move_constructible_v<ParsedFile>);
+static_assert(is_nothrow_assignable_v<ParsedFile, ParsedFile>);
+static_assert(is_nothrow_move_assignable_v<ParsedFile>);
+static_assert(is_nothrow_destructible_v<ParsedFile>);
+static_assert(is_nothrow_swappable_v<ParsedFile>);
+
 #define CASE_STATEMENT(CASE_BODY, T) \
     case Tag::T: {                   \
         CASE_BODY(T)                 \
@@ -137,10 +153,10 @@ void ExpressionPtr::resetToEmpty(EmptyTree *expr) noexcept {
     resetTagged(tagPtr(ExpressionToTag<EmptyTree>::value, expr));
 }
 
+// Returns true for nodes that are a pure read, like from a local variable, instance variable, `self`, etc.
+// These can be copied with `MK::cpRef`.
 bool isa_reference(const ExpressionPtr &what) {
-    return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<RestParam>(what) ||
-           isa_tree<KeywordArg>(what) || isa_tree<OptionalParam>(what) || isa_tree<BlockParam>(what) ||
-           isa_tree<ShadowArg>(what) || isa_tree<Self>(what);
+    return isa_tree<Local>(what) || isa_tree<UnresolvedIdent>(what) || isa_tree<Self>(what);
 }
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
@@ -316,6 +332,18 @@ UnresolvedConstantLit::UnresolvedConstantLit(core::LocOffsets loc, ExpressionPtr
     _sanityCheck();
 }
 
+const ExpressionPtr &UnresolvedConstantLit::outermostScope() const {
+    auto current = this;
+    while (auto parent = cast_tree<UnresolvedConstantLit>(current->scope)) {
+        current = parent.get();
+    }
+    return current->scope;
+}
+
+ExpressionPtr &UnresolvedConstantLit::outermostScope() {
+    return const_cast<ExpressionPtr &>(std::as_const(*this).outermostScope());
+}
+
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
     categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
@@ -331,37 +359,40 @@ optional<pair<core::SymbolRef, vector<core::NameRef>>> ConstantLit::fullUnresolv
     if (this->symbol() != core::Symbols::StubModule()) {
         return nullopt;
     }
-    ENFORCE(this->resolutionScopes() != nullptr && !this->resolutionScopes()->empty());
 
+    // This list is in reverse order, but that doesn't matter because all we ever use this for is
+    // for Type hashing, and don't care about the order for that.
     vector<core::NameRef> namesFailedToResolve;
     auto *nested = this;
-    {
-        while (true) {
-            if (nested->resolutionScopes() == nullptr || nested->resolutionScopes()->empty()) [[unlikely]] {
-                ENFORCE(false);
-                bool hasScopes = nested->resolutionScopes() != nullptr;
-                fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}" hasScopes={})",
-                                   ctx.locAt(this->loc()).showRaw(ctx), hasScopes);
-                fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
-            }
+    do {
+        ENFORCE(nested->symbol() == core::Symbols::StubModule());
 
-            if (nested->resolutionScopes()->front().exists()) {
-                break;
-            }
-
-            auto &orig = *nested->original();
-            namesFailedToResolve.emplace_back(orig.cnst);
-            nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
-            ENFORCE(nested);
-            ENFORCE(nested->symbol() == core::Symbols::StubModule());
-            ENFORCE(!nested->resolutionScopes()->empty());
+        if (nested->resolutionScopes() == nullptr || nested->resolutionScopes()->empty()) [[unlikely]] {
+            ENFORCE(false);
+            bool hasScopes = nested->resolutionScopes() != nullptr;
+            fatalLogger->error(R"(msg="Bad fullUnresolvedPath" loc="{}" hasScopes={})",
+                               ctx.locAt(this->loc()).showRaw(ctx), hasScopes);
+            fatalLogger->error("source=\"{}\"", absl::CEscape(ctx.file.data(ctx).source()));
         }
+
         auto &orig = *nested->original();
         namesFailedToResolve.emplace_back(orig.cnst);
-        absl::c_reverse(namesFailedToResolve);
+
+        if (nested->resolutionScopes()->front().exists()) {
+            break;
+        }
+
+        ENFORCE(!isa_tree<ast::UnresolvedConstantLit>(orig.scope), "Should have resolved all consts");
+        // `orig.scope` won't necessarily be a `ConstantLit`, e.g. due to dynamic constant references
+        nested = ast::cast_tree<ast::ConstantLit>(orig.scope);
+    } while (nested != nullptr);
+
+    if (nested != nullptr) {
+        auto prefix = nested->resolutionScopes()->front();
+        return make_pair(prefix, move(namesFailedToResolve));
+    } else {
+        return make_pair(core::Symbols::ErrorNode(), move(namesFailedToResolve));
     }
-    auto prefix = nested->resolutionScopes()->front();
-    return make_pair(prefix, move(namesFailedToResolve));
 }
 
 Block::Block(core::LocOffsets loc, MethodDef::PARAMS_store params, ExpressionPtr body)
@@ -436,13 +467,11 @@ void printElems(const core::GlobalState &gs, fmt::memory_buffer &buf, absl::Span
         if (isa_tree<Block>(a)) {
             continue;
         }
-        if (!first) {
-            if (isa_tree<ShadowArg>(a) && !didshadow) {
-                fmt::format_to(std::back_inserter(buf), "; ");
-                didshadow = true;
-            } else {
-                fmt::format_to(std::back_inserter(buf), ", ");
-            }
+        if (isa_tree<ShadowArg>(a) && !didshadow) {
+            fmt::format_to(std::back_inserter(buf), "; ");
+            didshadow = true;
+        } else if (!first) {
+            fmt::format_to(std::back_inserter(buf), ", ");
         }
         first = false;
         fmt::format_to(std::back_inserter(buf), "{}", a.toStringWithTabs(gs, tabs + 1));
@@ -453,6 +482,20 @@ void printArgs(const core::GlobalState &gs, fmt::memory_buffer &buf, absl::Span<
     fmt::format_to(std::back_inserter(buf), "(");
     printElems(gs, buf, args, tabs);
     fmt::format_to(std::back_inserter(buf), ")");
+}
+
+// The name used for a block type in the `flags` list of a raw `Send`. Blocks without a known syntax aren't named at
+// all, as the `block` field already shows whether a block is present.
+string_view showBlockType(Send::BlockType type) {
+    switch (type) {
+        case Send::BlockType::None:
+        case Send::BlockType::Present:
+            return ""sv;
+        case Send::BlockType::DoEnd:
+            return "doEndBlock"sv;
+        case Send::BlockType::Braces:
+            return "bracesBlock"sv;
+    }
 }
 
 } // namespace
@@ -986,6 +1029,9 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) const {
     if (this->flags.isRewriterSynthesized) {
         stringifiedFlags.emplace_back("rewriterSynthesized");
     }
+    if (auto blockType = showBlockType(this->flags.blockType); !blockType.empty()) {
+        stringifiedFlags.emplace_back(blockType);
+    }
 
     printTabs(buf, tabs + 1);
     fmt::format_to(std::back_inserter(buf), "flags = {{{}}}\n", fmt::join(stringifiedFlags, ", "));
@@ -1110,7 +1156,7 @@ ExpressionPtr *Send::kwSplat() {
 
 void Send::clearArgs() {
     this->args.clear();
-    this->flags.hasBlock = false;
+    this->flags.blockType = BlockType::None;
     this->numPosArgs_ = 0;
 }
 
@@ -1125,15 +1171,15 @@ void Send::insertPosArg(uint16_t index, ExpressionPtr arg) {
     this->numPosArgs_++;
 }
 
-void Send::setBlock(ExpressionPtr block) {
+void Send::setBlock(ExpressionPtr block, BlockType type) {
     if (hasBlock()) {
         this->args.pop_back();
-        flags.hasBlock = false;
+        flags.blockType = BlockType::None;
     }
 
     if (block != nullptr) {
         this->args.emplace_back(move(block));
-        flags.hasBlock = true;
+        flags.blockType = type;
         ENFORCE(this->block() != nullptr);
     }
 }
@@ -1143,7 +1189,7 @@ ExpressionPtr Send::withNewBody(core::LocOffsets loc, ExpressionPtr recv, core::
 
     // Reset important metadata on this function.
     this->numPosArgs_ = 0;
-    this->flags.hasBlock = false;
+    this->flags.blockType = BlockType::None;
 
     return rv;
 }
@@ -1277,8 +1323,32 @@ string Block::showRaw(const core::GlobalState &gs, int tabs) const {
     return fmt::to_string(buf);
 }
 
+namespace {
+core::NameRef extractIdentName(const ExpressionPtr &expr) {
+    if (auto unresolvedIdent = cast_tree<UnresolvedIdent>(expr)) {
+        return unresolvedIdent->name;
+    } else {
+        return core::NameRef::noName();
+    }
+}
+} // namespace
+
 string RestParam::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return "*" + this->expr.toStringWithTabs(gs, tabs);
+    if (auto kwargSplat = cast_tree<KeywordArg>(this->expr)) { // Handle keyword arg splat, like `def foo(**kwargs)`
+        auto name = extractIdentName(kwargSplat->expr);
+        if (name == core::Names::starStar()) {
+            return "**";
+        } else {
+            return "**" + kwargSplat->expr.toStringWithTabs(gs, tabs);
+        }
+    } else { // Handle rest arg splat, like `def foo(*args)`
+        auto name = extractIdentName(this->expr);
+        if (name == core::Names::star()) {
+            return "*";
+        } else {
+            return "*" + this->expr.toStringWithTabs(gs, tabs);
+        }
+    }
 }
 
 string KeywordArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
@@ -1295,11 +1365,18 @@ string OptionalParam::toStringWithTabs(const core::GlobalState &gs, int tabs) co
 }
 
 string ShadowArg::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return this->expr.toStringWithTabs(gs, tabs);
+    auto name = this->expr.toStringWithTabs(gs, tabs);
+
+    // Shadow args can have an empty name in an error case like `do |;| end`
+    return name.empty() ? "<missing_block_local_params>" : name;
 }
 
 string BlockParam::toStringWithTabs(const core::GlobalState &gs, int tabs) const {
-    return "&" + this->expr.toStringWithTabs(gs, tabs);
+    if (extractIdentName(this->expr) == core::Names::ampersand()) { // Anonymous block param, like `def foo(&)`
+        return "&";
+    } else {
+        return "&" + this->expr.toStringWithTabs(gs, tabs);
+    }
 }
 
 string_view RescueCase::nodeName() const {
@@ -1490,7 +1567,7 @@ string_view Self::nodeName() const {
     return "Self";
 }
 
-ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt){};
+ParsedFilesOrCancelled::ParsedFilesOrCancelled() : trees(nullopt) {};
 ParsedFilesOrCancelled::ParsedFilesOrCancelled(vector<ParsedFile> &&trees) : trees(move(trees)) {}
 
 ParsedFilesOrCancelled ParsedFilesOrCancelled::cancel(std::vector<ParsedFile> &&trees, WorkerPool &workers) {
@@ -1718,6 +1795,9 @@ string Send::showRawWithLocs(const core::GlobalState &gs, core::FileRef file, in
     }
     if (this->flags.isRewriterSynthesized) {
         stringifiedFlags.emplace_back("rewriterSynthesized");
+    }
+    if (auto blockType = showBlockType(this->flags.blockType); !blockType.empty()) {
+        stringifiedFlags.emplace_back(blockType);
     }
 
     printTabs(buf, tabs + 1);

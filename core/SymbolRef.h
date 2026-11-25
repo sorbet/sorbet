@@ -125,7 +125,7 @@ private:
                                     bool showRaw = false) const;
 
 public:
-    ClassOrModuleRef() : _id(0){};
+    ClassOrModuleRef() : _id(0) {};
     ClassOrModuleRef(const GlobalState &from, uint32_t id);
 
     uint32_t id() const {
@@ -147,8 +147,8 @@ public:
     ConstClassOrModuleData data(const GlobalState &gs) const;
     ConstClassOrModuleData dataAllowingNone(const GlobalState &gs) const;
 
-    bool operator==(const ClassOrModuleRef &rhs) const;
-    bool operator!=(const ClassOrModuleRef &rhs) const;
+    bool operator==(const ClassOrModuleRef &rhs) const noexcept = default;
+    bool operator!=(const ClassOrModuleRef &rhs) const noexcept = default;
 
     std::string toString(const GlobalState &gs) const {
         bool showFull = false;
@@ -207,7 +207,7 @@ private:
                                     bool showRaw = false) const;
 
 public:
-    MethodRef() : _id(0){};
+    MethodRef() : _id(0) {};
     MethodRef(const GlobalState &from, uint32_t id);
 
     uint32_t id() const {
@@ -242,9 +242,8 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
 
-    bool operator==(const MethodRef &rhs) const;
-
-    bool operator!=(const MethodRef &rhs) const;
+    bool operator==(const MethodRef &rhs) const noexcept = default;
+    bool operator!=(const MethodRef &rhs) const noexcept = default;
 };
 CheckSize(MethodRef, 4, 4);
 
@@ -258,7 +257,7 @@ private:
                                     bool showRaw = false) const;
 
 public:
-    FieldRef() : _id(0){};
+    FieldRef() : _id(0) {};
     FieldRef(const GlobalState &from, uint32_t id);
 
     uint32_t id() const {
@@ -287,9 +286,8 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
 
-    bool operator==(const FieldRef &rhs) const;
-
-    bool operator!=(const FieldRef &rhs) const;
+    bool operator==(const FieldRef &rhs) const noexcept = default;
+    bool operator!=(const FieldRef &rhs) const noexcept = default;
 };
 CheckSize(FieldRef, 4, 4);
 
@@ -303,7 +301,7 @@ private:
                                     bool showRaw = false) const;
 
 public:
-    TypeMemberRef() : _id(0){};
+    TypeMemberRef() : _id(0) {};
     TypeMemberRef(const GlobalState &from, uint32_t id);
 
     uint32_t id() const {
@@ -331,9 +329,8 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
 
-    bool operator==(const TypeMemberRef &rhs) const;
-
-    bool operator!=(const TypeMemberRef &rhs) const;
+    bool operator==(const TypeMemberRef &rhs) const noexcept = default;
+    bool operator!=(const TypeMemberRef &rhs) const noexcept = default;
 };
 CheckSize(TypeMemberRef, 4, 4);
 
@@ -348,7 +345,7 @@ private:
                                     bool showRaw = false) const;
 
 public:
-    TypeParameterRef() : _id(0){};
+    TypeParameterRef() : _id(0) {};
     TypeParameterRef(const GlobalState &from, uint32_t id);
 
     uint32_t id() const {
@@ -376,9 +373,8 @@ public:
     };
     std::string show(const GlobalState &gs, ShowOptions options) const;
 
-    bool operator==(const TypeParameterRef &rhs) const;
-
-    bool operator!=(const TypeParameterRef &rhs) const;
+    bool operator==(const TypeParameterRef &rhs) const noexcept = default;
+    bool operator!=(const TypeParameterRef &rhs) const noexcept = default;
 };
 CheckSize(TypeParameterRef, 4, 4);
 
@@ -482,7 +478,7 @@ public:
     SymbolRef(FieldRef kls);
     SymbolRef(TypeMemberRef kls);
     SymbolRef(TypeParameterRef kls);
-    SymbolRef() : _id(0){};
+    SymbolRef() : _id(0) {};
 
     // From experimentation, in the common case, methods typically have 2 or fewer arguments.
     // Placed here so it can be used across packages for common case optimizations.
@@ -531,9 +527,8 @@ public:
     }
 
 public:
-    bool operator==(const SymbolRef &rhs) const;
-
-    bool operator!=(const SymbolRef &rhs) const;
+    bool operator==(const SymbolRef &rhs) const noexcept = default;
+    bool operator!=(const SymbolRef &rhs) const noexcept = default;
 
     // TODO(jvilk): Remove as many of these methods as possible in favor of callsites using .data on the more specific
     // symbol *Ref classes (e.g., ClassOrModuleRef). These were introduced to wean the codebase from calling
@@ -908,172 +903,164 @@ public:
         return ClassOrModuleRef::fromRaw(62);
     }
 
-    static ClassOrModuleRef Net() {
+    static ClassOrModuleRef T_Sig_WithoutRuntime() {
         return ClassOrModuleRef::fromRaw(63);
     }
 
-    static ClassOrModuleRef Net_IMAP() {
+    static ClassOrModuleRef Enumerator() {
         return ClassOrModuleRef::fromRaw(64);
     }
 
-    static ClassOrModuleRef Net_Protocol() {
+    static ClassOrModuleRef T_Enumerator() {
         return ClassOrModuleRef::fromRaw(65);
     }
 
-    static ClassOrModuleRef T_Sig_WithoutRuntime() {
+    static ClassOrModuleRef T_Enumerator_Lazy() {
         return ClassOrModuleRef::fromRaw(66);
     }
 
-    static ClassOrModuleRef Enumerator() {
+    static ClassOrModuleRef T_Enumerator_Chain() {
         return ClassOrModuleRef::fromRaw(67);
     }
 
-    static ClassOrModuleRef T_Enumerator() {
+    static ClassOrModuleRef T_Struct() {
         return ClassOrModuleRef::fromRaw(68);
     }
 
-    static ClassOrModuleRef T_Enumerator_Lazy() {
+    static ClassOrModuleRef Singleton() {
         return ClassOrModuleRef::fromRaw(69);
     }
 
-    static ClassOrModuleRef T_Enumerator_Chain() {
+    static ClassOrModuleRef T_Enum() {
         return ClassOrModuleRef::fromRaw(70);
     }
 
-    static ClassOrModuleRef T_Struct() {
-        return ClassOrModuleRef::fromRaw(71);
-    }
-
-    static ClassOrModuleRef Singleton() {
-        return ClassOrModuleRef::fromRaw(72);
-    }
-
-    static ClassOrModuleRef T_Enum() {
-        return ClassOrModuleRef::fromRaw(73);
-    }
-
-    static MethodRef sig() {
+    static MethodRef T_Enum_caseAngles() {
         return MethodRef::fromRaw(4);
     }
 
-    static ClassOrModuleRef Enumerator_Lazy() {
-        return ClassOrModuleRef::fromRaw(74);
-    }
-
-    static ClassOrModuleRef Enumerator_Chain() {
-        return ClassOrModuleRef::fromRaw(75);
-    }
-
-    static ClassOrModuleRef T_Private() {
-        return ClassOrModuleRef::fromRaw(76);
-    }
-
-    static ClassOrModuleRef T_Private_Types() {
-        return ClassOrModuleRef::fromRaw(77);
-    }
-
-    static ClassOrModuleRef T_Private_Types_Void() {
-        return ClassOrModuleRef::fromRaw(78);
-    }
-
-    static ClassOrModuleRef T_Private_Types_Void_VOID() {
-        return ClassOrModuleRef::fromRaw(79);
-    }
-
-    static ClassOrModuleRef T_Private_Types_Void_VOIDSingleton() {
-        return ClassOrModuleRef::fromRaw(80);
-    }
-
-    static ClassOrModuleRef T_Private_Methods() {
-        return ClassOrModuleRef::fromRaw(81);
-    }
-
-    static ClassOrModuleRef T_Private_Methods_DeclBuilder() {
-        return ClassOrModuleRef::fromRaw(82);
-    }
-
-    static MethodRef T_Private_Methods_DeclBuilder_abstract() {
+    static MethodRef sig() {
         return MethodRef::fromRaw(5);
     }
 
-    static MethodRef T_Private_Methods_DeclBuilder_overridable() {
+    static ClassOrModuleRef Enumerator_Lazy() {
+        return ClassOrModuleRef::fromRaw(71);
+    }
+
+    static ClassOrModuleRef Enumerator_Chain() {
+        return ClassOrModuleRef::fromRaw(72);
+    }
+
+    static ClassOrModuleRef T_Private() {
+        return ClassOrModuleRef::fromRaw(73);
+    }
+
+    static ClassOrModuleRef T_Private_Types() {
+        return ClassOrModuleRef::fromRaw(74);
+    }
+
+    static ClassOrModuleRef T_Private_Types_Void() {
+        return ClassOrModuleRef::fromRaw(75);
+    }
+
+    static ClassOrModuleRef T_Private_Types_Void_VOID() {
+        return ClassOrModuleRef::fromRaw(76);
+    }
+
+    static ClassOrModuleRef T_Private_Types_Void_VOIDSingleton() {
+        return ClassOrModuleRef::fromRaw(77);
+    }
+
+    static ClassOrModuleRef T_Private_Methods() {
+        return ClassOrModuleRef::fromRaw(78);
+    }
+
+    static ClassOrModuleRef T_Private_Methods_DeclBuilder() {
+        return ClassOrModuleRef::fromRaw(79);
+    }
+
+    static MethodRef T_Private_Methods_DeclBuilder_abstract() {
         return MethodRef::fromRaw(6);
     }
 
-    static MethodRef T_Private_Methods_DeclBuilder_override() {
+    static MethodRef T_Private_Methods_DeclBuilder_overridable() {
         return MethodRef::fromRaw(7);
     }
 
-    static ClassOrModuleRef T_Sig_WithoutRuntimeSingleton() {
-        return ClassOrModuleRef::fromRaw(83);
-    }
-
-    static MethodRef sigWithoutRuntime() {
+    static MethodRef T_Private_Methods_DeclBuilder_override() {
         return MethodRef::fromRaw(8);
     }
 
-    static ClassOrModuleRef PackageSpecRegistry() {
-        return ClassOrModuleRef::fromRaw(84);
+    static ClassOrModuleRef T_Sig_WithoutRuntimeSingleton() {
+        return ClassOrModuleRef::fromRaw(80);
     }
 
-    static ClassOrModuleRef PackageSpec() {
-        return ClassOrModuleRef::fromRaw(85);
-    }
-
-    static ClassOrModuleRef Encoding() {
-        return ClassOrModuleRef::fromRaw(86);
-    }
-
-    static ClassOrModuleRef Thread() {
-        return ClassOrModuleRef::fromRaw(87);
-    }
-
-    static MethodRef Class_new() {
+    static MethodRef sigWithoutRuntime() {
         return MethodRef::fromRaw(9);
     }
 
-    static MethodRef todoMethod() {
+    static ClassOrModuleRef PackageSpecRegistry() {
+        return ClassOrModuleRef::fromRaw(81);
+    }
+
+    static ClassOrModuleRef PackageSpec() {
+        return ClassOrModuleRef::fromRaw(82);
+    }
+
+    static ClassOrModuleRef Encoding() {
+        return ClassOrModuleRef::fromRaw(83);
+    }
+
+    static ClassOrModuleRef Thread() {
+        return ClassOrModuleRef::fromRaw(84);
+    }
+
+    static MethodRef Class_new() {
         return MethodRef::fromRaw(10);
     }
 
-    static MethodRef rootStaticInit() {
+    static MethodRef todoMethod() {
         return MethodRef::fromRaw(11);
     }
 
-    static ClassOrModuleRef MagicBindToAttachedClass() {
-        return ClassOrModuleRef::fromRaw(88);
-    }
-
-    static ClassOrModuleRef MagicBindToSelfType() {
-        return ClassOrModuleRef::fromRaw(89);
-    }
-
-    static ClassOrModuleRef T_Types() {
-        return ClassOrModuleRef::fromRaw(90);
-    }
-
-    static ClassOrModuleRef T_Types_Base() {
-        return ClassOrModuleRef::fromRaw(91);
-    }
-
-    static ClassOrModuleRef Data() {
-        return ClassOrModuleRef::fromRaw(92);
-    }
-
-    static ClassOrModuleRef T_Class() {
-        return ClassOrModuleRef::fromRaw(93);
-    }
-
-    static ClassOrModuleRef T_Module() {
-        return ClassOrModuleRef::fromRaw(94);
-    }
-
-    static MethodRef T_Generic_squareBrackets() {
+    static MethodRef rootStaticInit() {
         return MethodRef::fromRaw(12);
     }
 
-    static MethodRef Kernel_lambda() {
+    static ClassOrModuleRef MagicBindToAttachedClass() {
+        return ClassOrModuleRef::fromRaw(85);
+    }
+
+    static ClassOrModuleRef MagicBindToSelfType() {
+        return ClassOrModuleRef::fromRaw(86);
+    }
+
+    static ClassOrModuleRef T_Types() {
+        return ClassOrModuleRef::fromRaw(87);
+    }
+
+    static ClassOrModuleRef T_Types_Base() {
+        return ClassOrModuleRef::fromRaw(88);
+    }
+
+    static ClassOrModuleRef Data() {
+        return ClassOrModuleRef::fromRaw(89);
+    }
+
+    static ClassOrModuleRef T_Class() {
+        return ClassOrModuleRef::fromRaw(90);
+    }
+
+    static ClassOrModuleRef T_Module() {
+        return ClassOrModuleRef::fromRaw(91);
+    }
+
+    static MethodRef T_Generic_squareBrackets() {
         return MethodRef::fromRaw(13);
+    }
+
+    static MethodRef Kernel_lambda() {
+        return MethodRef::fromRaw(14);
     }
 
     static TypeParameterRef Kernel_lambda_returnType() {
@@ -1081,19 +1068,19 @@ public:
     }
 
     static MethodRef Kernel_lambdaTLet() {
-        return MethodRef::fromRaw(14);
-    }
-
-    static MethodRef Kernel_proc() {
         return MethodRef::fromRaw(15);
     }
 
-    static MethodRef Module_syntheticSquareBrackets() {
+    static MethodRef Kernel_proc() {
         return MethodRef::fromRaw(16);
     }
 
-    static MethodRef Sorbet_Private_Static_typeMember() {
+    static MethodRef Module_syntheticSquareBrackets() {
         return MethodRef::fromRaw(17);
+    }
+
+    static MethodRef Sorbet_Private_Static_typeMember() {
+        return MethodRef::fromRaw(18);
     }
 
     static TypeParameterRef Kernel_proc_returnType() {
@@ -1101,7 +1088,7 @@ public:
     }
 
     static ClassOrModuleRef Magic_UntypedSource() {
-        return ClassOrModuleRef::fromRaw(95);
+        return ClassOrModuleRef::fromRaw(92);
     }
 
     static FieldRef ErrorNode() {

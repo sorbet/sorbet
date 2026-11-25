@@ -5,9 +5,14 @@ module T::Props::WeakConstructor
   include T::Props::Optional
   extend T::Sig
 
+  # Shared default so zero-arg construction doesn't allocate a fresh Hash;
+  # the construct_props_* methods only ever read from `hash`.
+  EMPTY_HASH = T.let({}.freeze, T::Hash[Symbol, T.untyped])
+  private_constant :EMPTY_HASH
+
   # checked(:never) - O(runtime object construction)
   sig { params(hash: T::Hash[Symbol, T.untyped]).void.checked(:never) }
-  def initialize(hash={})
+  def initialize(hash=EMPTY_HASH)
     decorator = self.class.decorator
 
     hash_keys_matching_props = decorator.construct_props_with_defaults(self, hash) +
@@ -33,9 +38,9 @@ module T::Props::WeakConstructor::DecoratorMethods
     # Use `each_pair` rather than `count` because, as of Ruby 2.6, the latter delegates to Enumerator
     # and therefore allocates for each entry.
     result = 0
-    props_without_defaults&.each_pair do |p, setter_proc|
+    props_without_defaults&.each_pair do |p, bound_setter|
       if hash.key?(p)
-        instance.instance_exec(hash[p], &setter_proc)
+        bound_setter.call(instance, hash[p])
         result += 1
       end
     end
@@ -56,7 +61,7 @@ module T::Props::WeakConstructor::DecoratorMethods
     result = 0
     props_with_defaults&.each_pair do |p, default_struct|
       if hash.key?(p)
-        instance.instance_exec(hash[p], &default_struct.setter_proc)
+        default_struct.bound_setter_proc.call(instance, hash[p])
         result += 1
       else
         default_struct.set_default(instance)

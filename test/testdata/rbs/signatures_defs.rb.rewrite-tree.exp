@@ -87,7 +87,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:p, <emptyTree>::<C Integer>).void()
   end
 
-  def sig_mismatch10<<todo method>>(*p:, &<blk>)
+  def sig_mismatch10<<todo method>>(**p, &<blk>)
     <emptyTree>
   end
 
@@ -253,7 +253,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.params(:p1, <emptyTree>::<C P1>, :p2, ::<root>::<C T>.nilable(<emptyTree>::<C P2>), :p3, <emptyTree>::<C P3>, :p4, <emptyTree>::<C P4>, :p5, ::<root>::<C T>.nilable(<emptyTree>::<C P5>), :p6, <emptyTree>::<C P6>, :block, ::<root>::<C T>.proc().void()).void()
   end
 
-  def method17<<todo method>>(p1, p2 = nil, *p3, p4:, p5: = nil, *p6:, &block)
+  def method17<<todo method>>(p1, p2 = nil, *p3, p4:, p5: = nil, **p6, &block)
     begin
       <emptyTree>::<C T>.reveal_type(p1)
       <emptyTree>::<C T>.reveal_type(p2)
@@ -341,6 +341,17 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def bar<<todo method>>(x, &<blk>)
     <emptyTree>::<C T>.reveal_type(x)
+  end
+
+  ::T::Sig::WithoutRuntime.sig() do ||
+    <self>.params(:rest, <emptyTree>::<C P1>, :trailing, <emptyTree>::<C P2>).void()
+  end
+
+  def trailing1<<todo method>>(*rest, trailing, &<blk>)
+    begin
+      <emptyTree>::<C T>.reveal_type(rest)
+      <emptyTree>::<C T>.reveal_type(trailing)
+    end
   end
 
   <self>.extend(<emptyTree>::<C T>::<C Sig>)
@@ -674,7 +685,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract5<<todo method>>(&<blk>)
-        <self>.puts("foo")
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -682,10 +693,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
 
       def method_abstract6<<todo method>>(&<blk>)
-        begin
-          <self>.puts("foo")
-          <self>.raise("foo")
-        end
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
@@ -708,32 +716,60 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
-      def method_abstract8<<todo method>>(&<blk>)
-        <emptyTree>
-      end
-
-      ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.abstract().returns(<emptyTree>::<C Integer>)
-      end
-
       def method_abstract9<<todo method>>(&<blk>)
-        <emptyTree>::<C Abstract>.raise()
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().params(:i, <emptyTree>::<C Integer>).returns(<emptyTree>::<C Integer>)
+      end
+
+      def method_abstract10<<todo method>>(i:, &<blk>)
+        <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
         <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
-      def method_abstract10<<todo method>>(&<blk>)
+      def method_abstract_private<<todo method>>(&<blk>)
         <emptyTree>
       end
 
       ::T::Sig::WithoutRuntime.sig() do ||
-        <self>.returns(::<root>::<C T>.noreturn())
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
       end
 
-      def self.raise<<todo method>>(&<blk>)
-        <self>.raise()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def multiple_signatures<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def repeated_annotations<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def repeated_private<<todo method>>(&<blk>)
+        <emptyTree>
+      end
+
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().abstract().returns(<emptyTree>::<C Integer>)
+      end
+
+      def repeated_empty<<todo method>>(&<blk>)
+        <emptyTree>
       end
 
       <runtime method definition of method_abstract1>
@@ -752,21 +788,62 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
       <runtime method definition of method_abstract8>
 
-      <runtime method definition of method_abstract8>
-
       <runtime method definition of method_abstract9>
 
       <runtime method definition of method_abstract10>
 
-      <runtime method definition of self.raise>
+      <self>.private(<runtime method definition of method_abstract_private>)
 
-      class <emptyTree>::<C Error><<C <todo sym>>> < (<emptyTree>::<C StandardError>)
-      end
+      <runtime method definition of multiple_signatures>
+
+      <runtime method definition of repeated_annotations>
+
+      <self>.private(<runtime method definition of repeated_private>)
+
+      <runtime method definition of repeated_empty>
 
       <self>.extend(::<root>::<C T>::<C Helpers>)
 
       <self>.abstract!()
     end
+
+    module <emptyTree>::<C Interface><<C <todo sym>>> < ()
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.abstract().params(:i, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
+      end
+
+      def foo<<todo method>>(i:, &<blk>)
+        <emptyTree>
+      end
+
+      <runtime method definition of foo>
+
+      <self>.extend(::<root>::<C T>::<C Helpers>)
+
+      <self>.interface!()
+    end
+
+    class <emptyTree>::<C ImplementationParent><<C <todo sym>>> < (::<todo sym>)
+      ::T::Sig::WithoutRuntime.sig() do ||
+        <self>.params(:i, <emptyTree>::<C Integer>).returns(<emptyTree>::<C String>)
+      end
+
+      def foo<<todo method>>(i:, &<blk>)
+        i.to_s()
+      end
+
+      <runtime method definition of foo>
+    end
+
+    class <emptyTree>::<C InheritedImplementation><<C <todo sym>>> < (<emptyTree>::<C ImplementationParent>)
+      <self>.include(<emptyTree>::<C Interface>)
+    end
+
+    class <emptyTree>::<C MissingImplementation><<C <todo sym>>> < (::<todo sym>)
+      <self>.include(<emptyTree>::<C Interface>)
+    end
+
+    <emptyTree>::<C T>.reveal_type(<emptyTree>::<C InheritedImplementation>.new().foo(:i, 1))
 
     class <emptyTree>::<C Final><<C <todo sym>>> < (::<todo sym>)
       ::T::Sig::WithoutRuntime.sig(:final) do ||
@@ -816,4 +893,6 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     <self>.public(<runtime method definition of method3>)
   end
+
+  <runtime method definition of trailing1>
 end

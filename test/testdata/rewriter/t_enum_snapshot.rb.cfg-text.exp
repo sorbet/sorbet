@@ -71,7 +71,7 @@ bb6[firstDead=-1](<self>: T.class_of(MyEnum), <block-pre-call-temp>$23: Sorbet::
 bb7[firstDead=5](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(MyEnum)):
     <statTemp>$21: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$23, enums>
     <self>: T.class_of(MyEnum) = <selfRestore>$24
-    <statTemp>$52: T.class_of(MyEnum) = <self>: T.class_of(MyEnum).public()
+    <statTemp>$52: NilClass = <self>: T.class_of(MyEnum).public()
     <returnMethodTemp>$2: Symbol(:serialize) = :serialize
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:serialize)
     <unconditional> -> bb1
@@ -271,7 +271,7 @@ bb6[firstDead=-1](<self>: T.class_of(EnumsDoEnum), <block-pre-call-temp>$23: Sor
 bb7[firstDead=5](<block-pre-call-temp>$23: Sorbet::Private::Static::Void, <selfRestore>$24: T.class_of(EnumsDoEnum)):
     <statTemp>$21: Sorbet::Private::Static::Void = Solve<<block-pre-call-temp>$23, enums>
     <self>: T.class_of(EnumsDoEnum) = <selfRestore>$24
-    <statTemp>$53: T.class_of(EnumsDoEnum) = <self>: T.class_of(EnumsDoEnum).public()
+    <statTemp>$53: NilClass = <self>: T.class_of(EnumsDoEnum).public()
     <returnMethodTemp>$2: Symbol(:serialize) = :serialize
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:serialize)
     <unconditional> -> bb1
@@ -461,7 +461,7 @@ bb7[firstDead=17](<block-pre-call-temp>$32: Sorbet::Private::Static::Void, <self
     keep_for_ide$57: T.untyped = <keep-alive> keep_for_ide$57
     <castTemp>$59: Integer(1) = 1
     <C StaticField4>$56: Integer = cast(<castTemp>$59: Integer(1), Integer);
-    <statTemp>$60: T.class_of(BadConsts) = <self>: T.class_of(BadConsts).public()
+    <statTemp>$60: NilClass = <self>: T.class_of(BadConsts).public()
     <returnMethodTemp>$2: Symbol(:serialize) = :serialize
     <finalReturn>: T.noreturn = return <returnMethodTemp>$2: Symbol(:serialize)
     <unconditional> -> bb1

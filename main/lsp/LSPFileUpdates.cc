@@ -5,6 +5,9 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
+    ENFORCE(this->updatedFiles.size() == this->updatedFileRefs.size());
+    ENFORCE(older.updatedFiles.size() == older.updatedFileRefs.size());
+
     editCount += older.editCount;
     committedEditCount += older.committedEditCount;
     hasNewFiles = hasNewFiles || older.hasNewFiles;
@@ -12,17 +15,18 @@ void LSPFileUpdates::mergeOlder(const LSPFileUpdates &older) {
     preemptionsExpected += older.preemptionsExpected;
 
     // For updates, we prioritize _newer_ updates.
-    UnorderedSet<string> encountered;
-    for (auto &f : updatedFiles) {
-        encountered.emplace(f->path());
-    }
+    UnorderedSet<core::FileRef> encountered(this->updatedFileRefs.begin(), this->updatedFileRefs.end());
 
-    for (auto &f : older.updatedFiles) {
-        if (encountered.contains(f->path())) {
+    auto ix = -1;
+    for (auto fref : older.updatedFileRefs) {
+        ++ix;
+
+        if (encountered.contains(fref)) {
             continue;
         }
-        encountered.emplace(f->path());
-        updatedFiles.push_back(f);
+        encountered.emplace(fref);
+        this->updatedFileRefs.push_back(fref);
+        this->updatedFiles.push_back(older.updatedFiles[ix]);
     }
     typecheckingPath = TypecheckingPath::Slow;
 }
@@ -34,6 +38,7 @@ LSPFileUpdates LSPFileUpdates::copy() const {
     copy.committedEditCount = committedEditCount;
     copy.typecheckingPath = typecheckingPath;
     copy.hasNewFiles = hasNewFiles;
+    copy.updatedFileRefs = updatedFileRefs;
     copy.updatedFiles = updatedFiles;
     copy.cancellationExpected = cancellationExpected;
     copy.preemptionsExpected = preemptionsExpected;
@@ -41,52 +46,6 @@ LSPFileUpdates LSPFileUpdates::copy() const {
 }
 
 namespace {
-
-// Returns `true` if the two containers share a value, and `false` otherwise. This requires that the two containers are
-// sorted, which is also a requirement of using `absl::c_set_intersetion`, so this is a drop-in replacement when the
-// resulting set isn't needed.
-//
-// This is adapted from
-// https://github.com/llvm/llvm-project/blob/b89e774672678ef26baf8f94c616f43551d29428/libcxx/include/__algorithm/set_intersection.h#L47-L123
-// and modified to return early when any intersection is found.
-bool intersects(const vector<core::WithoutUniqueNameHash> &changed, const vector<core::WithoutUniqueNameHash> &used) {
-    auto changedIt = changed.begin();
-    auto changedEnd = changed.end();
-    auto usedIt = used.begin();
-    auto usedEnd = used.end();
-
-    bool prevEqual = false;
-
-    while (usedIt != usedEnd) {
-        auto changedNext = std::lower_bound(changedIt, changedEnd, *usedIt);
-        std::swap(changedNext, changedIt);
-        bool changedEqual = changedNext == changedIt;
-
-        // If we didn't advance `changedIt`, and the previous lower_bound call for `used` also didn't advance `usedIt`,
-        // we've found a match.
-        if (changedEqual && prevEqual) {
-            return true;
-        }
-        prevEqual = changedEqual;
-
-        if (changedIt == changedEnd) {
-            break;
-        }
-
-        auto usedNext = std::lower_bound(usedIt, usedEnd, *changedIt);
-        std::swap(usedNext, usedIt);
-        bool usedEqual = usedNext == usedIt;
-
-        // If we didn't advance `usedIt`, and the previous lower_bound call for `changed` also didn't advance
-        // `changedIt`, we've found a match.
-        if (usedEqual && prevEqual) {
-            return true;
-        }
-        prevEqual = usedEqual;
-    }
-
-    return false;
-}
 
 // An output iterator that only writes out the `nameHash` component of a `SymbolHash`. This allows us to avoid
 // materializing a vector of `WithoutUniqueNameHash` when we're only interested in the `nameHash` components.
@@ -123,7 +82,7 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
     vector<core::WithoutUniqueNameHash> changedSymbolNameHashes;
 
     FastPathFilesToTypecheckResult result;
-    Timer timeit(config.logger, "compute_fast_path_file_set");
+    Timer timeit(*config.logger, "compute_fast_path_file_set");
     auto idx = -1;
     for (const auto &updatedFile : updatedFiles) {
         idx++;
@@ -202,11 +161,12 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
         }
 
         ENFORCE(oldFile->getFileHash() != nullptr);
-        if (!intersects(changedSymbolNameHashes, oldFile->getFileHash()->usages.nameHashes)) {
+        if (!core::WithoutUniqueNameHash::sortedIntersects(changedSymbolNameHashes,
+                                                           oldFile->getFileHash()->usages.nameHashes)) {
             continue;
         }
 
-        result.extraFiles.emplace_back(oldFile->path());
+        result.extraFiles.emplace_back(ref);
         result.totalChanged += 1;
 
         if (result.totalChanged > (2 * config.opts.lspMaxFilesOnFastPath)) {
@@ -216,19 +176,18 @@ LSPFileUpdates::fastPathFilesToTypecheck(const core::GlobalState &gs, const LSPC
             // The "2 * ..." is so that we can get a rough idea of whether there's an easy
             // bang-for-buck bump we could make to the threshold by reading the logs.
             //
-            // One of two things could be true:
-            // - We're running on the indexer thread to decide typecheckingPath, which only cares about how
-            //   many extra files there are, not what they are.
+            // One of three things could be true:
+            // - We're running on the indexer thread via commitEdit to decide typecheckingPath,
+            //   which only cares about how many extra files there are, not what they are.
+            // - We're running on the indexer thread via canPreempt to decide whether preemption
+            //   is possible, which also only cares about the count.
             // - We're running on the typechecker thread (knowing that typecheckingPath was already
             //   TypecheckingPath::Fast) and simply need to compute the list of files to typecheck.
             //   But that would be a contradiction--because otherwise the indexer would have marked
             //   the update as not being able to take the fast path.
             //
-            // So it's actually only the first thing that's true.
-
-            // Crude indicator of being on indexer thread, as the typechecker thread always
-            // calls us with an empty map of evictedFiles
-            ENFORCE(!evictedFiles.empty());
+            // So it's actually only one of the first two things that's true, and neither of which
+            // care about the full file list, so let's early exit.
             return result;
         }
     }

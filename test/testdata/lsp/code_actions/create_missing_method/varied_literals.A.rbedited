@@ -1,0 +1,19 @@
+# typed: true
+# selective-apply-code-action: refactor
+# enable-experimental-lsp-create-missing-method: true
+
+class VariedLiterals
+  extend T::Sig
+
+  sig { void }
+  def caller
+    process(nil, :my_symbol, 3.14, [1, 2, 3], {a: 1})
+#   ^^^^^^^ error: Method `process` does not exist on `VariedLiterals`
+#     ^ apply-code-action: [A] Create missing method
+  end
+
+  sig { params(param: NilClass, param1: Symbol, param2: Float, param3: [Integer, Integer, Integer], param4: {a: Integer}).returns(T.untyped) }
+  def process(param, param1, param2, param3, param4)
+    Kernel.raise NotImplementedError
+  end
+end

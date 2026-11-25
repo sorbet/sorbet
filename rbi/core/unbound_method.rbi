@@ -219,6 +219,7 @@ class UnboundMethod
   # end
   # C.instance_method(:bar).original_name # => :foo
   # ```
+  sig { returns(Symbol) }
   def original_name; end
 
   # Returns the parameter information of this method.

@@ -20,7 +20,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       end
     end
 
-    if <emptyTree>
+    if ::<ErrorNode>
       <self>.puts("hello")
     else
       <emptyTree>
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     end
   end
 
-  if <emptyTree>
+  if ::<ErrorNode>
     <self>.puts("hello")
   else
     <emptyTree>

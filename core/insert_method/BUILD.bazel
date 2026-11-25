@@ -1,0 +1,22 @@
+cc_library(
+    name = "insert_method",
+    srcs = glob(
+        [
+            "*.cc",
+            "*.h",
+        ],
+    ),
+    hdrs = [
+        "insert_method.h",
+    ],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//core",
+        "//core/source_generator",
+        "@com_google_absl//absl/strings",
+    ],
+)

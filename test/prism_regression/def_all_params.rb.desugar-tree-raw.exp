@@ -49,10 +49,10 @@ ClassDef{
           name = <U *>
         } }, RestParam{ expr = KeywordArg{ expr = UnresolvedIdent{
           kind = Local
-          name = <P <U **> $2>
+          name = <U **>
         } } }, BlockParam{ expr = UnresolvedIdent{
           kind = Local
-          name = <P <U &> $3>
+          name = <U &>
         } }]
       rhs = EmptyTree
     }

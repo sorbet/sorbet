@@ -1,0 +1,107 @@
+---
+id: load-time-tuning
+title: Load-time Tuning
+---
+
+`sorbet-runtime` uses lazy initialization internally, sometimes to eliminate load-time cycles, and sometimes to keep development code loading fast, but some applications benefit from **eager loading**, instead of lazy loading.
+
+These methods force that deferred work to happen eagerly:
+
+```ruby
+# Run all `sig {...}` blocks, redefining all associated methods with runtime checking
+# (or dropping the first-call wrapper, for `.checked(:never)` sigs)
+T::Utils.run_all_sig_blocks
+
+# The same, but for `T.type_alias` blocks
+T::Utils.run_all_type_alias_blocks
+
+# Force all T::Struct classes to generate their specialized serialization methods
+T::Utils.eagerly_define_all_lazy_props_methods!
+
+# (Optional, can break code) Free signatures whose runtime checks never run,
+# then garbage collect the type objects which were freed
+T::Utils.drop_unchecked_sigs!
+GC.start
+
+# Force every type object to build its lazily-initialized fields
+T::Utils.build_all_types
+```
+
+For certain applications, like HTTP services, these methods mitigate first-call or first-request latency spikes. It's the same idea behind projects like [nakayoshi_fork] and patterns like zeitwerk's `eager_load`.
+
+Call these methods **after** all application code has been loaded (e.g., in a Rails initializer or a `before_fork` hook) but **before** forking workers (so the initialized state is shared across processes via copy-on-write).
+
+The order matters. Running a `sig` block or a `T.type_alias` block creates the type objects it mentions, and `build_all_types` only reaches type objects that exist when it runs, so it goes last.
+
+`drop_unchecked_sigs!` is not always behavior preserving, [see below](#tutilsdrop_unchecked_sigs) for why. At a high level, this operation drops runtime `Signature` objects which are not strictly required for any runtime type checking, but means that all reflection APIs `sorbet-runtime` provides to reify a `Signature` object for a method will return `nil` (which can cause code depending on reflection to break). When using this method, be sure to call `GC.start` before `build_all_types` to avoid redundant work.
+
+[nakayoshi_fork]: https://github.com/ko1/nakayoshi_fork
+
+## `T::Utils.run_all_sig_blocks`
+
+```ruby
+T::Utils.run_all_sig_blocks
+```
+
+Method signatures (`sig { ... }`) are lazily evaluated: the block inside a `sig` doesn't run until the method is first called. This means the first call to any sig'd method is slower than subsequent calls.
+
+`run_all_sig_blocks` forces every pending sig block to evaluate immediately, so that the first real call to each method has no extra overhead.
+
+## `T::Utils.run_all_type_alias_blocks`
+
+```ruby
+T::Utils.run_all_type_alias_blocks
+```
+
+Type aliases created with `T.type_alias { ... }` lazily compute the aliased type the first time it's needed (either for runtime type checking or for reflection). This method forces all type alias objects in the process to resolve that computation eagerly.
+
+## `T::Utils.eagerly_define_all_lazy_props_methods!`
+
+```ruby
+T::Utils.eagerly_define_all_lazy_props_methods!
+```
+
+Classes that include `T::Props::Serializable` (including `T::Struct`) generate specialized `serialize` and `from_hash` methods using codegen for runtime performance (mostly: to avoid contention for VM-level method call caches). These specialized methods are usually generated lazily on the first call to the ser/de methods. This method eagerly generates these specialized methods.
+
+> **Note**: The `serialize` and `from_hash` methods on `T::Struct` have a number of [gotchas and legacy behaviors](tstruct.md#serialize-and-from_hash-converting-tstruct-to-and-from-hash).
+
+## `T::Utils.build_all_types`
+
+```ruby
+T::Utils.build_all_types
+```
+
+Type objects initialize lazily: composite types like `T.any` and `T::Array` coerce the types they wrap on first use, and simple types memoize their name and `T.nilable` form. In a forked worker, that first use writes onto a type object shared with the parent, copying the memory page that holds it. This method builds those fields for every type object in the process up front, so the pages stay shared after forking.
+
+## `T::Utils.drop_unchecked_sigs!`
+
+```ruby
+T::Utils.drop_unchecked_sigs!
+```
+
+A `sig` that never checks anything at runtime still costs memory: `sorbet-runtime` keeps its `Signature` object so that tools can introspect the method. These are the sigs marked `.checked(:never)`, plus the sigs marked `.checked(:tests)` outside of a test environment. In a large application they can hold many megabytes.
+
+This method frees the signatures that `sorbet-runtime` holds at the time of the call. There is no way back: nothing can rebuild a freed signature, because its `sig` block has already run.
+
+Call it once, **after** all application code has been loaded and **after** `T::Utils.run_all_sig_blocks`, so that every `sig` block has run and recorded its signature:
+
+```ruby
+T::Utils.run_all_sig_blocks
+T::Utils.drop_unchecked_sigs!
+GC.start
+T::Utils.build_all_types
+```
+
+If the application also calls `T::Utils.build_all_types`, call `drop_unchecked_sigs!` first, and run the garbage collector in between. The type objects that only the dropped signatures mention become garbage, but `build_all_types` finds type objects with `ObjectSpace.each_object`, which still sees them until the garbage collector runs. Without the `GC.start`, `build_all_types` spends time building lazy fields on type objects that are about to be freed.
+
+Signatures recorded after the call (for example by code that loads later) are kept as usual.
+
+> **Warning**: This method changes the result of `T::Utils.signature_for_method`. Before the call, it returns a signature for every method with a `sig`. After the call, it returns a signature only for methods whose sigs are checked at runtime (and for `abstract` methods), and `nil` for the rest. If you only call this method in production (as with the other methods on this page), `signature_for_method` will give different answers in production than in development and tests. Only call this method if no code in the application (including gems) relies on `signature_for_method` returning a signature for every method with a `sig`.
+
+Runtime dispatch never uses these signatures, so calls behave the same. Methods with such sigs keep no wrapper at all, so `Method#arity`, `Method#source_location` and `Method#parameters` report the same values as before. Apart from `signature_for_method`, the only other visible change is that final method violations lose the `Made final here:` source location.
+
+Signatures on `abstract` methods are never dropped, because `T::AbstractUtils` reads them at any time.
+
+> **Note**: An application that prepends `T::CompatibilityPatches::MethodExtensions` must take the `Method` object after the `sig` block has run. A handle taken from the first-call wrapper before that reports the parameters of the wrapper, because the patch can no longer find the dropped signature.
+
+> **Note**: A `sig` block that runs after this call cannot see a dropped signature on the method it overrides, so `sorbet-runtime` skips the override checks against that parent signature. This is another reason to call it only once all code has been loaded.

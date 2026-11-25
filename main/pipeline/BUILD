@@ -13,15 +13,15 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast/desugar",
+        "//ast/desugar/prism",
         "//ast/substitute",
         "//ast/treemap",
         "//cfg",
         "//cfg/builder",
         "//common/concurrency",
-        "//common/json2msgpack",
         "//common/kvstore",
         "//core",
-        "//core/proto",
+        "//core/json",
         "//core/serialize",
         "//definition_validator",
         "//infer",
@@ -38,6 +38,7 @@ cc_library(
         "//rbs",
         "//resolver",
         "//rewriter",
+        "@rapidjson",
     ],
 )
 
@@ -57,6 +58,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast/desugar",
+        "//ast/desugar/prism",
         "//ast/substitute",
         "//ast/treemap",
         "//cfg",

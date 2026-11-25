@@ -52,25 +52,16 @@ string prettyPrintRangeComment(string_view sourceLine, const Range &range, strin
                        string(numLeadingSpaces + sourceLineNumber.length() + 1, ' '), string(numCarets, '^'), comment);
 }
 
-template <typename T> bool isDuplicateDiagnostic(string_view filename, T *assertion, const Diagnostic &d) {
-    return assertion && assertion->matchesDuplicateErrors && assertion->matches(filename, *d.range) == 0 &&
-           d.message.find(assertion->message) != string::npos;
-}
-
 template <typename T>
-void reportMissingError(const string &filename, const T &assertion, string_view sourceLine, string_view errorPrefix,
-                        bool missingDuplicate = false) {
+void reportMissingError(const string &filename, const T &assertion, string_view sourceLine, string_view errorPrefix) {
     // Skip error message checking when running with Prism.
     if (sorbet::test::parser == realmain::options::Parser::PRISM) {
         return;
     }
 
-    auto coreMessage = missingDuplicate ? "Error was not duplicated" : "Did not find expected error";
-    auto messagePostfix = missingDuplicate ? "\nYou can fix this error by changing the assertion to `error:`." : "";
     ADD_FAIL_CHECK_AT(filename.c_str(), assertion.range->start->line + 1,
-                      fmt::format("{}{}:\n{}{}", errorPrefix, coreMessage,
-                                  prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString()),
-                                  messagePostfix));
+                      fmt::format("{}Did not find expected error:\n{}", errorPrefix,
+                                  prettyPrintRangeComment(sourceLine, *assertion.range, assertion.toString())));
 }
 
 void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic, string_view sourceLine,
@@ -87,9 +78,10 @@ void reportUnexpectedError(const string &filename, const Diagnostic &diagnostic,
     ADD_FAIL_CHECK_AT(
         filename.c_str(), diagnostic.range->start->line + 1,
         fmt::format(
-            "{}Found unexpected error:\n{}\nNote: If there is already an assertion for this error, then this is a "
-            "duplicate error. Change the assertion to `# error-with-dupes: <error message>` if the duplicate is "
-            "expected.",
+            "{}Found unexpected error:\n"
+            "{}\n"
+            "Note: If there is already an assertion for this error, then this is a duplicate error. "
+            "Change the assertion to `# ^^^ error:`-style assertions (one per error) if the duplicates are expected.",
             errorPrefix, prettyPrintRangeComment(sourceLine, *diagnostic.range, diagnosticMessage)));
 }
 string getSourceLine(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents, const string &filename,
@@ -143,8 +135,6 @@ bool checkAllInner(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::F
         });
 
         auto diagnosticsIt = diagnostics.begin();
-        T *lastAssertion = nullptr;
-        bool lastAssertionMatchedDuplicate = false;
 
         while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
             // See if the ranges match.
@@ -154,21 +144,6 @@ bool checkAllInner(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::F
             if (diagnostic->severity.value_or(T::severity) != T::severity) {
                 diagnosticsIt++;
                 continue;
-            }
-
-            if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
-                diagnosticsIt++;
-                lastAssertionMatchedDuplicate = true;
-                continue;
-            } else {
-                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
-                    reportMissingError(lastAssertion->filename, *lastAssertion,
-                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
-                                       errorPrefix, true);
-                    success = false;
-                }
-                lastAssertionMatchedDuplicate = false;
-                lastAssertion = nullptr;
             }
 
             const int cmp = assertion->matches(filename, *diagnostic->range);
@@ -196,8 +171,6 @@ bool checkAllInner(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::F
                                            errorPrefix) &&
                           success;
                 // We've 'consumed' the diagnostic and assertion.
-                // Save assertion in case it matches multiple diagnostics.
-                lastAssertion = assertion.get();
                 diagnosticsIt++;
                 assertionsIt++;
             }
@@ -212,21 +185,9 @@ bool checkAllInner(const sorbet::UnorderedMap<string, shared_ptr<sorbet::core::F
                 continue;
             }
 
-            if (isDuplicateDiagnostic(filename, lastAssertion, *diagnostic)) {
-                lastAssertionMatchedDuplicate = true;
-            } else {
-                reportUnexpectedError(filename, *diagnostic,
-                                      getSourceLine(files, filename, diagnostic->range->start->line), errorPrefix);
-                success = false;
-
-                if (lastAssertion && lastAssertion->matchesDuplicateErrors && !lastAssertionMatchedDuplicate) {
-                    reportMissingError(lastAssertion->filename, *lastAssertion,
-                                       getSourceLine(files, lastAssertion->filename, lastAssertion->range->start->line),
-                                       errorPrefix, true);
-                }
-                lastAssertion = nullptr;
-                lastAssertionMatchedDuplicate = false;
-            }
+            reportUnexpectedError(filename, *diagnostic, getSourceLine(files, filename, diagnostic->range->start->line),
+                                  errorPrefix);
+            success = false;
             diagnosticsIt++;
         }
     }
@@ -254,7 +215,6 @@ const UnorderedMap<
     assertionConstructors = {
         {"untyped", UntypedAssertion::make},
         {"error", ErrorAssertion::make},
-        {"error-with-dupes", ErrorAssertion::make},
         {"usage", UsageAssertion::make},
         {"import", ImportAssertion::make},
         {"importusage", ImportUsageAssertion::make},
@@ -264,21 +224,26 @@ const UnorderedMap<
         {"highlight-untyped-values", BooleanPropertyAssertion::make},
         {"disable-fast-path", BooleanPropertyAssertion::make},
         {"disable-stress-incremental", BooleanPropertyAssertion::make},
+        {"disable-parser-comparison", BooleanPropertyAssertion::make},
         {"uniquely-defined-behavior", BooleanPropertyAssertion::make},
         {"check-out-of-order-constant-references", BooleanPropertyAssertion::make},
         {"enable-packager", BooleanPropertyAssertion::make},
+        {"enable-package-directed", BooleanPropertyAssertion::make},
         {"enable-experimental-rbs-comments", BooleanPropertyAssertion::make},
         {"enable-experimental-requires-ancestor", BooleanPropertyAssertion::make},
         {"enable-experimental-rspec", BooleanPropertyAssertion::make},
+        {"enable-experimental-method-modifiers", BooleanPropertyAssertion::make},
         {"experimental-ruby3-keyword-args", BooleanPropertyAssertion::make},
         {"typed-super", BooleanPropertyAssertion::make},
         {"enable-suggest-unsafe", BooleanPropertyAssertion::make},
         {"enable-experimental-lsp-extract-to-variable", BooleanPropertyAssertion::make},
+        {"enable-experimental-lsp-create-missing-method", BooleanPropertyAssertion::make},
         {"selective-apply-code-action", StringPropertyAssertions::make},
         {"use-code-action-resolve", BooleanPropertyAssertion::make},
         {"assert-no-code-action", StringPropertyAssertions::make},
         {"assert-fast-path", FastPathAssertion::make},
         {"assert-slow-path", BooleanPropertyAssertion::make},
+        {"omit-apply-all-quickfix", BooleanPropertyAssertion::make},
         {"hover", HoverAssertion::make},
         {"hover-line", HoverLineAssertion::make},
         {"completion", CompletionAssertion::make},
@@ -287,7 +252,6 @@ const UnorderedMap<
         {"no-stdlib", BooleanPropertyAssertion::make},
         {"symbol-search", SymbolSearchAssertion::make},
         {"apply-rename", ApplyRenameAssertion::make},
-        {"extra-package-files-directory-prefix-underscore", StringPropertyAssertion::make},
         {"extra-package-files-directory-prefix-slash-deprecated", StringPropertyAssertion::make},
         {"extra-package-files-directory-prefix-slash", StringPropertyAssertion::make},
         {"allow-relaxed-packager-checks-for", StringPropertyAssertion::make},
@@ -300,21 +264,13 @@ const UnorderedMap<
         {"hierarchy-ref-set", HierarchyRefSetAssertion::make},
         {"find-hierarchy-refs", FindHierarchyRefsAssertion::make},
         {"hierarchy-ref", HierarchyRefAssertion::make},
+        {"stratum", StratumAssertion::make},
 };
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
 const UnorderedSet<string> ignoredAssertionLabels = {
-    "typed",
-    "TODO",
-    "linearization",
-    "commented-out-error",
-    "Note",
-    "NOTE",
-    "See",
-    "packaged",
-    "rubyfmt-force-exit",
-    "compiled",
-    "exclude-from-file-update",
+    "typed", "TODO",     "linearization", "commented-out-error",      "Note", "NOTE",
+    "See",   "packaged", "compiled",      "exclude-from-file-update",
 };
 
 constexpr string_view NOTHING_LABEL = "(nothing)"sv;
@@ -484,19 +440,16 @@ int RangeAssertion::cmp(const RangeAssertion &b) const {
     return toString().compare(b.toString());
 }
 
-ErrorAssertion::ErrorAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message,
-                               bool matchesDuplicateErrors)
-    : RangeAssertion(filename, range, assertionLine), message(message), matchesDuplicateErrors(matchesDuplicateErrors) {
-}
+ErrorAssertion::ErrorAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine, string_view message)
+    : RangeAssertion(filename, range, assertionLine), message(message) {}
 
 shared_ptr<ErrorAssertion> ErrorAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                 string_view assertionContents, string_view assertionType) {
-    return make_shared<ErrorAssertion>(filename, range, assertionLine, assertionContents,
-                                       assertionType == "error-with-dupes");
+    return make_shared<ErrorAssertion>(filename, range, assertionLine, assertionContents);
 }
 
 string ErrorAssertion::toString() const {
-    return fmt::format("{}: {}", (matchesDuplicateErrors ? "error-with-dupes" : "error"), message);
+    return fmt::format("error: {}", message);
 }
 
 bool ErrorAssertion::check(const Diagnostic &diagnostic, string_view sourceLine, string_view errorPrefix) {
@@ -553,28 +506,6 @@ bool UntypedAssertion::check(const Diagnostic &diagnostic, string_view sourceLin
 
 unique_ptr<Range> RangeAssertion::makeRange(int sourceLine, int startChar, int endChar) {
     return make_unique<Range>(make_unique<Position>(sourceLine, startChar), make_unique<Position>(sourceLine, endChar));
-}
-
-vector<shared_ptr<ErrorAssertion>>
-RangeAssertion::getErrorAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
-    vector<shared_ptr<ErrorAssertion>> rv;
-    for (auto assertion : assertions) {
-        if (auto assertionOfType = dynamic_pointer_cast<ErrorAssertion>(assertion)) {
-            rv.push_back(assertionOfType);
-        }
-    }
-    return rv;
-}
-
-vector<shared_ptr<UntypedAssertion>>
-RangeAssertion::getUntypedAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
-    vector<shared_ptr<UntypedAssertion>> rv;
-    for (auto assertion : assertions) {
-        if (auto assertionOfType = dynamic_pointer_cast<UntypedAssertion>(assertion)) {
-            rv.push_back(assertionOfType);
-        }
-    }
-    return rv;
 }
 
 vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core::File> &file) {
@@ -701,6 +632,10 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
         BooleanPropertyAssertion::getValue("enable-experimental-requires-ancestor", assertions).value_or(false);
     opts.cacheSensitiveOptions.rspecRewriterEnabled =
         BooleanPropertyAssertion::getValue("enable-experimental-rspec", assertions).value_or(false);
+    auto experimentalMethodModifiers =
+        BooleanPropertyAssertion::getValue("enable-experimental-method-modifiers", assertions);
+    opts.experimentalMethodModifiers = experimentalMethodModifiers.has_value() ? experimentalMethodModifiers.value()
+                                                                               : opts.cacheSensitiveOptions.rbsEnabled;
     opts.ruby3KeywordArgs =
         BooleanPropertyAssertion::getValue("experimental-ruby3-keyword-args", assertions).value_or(false);
     opts.cacheSensitiveOptions.typedSuper =
@@ -719,12 +654,6 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
 
     opts.cacheSensitiveOptions.sorbetPackages =
         BooleanPropertyAssertion::getValue("enable-packager", assertions).value_or(false);
-    auto extraDirUnderscore =
-        StringPropertyAssertion::getValue("extra-package-files-directory-prefix-underscore", assertions);
-    if (extraDirUnderscore.has_value()) {
-        opts.extraPackageFilesDirectoryUnderscorePrefixes.emplace_back(extraDirUnderscore.value());
-    }
-
     auto extraDirSlashDeprecated =
         StringPropertyAssertion::getValue("extra-package-files-directory-prefix-slash-deprecated", assertions);
     if (extraDirSlashDeprecated.has_value()) {
@@ -743,6 +672,8 @@ realmain::options::Options RangeAssertion::parseOptions(vector<shared_ptr<RangeA
 
     vector<string> defaultLayers = {};
     opts.packagerLayers = StringPropertyAssertions::getValues("packager-layers", assertions).value_or(defaultLayers);
+
+    opts.packageDirected = BooleanPropertyAssertion::getValue("enable-package-directed", assertions).value_or(false);
 
     return opts;
 }
@@ -811,7 +742,7 @@ vector<unique_ptr<Location>> &extractLocations(ResponseMessage &respMsg) {
     static vector<unique_ptr<Location>> empty;
     auto &result = *(respMsg.result);
     auto &locationsOrNull = get<variant<JSONNullObject, vector<unique_ptr<Location>>>>(result);
-    if (auto isNull = get_if<JSONNullObject>(&locationsOrNull)) {
+    if (get_if<JSONNullObject>(&locationsOrNull)) {
         return empty;
     }
     return get<vector<unique_ptr<Location>>>(locationsOrNull);
@@ -821,7 +752,7 @@ vector<unique_ptr<DocumentHighlight>> &extractDocumentHighlights(ResponseMessage
     static vector<unique_ptr<DocumentHighlight>> empty;
     auto &result = *(respMsg.result);
     auto &highlightsOrNull = get<variant<JSONNullObject, vector<unique_ptr<DocumentHighlight>>>>(result);
-    if (auto isNull = get_if<JSONNullObject>(&highlightsOrNull)) {
+    if (get_if<JSONNullObject>(&highlightsOrNull)) {
         return empty;
     }
     return get<vector<unique_ptr<DocumentHighlight>>>(highlightsOrNull);
@@ -1249,7 +1180,7 @@ optional<bool> BooleanPropertyAssertion::getValue(string_view type,
 
 BooleanPropertyAssertion::BooleanPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    bool value, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value) {};
 
 string BooleanPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
@@ -1280,7 +1211,7 @@ optional<string> StringPropertyAssertion::getValue(string_view type,
 
 StringPropertyAssertion::StringPropertyAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                  string value, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), value(value) {};
 
 string StringPropertyAssertion::toString() const {
     return fmt::format("{}: {}", assertionType, value);
@@ -1372,7 +1303,7 @@ void HoverAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &assertio
 
 // Retrieve contents of a Hover response as a string.
 string_view hoverToString(variant<JSONNullObject, unique_ptr<Hover>> &hoverResult) {
-    if (auto nullResp = get_if<JSONNullObject>(&hoverResult)) {
+    if (get_if<JSONNullObject>(&hoverResult)) {
         return NULL_LABEL;
     } else {
         auto &hover = get<unique_ptr<Hover>>(hoverResult);
@@ -1592,6 +1523,91 @@ void ApplyCompletionAssertion::checkAll(const vector<shared_ptr<RangeAssertion>>
     }
 }
 
+namespace {
+
+struct ColumnSpan {
+    // 0-indexed
+    long beginPos;
+    // 0-indexed
+    long endPos;
+};
+
+optional<ColumnSpan> findColumnsEnclosingPosition(const regex &wordDefinition, string_view text, int pos, int startPos,
+                                                  int stopPos) {
+    cmatch match;
+    auto beginPos = startPos, endPos = startPos;
+    while (regex_search(text.data() + beginPos, text.data() + text.size(), match, wordDefinition)) {
+        beginPos += match.position();
+        endPos = beginPos + match.length();
+
+        if (beginPos <= pos && pos <= endPos) {
+            return ColumnSpan{beginPos, endPos};
+        } else if (stopPos > 0 && stopPos < beginPos) {
+            return nullopt;
+        }
+
+        beginPos = endPos;
+    }
+
+    return nullopt;
+}
+
+// This function ported from JavaScript in VS Code to C++. Original code licensed under. MIT License
+// Copyright (c) 2015 - present Microsoft Corporation
+// https://github.com/microsoft/vscode/blob/107a52d8fa5ced7e1/src/vs/editor/common/core/wordHelper.ts#L98
+optional<ColumnSpan> getWordAtText(int pos, const regex &wordDefinition, string_view text) {
+    auto prevRegexIndex = -1;
+    optional<ColumnSpan> match = nullopt;
+
+    const uint32_t windowSize = 15;
+
+    for (auto i = 1;; i++) {
+        // Progressively widen the lookbehind around the cursor on the current line (steps of 15 chars)
+        int regexIndex = pos - windowSize * i;
+        auto thisMatch = findColumnsEnclosingPosition(wordDefinition, text, pos, max(0, regexIndex), prevRegexIndex);
+
+        if (!thisMatch.has_value() && match.has_value()) {
+            // stop: we have something
+            break;
+        }
+
+        match = thisMatch;
+
+        // stop: searched at start
+        if (regexIndex <= 0) {
+            break;
+        }
+        prevRegexIndex = regexIndex;
+    }
+
+    if (match.has_value()) {
+        return match;
+    }
+
+    return nullopt;
+}
+
+// This function ported from JavaScript in VS Code to C++. Original code licensed under. MIT License
+// Copyright (c) 2015 - present Microsoft Corporation
+// https://github.com/microsoft/vscode/blob/663d4b3a7dac23610/src/vs/workbench/api/common/extHostDocumentData.ts#L247
+unique_ptr<Range> getWordRangeAtPosition(const Position &position, const core::File &file) {
+    // This regex is a crude approximation. I couldn't find the precise regex that VS Code registers
+    // for Ruby. I've only validated that it works well enough to pass our tests, but this should
+    // not be the basis to power a language client implementation.
+    static const regex regexp(R"([^ !"#$%&'()*+,./:;<=>?@\[\\\]\^_`{|}~-]+)");
+
+    auto wordAtText = getWordAtText(position.character, regexp, file.getLine(position.line + 1));
+
+    if (wordAtText.has_value()) {
+        return make_unique<Range>(make_unique<Position>(position.line, wordAtText->beginPos),
+                                  make_unique<Position>(position.line, wordAtText->endPos));
+    }
+
+    return nullptr;
+}
+
+} // namespace
+
 void ApplyCompletionAssertion::check(const UnorderedMap<string, shared_ptr<core::File>> &sourceFileContents,
                                      LSPWrapper &wrapper, int &nextId, string errorPrefix) {
     auto completionList = doTextDocumentCompletion(wrapper, *this->range, nextId, this->filename);
@@ -1625,10 +1641,27 @@ void ApplyCompletionAssertion::check(const UnorderedMap<string, shared_ptr<core:
         return;
     }
 
-    REQUIRE_NE(completionItem->textEdit, nullopt);
-    auto &textEdit = completionItem->textEdit.value();
+    unique_ptr<TextEdit> textEdit;
+    if (completionItem->textEdit.has_value()) {
+        textEdit = move(completionItem->textEdit.value());
+    } else if (auto wordRange = getWordRangeAtPosition(*this->range->start, *file)) {
+        textEdit = make_unique<TextEdit>(move(wordRange), completionItem->insertText.value());
+    } else {
+        // No word at cursor position (likely: cursor something like `x.|`).
+        // Let's insert instead of replace.
+        textEdit = make_unique<TextEdit>(make_unique<Range>(this->range->start->copy(), this->range->start->copy()),
+                                         completionItem->insertText.value());
+    }
+
     auto reindent = true;
     auto actualEditedFileContents = applyEdit(file->source(), *file, *textEdit->range, textEdit->newText, reindent);
+
+    if (completionItem->additionalTextEdits.has_value()) {
+        for (const auto &textEdit : completionItem->additionalTextEdits.value()) {
+            actualEditedFileContents =
+                applyEdit(actualEditedFileContents, *file, *textEdit->range, textEdit->newText, /* false */ false);
+        }
+    }
 
     {
         CHECK_EQ_DIFF(expectedEditedFileContents, actualEditedFileContents,
@@ -1645,7 +1678,7 @@ shared_ptr<ApplyRenameAssertion> ApplyRenameAssertion::make(string_view filename
                                                             int assertionLine, string_view assertionContents,
                                                             string_view assertionType) {
     static const regex newNameRegex(
-        R"(^\[(\w+)\]\s+(?:(?:newName:\s+([a-zA-Z0-9_@]+))?\s?(?:placeholderText:\s+([^ ]+))?\s?(?:invalid:\s+(true))?\s?(?:expectedErrorMessage:\s+(.+))?)$)");
+        R"(^\[(\w+)\]\s+(?:(?:newName:\s+([a-zA-Z0-9_@]+=?))?\s?(?:placeholderText:\s+([^ ]+))?\s?(?:invalid:\s+(true))?\s?(?:expectedErrorMessage:\s+(.+))?)$)");
 
     smatch matches;
     string assertionContentsString = string(assertionContents);
@@ -2344,7 +2377,7 @@ void ShowSymbolAssertion::checkAll(const vector<shared_ptr<RangeAssertion>> &ass
 }
 
 string_view symbolInformationToString(variant<JSONNullObject, unique_ptr<SymbolInformation>> &showSymbolResult) {
-    if (auto nullResp = get_if<JSONNullObject>(&showSymbolResult)) {
+    if (get_if<JSONNullObject>(&showSymbolResult)) {
         return NULL_LABEL;
     } else {
         auto &symbolInformation = get<unique_ptr<SymbolInformation>>(showSymbolResult);
@@ -2379,6 +2412,13 @@ void ShowSymbolAssertion::check(const UnorderedMap<string, shared_ptr<core::File
                                       errorPrefix, prettyPrintRangeComment(sourceLine, *range, toString()),
                                       prettyPrintRangeComment(sourceLine, *range,
                                                               fmt::format("show-symbol: {}", showSymbolContents))));
+    } else if (holds_alternative<unique_ptr<SymbolInformation>>(showSymbolResponse) &&
+               get<unique_ptr<SymbolInformation>>(showSymbolResponse)->location == nullptr) {
+        auto sourceLine = getSourceLine(sourceFileContents, filename, range->start->line);
+        ADD_FAIL_CHECK_AT(filename.c_str(), range->start->line + 1,
+                          fmt::format("{}This `show-symbol` has `nullptr` for `location`:\n{}", errorPrefix,
+                                      prettyPrintRangeComment(sourceLine, *range,
+                                                              fmt::format("show-symbol: {}", showSymbolContents))));
     }
 }
 
@@ -2409,7 +2449,7 @@ shared_ptr<StringPropertyAssertions> StringPropertyAssertions::make(string_view 
 
 StringPropertyAssertions::StringPropertyAssertions(string_view filename, unique_ptr<Range> &range, int assertionLine,
                                                    vector<string> values, string_view assertionType)
-    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values){};
+    : RangeAssertion(filename, range, assertionLine), assertionType(string(assertionType)), values(values) {};
 
 optional<vector<string>> StringPropertyAssertions::getValues(string_view type,
                                                              const vector<shared_ptr<RangeAssertion>> &assertions) {
@@ -2515,6 +2555,25 @@ shared_ptr<HierarchyRefAssertion> HierarchyRefAssertion::make(string_view filena
 
 string HierarchyRefAssertion::toString() const {
     return fmt::format("find-hierarchy-refs: {}", symbol);
+}
+
+shared_ptr<StratumAssertion> StratumAssertion::make(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                                    string_view assertionContents, string_view assertionType) {
+    int value;
+    int success = absl::SimpleAtoi(assertionContents, &value);
+    {
+        INFO("Invalid integer value: '" << assertionContents << "'");
+        CHECK(success);
+    }
+    return make_shared<StratumAssertion>(filename, range, assertionLine, core::packages::Stratum(value));
+}
+
+StratumAssertion::StratumAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine,
+                                   core::packages::Stratum value)
+    : RangeAssertion(filename, range, assertionLine), value(value) {};
+
+string StratumAssertion::toString() const {
+    return fmt::format("stratum: {}", value.rawId());
 }
 
 } // namespace sorbet::test

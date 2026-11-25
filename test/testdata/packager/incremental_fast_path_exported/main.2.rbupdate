@@ -6,7 +6,6 @@ module Root
     T.reveal_type(Lib::MyStaticField) # error: `T.untyped`
     #             ^^^^^^^^^^^^^^^^^^ error: Unable to resolve
     T.reveal_type(Lib::MyPrivateStaticField)
-    #             ^^^^^^^^^^^^^^^^^^^^^^^^^ error: resolves but is not exported
   # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Integer`
   end
 end

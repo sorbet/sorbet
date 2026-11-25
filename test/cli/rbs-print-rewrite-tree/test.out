@@ -1,74 +1,128 @@
-No errors! Great job.
-Begin {
-  stmts = [
-    Send {
-      receiver = NULL
-      method = <U extend>
-      args = [
-        Const {
-          scope = Const {
-            scope = NULL
-            name = <C <U T>>
-          }
-          name = <C <U Sig>>
-        }
-      ]
-    }
-    Block {
-      send = Send {
-        receiver = ResolvedConst {
-          symbol = (module ::T::Sig::WithoutRuntime)
-        }
-        method = <U sig>
-        args = [
-        ]
-      }
-      params = NULL
-      body = Send {
-        receiver = Self {
-        }
-        method = <U returns>
-        args = [
-          Const {
-            scope = NULL
-            name = <C <U String>>
-          }
-        ]
-      }
-    }
-    DefMethod {
-      name = <U foo>
-      params = NULL
-      body = Assign {
-        lhs = LVarLhs {
-          name = <U x>
-        }
-        rhs = Send {
-          receiver = Const {
-            scope = Cbase {
-            }
-            name = <C <U T>>
-          }
-          method = <U let>
-          args = [
-            Send {
-              receiver = Const {
-                scope = NULL
-                name = <C <U ARGV>>
-              }
-              method = <U first>
-              args = [
-              ]
-            }
-            Const {
-              scope = NULL
-              name = <C <U String>>
-            }
-          ]
-        }
-      }
-    }
-  ]
-}
+@ ProgramNode (location: (2,0)-(7,3))
++-- locals: []
++-- statements:
+    @ StatementsNode (location: (2,0)-(7,3))
+    +-- body: (length: 3)
+        +-- @ CallNode (location: (2,0)-(2,13))
+        |   +-- CallNodeFlags: ignore_visibility
+        |   +-- receiver: nil
+        |   +-- call_operator_loc: nil
+        |   +-- name: :extend
+        |   +-- message_loc: (2,0)-(2,6) = "extend"
+        |   +-- opening_loc: nil
+        |   +-- arguments:
+        |   |   @ ArgumentsNode (location: (2,7)-(2,13))
+        |   |   +-- ArgumentsNodeFlags: nil
+        |   |   +-- arguments: (length: 1)
+        |   |       +-- @ ConstantPathNode (location: (2,7)-(2,13))
+        |   |           +-- parent:
+        |   |           |   @ ConstantReadNode (location: (2,7)-(2,8))
+        |   |           |   +-- name: :T
+        |   |           +-- name: :Sig
+        |   |           +-- delimiter_loc: (2,8)-(2,10) = "::"
+        |   |           +-- name_loc: (2,10)-(2,13) = "Sig"
+        |   +-- closing_loc: nil
+        |   +-- block: nil
+        +-- @ CallNode (location: (4,2)-(4,12))
+        |   +-- CallNodeFlags: nil
+        |   +-- receiver:
+        |   |   @ ConstantPathNode (location: (4,2)-(4,12))
+        |   |   +-- parent:
+        |   |   |   @ ConstantPathNode (location: (4,2)-(4,12))
+        |   |   |   +-- parent:
+        |   |   |   |   @ ConstantPathNode (location: (4,2)-(4,12))
+        |   |   |   |   +-- parent: nil
+        |   |   |   |   +-- name: :T
+        |   |   |   |   +-- delimiter_loc: (4,2)-(4,12) = " -> String"
+        |   |   |   |   +-- name_loc: (4,2)-(4,12) = " -> String"
+        |   |   |   +-- name: :Sig
+        |   |   |   +-- delimiter_loc: (4,2)-(4,12) = " -> String"
+        |   |   |   +-- name_loc: (4,2)-(4,12) = " -> String"
+        |   |   +-- name: :WithoutRuntime
+        |   |   +-- delimiter_loc: (4,2)-(4,12) = " -> String"
+        |   |   +-- name_loc: (4,2)-(4,12) = " -> String"
+        |   +-- call_operator_loc: (4,2)-(4,2) = ""
+        |   +-- name: :sig
+        |   +-- message_loc: (4,2)-(4,2) = ""
+        |   +-- opening_loc: (4,2)-(4,2) = ""
+        |   +-- arguments: nil
+        |   +-- closing_loc: (4,2)-(4,2) = ""
+        |   +-- block:
+        |       @ BlockNode (location: (4,0)-(4,12))
+        |       +-- locals: []
+        |       +-- parameters: nil
+        |       +-- body:
+        |       |   @ CallNode (location: (4,6)-(4,12))
+        |       |   +-- CallNodeFlags: nil
+        |       |   +-- receiver:
+        |       |   |   @ SelfNode (location: (4,2)-(4,12))
+        |       |   +-- call_operator_loc: (4,6)-(4,6) = ""
+        |       |   +-- name: :returns
+        |       |   +-- message_loc: (4,6)-(4,6) = ""
+        |       |   +-- opening_loc: (4,6)-(4,6) = ""
+        |       |   +-- arguments:
+        |       |   |   @ ArgumentsNode (location: (4,6)-(4,12))
+        |       |   |   +-- ArgumentsNodeFlags: nil
+        |       |   |   +-- arguments: (length: 1)
+        |       |   |       +-- @ ConstantReadNode (location: (4,6)-(4,12))
+        |       |   |           +-- name: :String
+        |       |   +-- closing_loc: (4,6)-(4,6) = ""
+        |       |   +-- block: nil
+        |       +-- opening_loc: (0,0)-(0,0) = ""
+        |       +-- closing_loc: (0,0)-(0,0) = ""
+        +-- @ DefNode (location: (5,0)-(7,3))
+            +-- name: :foo
+            +-- name_loc: (5,4)-(5,7) = "foo"
+            +-- receiver: nil
+            +-- parameters: nil
+            +-- body:
+            |   @ StatementsNode (location: (6,2)-(6,16))
+            |   +-- body: (length: 1)
+            |       +-- @ LocalVariableWriteNode (location: (6,2)-(6,16))
+            |           +-- name: :x
+            |           +-- depth: 0
+            |           +-- name_loc: (6,2)-(6,3) = "x"
+            |           +-- value:
+            |           |   @ CallNode (location: (6,20)-(6,26))
+            |           |   +-- CallNodeFlags: nil
+            |           |   +-- receiver:
+            |           |   |   @ ConstantPathNode (location: (6,20)-(6,26))
+            |           |   |   +-- parent: nil
+            |           |   |   +-- name: :T
+            |           |   |   +-- delimiter_loc: (6,20)-(6,26) = "String"
+            |           |   |   +-- name_loc: (6,20)-(6,26) = "String"
+            |           |   +-- call_operator_loc: (6,20)-(6,20) = ""
+            |           |   +-- name: :let
+            |           |   +-- message_loc: (6,20)-(6,20) = ""
+            |           |   +-- opening_loc: (6,20)-(6,20) = ""
+            |           |   +-- arguments:
+            |           |   |   @ ArgumentsNode (location: (6,20)-(6,26))
+            |           |   |   +-- ArgumentsNodeFlags: nil
+            |           |   |   +-- arguments: (length: 2)
+            |           |   |       +-- @ CallNode (location: (6,6)-(6,16))
+            |           |   |       |   +-- CallNodeFlags: nil
+            |           |   |       |   +-- receiver:
+            |           |   |       |   |   @ ConstantReadNode (location: (6,6)-(6,10))
+            |           |   |       |   |   +-- name: :ARGV
+            |           |   |       |   +-- call_operator_loc: (6,10)-(6,11) = "."
+            |           |   |       |   +-- name: :first
+            |           |   |       |   +-- message_loc: (6,11)-(6,16) = "first"
+            |           |   |       |   +-- opening_loc: nil
+            |           |   |       |   +-- arguments: nil
+            |           |   |       |   +-- closing_loc: nil
+            |           |   |       |   +-- block: nil
+            |           |   |       +-- @ ConstantReadNode (location: (6,20)-(6,26))
+            |           |   |           +-- name: :String
+            |           |   +-- closing_loc: (6,20)-(6,20) = ""
+            |           |   +-- block: nil
+            |           +-- operator_loc: (6,4)-(6,5) = "="
+            +-- locals: [:x]
+            +-- def_keyword_loc: (5,0)-(5,3) = "def"
+            +-- operator_loc: nil
+            +-- lparen_loc: nil
+            +-- rparen_loc: nil
+            +-- equal_loc: nil
+            +-- end_keyword_loc: (7,0)-(7,3) = "end"
+
 --------------------------------------------------------------------------
 --print=rbs-rewrite-tree must also include `--enable-experimental-rbs-comments`

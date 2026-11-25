@@ -135,6 +135,20 @@ module Kernel
   # c(4)   #=> []
   # c(5)   #=> nil
   # ```
+  sig do
+    params(
+        start_or_range: Integer,
+        length: Integer,
+    )
+    .returns(T.nilable(T::Array[String]))
+  end
+  sig do
+    params(
+        start_or_range: T::Range[Integer],
+    )
+    .returns(T.nilable(T::Array[String]))
+  end
+  sig {returns(T::Array[String])}
   def self.caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
 
   # Returns the current execution stack---an array containing backtrace location
@@ -722,14 +736,6 @@ module Kernel
   sig {returns(T.self_type)}
   def trust(); end
 
-  sig do
-    params(
-        arg: BasicObject,
-    )
-    .void
-  end
-  def undef(*arg); end
-
   sig {returns(T.self_type)}
   def untaint(); end
 
@@ -1299,7 +1305,7 @@ module Kernel
     params(
         arg0: Exception,
         arg1: String,
-        arg2: T::Array[String],
+        arg2: T.any(T::Array[String], T::Array[Thread::Backtrace::Location]),
     )
     .returns(T.noreturn)
   end
@@ -1864,6 +1870,14 @@ module Kernel
   # ```
   sig do
     params(
+        arg0: String,
+        arg1: BasicObject,
+        arg2: BasicObject,
+    )
+    .returns(NilClass)
+  end
+  sig do
+    params(
         arg0: IO,
         arg1: String,
         arg2: BasicObject,
@@ -2101,23 +2115,23 @@ module Kernel
   # [`gem_original_require`](https://docs.ruby-lang.org/en/2.6.0/Kernel.html#method-i-gem_original_require)
   sig do
     params(
-        path: String,
+        path: T.any(String, Pathname),
     )
     .returns(T::Boolean)
   end
   def require(path); end
 
-  # Ruby tries to load the library named *string* relative to the requiring
+  # Ruby tries to load the library named *path* relative to the requiring
   # file's path. If the file's path cannot be determined a
   # [`LoadError`](https://docs.ruby-lang.org/en/2.7.0/LoadError.html) is raised.
   # If a file is loaded `true` is returned and false otherwise.
   sig do
     params(
-        feature: T.any(String, Pathname)
+        path: T.any(String, Pathname)
     )
     .returns(T::Boolean)
   end
-  def require_relative(feature); end
+  def require_relative(path); end
 
   # Calls select(2) system call. It monitors given arrays of
   # [`IO`](https://docs.ruby-lang.org/en/2.7.0/IO.html) objects, waits until one
@@ -2949,7 +2963,7 @@ module Kernel
     params(
         arg0: T.any(T::Class[T.anything], Exception),
         arg1: T.untyped,
-        arg2: T.nilable(T::Array[String]),
+        arg2: T.nilable(T.any(T::Array[String], T::Array[Thread::Backtrace::Location])),
     )
     .returns(T.noreturn)
   end

@@ -10,7 +10,6 @@ class A < T::InexactStruct
 
   prop :foreign_b, T.nilable(String), foreign: -> { B }
   #     ^^^^^^^^^ def: A#foreign_b
-  #                                   ^^^^^^^ def: A#foreign_b_
 end
 
 a = A.new(some_const: '', some_prop: '')
@@ -20,8 +19,7 @@ a.some_prop=('')
 # ^^^^^^^^^  usage: A#some_prop
 a.some_prop
 # ^^^^^^^^^ usage: A#some_prop
-a.foreign_b_
-# ^^^^^^^^^^ usage: A#foreign_b_
+a.foreign_b_ # error: does not exist
 
 class B < T::Struct
   const :some_const, String

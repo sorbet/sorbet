@@ -25,13 +25,26 @@ class A
                                    # ^^^ error: Malformed `sig`. Type not specified for parameter `blk`
 
   sig {void}
-  def test_yield
+  def test_yield # error: does not mention a block parameter
     yield
+  # ^^^^^ error: Method `call` does not exist on `NilClass`
   end
 
   sig {void}
   def test_block_type_not_specified_later; end
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Malformed `sig`. Type not specified for parameter `my_custom_block_name`
+
+  sig { params(x: Integer,).returns(Integer) }
+  def calls_yield_with_params(x) # error: does not mention a block parameter
+    yield
+  # ^^^^^ error: Method `call` does not exist on `NilClass`
+  end
+
+  sig { params(x: Integer,).returns(Integer) }
+  def calls_yield_with_params_default(x: 0) # error: does not mention a block parameter
+    yield
+  # ^^^^^ error: Method `call` does not exist on `NilClass`
+  end
 end
 
 class A

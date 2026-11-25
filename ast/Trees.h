@@ -10,7 +10,9 @@
 #include "core/Types.h"
 #include "core/UntaggedPtr.h"
 #include "core/ZippedPair.h"
+#include <functional>
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 //
@@ -96,7 +98,7 @@ private:
 
     template <typename E, typename... Args> friend ExpressionPtr make_expression(Args &&...);
 
-    static tagged_storage tagPtr(Tag tag, void *expr) {
+    static tagged_storage tagPtr(Tag tag, void *expr) noexcept {
         ENFORCE(static_cast<size_t>(tag) != 0);
         ENFORCE(expr != nullptr);
 
@@ -107,7 +109,7 @@ private:
         return maskedPtr | val;
     }
 
-    ExpressionPtr(Tag tag, void *expr) : ptr(tagPtr(tag, expr)) {}
+    ExpressionPtr(Tag tag, void *expr) noexcept : ptr(tagPtr(tag, expr)) {}
 
     static void deleteTagged(Tag tag, void *ptr) noexcept;
 
@@ -198,16 +200,11 @@ public:
         return ptr != 0;
     }
 
-    bool operator==(const ExpressionPtr &other) const noexcept {
-        return ptr == other.ptr;
-    }
+    bool operator==(const ExpressionPtr &other) const noexcept = default;
+    bool operator!=(const ExpressionPtr &other) const noexcept = default;
 
     bool operator==(std::nullptr_t) const noexcept {
         return ptr == 0;
-    }
-
-    bool operator!=(const ExpressionPtr &other) const noexcept {
-        return ptr != other.ptr;
     }
 
     bool operator!=(std::nullptr_t) const noexcept {
@@ -285,18 +282,19 @@ struct ParsedFile {
         // if 'true' file is completely cached in kvstore
         bool cached : 1;
 
-        Flags() : cached{false} {}
+        Flags() noexcept : cached{false} {}
     };
 
     Flags flags;
 
     ParsedFile() = default;
-    ParsedFile(ast::ExpressionPtr tree, core::FileRef file) : tree{std::move(tree)}, file{file}, flags{} {}
+    ParsedFile(ast::ExpressionPtr tree, core::FileRef file) noexcept : tree{std::move(tree)}, file{file}, flags{} {}
 
     void swap(ParsedFile &other) noexcept {
         using std::swap;
         this->tree.swap(other.tree);
         swap(this->file, other.file);
+        swap(this->flags, other.flags);
     }
 
     bool cached() const {
@@ -308,7 +306,7 @@ struct ParsedFile {
     }
 };
 
-inline void swap(ParsedFile &a, ParsedFile &b) {
+inline void swap(ParsedFile &a, ParsedFile &b) noexcept {
     a.swap(b);
 }
 
@@ -834,24 +832,46 @@ public:
     core::NameRef fun;
     const core::LocOffsets funLoc;
 
+    // Whether a block is present on the send, and if the style of the block argument is known (do/end vs braces). A
+    // value of `Present` is always valid here if it's not known if the block was defined with do/end or braces.
+    enum class BlockType : uint8_t {
+        None = 0,
+        Present = 1,
+        DoEnd = 2,
+        Braces = 3,
+    };
+
+    static void constexpr validateBlockTypeBits(BlockType b) {
+        // Unfortunately, we can't collapse these cases because the compiler isn't smart
+        // enough to see what the value of b is.
+        switch (b) {
+            case BlockType::None:
+                static_assert(int(BlockType::None) < (1 << 2), "BlockType must fit into two bits");
+                break;
+            case BlockType::Present:
+                static_assert(int(BlockType::Present) < (1 << 2), "BlockType must fit into two bits");
+                break;
+            case BlockType::DoEnd:
+                static_assert(int(BlockType::DoEnd) < (1 << 2), "BlockType must fit into two bits");
+                break;
+            case BlockType::Braces:
+                static_assert(int(BlockType::Braces) < (1 << 2), "BlockType must fit into two bits");
+                break;
+        }
+    }
+
     struct Flags {
         // True if the receiver was self (either implicit like `foo()` or explicit like `self.foo()`)
         //   - Prior to Ruby 2.7, it was illegal to call a private method with an explicit receiver.
         //   - As of Ruby 2.7, it became legal to call private methods on self, e.g. `self.foo()`.
-        bool isPrivateOk : 1;
-        bool isRewriterSynthesized : 1;
-        bool hasBlock : 1;
+        bool isPrivateOk : 1 = false;
+        bool isRewriterSynthesized : 1 = false;
+        BlockType blockType : 2 = BlockType::None;
 
-        // In C++20 we can replace this with bit field initialzers
-        Flags() : isPrivateOk(false), isRewriterSynthesized(false), hasBlock(false) {}
-        bool operator==(const Flags &other) const noexcept {
-            return isPrivateOk == other.isPrivateOk && isRewriterSynthesized == other.isRewriterSynthesized &&
-                   hasBlock == other.hasBlock;
-        }
+        Flags() {}
 
-        bool operator!=(const Flags &other) const noexcept {
-            return !(*this == other);
-        }
+        bool operator==(const Flags &other) const noexcept = default;
+        bool operator!=(const Flags &other) const noexcept = default;
     };
     CheckSize(Flags, 1, 1);
 
@@ -908,7 +928,7 @@ public:
     const ExpressionPtr *kwSplat() const;
     ExpressionPtr *kwSplat();
 
-    void setBlock(ExpressionPtr block);
+    void setBlock(ExpressionPtr block, BlockType type);
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
     std::string showRaw(const core::GlobalState &gs, int tabs = 0) const;
@@ -1015,7 +1035,7 @@ public:
 
     // True when this send contains a block argument.
     bool hasBlock() const {
-        return flags.hasBlock;
+        return flags.blockType != BlockType::None;
     }
 
     // True when this send contains at least 1 position argument.
@@ -1110,12 +1130,11 @@ public:
     bool prismDesugarEqual(const core::GlobalState &gs, const ExpressionPtr &other, const core::FileRef file) const;
 
     core::ZippedPairSpan<ExpressionPtr, ExpressionPtr> kviter() {
-        return core::ZippedPairSpan<ExpressionPtr, ExpressionPtr>{absl::MakeSpan(keys), absl::MakeSpan(values)};
+        return core::ZipSpans(absl::MakeSpan(keys), absl::MakeSpan(values));
     }
 
     core::ZippedPairSpan<const ExpressionPtr, const ExpressionPtr> kviter() const {
-        return core::ZippedPairSpan<const ExpressionPtr, const ExpressionPtr>{absl::MakeSpan(keys),
-                                                                              absl::MakeSpan(values)};
+        return core::ZipSpans(absl::MakeSpan(keys), absl::MakeSpan(values));
     }
 
     std::string toStringWithTabs(const core::GlobalState &gs, int tabs = 0) const;
@@ -1199,6 +1218,53 @@ public:
     std::string showRawWithLocs(const core::GlobalState &gs, core::FileRef file, int tabs = 0) const;
     std::string_view nodeName() const;
 
+    // Folds the terminal scope and then each constant name from root to leaf.
+    template <class RootFn, class PartFn> auto foldFromRoot(RootFn && onRoot, PartFn && onPart) const {
+        using State = std::remove_cvref_t<std::invoke_result_t<RootFn &, const ExpressionPtr &>>;
+
+        auto foldImpl = [&](const auto &self, const UnresolvedConstantLit &current) -> State {
+            State state = [&]() -> State {
+                if (auto scope = cast_tree<UnresolvedConstantLit>(current.scope)) {
+                    return self(self, *scope);
+                }
+                return std::invoke(onRoot, current.scope);
+            }();
+            return std::invoke(onPart, std::move(state), current.cnst, current.loc);
+        };
+        return foldImpl(foldImpl, *this);
+    }
+
+    // Consumes a constant path, transforms its terminal scope, and then rebuilds each constant part root-to-leaf.
+    // Each part retains ownership of its original UnresolvedConstantLit node and has its transformed scope installed.
+    template <class Walker> static ExpressionPtr foldOwned(ExpressionPtr tree, Walker && walker) {
+        using WalkerType = std::remove_reference_t<Walker>;
+        using RootResult = decltype(std::declval<WalkerType &>().onRoot(std::declval<ExpressionPtr &&>()));
+        using PartResult = decltype(std::declval<WalkerType &>().onPart(
+            std::declval<std::unique_ptr<UnresolvedConstantLit> &&>(), std::declval<bool>()));
+        static_assert(std::is_same_v<RootResult, ExpressionPtr>,
+                      "Walker::onRoot must accept an owned ExpressionPtr and return an ExpressionPtr");
+        static_assert(std::is_same_v<PartResult, ExpressionPtr>,
+                      "Walker::onPart must accept an owned UnresolvedConstantLit and whether it is outermost, and "
+                      "return an ExpressionPtr");
+
+        auto foldImpl = [&](const auto &self, std::unique_ptr<UnresolvedConstantLit> current,
+                            bool isOutermost) -> ExpressionPtr {
+            auto scope = std::move(current->scope);
+            if (isa_tree<UnresolvedConstantLit>(scope)) {
+                current->scope = self(self, scope.toUnique<UnresolvedConstantLit>(), false);
+            } else {
+                current->scope = walker.onRoot(std::move(scope));
+            }
+            return walker.onPart(std::move(current), bool{isOutermost});
+        };
+        return foldImpl(foldImpl, tree.toUnique<UnresolvedConstantLit>(), true);
+    }
+
+    // Follows the `UnresolvedConstantLit` scope chain until we arrive at a `scope`
+    // that is not an `UnresolvedConstantLit`, and return a reference to that.
+    const ExpressionPtr &outermostScope() const;
+    ExpressionPtr &outermostScope();
+
     void _sanityCheck();
 };
 CheckSize(UnresolvedConstantLit, 24, 8);
@@ -1210,38 +1276,87 @@ private:
     //
     // A ConstantLit can be in one of three states:
     //
-    // 1. A known constant that we create ourselves (e.g. core::Symbols::root()).  This requires
-    //    12 bytes of storage:
+    // 1. A known constant that we create ourselves (e.g. core::Symbols::root()).  Expressed as
+    //    a struct definition, it requires 12 bytes of storage:
     //
     //    struct KnownSymbol {
-    //        core::SymbolRef sym;
     //        core::LocOffsets loc;
+    //        core::SymbolRef sym;
     //    };
     //
     //    The loc is actually important to propagate information into later passes and to ensure
     //    that various ENFORCEs around loc consistency hold.
+    //
+    //    Due to alignment requirements and the need to hold a tag, the actual struct definition
+    //    looks more like:
+    //
+    //    struct KnownSymbol {
+    //        uint64_t loc; // re-interpretable as a `core::LocOffsets`
+    //        union {
+    //            struct {
+    //                uint16_t tag;
+    //                uint8_t rawId[4]; // sym.rawId()
+    //                uint16_t unused;  // always zeros
+    //            };
+    //            uint64_t val;
+    //        } u;
+    //    };
+    //
+    //    We cheat a little bit by re-interpreting `loc` as a `core::LocOffsets`; using types
+    //    with actual constructors and destructors here is complicated.
     //
     // 2. A resolved constant.  We cheat a little bit here because this is actually encompassing
     //    both a constant that we are attempting to resolve and a constant that we have finished
     //    resolving.  This requires 16 bytes of storage due to alignment requirements:
     //
     //    struct ResolvedSymbol {
-    //        core::SymbolRef sym;
     //        std::unique_ptr<UnresolvedConstantLit> original;
+    //        core::SymbolRef sym;
     //    };
     //
     //    The loc for this constant is derivable from `original`.
+    //
+    //    Similarly to case 1, the actual definition looks more like:
+    //
+    //    struct ResolvedSymbol {
+    //        UnresolvedConstantLit *original;
+    //        union {
+    //            struct {
+    //                uint16_t tag;
+    //                uint8_t rawId[4]; // sym.rawId()
+    //                uint16_t unused;  // always zeros
+    //            };
+    //            uint64_t val;
+    //        } u;
+    //    };
+    //
+    //    Since we have to manage the lifetime of `original` ourselves, rather than relying on
+    //    objects with proper constructors and destructors to do it for us.
     //
     // 3. A constant that we attempted to resolve, but resolution failed.  This requires 16
     //    bytes of storage.
     //
     //    struct FailedResolutionSymbol {
-    //        std::unique_ptr<std::vector<core::SymbolRef>> resolutionScopes;
     //        std::unique_ptr<UnresolvedConstantLit> original;
+    //        std::unique_ptr<std::vector<core::SymbolRef>> resolutionScopes;
     //    };
     //
     //    We transition the second case -- where the second case is representing a symbol that
     //    is in the process of resolving -- to this case, and then we never transition out.
+    //
+    //    Since the storage for `resolutionScopes` overlaps with the tagging scheme above,
+    //    the actual struct definition looks more like:
+    //
+    //    struct FailedResolutionSymbol {
+    //        UnresolvedConstantLit *original;
+    //        union {
+    //            struct {
+    //                uint16_t tag;
+    //                uint8_t ptrBytes[6]; // upper 48 bits of `resolutionScopes`
+    //            };
+    //            uint64_t val;
+    //        } u;
+    //    };
     //
     // We can represent all three of these in 16 bytes of space by doing a bunch of manual
     // pointer tagging.
@@ -1257,23 +1372,23 @@ private:
         static constexpr tagged_storage TAG_MASK = 0xffff;
         static constexpr tagged_storage PTR_MASK = ~TAG_MASK;
 
+        // This member is either a LocOffsets (in the case of a known symbol) or a pointer
+        // to the associated UnresolvedConstantLit.
+        tagged_storage ptr1;
         // This member is a tagged quantity; its upper 48 bits will be either a raw symbol
         // ID or a pointer to a vector of SymbolRefs representing the resolution scopes
         // for a constant that failed to resolve.
         //
-        // The tag determines the value for both this member and ptr2.
-        tagged_storage ptr1;
-        // This member is either a LocOffsets (in the case of a known symbol) or a pointer
-        // to the associated UnresolvedConstantLit.
+        // The tag determines the value for both this member and ptr1.
         tagged_storage ptr2;
 
-        tagged_storage untaggedPtr1() const noexcept {
-            auto val = ptr1 & PTR_MASK;
+        tagged_storage untaggedPtr2() const noexcept {
+            auto val = ptr2 & PTR_MASK;
             return val >> 16;
         }
 
         Tag tag() const {
-            auto value = ptr1 & TAG_MASK;
+            auto value = ptr2 & TAG_MASK;
             return static_cast<Tag>(value);
         }
 
@@ -1296,13 +1411,13 @@ private:
             return tagPtr(Tag::FailedResolutionSymbol, new std::vector<core::SymbolRef>());
         }
 
-        Storage(core::LocOffsets loc, core::SymbolRef symbol) : ptr1(tagSymbol(Tag::KnownSymbol, symbol)) {
-            static_assert(sizeof(loc) == sizeof(ptr2), "LocOffsets is too big to fit!");
-            new (&ptr2) core::LocOffsets(loc);
+        Storage(core::LocOffsets loc, core::SymbolRef symbol) : ptr2(tagSymbol(Tag::KnownSymbol, symbol)) {
+            static_assert(sizeof(loc) == sizeof(ptr1), "LocOffsets is too big to fit!");
+            new (&ptr1) core::LocOffsets(loc);
         }
 
         Storage(core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original)
-            : ptr1(tagSymbol(Tag::ResolvedSymbol, symbol)), ptr2(reinterpret_cast<tagged_storage>(original.release())) {
+            : ptr1(reinterpret_cast<tagged_storage>(original.release())), ptr2(tagSymbol(Tag::ResolvedSymbol, symbol)) {
         }
 
         // We have to explicitly delete these, because otherwise making a copy of a `Storage`
@@ -1319,13 +1434,13 @@ private:
         ~Storage() {
             switch (tag()) {
                 case Tag::KnownSymbol: {
-                    // ptr1 just holds the raw ID for the symbol, so only delete LocOffsets.
-                    auto *p = reinterpret_cast<core::LocOffsets *>(&ptr2);
+                    // ptr2 just holds the raw ID for the symbol, so only destroy LocOffsets.
+                    auto *p = reinterpret_cast<core::LocOffsets *>(&ptr1);
                     p->~LocOffsets();
                     break;
                 }
                 case Tag::ResolvedSymbol: {
-                    // ptr1 just holds the raw ID for the symbol.
+                    // ptr2 just holds the raw ID for the symbol.
                     auto *ucl = original();
                     delete ucl;
                     break;
@@ -1346,7 +1461,7 @@ private:
                     return nullptr;
                 case Tag::ResolvedSymbol:
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<UnresolvedConstantLit *>(ptr2);
+                    return reinterpret_cast<UnresolvedConstantLit *>(ptr1);
             }
         }
 
@@ -1356,14 +1471,14 @@ private:
                     return nullptr;
                 case Tag::ResolvedSymbol:
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<const UnresolvedConstantLit *>(ptr2);
+                    return reinterpret_cast<const UnresolvedConstantLit *>(ptr1);
             }
         }
 
         core::LocOffsets loc() const {
             switch (tag()) {
                 case Tag::KnownSymbol:
-                    return *reinterpret_cast<const core::LocOffsets *>(&ptr2);
+                    return *reinterpret_cast<const core::LocOffsets *>(&ptr1);
                 case Tag::ResolvedSymbol:
                 case Tag::FailedResolutionSymbol:
                     return original()->loc;
@@ -1374,7 +1489,7 @@ private:
             switch (tag()) {
                 case Tag::KnownSymbol:
                 case Tag::ResolvedSymbol:
-                    return core::SymbolRef::fromRaw(static_cast<uint32_t>(untaggedPtr1()));
+                    return core::SymbolRef::fromRaw(static_cast<uint32_t>(untaggedPtr2()));
                 case Tag::FailedResolutionSymbol:
                     return core::Symbols::StubModule();
             }
@@ -1386,7 +1501,7 @@ private:
                 case Tag::ResolvedSymbol:
                     return nullptr;
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<std::vector<core::SymbolRef> *>(untaggedPtr1());
+                    return reinterpret_cast<std::vector<core::SymbolRef> *>(untaggedPtr2());
             }
         }
 
@@ -1396,20 +1511,20 @@ private:
                 case Tag::ResolvedSymbol:
                     return nullptr;
                 case Tag::FailedResolutionSymbol:
-                    return reinterpret_cast<const std::vector<core::SymbolRef> *>(untaggedPtr1());
+                    return reinterpret_cast<const std::vector<core::SymbolRef> *>(untaggedPtr2());
             }
         }
 
         void setSymbol(core::SymbolRef sym) {
             ENFORCE(tag() == Tag::ResolvedSymbol);
             ENFORCE(sym != core::Symbols::StubModule());
-            ptr1 = tagSymbol(Tag::ResolvedSymbol, sym);
+            ptr2 = tagSymbol(Tag::ResolvedSymbol, sym);
         }
 
         void markUnresolved() {
             ENFORCE(tag() == Tag::ResolvedSymbol);
             if (tag() == Tag::ResolvedSymbol) {
-                ptr1 = allocateResolutionScopes();
+                ptr2 = allocateResolutionScopes();
                 ENFORCE(tag() == Tag::FailedResolutionSymbol);
             }
         }
@@ -1462,6 +1577,37 @@ public:
 
     const UnresolvedConstantLit *original() const {
         return storage.original();
+    }
+
+    // Walks original-backed constant parts from innermost to root. Returning false from either Walker method stops the
+    // walk. `onRoot` receives whether the terminal scope is itself a ConstantLit; its symbol is empty when it is not.
+    template <class Walker> bool walkOriginalPath(Walker && walker) const {
+        using WalkerType = std::remove_reference_t<Walker>;
+        using RootResult = decltype(std::declval<WalkerType &>().onRoot(
+            std::declval<core::LocOffsets>(), std::declval<core::SymbolRef>(), std::declval<bool>()));
+        using PartResult = decltype(std::declval<WalkerType &>().onPart(
+            std::declval<core::LocOffsets>(), std::declval<core::SymbolRef>(), std::declval<core::NameRef>(),
+            std::declval<bool>()));
+        static_assert(std::is_same_v<RootResult, bool>,
+                      "Walker::onRoot must accept (LocOffsets, SymbolRef, bool) and return bool");
+        static_assert(std::is_same_v<PartResult, bool>,
+                      "Walker::onPart must accept (LocOffsets, SymbolRef, NameRef, bool) and return bool");
+
+        auto *current = this;
+        bool isOutermost = true;
+        while (auto *original = current->original()) {
+            if (!walker.onPart(current->loc(), current->symbol(), core::NameRef{original->cnst}, bool{isOutermost})) {
+                return false;
+            }
+
+            auto scope = cast_tree<ConstantLit>(original->scope);
+            if (scope == nullptr) {
+                return walker.onRoot(original->scope.loc(), core::SymbolRef{}, false);
+            }
+            current = scope.get();
+            isOutermost = false;
+        }
+        return walker.onRoot(current->loc(), current->symbol(), true);
     }
 
     void _sanityCheck();

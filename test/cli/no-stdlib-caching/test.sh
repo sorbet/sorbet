@@ -7,6 +7,13 @@ trap 'rm -rf "$dir"' EXIT
 
 cp ./test/cli/no-stdlib-caching/test.rb "$dir"
 
-main/sorbet --silence-dev-message --cache-dir="$dir/cache" "$dir" 2>&1 || true
-main/sorbet --silence-dev-message --no-stdlib --cache-dir="$dir/cache" "$dir" 2>&1 || true
+if main/sorbet --silence-dev-message --cache-dir="$dir/cache" "$dir" 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
+
+if main/sorbet --silence-dev-message --no-stdlib --cache-dir="$dir/cache" "$dir" 2>&1; then
+  echo "Expected to fail!"
+  exit 1
+fi
 

@@ -14,7 +14,7 @@
 #include "core/errors/desugar.h"
 #include "core/errors/internal.h"
 
-// Any changes made to `Desugar.cc` here should also be reflected in `PrismDesugar.cc` and `parser/prism/Translator.cc`
+// Any changes made to `Desugar.cc` here should also be reflected in the Prism variant in `ast/desugar/prism/Desugar.cc`
 namespace sorbet::ast::desugar {
 
 using namespace std;
@@ -24,19 +24,19 @@ namespace {
 struct DesugarContext final {
     core::MutableContext ctx;
     uint32_t &uniqueCounter;
-    core::NameRef enclosingBlockParamName;
-    core::LocOffsets enclosingMethodLoc;
+    core::LocOffsets &enclosingBlockParamLoc;
+    core::NameRef &enclosingBlockParamName;
     core::NameRef enclosingMethodName;
     bool inAnyBlock;
     bool inModule;
     bool preserveConcreteSyntax;
 
-    DesugarContext(core::MutableContext ctx, uint32_t &uniqueCounter, core::NameRef enclosingBlockParamName,
-                   core::LocOffsets enclosingMethodLoc, core::NameRef enclosingMethodName, bool inAnyBlock,
+    DesugarContext(core::MutableContext ctx, uint32_t &uniqueCounter, core::LocOffsets &enclosingBlockParamLoc,
+                   core::NameRef &enclosingBlockParamName, core::NameRef enclosingMethodName, bool inAnyBlock,
                    bool inModule, bool preserveConcreteSyntax)
-        : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockParamName(enclosingBlockParamName),
-          enclosingMethodLoc(enclosingMethodLoc), enclosingMethodName(enclosingMethodName), inAnyBlock(inAnyBlock),
-          inModule(inModule), preserveConcreteSyntax(preserveConcreteSyntax){};
+        : ctx(ctx), uniqueCounter(uniqueCounter), enclosingBlockParamLoc(enclosingBlockParamLoc),
+          enclosingBlockParamName(enclosingBlockParamName), enclosingMethodName(enclosingMethodName),
+          inAnyBlock(inAnyBlock), inModule(inModule), preserveConcreteSyntax(preserveConcreteSyntax) {};
 
     core::NameRef freshNameUnique(core::NameRef name) {
         return ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, name, ++uniqueCounter);
@@ -191,8 +191,24 @@ void checkBlockRestParam(DesugarContext dctx, const MethodDef::PARAMS_store &arg
     }
 }
 
+namespace {
+
+// Translate the block syntax recorded by the parser to the representation used on `ast::Send`.
+ast::Send::BlockType blockStyleToType(parser::BlockStyle style) {
+    switch (style) {
+        case parser::BlockStyle::Present:
+            return ast::Send::BlockType::Present;
+        case parser::BlockStyle::DoEnd:
+            return ast::Send::BlockType::DoEnd;
+        case parser::BlockStyle::Braces:
+            return ast::Send::BlockType::Braces;
+    }
+}
+
+} // namespace
+
 ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
-    block->send->loc = block->send->loc.join(block->loc);
+    block->send->loc = block->loc;
     auto recv = node2TreeImpl(dctx, block->send);
     Send *send;
     ExpressionPtr res;
@@ -201,10 +217,13 @@ ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
     } else {
         // This must have been a csend; That will have been desugared
         // into an insseq with an If in the expression.
+        //
+        // Bug: This could also be an `If` created by desugaring a `block_given?` call.
+        // https://github.com/sorbet/sorbet/issues/9860
         res = move(recv);
         auto is = cast_tree<InsSeq>(res);
         if (!is) {
-            if (auto e = dctx.ctx.beginIndexerError(block->loc, core::errors::Desugar::UnsupportedNode)) {
+            if (auto e = dctx.ctx.beginIndexerError(block->blockLoc, core::errors::Desugar::UnsupportedNode)) {
                 e.setHeader("No body in block");
             }
             return MK::EmptyTree();
@@ -219,11 +238,11 @@ ExpressionPtr desugarBlock(DesugarContext dctx, parser::Block *block) {
     checkBlockRestParam(dctx, Params);
 
     auto inBlock = true;
-    DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamName, dctx.enclosingMethodLoc,
+    DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName,
                          dctx.enclosingMethodName, inBlock, dctx.inModule, dctx.preserveConcreteSyntax);
-    auto desugaredBody = desugarBody(dctx1, block->loc, block->body, move(destructures));
+    auto desugaredBody = desugarBody(dctx1, block->blockLoc, block->body, move(destructures));
 
-    send->setBlock(MK::Block(block->loc, move(desugaredBody), move(Params)));
+    send->setBlock(MK::Block(block->blockLoc, move(desugaredBody), move(Params)), blockStyleToType(block->style));
     return res;
 }
 
@@ -383,8 +402,8 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
     // Reset uniqueCounter within this scope (to keep numbers small)
     uint32_t uniqueCounter = 1;
     auto inModule = dctx.inModule && !isSelf;
-    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamName, declLoc, name, dctx.inAnyBlock,
-                         inModule, dctx.preserveConcreteSyntax);
+    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName, name,
+                         dctx.inAnyBlock, inModule, dctx.preserveConcreteSyntax);
     auto [params, destructures] = desugarParams(dctx1, argnode);
 
     if (params.empty() || !isa_tree<BlockParam>(params.back())) {
@@ -394,12 +413,20 @@ ExpressionPtr buildMethod(DesugarContext dctx, core::LocOffsets loc, core::LocOf
 
     const auto &blockParam = cast_tree<BlockParam>(params.back());
     ENFORCE(blockParam != nullptr, "Every method's last param must be a block param by now.");
+    auto enclosingBlockParamLoc = blockParam->loc;
     auto enclosingBlockParamName = blockParam2Name(dctx, *blockParam);
+    auto initialBlockParamName = enclosingBlockParamName;
 
-    DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockParamName, declLoc, name, dctx.inAnyBlock,
-                         inModule, dctx.preserveConcreteSyntax);
+    DesugarContext dctx2(dctx1.ctx, dctx1.uniqueCounter, enclosingBlockParamLoc, enclosingBlockParamName, name,
+                         dctx.inAnyBlock, inModule, dctx.preserveConcreteSyntax);
     ExpressionPtr desugaredBody = desugarBody(dctx2, loc, body, move(destructures));
     desugaredBody = validateRBIBody(dctx2, move(desugaredBody));
+
+    if (enclosingBlockParamName != initialBlockParamName) {
+        // Desugaring a `yield` to an implicit block param indicates that we should change the block
+        // parameter so that we can detect this case in resolver.
+        blockParam->expr = MK::Local(enclosingBlockParamLoc, enclosingBlockParamName);
+    }
 
     auto mdef = MK::Method(loc, declLoc, name, move(params), move(desugaredBody));
     cast_tree<MethodDef>(mdef)->flags.isSelfMethod = isSelf;
@@ -437,7 +464,7 @@ ExpressionPtr unsupportedNode(DesugarContext dctx, parser::Node *node) {
     if (auto e = dctx.ctx.beginIndexerError(node->loc, core::errors::Desugar::UnsupportedNode)) {
         e.setHeader("Unsupported node type `{}`", node->nodeName());
     }
-    return MK::EmptyTree();
+    return MK::Constant(node->loc, core::Symbols::ErrorNode());
 }
 
 // Desugar multiple left hand side assignments into a sequence of assignments
@@ -469,6 +496,8 @@ ExpressionPtr desugarMlhs(DesugarContext dctx, core::LocOffsets loc, parser::Mlh
     auto zloc = loc.copyWithZeroLength();
 
     for (auto &c : lhs->exprs) {
+        ENFORCE(c != nullptr, "unexpected null in mlhs");
+
         if (auto *splat = parser::cast_node<parser::SplatLhs>(c.get())) {
             ENFORCE(!didSplat, "did splat already");
             didSplat = true;
@@ -582,9 +611,12 @@ ClassDef::RHS_store scopeNodeToBody(DesugarContext dctx, unique_ptr<parser::Node
     uint32_t uniqueCounter = 1;
     // Blocks never persist across a class/module boundary
     auto inAnyBlock = false;
-    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamName, dctx.enclosingMethodLoc,
+    DesugarContext dctx1(dctx.ctx, uniqueCounter, dctx.enclosingBlockParamLoc, dctx.enclosingBlockParamName,
                          dctx.enclosingMethodName, inAnyBlock, dctx.inModule, dctx.preserveConcreteSyntax);
-    if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
+    auto *begin = parser::cast_node<parser::Begin>(node.get());
+    // A `Begin` with one statement came from parens, like `class A; (a; b); end`. Desugar it as an
+    // expression, so that it gets the parens' loc.
+    if (begin != nullptr && begin->stmts.size() != 1) {
         body.reserve(begin->stmts.size());
         for (auto &stat : begin->stmts) {
             body.emplace_back(node2TreeImpl(dctx1, stat));
@@ -635,21 +667,23 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
     //
     // This means we'll always need statements for as many arguments as the send has, plus two more: one for the
     // temporary assignment and the last for the actual update we're desugaring.
-    ENFORCE(!s->hasKwArgs() && !s->hasBlock());
-    const auto numPosArgs = s->numPosArgs();
     InsSeq::STATS_store stats;
-    stats.reserve(numPosArgs + 2);
+    stats.reserve(s->numPosArgs() + 2 * s->numKwArgs() + 1);
     core::NameRef tempRecv = dctx.freshNameUnique(s->fun);
     stats.emplace_back(MK::Assign(s->loc, tempRecv, move(s->recv)));
+
     Send::ARGS_store readArgs;
     Send::ARGS_store assgnArgs;
     // these are the arguments for the first send, e.g. x.y(). The number of arguments should be identical to whatever
     // we saw on the LHS.
-    readArgs.reserve(numPosArgs);
+    auto expectedArgs = s->numNonBlockArgs() + (s->hasBlock() ? 1 : 0);
+    readArgs.reserve(expectedArgs);
     // these are the arguments for the second send, e.g. x.y=(val). That's why we need the space for the extra argument
     // here: to accommodate the call to field= instead of just field.
-    assgnArgs.reserve(numPosArgs + 1);
+    assgnArgs.reserve(expectedArgs + 1);
 
+    // TODO(jez) We could optimize this by using the same isa_reference / cpRef trick we use
+    // elsewhere to avoid creating tmp assignments for things that don't need them.
     for (auto &arg : s->posArgs()) {
         auto argLoc = arg.loc();
         core::NameRef name = dctx.freshNameUnique(s->fun);
@@ -658,7 +692,33 @@ OpAsgnScaffolding copyArgsForOpAsgn(DesugarContext dctx, Send *s) {
         assgnArgs.emplace_back(MK::Local(argLoc, name));
     }
 
-    return {tempRecv, move(stats), numPosArgs, move(readArgs), move(assgnArgs)};
+    for (const auto &[key, val] : s->kwArgPairs()) {
+        auto keyLoc = key.loc();
+        auto keyName = dctx.freshNameUnique(s->fun);
+        stats.emplace_back(MK::Assign(keyLoc, keyName, move(key)));
+        readArgs.emplace_back(MK::Local(keyLoc, keyName));
+        assgnArgs.emplace_back(MK::Local(keyLoc, keyName));
+
+        auto valLoc = val.loc();
+        auto valName = dctx.freshNameUnique(s->fun);
+        stats.emplace_back(MK::Assign(valLoc, valName, move(val)));
+        readArgs.emplace_back(MK::Local(valLoc, valName));
+        assgnArgs.emplace_back(MK::Local(valLoc, valName));
+    }
+
+    if (auto *kwsplat = s->kwSplat()) {
+        auto name = dctx.freshNameUnique(s->fun);
+        stats.emplace_back(MK::Assign(kwsplat->loc(), name, move(*kwsplat)));
+        readArgs.emplace_back(MK::Local(kwsplat->loc(), name));
+        assgnArgs.emplace_back(MK::Local(kwsplat->loc(), name));
+    }
+
+    if (s->hasBlock()) {
+        readArgs.emplace_back(s->block()->deepCopy());
+        assgnArgs.emplace_back(move(*s->rawBlock()));
+    }
+
+    return {tempRecv, move(stats), s->numPosArgs(), move(readArgs), move(assgnArgs)};
 }
 
 // while true
@@ -760,7 +820,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     flags.isPrivateOk = true;
                 }
 
-                if (isCallToBlockGivenP(send, rec) && dctx.enclosingMethodLoc.exists()) {
+                if (isCallToBlockGivenP(send, rec) && dctx.enclosingMethodName.exists()) {
                     // Desugar:
                     //     def foo(&my_block)
                     //       x = block_given?
@@ -775,6 +835,10 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // based on the nilability of the block (if specified)
 
                     auto sendExpr = MK::Send0(loc, move(rec), core::Names::blockGiven_p(), send->methodLoc);
+                    if (dctx.enclosingBlockParamName == core::Names::blkArg()) {
+                        dctx.enclosingBlockParamLoc = send->loc;
+                        dctx.enclosingBlockParamName = core::Names::implicitYield();
+                    }
                     result = MK::If(loc, MK::Local(loc, dctx.enclosingBlockParamName), move(sendExpr), MK::False(loc));
 
                     return;
@@ -792,10 +856,10 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 if (!send->args.empty() && parser::isa_node<parser::BlockPass>(send->args.back().get())) {
                     auto *bp = parser::cast_node<parser::BlockPass>(send->args.back().get());
                     blockPassLoc = bp->loc;
-                    if (bp->block == nullptr) {
-                        // Replace an anonymous block pass like `f(&)` with a local variable reference, like `f(&&)`.
+                    if (bp->block == nullptr) { // Anonymous block pass, like `f(&)`
+                        // Treat it as a block pass of a local variable literally named `&`.
                         blockPassArg = MK::Local(bp->loc.copyEndWithZeroLength(), core::Names::ampersand());
-                    } else {
+                    } else { // Block pass with an explicit expression, like `f(&block)`
                         blockPassArg = node2TreeImpl(dctx, bp->block);
                     }
 
@@ -925,8 +989,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `foo(*splat, &:to_s)`
 
                             auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
+                            flags.blockType = ast::Send::BlockType::Present;
                             sendargs.emplace_back(move(desugaredBlockLiteral));
-                            flags.hasBlock = true;
 
                             res = MK::Send(loc, MK::Magic(loc), core::Names::callWithSplat(), send->methodLoc, 4,
                                            move(sendargs), flags);
@@ -970,8 +1034,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             // E.g. `a.map(:to_s)`
 
                             auto desugaredBlockLiteral = symbol2Proc(dctx, move(blockPassArg));
+                            flags.blockType = ast::Send::BlockType::Present;
                             args.emplace_back(move(desugaredBlockLiteral));
-                            flags.hasBlock = true;
 
                             res =
                                 MK::Send(loc, move(rec), send->method, send->methodLoc, numPosArgs, move(args), flags);
@@ -1137,7 +1201,18 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 }
             },
             [&](parser::Block *block) { result = desugarBlock(dctx, block); },
-            [&](parser::Begin *begin) { result = desugarBegin(dctx, loc, begin->stmts); },
+            [&](parser::Begin *begin) {
+                // The parser models `(a; b)` as a `Begin` for the parens wrapping a `Begin` for the
+                // statements, whose loc excludes the parens. Desugar the statements with the parens'
+                // loc, so that autocorrects which wrap this expression produce valid code.
+                auto *inner =
+                    begin->stmts.size() == 1 ? parser::cast_node<parser::Begin>(begin->stmts[0].get()) : nullptr;
+                if (inner != nullptr && inner->stmts.size() > 1) {
+                    result = desugarBegin(dctx, loc, inner->stmts);
+                } else {
+                    result = desugarBegin(dctx, loc, begin->stmts);
+                }
+            },
             [&](parser::Assign *asgn) {
                 auto lhs = node2TreeImpl(dctx, asgn->lhs);
                 auto rhs = node2TreeImpl(dctx, asgn->rhs);
@@ -1241,19 +1316,20 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 auto arg = node2TreeImpl(dctx, andAsgn->right);
                 if (auto s = cast_tree<Send>(recv)) {
                     auto sendLoc = s->loc;
+                    auto recvLoc = s->recv.loc();
                     auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
                     auto numPosAssgnArgs = numPosArgs + 1;
 
-                    assgnArgs.emplace_back(move(arg));
-                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
+                    assgnArgs.insert(assgnArgs.begin() + numPosArgs, move(arg));
+                    auto cond = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
                                          move(readArgs), s->flags);
                     core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
 
-                    auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                         sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto body = MK::Send(loc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                         numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto elsep = MK::Local(sendLoc, tempResult);
-                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+                    auto iff = MK::If(loc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
                     result = move(wrapped);
                 } else if (isa_reference(recv)) {
@@ -1280,18 +1356,20 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
 
                     auto sendLoc = s->loc;
+
+                    auto recvLoc = s->recv.loc();
                     auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
                     auto numPosAssgnArgs = numPosArgs + 1;
-                    assgnArgs.emplace_back(move(arg));
-                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
+                    assgnArgs.insert(assgnArgs.begin() + numPosArgs, move(arg));
+                    auto cond = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
                                          move(readArgs), s->flags);
                     core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
 
-                    auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                         sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto body = MK::Send(loc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                         numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto elsep = MK::Local(sendLoc, tempResult);
-                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+                    auto iff = MK::If(loc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
                     ifExpr->elsep = move(wrapped);
                     result = move(recv);
@@ -1313,18 +1391,19 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 auto arg = node2TreeImpl(dctx, orAsgn->right);
                 if (auto s = cast_tree<Send>(recv)) {
                     auto sendLoc = s->loc;
+                    auto recvLoc = s->recv.loc();
                     auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
                     auto numPosAssgnArgs = numPosArgs + 1;
-                    assgnArgs.emplace_back(move(arg));
-                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
+                    assgnArgs.insert(assgnArgs.begin() + numPosArgs, move(arg));
+                    auto cond = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
                                          move(readArgs), s->flags);
                     core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
 
-                    auto elsep = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                          sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto elsep = MK::Send(loc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                          numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto body = MK::Local(sendLoc, tempResult);
-                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+                    auto iff = MK::If(loc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
                     result = move(wrapped);
                 } else if (isa_reference(recv)) {
@@ -1374,18 +1453,20 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     }
 
                     auto sendLoc = s->loc;
+
+                    auto recvLoc = s->recv.loc();
                     auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
                     auto numPosAssgnArgs = numPosArgs + 1;
-                    assgnArgs.emplace_back(move(arg));
-                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
+                    assgnArgs.insert(assgnArgs.begin() + numPosArgs, move(arg));
+                    auto cond = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
                                          move(readArgs), s->flags);
                     core::NameRef tempResult = dctx.freshNameUnique(s->fun);
                     stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
 
-                    auto elsep = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                          sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto elsep = MK::Send(loc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                          numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto body = MK::Local(sendLoc, tempResult);
-                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
+                    auto iff = MK::If(loc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
                     ifExpr->elsep = move(wrapped);
                     result = move(recv);
@@ -1405,16 +1486,17 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 auto rhs = node2TreeImpl(dctx, opAsgn->right);
                 if (auto s = cast_tree<Send>(recv)) {
                     auto sendLoc = s->loc;
+                    auto recvLoc = s->recv.loc();
                     auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
 
-                    auto prevValue = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
+                    auto prevValue = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
                                               move(readArgs), s->flags);
                     auto newValue = MK::Send1(sendLoc, move(prevValue), opAsgn->op, opAsgn->opLoc, move(rhs));
                     auto numPosAssgnArgs = numPosArgs + 1;
-                    assgnArgs.emplace_back(move(newValue));
+                    assgnArgs.insert(assgnArgs.begin() + numPosArgs, move(newValue));
 
-                    auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                        sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto res = MK::Send(loc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                        numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto wrapped = MK::InsSeq(loc, move(stats), move(res));
                     result = move(wrapped);
                 } else if (isa_reference(recv)) {
@@ -1447,15 +1529,16 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // and then perform basically the same logic as above for a send, but replacing it within
                     // the else-case of the if at the end instead
                     auto sendLoc = s->loc;
+                    auto recvLoc = s->recv.loc();
                     auto [tempRecv, stats, numPosArgs, readArgs, assgnArgs] = copyArgsForOpAsgn(dctx, s);
-                    auto prevValue = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
+                    auto prevValue = MK::Send(sendLoc, MK::Local(recvLoc, tempRecv), s->fun, s->funLoc, numPosArgs,
                                               move(readArgs), s->flags);
                     auto newValue = MK::Send1(sendLoc, move(prevValue), opAsgn->op, opAsgn->opLoc, move(rhs));
                     auto numPosAssgnArgs = numPosArgs + 1;
-                    assgnArgs.emplace_back(move(newValue));
+                    assgnArgs.insert(assgnArgs.begin() + numPosArgs, move(newValue));
 
-                    auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(dctx.ctx),
-                                        sendLoc.copyWithZeroLength(), numPosAssgnArgs, move(assgnArgs), s->flags);
+                    auto res = MK::Send(loc, MK::Local(recvLoc, tempRecv), s->fun.addEq(dctx.ctx), s->funLoc,
+                                        numPosAssgnArgs, move(assgnArgs), s->flags);
                     auto wrapped = MK::InsSeq(loc, move(stats), move(res));
                     ifExpr->elsep = move(wrapped);
                     result = move(recv);
@@ -1487,7 +1570,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 auto zeroLengthLoc = loc.copyWithZeroLength();
                 auto zeroLengthRecvLoc = recvLoc.copyWithZeroLength();
                 auto csendLoc = recvLoc.copyEndWithZeroLength();
-                if (recvLoc.endPos() + 1 <= dctx.ctx.file.data(dctx.ctx).source().size()) {
+                if (recvLoc.endPos() + 1 <= dctx.ctx.file.data(dctx.ctx).sourceSize()) {
                     auto ampersandLoc = core::LocOffsets{recvLoc.endPos(), recvLoc.endPos() + 1};
                     // The arg loc for the synthetic variable created for the purpose of this safe navigation
                     // check is a bit of a hack. It's intentionally one character too short so that for
@@ -1512,7 +1595,7 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 ExpressionPtr nil =
                     MK::Send1(recvLoc.copyEndWithZeroLength(), MK::Magic(zeroLengthLoc),
                               core::Names::nilForSafeNavigation(), zeroLengthLoc, MK::Local(csendLoc, tempRecv));
-                auto iff = MK::If(zeroLengthLoc, move(cond), move(nil), move(send));
+                auto iff = MK::If(loc, move(cond), move(nil), move(send));
                 auto res = MK::InsSeq1(csend->loc, move(assgn), move(iff));
                 result = move(res);
             },
@@ -1547,8 +1630,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
             },
             [&](parser::Kwbegin *kwbegin) { result = desugarBegin(dctx, loc, kwbegin->stmts); },
             [&](parser::Module *module) {
-                DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamName,
-                                     dctx.enclosingMethodLoc, dctx.enclosingMethodName, dctx.inAnyBlock, true,
+                DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc,
+                                     dctx.enclosingBlockParamName, dctx.enclosingMethodName, dctx.inAnyBlock, true,
                                      dctx.preserveConcreteSyntax);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, move(module->body));
                 ExpressionPtr res =
@@ -1556,8 +1639,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = move(res);
             },
             [&](parser::Class *klass) {
-                DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamName,
-                                     dctx.enclosingMethodLoc, dctx.enclosingMethodName, dctx.inAnyBlock, false,
+                DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc,
+                                     dctx.enclosingBlockParamName, dctx.enclosingMethodName, dctx.inAnyBlock, false,
                                      dctx.preserveConcreteSyntax);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, move(klass->body));
                 ClassDef::ANCESTORS_store ancestors;
@@ -1641,8 +1724,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     return;
                 }
 
-                DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamName,
-                                     dctx.enclosingMethodLoc, dctx.enclosingMethodName, dctx.inAnyBlock, false,
+                DesugarContext dctx1(dctx.ctx, dctx.uniqueCounter, dctx.enclosingBlockParamLoc,
+                                     dctx.enclosingBlockParamName, dctx.enclosingMethodName, dctx.inAnyBlock, false,
                                      dctx.preserveConcreteSyntax);
                 ClassDef::RHS_store body = scopeNodeToBody(dctx1, move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
@@ -1729,51 +1812,105 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 // Do this by synthesizing a `Send` parse node and letting our
                 // Send desugar handle it.
                 auto method = maybeTypedSuper(dctx);
+                auto funLoc = dctx.ctx.locAt(super->loc).adjustLen(dctx.ctx, 0, "super"sv.size()).offsets();
                 unique_ptr<parser::Node> send =
-                    make_unique<parser::Send>(super->loc, nullptr, method, super->loc, move(super->args));
+                    make_unique<parser::Send>(super->loc, nullptr, method, funLoc, move(super->args));
                 auto res = node2TreeImpl(dctx, send);
                 result = move(res);
             },
             [&](parser::ZSuper *zuper) { result = MK::ZSuper(loc, maybeTypedSuper(dctx)); },
             [&](parser::For *for_) {
-                MethodDef::PARAMS_store params;
-                bool canProvideNiceDesugar = true;
-                auto mlhsNode = move(for_->vars);
-                if (auto *mlhs = parser::cast_node<parser::Mlhs>(mlhsNode.get())) {
-                    for (auto &c : mlhs->exprs) {
-                        if (!parser::isa_node<parser::LVarLhs>(c.get())) {
-                            canProvideNiceDesugar = false;
-                            break;
-                        }
-                    }
-                    if (canProvideNiceDesugar) {
-                        for (auto &c : mlhs->exprs) {
-                            params.emplace_back(node2TreeImpl(dctx, c));
-                        }
-                    }
+                auto forLoopVar = move(for_->vars);
+
+                bool canProvideNiceDesugar = false;
+                if (auto *mlhs = parser::cast_node<parser::Mlhs>(forLoopVar.get())) {
+                    // `for x, y in []` — nice only if every entry is an LVarLhs (not e.g. `(a, b).c` or `@ivar`).
+                    canProvideNiceDesugar = absl::c_all_of(
+                        mlhs->exprs, [](const auto &c) { return parser::isa_node<parser::LVarLhs>(c.get()); });
+                } else if (parser::isa_node<parser::LVarLhs>(forLoopVar.get())) {
+                    // `for local in []`
+                    canProvideNiceDesugar = true;
                 } else {
-                    canProvideNiceDesugar = parser::isa_node<parser::LVarLhs>(mlhsNode.get());
-                    if (canProvideNiceDesugar) {
-                        ExpressionPtr lhs = node2TreeImpl(dctx, mlhsNode);
-                        params.emplace_back(move(lhs));
-                    } else {
-                        mlhsNode = make_unique<parser::Mlhs>(loc, NodeVec1(move(mlhsNode)));
-                    }
+                    // `for @ivar in []` (or any other single non-local variable target)
+                    canProvideNiceDesugar = false;
                 }
 
-                auto body = node2TreeImpl(dctx, for_->body);
-
-                ExpressionPtr block;
+                ExpressionPtr block; // the body to the `each` loop we'll create
                 if (canProvideNiceDesugar) {
-                    block = MK::Block(loc, move(body), move(params));
+                    MethodDef::PARAMS_store params;
+                    if (parser::isa_node<parser::LVarLhs>(forLoopVar.get())) { // single local
+                        // Desugar:
+                        //     for a in []
+                        // into:
+                        //     [].each { |a| ... }
+
+                        auto localVar = node2TreeImpl(dctx, forLoopVar);
+                        params.emplace_back(move(localVar));
+                    } else if (auto *mlhs = parser::cast_node<parser::Mlhs>(forLoopVar.get())) { // mlhs of all locals
+                        // Desugar:
+                        //     for a, b, c in []
+                        // into:
+                        //     [].each { |a, b, c| ... }
+                        for (auto &c : mlhs->exprs) {
+                            ENFORCE(parser::isa_node<parser::LVarLhs>(c.get()));
+                            params.emplace_back(node2TreeImpl(dctx, c));
+                        }
+                    } else {
+                        unreachable("Expected the `forLoopVar` to be either a LVarLhs or Mlhs");
+                    }
+
+                    auto loopBody = node2TreeImpl(dctx, for_->body);
+                    block = MK::Block(loc, move(loopBody), move(params));
                 } else {
-                    auto temp = dctx.freshNameUnique(core::Names::forTemp());
+                    // Create a temporary local variable, and use it as the block parameter.
+                    // We'll later assign it to the actual loop variable(s) in the block body
+                    core::NameRef forLoopTempVarName = dctx.freshNameUnique(core::Names::forTemp());
+                    MethodDef::PARAMS_store params;
+                    params.emplace_back(MK::Local(loc, forLoopTempVarName));
 
-                    unique_ptr<parser::Node> masgn =
-                        make_unique<parser::Masgn>(loc, move(mlhsNode), make_unique<parser::LVar>(loc, temp));
+                    ExpressionPtr assignment;
+                    if (parser::isa_node<parser::Mlhs>(forLoopVar.get())) { // mlhs with non-local variables entries
+                        // Desugar:
+                        //     for @ivar, @@cvar, $gvar in []
+                        // into:
+                        //     [].each do |forTemp$1|
+                        //       begin
+                        //         <assignTemp>$2 = forTemp$1
+                        //         <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2, 3, 0)
+                        //         @ivar  = <assignTemp>$3.[](0)
+                        //         @@cvar = <assignTemp>$3.[](1)
+                        //         $gvar  = <assignTemp>$3.[](2)
+                        //       end
+                        //       begin
+                        //         "the loop body"
+                        //       end
+                        //     end
+                        auto mlhs = move(forLoopVar);
+                        auto rhs = make_unique<parser::LVar>(loc, forLoopTempVarName);
+                        unique_ptr<parser::Node> masgn = make_unique<parser::Masgn>(loc, move(mlhs), move(rhs));
+                        assignment = node2TreeImpl(dctx, masgn);
+                    } else { // single non-local variable target
+                        // Desugar:
+                        //     for @ivar in []
+                        // into:
+                        //     [].each do |forTemp$1|
+                        //       @ivar = forTemp$1
+                        //       begin
+                        //         "the loop body"
+                        //       end
+                        //     end
+                        // MK::Assign handles a Send LHS by folding the rhs in as a positional arg.
+                        auto lhs = node2TreeImpl(dctx, forLoopVar);
+                        auto rhs = MK::Local(loc, forLoopTempVarName);
+                        assignment = MK::Assign(loc, move(lhs), move(rhs));
+                    }
 
-                    body = MK::InsSeq1(loc, node2TreeImpl(dctx, masgn), move(body));
-                    block = MK::Block(loc, move(body), move(params));
+                    auto loopBody = node2TreeImpl(dctx, for_->body); // The loop's actual body
+
+                    // prepend the (multi-)assignment to the loop body
+                    loopBody = MK::InsSeq1(loc, move(assignment), move(loopBody));
+
+                    block = MK::Block(loc, move(loopBody), move(params));
                 }
 
                 auto res =
@@ -1834,18 +1971,32 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 result = move(res);
             },
             [&](parser::Complex *complex) {
+                // Create the desugared Complex call like `::Kernel.Complex(0, unsigned_value)`
+                //
+                // The value itself might be a rational (e.g. `1ri`), which would desugar to:
+                //     ::Kernel.Complex(0, Kernel.Rational("1"))
+                ast::ExpressionPtr imaginaryPart;
+                if (absl::EndsWith(complex->value, "r")) {
+                    auto rationalValue = complex->value.substr(0, complex->value.size() - "r"sv.size());
+                    auto kernel = MK::Constant(loc, core::Symbols::Kernel());
+                    core::NameRef value = dctx.ctx.state.enterNameUTF8(rationalValue);
+                    imaginaryPart =
+                        MK::Send1(loc, move(kernel), core::Names::KernelRational(), locZeroLen, MK::String(loc, value));
+                } else {
+                    core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->value);
+                    imaginaryPart = MK::String(loc, value);
+                }
+
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef complex_name = core::Names::Constants::Complex().dataCnst(dctx.ctx)->original;
-                core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->value);
-                auto send =
-                    MK::Send2(loc, move(kernel), complex_name, locZeroLen, MK::Int(loc, 0), MK::String(loc, value));
+                auto send = MK::Send2(loc, move(kernel), core::Names::KernelComplex(), locZeroLen, MK::Int(loc, 0),
+                                      move(imaginaryPart));
                 result = move(send);
             },
             [&](parser::Rational *complex) {
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef complex_name = core::Names::Constants::Rational().dataCnst(dctx.ctx)->original;
                 core::NameRef value = dctx.ctx.state.enterNameUTF8(complex->val);
-                auto send = MK::Send1(loc, move(kernel), complex_name, locZeroLen, MK::String(loc, value));
+                auto send =
+                    MK::Send1(loc, move(kernel), core::Names::KernelRational(), locZeroLen, MK::String(loc, value));
                 result = move(send);
             },
             [&](parser::Array *array) {
@@ -2071,12 +2222,8 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 if (dctx.enclosingBlockParamName.exists()) {
                     // we always want to report an error if we're using yield with a synthesized name in strict mode
                     if (dctx.enclosingBlockParamName == core::Names::blkArg()) {
-                        if (auto e = dctx.ctx.beginIndexerError(dctx.enclosingMethodLoc,
-                                                                core::errors::Desugar::UnnamedBlockParameter)) {
-                            e.setHeader("Method `{}` uses `{}` but does not mention a block parameter",
-                                        dctx.enclosingMethodName.show(dctx.ctx), "yield");
-                            e.addErrorLine(dctx.ctx.locAt(loc), "Arising from use of `{}` in method body", "yield");
-                        }
+                        dctx.enclosingBlockParamLoc = loc;
+                        dctx.enclosingBlockParamName = core::Names::implicitYield();
                     }
 
                     recv = MK::Local(loc, dctx.enclosingBlockParamName);
@@ -2215,15 +2362,30 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     return;
                 }
 
-                ExpressionPtr assign;
-                auto temp = core::NameRef::noName();
-                core::LocOffsets cloc;
+                bool hasCondition = case_->condition != nullptr;
 
-                if (case_->condition != nullptr) {
+                core::LocOffsets cloc;
+                ExpressionPtr condition;
+                // If the predicate is already reference-like (local, ivar, self, etc.), reading it is side-effect-free,
+                // so we can read it directly in each `===`, skipping the synthetic `<assignTemp>` local.
+                bool needsTempLocal = false;
+                auto temp = core::NameRef::noName();
+                ExpressionPtr assign;
+                if (hasCondition) {
                     cloc = case_->condition->loc;
-                    temp = dctx.freshNameUnique(core::Names::assignTemp());
-                    assign = MK::Assign(cloc, temp, node2TreeImpl(dctx, case_->condition));
+                    condition = node2TreeImpl(dctx, case_->condition);
+                    needsTempLocal = !isa_reference(condition);
+                    if (needsTempLocal) {
+                        temp = dctx.freshNameUnique(core::Names::assignTemp());
+                        assign = MK::Assign(cloc, temp, move(condition));
+                    }
                 }
+
+                // Build an AST node that reads the case's condition.
+                auto makeConditionRead = [&]() -> ExpressionPtr {
+                    return needsTempLocal ? MK::Local(cloc, temp) : MK::cpRef(condition);
+                };
+
                 ExpressionPtr res = node2TreeImpl(dctx, case_->else_);
                 for (auto it = case_->whens.rbegin(); it != case_->whens.rend(); ++it) {
                     auto when = parser::cast_node<parser::When>(it->get());
@@ -2232,22 +2394,20 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     for (auto &cnode : when->patterns) {
                         ExpressionPtr test;
                         if (parser::isa_node<parser::Splat>(cnode.get())) {
-                            ENFORCE(temp.exists(), "splats need something to test against");
+                            ENFORCE(hasCondition, "splats need something to test against");
                             auto recv = MK::Magic(loc);
-                            auto local = MK::Local(cloc, temp);
                             // TODO(froydnj): use the splat's var directly so we can elide the
                             // coercion to an array where possible.
                             auto splat = node2TreeImpl(dctx, cnode);
                             auto patternloc = splat.loc();
                             test = MK::Send2(patternloc, move(recv), core::Names::checkMatchArray(),
-                                             patternloc.copyWithZeroLength(), move(local), move(splat));
+                                             patternloc.copyWithZeroLength(), makeConditionRead(), move(splat));
                         } else {
                             auto ctree = node2TreeImpl(dctx, cnode);
-                            if (temp.exists()) {
-                                auto local = MK::Local(cloc, temp);
+                            if (hasCondition) {
                                 auto patternloc = ctree.loc();
                                 test = MK::Send1(patternloc, move(ctree), core::Names::tripleEq(),
-                                                 patternloc.copyWithZeroLength(), move(local));
+                                                 patternloc.copyWithZeroLength(), makeConditionRead());
                             } else {
                                 test = move(ctree);
                             }
@@ -2260,11 +2420,15 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                             cond = MK::If(loc, move(test), move(true_), move(cond));
                         }
                     }
-                    res = MK::If(when->loc, move(cond), node2TreeImpl(dctx, when->body), move(res));
+                    // The outermost `if` stands for the whole `case`, so give it the `case`'s loc.
+                    auto ifLoc = it + 1 == case_->whens.rend() ? loc : when->loc;
+                    res = MK::If(ifLoc, move(cond), node2TreeImpl(dctx, when->body), move(res));
                 }
+
                 if (assign != nullptr) {
                     res = MK::InsSeq1(loc, move(assign), move(res));
                 }
+
                 result = move(res);
             },
             [&](parser::Splat *splat) {
@@ -2333,16 +2497,14 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                 if (auto e = dctx.ctx.beginIndexerError(what->loc, core::errors::Desugar::UndefUsage)) {
                     e.setHeader("Unsupported method: undef");
                 }
+
                 Send::ARGS_store args;
                 for (auto &expr : undef->exprs) {
                     args.emplace_back(node2TreeImpl(dctx, expr));
                 }
-                auto numPosArgs = args.size();
-                auto res = MK::Send(loc, MK::Constant(loc, core::Symbols::Kernel()), core::Names::undef(), locZeroLen,
-                                    numPosArgs, move(args));
-                // It wasn't a Send to begin with--there's no way this could result in a private
-                // method call error.
-                ast::cast_tree_nonnull<ast::Send>(res).flags.isPrivateOk = true;
+
+                // Desugar `undef :foo, :bar` to `::<Magic>.<undef>(:foo, :bar)`
+                auto res = MK::Send(loc, MK::Magic(loc), core::Names::undef(), locZeroLen, args.size(), move(args));
                 result = move(res);
             },
             [&](parser::CaseMatch *caseMatch) {
@@ -2373,7 +2535,9 @@ ExpressionPtr node2TreeImplBody(DesugarContext dctx, parser::Node *what) {
                     // Create a new `if` for the branch:
                     // `in A` => `if (TODO)`
                     auto match = MK::RaiseUnimplemented(pattern->loc);
-                    res = MK::If(inPattern->loc, move(match), move(body), move(res));
+                    // The outermost `if` stands for the whole `case`, so give it the `case`'s loc.
+                    auto ifLoc = it + 1 == caseMatch->inBodies.rend() ? loc : inPattern->loc;
+                    res = MK::If(ifLoc, move(match), move(body), move(res));
                 }
                 res = MK::InsSeq1(loc, move(exprVar), move(res));
                 result = move(res);
@@ -2467,14 +2631,16 @@ ExpressionPtr node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what,
     try {
         uint32_t uniqueCounter = 1;
         // We don't have an enclosing block arg to start off.
-        DesugarContext dctx(ctx, uniqueCounter, core::NameRef::noName(), core::LocOffsets::none(),
+        auto enclosingBlockParamLoc = core::LocOffsets::none();
+        auto enclosingBlockParamName = core::NameRef::noName();
+        DesugarContext dctx(ctx, uniqueCounter, enclosingBlockParamLoc, enclosingBlockParamName,
                             core::NameRef::noName(), false, false, preserveConcreteSyntax);
         auto liftedClassDefLoc = what->loc;
         auto result = node2TreeImpl(dctx, what);
         if (result.loc().exists()) {
             // If the desugared expression has a different loc, we want to use that. This can happen
-            // because (:block (:send)) desugars to (:send (:block)), but the (:block) node just has
-            // the loc of the `do ... end`, while the (:send) has the whole loc
+            // because a `begin ... ensure ... end` desugars to a tree whose loc doesn't include the
+            // `begin` and `end` keywords.
             //
             // But if we desugared to EmptyTree (either intentionally or because there was an
             // unsupported node type), we want to use the loc of the original node.

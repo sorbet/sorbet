@@ -11,7 +11,7 @@ using ForeignPtr = const void *;
 using SelfPtr = const void *;
 
 struct node_list;
-struct token;
+class token;
 
 struct builder {
     ForeignPtr (*accessible)(SelfPtr builder, ForeignPtr node);
@@ -165,7 +165,6 @@ struct builder {
     ForeignPtr (*range_exclusive)(SelfPtr builder, ForeignPtr lhs, const token *oper, ForeignPtr rhs);
     ForeignPtr (*range_inclusive)(SelfPtr builder, ForeignPtr lhs, const token *oper, ForeignPtr rhs);
     ForeignPtr (*rational)(SelfPtr builder, const token *tok);
-    ForeignPtr (*rational_complex)(SelfPtr builder, const token *tok);
     ForeignPtr (*regexp_compose)(SelfPtr builder, const token *begin, const node_list *parts, const token *end,
                                  ForeignPtr options);
     ForeignPtr (*regexp_options)(SelfPtr builder, const token *regopt);
@@ -198,7 +197,7 @@ struct builder {
     ForeignPtr (*xstring_compose)(SelfPtr builder, const token *begin, const node_list *parts, const token *end);
 };
 
-static_assert(std::is_pod_v<builder>, "`builder` must be a POD type");
+static_assert(std::is_trivial_v<builder> && std::is_standard_layout_v<builder>, "`builder` must be a POD type");
 
 } // namespace ruby_parser
 

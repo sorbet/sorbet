@@ -58,7 +58,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     static unique_ptr<WorkerPool> workers = WorkerPool::create(0, *logger);
     commonGs->trace("starting run");
     unique_ptr<core::GlobalState> gs;
-    { gs = commonGs->deepCopyGlobalState(true); }
+    {
+        gs = commonGs->deepCopyGlobalState(true);
+    }
     string inputData((const char *)data, size);
     vector<core::FileRef> inputFiles;
     {
@@ -74,6 +76,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     auto foundHashes = nullptr;
     indexed =
         move(realmain::pipeline::nameAndResolve(*gs, move(indexed.result()), *opts, *workers, foundHashes).result());
-    realmain::pipeline::typecheck(*gs, move(indexed.result()), *opts, *workers);
+    realmain::pipeline::sortBySize(*gs, indexed.result());
+    auto relevantPackages = nullptr;
+    realmain::pipeline::typecheck(*gs, move(indexed.result()), *opts, *workers, relevantPackages);
     return 0;
 }

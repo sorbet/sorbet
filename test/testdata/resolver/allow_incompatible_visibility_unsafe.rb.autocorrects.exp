@@ -29,7 +29,7 @@ end
 # This one will overwrite to `allow_incompatible: :visibility`, but w/e
 class ChildBadSymbol < Parent
   sig {override(allow_incompatible: :visibility).returns(Integer)}
-  #                                 ^^^^ error-with-dupes: `override(allow_incompatible: ...)` expects either `true` or `:visibility
+  #                                 ^^^^ error: `override(allow_incompatible: ...)` expects either `true` or `:visibility
   private def some_public_api; 0; end
   #       ^^^^^^^^^^^^^^^^^^^ error: Method `some_public_api` is private in `ChildBadSymbol` but not in `Parent`
 end

@@ -8,7 +8,7 @@ using namespace std;
 
 namespace sorbet::rewriter {
 
-void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn) {
+void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn, bool isRoot) {
     if (ctx.state.cacheSensitiveOptions.runningUnderAutogen) {
         return;
     }
@@ -28,15 +28,33 @@ void ConstantAssumeType::run(core::MutableContext ctx, ast::Assign *asgn) {
         return;
     }
 
+    // Allow `A.new.freeze` to be treated the same as `A.new`
+    if (send->fun == core::Names::freeze() && !send->hasNonBlockArgs() && !send->hasBlock()) {
+        send = ast::cast_tree<ast::Send>(send->recv);
+        if (send == nullptr) {
+            return;
+        }
+    }
+
     if (send->fun != core::Names::new_()) {
         return;
     }
 
-    if (!(ast::isa_tree<ast::UnresolvedConstantLit>(send->recv) || ast::isa_tree<ast::ConstantLit>(send->recv))) {
+    ast::ExpressionPtr type;
+    if (send->recv.isSelfReference()) {
+        if (isRoot) {
+            return; // Don't try to cast top level `X = new` to `<root>`
+        }
+
+        // For `X = new` (or `X = self.new`), the inferred type is the self type. The resolver will
+        // replace this with the (then-resolved) enclosing class.
+        type = ast::MK::Self(send->recv.loc());
+    } else if (ast::isa_tree<ast::UnresolvedConstantLit>(send->recv) || ast::isa_tree<ast::ConstantLit>(send->recv)) {
+        type = send->recv.deepCopy();
+    } else {
         return;
     }
 
-    auto type = send->recv.deepCopy();
     asgn->rhs = ast::MK::AssumeType(asgn->rhs.loc(), move(asgn->rhs), move(type));
 }
 

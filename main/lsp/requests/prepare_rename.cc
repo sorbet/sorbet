@@ -132,4 +132,10 @@ unique_ptr<ResponseMessage> PrepareRenameTask::runRequest(LSPTypecheckerDelegate
     return response;
 }
 
+core::packages::Stratum PrepareRenameTask::preemptionStratum(FileStratumMapping info) const {
+    // We can't tell how far the rename will go, so we conservatively say that we can preempt at the end of the package
+    // graph.
+    return info.getLastStratum();
+}
+
 } // namespace sorbet::realmain::lsp

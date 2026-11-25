@@ -52,26 +52,7 @@ module T::Props
             SerdeTransform::Mode::DESERIALIZE,
             'val'
           )
-          transformed_val = if transformation
-            # Rescuing exactly NoMethodError is intended as a temporary hack
-            # to preserve the semantics from before codegen. More generally
-            # we are inconsistent about typechecking on deser and need to decide
-            # our strategy here.
-            <<~RUBY
-              begin
-                #{transformation}
-              rescue NoMethodError => e
-                raise_deserialization_error(
-                  #{prop.inspect},
-                  val,
-                  e,
-                )
-                val
-              end
-            RUBY
-          else
-            'val'
-          end
+          transformed_val = transformation || 'val'
 
           nil_handler = generate_nil_handler(
             prop: prop,
@@ -81,10 +62,16 @@ module T::Props
             raise_on_nil_write: !!rules[:raise_on_nil_write],
           )
 
+          # The `.freeze` on the `hash.key?` argument matters: when this source
+          # is eval'd lazily (without a frozen-string-literal prefix, unlike
+          # `eagerly_define_lazy_methods!`), a bare literal here would allocate
+          # a new String on every call for each nil/missing prop. `"str".freeze`
+          # compiles to a no-allocation VM instruction (opt_str_freeze). The
+          # `hash[...]` read doesn't need it because of opt_aref_with.
           <<~RUBY
             val = hash[#{hash_key.inspect}]
             #{ivar_name} = if val.nil?
-              found -= 1 unless hash.key?(#{hash_key.inspect})
+              found -= 1 unless hash.key?(#{hash_key.inspect}.freeze)
               #{nil_handler}
             else
               #{transformed_val}

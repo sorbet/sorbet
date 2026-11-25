@@ -9,7 +9,7 @@ module T::Private::Abstract::Validate
 
   def self.validate_abstract_module(mod)
     type = Abstract::Data.get(mod, :abstract_type)
-    validate_interface(mod) if type == :interface
+    validate_interface(mod) if :interface == type
   end
 
   # Validates a class/module with an abstract class/module as an ancestor. This must be called
@@ -56,7 +56,7 @@ module T::Private::Abstract::Validate
       # signature and (b) methods from ancestors (note that these ancestors can come before or
       # after the abstract module in the inheritance chain -- the former coming from
       # walking `mod.ancestors` above).
-      abstract_signature = Methods.signature_for_method(abstract_method)
+      abstract_signature = Methods.signature_for_method(abstract_method) || raise("Method being abstract must imply it has a signature")
       # We allow implementation methods to be defined without a signature.
       # In that case, get its untyped signature.
       implementation_signature ||= Methods::Signature.new_untyped(
@@ -111,8 +111,8 @@ module T::Private::Abstract::Validate
   end
 
   private_class_method def self.describe_method(method, show_owner: true)
-    loc = if method.source_location
-      method.source_location.join(':')
+    loc = if (source_loc = method.source_location)
+      source_loc.join(':')
     else
       "<unknown location>"
     end

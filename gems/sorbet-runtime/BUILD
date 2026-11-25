@@ -1,10 +1,12 @@
+load(":tools/call_validation.bzl", "call_validation_rb_files")
+
 filegroup(
     name = "sorbet-runtime",
     srcs = glob([
         "lib/**/*.rb",
     ]) + [
-        "Rakefile",
         "Gemfile",
+        "Rakefile",
         "sorbet-runtime.gemspec",
     ],
     visibility = ["//visibility:public"],
@@ -19,7 +21,12 @@ filegroup(
 
 filegroup(
     name = "sorbet-runtime-stubs",
-    srcs = ["test/test_helper.rb"] + glob(["test/*.rbi"]),
+    srcs = glob([
+        "lib/**/*.rbi",
+        "sorbet/rbi/**/*.rbi",
+    ]) + [
+        "sorbet/config",
+    ],
 )
 
 sh_test(
@@ -51,7 +58,5 @@ cc_binary(
         "@cxxopts",
     ],
 )
-
-load(":tools/call_validation.bzl", "call_validation_rb_files")
 
 call_validation_rb_files()

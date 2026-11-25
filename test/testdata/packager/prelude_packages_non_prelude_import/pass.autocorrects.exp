@@ -1,0 +1,61 @@
+# -- test/testdata/packager/prelude_packages_non_prelude_import/application/__package.rb --
+# frozen_string_literal: true
+# typed: strict
+
+class Application < PackageSpec
+end
+# ------------------------------
+# -- test/testdata/packager/prelude_packages_non_prelude_import/application/b.rb --
+# typed: true
+
+module Application
+  class B
+    extend T::Sig
+
+    sig { returns(Integer) }
+    def self.test
+      10
+    end
+  end
+end
+# ------------------------------
+# -- test/testdata/packager/prelude_packages_non_prelude_import/prelude/__package.rb --
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Prelude < PackageSpec
+  prelude!
+
+end
+# ------------------------------
+# -- test/testdata/packager/prelude_packages_non_prelude_import/prelude/a.rb --
+# typed: true
+
+module Prelude
+  class A
+  end
+end
+# ------------------------------
+# -- test/testdata/packager/prelude_packages_non_prelude_import/prelude/test/__package.rb --
+# frozen_string_literal: true
+# typed: strict
+# enable-packager: true
+
+class Test::Prelude < PackageSpec
+  test!
+  prelude!
+
+  import Prelude
+end
+# ------------------------------
+# -- test/testdata/packager/prelude_packages_non_prelude_import/relaxed_prelude/__package.rb --
+# frozen_string_literal: true
+# typed: strict
+# allow-relaxed-packager-checks-for: RelaxedPrelude
+
+class RelaxedPrelude < PackageSpec
+  prelude!
+
+end
+# ------------------------------

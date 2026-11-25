@@ -45,7 +45,7 @@ void CFG::enterLocalInternal(core::LocalVariable variable, LocalRef &ref) {
     this->localVariables.emplace_back(variable);
 
     // Default values
-    this->minLoops.emplace_back(INT_MAX);
+    this->minLoops.emplace_back();
     this->maxLoopWrite.emplace_back(0);
 
     ENFORCE(this->localVariables.size() == this->minLoops.size());
@@ -62,12 +62,22 @@ LocalRef CFG::enterLocal(core::LocalVariable variable) {
     return ref;
 }
 
+LinkRef CFG::enterLink(core::NameRef fun, core::LocOffsets loc, vector<core::ParamInfo::Flags> &&paramFlags) {
+    auto id = links.size();
+    links.emplace_back(make_shared<core::SendAndBlockLink>(fun, loc, std::move(paramFlags)));
+    return LinkRef(static_cast<uint32_t>(id));
+}
+
 CFG::CFG() {
     freshBlock(0); // entry;
     freshBlock(0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond.variable = LocalRef::unconditional();
+
+    // The default LinkRef is 0; we push a nullptr here so e.g. a Send without a block can
+    // simply use its default LinkRef to index into the array instead of having to branch.
+    links.emplace_back(nullptr);
 
     UnfreezeCFGLocalVariables unfreezeVars(*this);
     // Enter a few fixed local variables
@@ -112,8 +122,8 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
                 blockReads.add(v->what.id());
             } else if (auto v = cast_instruction<Send>(bind.value)) {
                 blockReads.add(v->recv.variable.id());
-                for (auto &arg : v->args) {
-                    blockReads.add(arg.variable.id());
+                for (auto &arg : v->argRefs()) {
+                    blockReads.add(arg.id());
                 }
             } else if (auto v = cast_instruction<TAbsurd>(bind.value)) {
                 blockReads.add(v->what.variable.id());
@@ -162,17 +172,11 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     {
         Timer timeit(ctx.state.tracer(), "privates2");
         auto local = 0;
-        vector<UIntSet> writesToRemove(maxBasicBlockId, UIntSet(numLocalVariables()));
         for (const auto &usages : usageCounts) {
             if (usages.first == 1) {
-                writesToRemove[usages.second].add(local);
+                target.writes[usages.second].remove(local);
             }
             local++;
-        }
-        auto blockId = 0;
-        for (const auto &blockWritesToRemove : writesToRemove) {
-            target.writes[blockId].remove(blockWritesToRemove);
-            blockId++;
         }
     }
 
@@ -353,8 +357,7 @@ optional<BasicBlock::BlockExitCondInfo> BasicBlock::maybeGetUpdateKnowledgeRecei
 string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "block[id={}]({})\n", this->id,
-                   fmt::map_join(
-                       this->args, ", ", [&](const auto &arg) -> auto{ return arg.toString(gs, cfg); }));
+                   fmt::map_join(this->args, ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);
@@ -369,8 +372,7 @@ string BasicBlock::toString(const core::GlobalState &gs, const CFG &cfg) const {
 string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "bb{}[firstDead={}]({}):\n", this->id, this->firstDeadInstructionIdx,
-                   fmt::map_join(
-                       this->args, ", ", [&](const auto &arg) -> auto{ return arg.toString(gs, cfg); }));
+                   fmt::map_join(this->args, ", ", [&](const auto &arg) -> auto { return arg.toString(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "    # outerLoops: {}\n", this->outerLoops);
@@ -401,8 +403,7 @@ string BasicBlock::toTextualString(const core::GlobalState &gs, const CFG &cfg) 
 string BasicBlock::showRaw(const core::GlobalState &gs, const CFG &cfg) const {
     fmt::memory_buffer buf;
     fmt::format_to(std::back_inserter(buf), "block[id={}]({})\n", this->id,
-                   fmt::map_join(
-                       this->args, ", ", [&](const auto &arg) -> auto{ return arg.showRaw(gs, cfg); }));
+                   fmt::map_join(this->args, ", ", [&](const auto &arg) -> auto { return arg.showRaw(gs, cfg); }));
 
     if (this->outerLoops > 0) {
         fmt::format_to(std::back_inserter(buf), "outerLoops: {}\n", this->outerLoops);

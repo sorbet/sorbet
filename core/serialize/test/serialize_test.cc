@@ -11,7 +11,7 @@ namespace sorbet::core::serialize {
 
 auto logger = spdlog::stderr_color_mt("serialize_test");
 
-TEST_CASE("U4") { // NOLINT
+TEST_CASE("U4") {
     Pickler p;
     p.putU4(0);
     p.putU4(1);
@@ -22,7 +22,7 @@ TEST_CASE("U4") { // NOLINT
     CHECK_EQ(u.getU4(), 4294967295);
 }
 
-TEST_CASE("U4U1") { // NOLINT
+TEST_CASE("U4U1") {
     Pickler p;
     p.putU4(0);
     p.putU4(0);
@@ -45,7 +45,7 @@ TEST_CASE("U4U1") { // NOLINT
     CHECK_EQ(u.getU4(), 4294967295);
 }
 
-TEST_CASE("U8") { // NOLINT
+TEST_CASE("U8") {
     Pickler p;
     p.putS8(0);
     p.putS8(1);
@@ -58,7 +58,7 @@ TEST_CASE("U8") { // NOLINT
     CHECK_EQ(u.getS8(), 9223372036854775807);
 }
 
-TEST_CASE("Strings") { // NOLINT
+TEST_CASE("Strings") {
     Pickler p;
     p.putStr("");
     p.putStr("a");

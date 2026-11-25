@@ -128,9 +128,9 @@ class StringScanner < Object
         arg0: String,
         arg1: T::Boolean,
     )
-    .returns(StringScanner)
+    .void
   end
-  def self.new(arg0, arg1=T.unsafe(nil)); end
+  def initialize(arg0, arg1=T.unsafe(nil)); end
 
   # Appends `str` to the string being scanned. This method does not affect scan
   # pointer.

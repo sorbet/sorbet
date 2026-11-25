@@ -1,14 +1,36 @@
 # frozen_string_literal: true
 # typed: true
 
+# Every sig keeps one of these for the life of the process. At 18 or fewer instance variables an
+# instance fits in a 160-byte GC slot; a 19th moves every instance to the 320-byte slot, so prefer
+# deriving new state over storing it.
 class T::Private::Methods::Signature
-  attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type, :block_name,
-              :rest_type, :rest_name, :keyrest_type, :keyrest_name, :bind,
-              :return_type, :mode, :req_arg_count, :req_kwarg_names, :has_rest, :has_keyrest,
-              :check_level, :parameters, :on_failure, :override_allow_incompatible,
-              :defined_raw
+  attr_reader :method, :method_name, :arg_types, :kwarg_types, :block_type,
+              :rest_type, :keyrest_type, :bind, :effective_return_type,
+              :return_type, :req_arg_count, :req_kwarg_names, :on_failure
 
-  UNNAMED_REQUIRED_PARAMETERS = [[:req]].freeze
+  # @flags packs, from the low bits up: mode (3 bits), check_level (2 bits),
+  # override_allow_incompatible (2 bits), and defined_raw (1 bit).
+  FLAG_MODES = T::Private::Methods::Modes::MODES
+  FLAG_CHECK_LEVELS = T::Private::RuntimeLevels::LEVELS
+  FLAG_ALLOW_INCOMPATIBLE = [false, true, :visibility].freeze
+  MODE_MASK = 0b111
+  CHECK_LEVEL_SHIFT = 3
+  CHECK_LEVEL_MASK = 0b11
+  ALLOW_INCOMPATIBLE_SHIFT = 5
+  ALLOW_INCOMPATIBLE_MASK = 0b11
+  DEFINED_RAW_BIT = 1 << 7
+  private_constant :FLAG_MODES, :FLAG_CHECK_LEVELS, :FLAG_ALLOW_INCOMPATIBLE, :MODE_MASK,
+                   :CHECK_LEVEL_SHIFT, :CHECK_LEVEL_MASK, :ALLOW_INCOMPATIBLE_SHIFT,
+                   :ALLOW_INCOMPATIBLE_MASK, :DEFINED_RAW_BIT
+
+  # T.unsafe: `UnboundMethod#parameters` lies and says `T::Array[[Symbol, Symbol]]`.
+  # Sorbet can't lub tuple types, meaning that `T.any([Symbol], [Symbol,
+  # Symbol])` would just be `T::Array[T.untyped]`. But Sorbet can see that
+  # UNNAMED_REQUIRED_PARAMETERS, which is an array of 1-tuples, can never
+  # equal an array of 2-tuples, and calls the code dead. There's no good
+  # option, let's just unsafe until tuples are better and we can fix the sig.
+  UNNAMED_REQUIRED_PARAMETERS = T.unsafe([[:req]].freeze)
 
   def self.new_untyped(method:, mode: T::Private::Methods::Modes.untyped, parameters: method.parameters)
     # Using `NotTyped` ensures we'll get an error if we ever try validation on these.
@@ -16,7 +38,7 @@ class T::Private::Methods::Signature
     raw_return_type = not_typed
     # Map missing parameter names to "argN" positionally
     parameters = parameters.each_with_index.map do |(param_kind, param_name), index|
-      [param_kind, param_name || "arg#{index}"]
+      [param_kind, T.unsafe(param_name) || "arg#{index}".to_sym]
     end
     raw_arg_types = {}
     parameters.each do |_, param_name|
@@ -36,36 +58,44 @@ class T::Private::Methods::Signature
     )
   end
 
-  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: method.parameters, override_allow_incompatible: false, defined_raw: false)
+  def initialize(method:, method_name:, raw_arg_types:, raw_return_type:, bind:, mode:, check_level:, on_failure:, parameters: nil, override_allow_incompatible: false, defined_raw: false)
+    check_level = check_level.nil? ? T::Private::RuntimeLevels.default_checked_level : check_level
     @method = method
     @method_name = method_name
     @block_type = nil
-    @block_name = nil
     @rest_type = nil
-    @rest_name = nil
     @keyrest_type = nil
-    @keyrest_name = nil
     @return_type = T::Utils.coerce(raw_return_type)
-    @bind = bind ? T::Utils.coerce(bind) : bind
-    @mode = mode
-    @check_level = check_level
-    @has_rest = false
-    @has_keyrest = false
+    @effective_return_type = if check_level == :tests && @return_type.is_a?(T::Private::Types::Void)
+      T::Types::Anything::Private::INSTANCE
+    else
+      @return_type
+    end
+    @bind = NilClass.===(bind) ? bind : T::Utils.coerce(bind)
     @parameters = parameters
+    parameters ||= method.parameters
     @on_failure = on_failure
-    @override_allow_incompatible = override_allow_incompatible
-    @defined_raw = defined_raw
+    @flags = flag_index(FLAG_MODES, mode, 'mode') |
+             (flag_index(FLAG_CHECK_LEVELS, check_level, 'check_level') << CHECK_LEVEL_SHIFT) |
+             (flag_index(FLAG_ALLOW_INCOMPATIBLE, override_allow_incompatible, 'override_allow_incompatible') << ALLOW_INCOMPATIBLE_SHIFT) |
+             (defined_raw ? DEFINED_RAW_BIT : 0)
 
     # Use T.untyped in lieu of T.nilable to try to avoid unnecessary allocations.
-    arg_types = T.let(nil, T.untyped)
-    kwarg_types = T.let(nil, T.untyped)
+    arg_types = nil
+    kwarg_types = nil
+    req_kwarg_names = nil
+    if T::Private::IS_TYPECHECKING
+      arg_types = T.let(nil, T.nilable(T::Array[[Symbol, T::Types::Base]]))
+      kwarg_types = T.let(nil, T.nilable(T::Hash[Symbol, T::Types::Base]))
+      req_kwarg_names = T.let(nil, T.nilable(T::Array[Symbol]))
+    end
     req_arg_count = 0
-    req_kwarg_names = T.let(nil, T.untyped)
 
     # If sig params are declared but there is a single parameter with a missing name
     # **and** the method ends with a "=", assume it is a writer method generated
     # by attr_writer or attr_accessor
-    writer_method = !(raw_arg_types.size == 1 && raw_arg_types.key?(nil)) && parameters == UNNAMED_REQUIRED_PARAMETERS && method_name[-1] == "="
+    # (Checks are ordered so that the common, non-writer case short-circuits without allocating.)
+    writer_method = method_name.end_with?("=") && parameters == UNNAMED_REQUIRED_PARAMETERS && !(raw_arg_types.size == 1 && raw_arg_types.key?(nil))
     # For writer methods, map the single parameter to the method name without the "=" at the end
     parameters = [[:req, method_name[0...-1].to_sym]] if writer_method
     is_name_missing = parameters.any? { |_, name| !raw_arg_types.key?(name) }
@@ -87,7 +117,7 @@ class T::Private::Methods::Signature
     end
     i = 0
     raw_arg_types.each do |type_name, raw_type|
-      param_kind, param_name = parameters[i]
+      param_kind, param_name = parameters.fetch(i)
 
       if type_name != param_name
         hint = ""
@@ -103,7 +133,7 @@ class T::Private::Methods::Signature
 
         raise "Parameter `#{type_name}` is declared out of order (declared as arg number " \
               "#{i + 1}, defined in the method as arg number " \
-              "#{parameters.index { |_, name| name == type_name } + 1}).#{hint}\nMethod: #{method_desc}"
+              "#{T.must(parameters.index { |_, name| name == type_name }) + 1}).#{hint}\nMethod: #{method_desc}"
       end
 
       type = T::Utils.coerce(raw_type)
@@ -131,15 +161,10 @@ class T::Private::Methods::Signature
           (req_kwarg_names ||= []) << param_name
         end
       when :block
-        @block_name = param_name
         @block_type = type
       when :rest
-        @has_rest = true
-        @rest_name = param_name
         @rest_type = type
       when :keyrest
-        @has_keyrest = true
-        @keyrest_name = param_name
         @keyrest_type = type
       else
         raise "Unexpected param_kind: `#{param_kind}`. Method: #{method_desc}"
@@ -148,6 +173,7 @@ class T::Private::Methods::Signature
       i += 1
     end
 
+    @parameters ||= parameters unless @rest_type.nil?
     @arg_types = arg_types || EMPTY_LIST
     @kwarg_types = kwarg_types || EMPTY_HASH
     @req_arg_count = req_arg_count
@@ -163,6 +189,39 @@ class T::Private::Methods::Signature
     new_sig
   end
 
+  # Names are derived rather than stored so that Signature fits in a smaller GC slot.
+  def parameters
+    @parameters || @method.parameters
+  end
+
+  def block_name
+    parameter_name(:block)
+  end
+
+  def rest_name
+    parameter_name(:rest)
+  end
+
+  def keyrest_name
+    parameter_name(:keyrest)
+  end
+
+  def mode
+    FLAG_MODES.fetch(@flags & MODE_MASK)
+  end
+
+  def check_level
+    FLAG_CHECK_LEVELS.fetch((@flags >> CHECK_LEVEL_SHIFT) & CHECK_LEVEL_MASK)
+  end
+
+  def override_allow_incompatible
+    FLAG_ALLOW_INCOMPATIBLE.fetch((@flags >> ALLOW_INCOMPATIBLE_SHIFT) & ALLOW_INCOMPATIBLE_MASK)
+  end
+
+  def defined_raw
+    @flags.anybits?(DEFINED_RAW_BIT)
+  end
+
   def arg_count
     @arg_types.length
   end
@@ -175,10 +234,6 @@ class T::Private::Methods::Signature
     @method.owner
   end
 
-  def dsl_method
-    "#{@mode}_method"
-  end
-
   # @return [Hash] a mapping like `{arg_name: [val, type], ...}`, for only those args actually present.
   def each_args_value_type(args)
     # Manually split out args and kwargs based on ruby's behavior. Do not try to implement this by
@@ -189,14 +244,14 @@ class T::Private::Methods::Signature
     # causes forwarding **kwargs to do the wrong thing: see https://bugs.ruby-lang.org/issues/10708
     # and https://bugs.ruby-lang.org/issues/11860.
     args_length = args.length
-    if (args_length > @req_arg_count) && (!@kwarg_types.empty? || @has_keyrest) && args[-1].is_a?(Hash)
-      kwargs = args[-1]
+    if (args_length > @req_arg_count) && (!@kwarg_types.empty? || !@keyrest_type.nil?) && (last_arg = args[-1]).is_a?(Hash)
+      kwargs = last_arg
       args_length -= 1
     else
       kwargs = EMPTY_HASH
     end
 
-    if !@has_rest && ((args_length < @req_arg_count) || (args_length > @arg_types.length))
+    if @rest_type.nil? && ((args_length < @req_arg_count) || (args_length > @arg_types.length))
       expected_str = @req_arg_count.to_s
       if @arg_types.length != @req_arg_count
         expected_str += "..#{@arg_types.length}"
@@ -210,24 +265,28 @@ class T::Private::Methods::Signature
       # Process given pre-rest args. When there are no rest args,
       # this is just the given number of args.
       while it < args_length && it < @arg_types.length
-        yield @arg_types[it][0], args[it], @arg_types[it][1]
+        arg_type = @arg_types.fetch(it)
+        yield arg_type[0], args[it], arg_type[1]
         it += 1
       end
 
-      if @has_rest
+      if !@rest_type.nil?
         rest_count = args_length - @arg_types.length
-        rest_count = 0 if rest_count.negative?
 
-        rest_count.times do
-          yield @rest_name, args[it], @rest_type
-          it += 1
+        if rest_count > 0
+          rest_name = fast_rest_name
+
+          rest_count.times do
+            yield rest_name, args[it], @rest_type
+            it += 1
+          end
         end
       end
     end
 
     kwargs.each do |name, val|
       type = @kwarg_types[name]
-      if !type && @has_keyrest
+      if !type && !@keyrest_type.nil?
         type = @keyrest_type
       end
 
@@ -236,12 +295,16 @@ class T::Private::Methods::Signature
   end
 
   def method_desc
-    loc = if @method.source_location
-      @method.source_location.join(':')
+    self.class.method_desc(@method, @method_name)
+  end
+
+  def self.method_desc(method, method_name, source_loc=method.source_location)
+    loc = if source_loc
+      source_loc.join(':')
     else
       "<unknown location>"
     end
-    "#{@method} at #{loc}"
+    "#{method.owner}##{method_name} at #{loc}"
   end
 
   def force_type_init
@@ -251,6 +314,20 @@ class T::Private::Methods::Signature
     @rest_type&.build_type
     @keyrest_type&.build_type
     @return_type.build_type
+  end
+
+  # The rest param directly follows the positional params unless required params come after it.
+  private def fast_rest_name
+    param_kind, param_name = parameters[@arg_types.length]
+    param_kind == :rest ? param_name : parameter_name(:rest)
+  end
+
+  private def parameter_name(kind)
+    parameters.assoc(kind)&.[](1)
+  end
+
+  private def flag_index(values, value, field)
+    values.index(value) || raise(ArgumentError.new("Invalid #{field} for `#{@method_name}`: #{value.inspect}"))
   end
 
   EMPTY_LIST = [].freeze

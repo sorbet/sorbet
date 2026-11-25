@@ -3,6 +3,13 @@
 
 module T::Utils
   module Private
+    # NOTE: the Module and SimplePairUnion branches of this method are inlined
+    # for speed in several hot paths. The `T.cast` / `T.let` / `T.bind` /
+    # `T.assert_type!` happy paths in `_types.rb` inline the value check and
+    # return early on success; `T::Private::Casts.cast` is only reached after
+    # that check has already failed, so it reproduces the coercion branches but
+    # skips the (now always-false) value check. If you change the behavior
+    # here, update those callers too.
     def self.coerce_and_check_module_types(val, check_val, check_module_type)
       # rubocop:disable Style/CaseLikeIf
       if val.is_a?(T::Types::Base)
@@ -133,7 +140,7 @@ module T::Utils
   # @return [String]
   #
   def self.string_truncate_middle(str, start_len, end_len, ellipsis='...')
-    return unless str
+    return str unless str
 
     raise ArgumentError.new('must provide start_len') unless start_len
     raise ArgumentError.new('must provide end_len') unless end_len
@@ -148,6 +155,52 @@ module T::Utils
     end_part = end_len == 0 ? '' : str[-end_len..-1]
 
     "#{start_part}#{ellipsis}#{end_part}"
+  end
+
+  # Force all TypeAlias instances to resolve their effective_aliased_type eagerly.
+  #
+  # Call this while eagerly preloading a codebase (e.g. at service startup) to
+  # optimize for first-call/first-request latency.
+  def self.run_all_type_alias_blocks
+    require 'objspace'
+    ObjectSpace.each_object(T::Private::Types::TypeAlias, &:effective_aliased_type)
+    nil
+  end
+
+  # Force all T::Props::Serializable decorators to eagerly define their lazily
+  # specialized methods (serialization, deserialization, etc.).
+  #
+  # Call this while eagerly preloading a codebase (e.g. at service startup) to
+  # optimize for first-call/first-request latency.
+  def self.eagerly_define_all_lazy_props_methods!
+    require 'objspace'
+    ObjectSpace.each_object(T::Props::Serializable::DecoratorMethods, &:eagerly_define_lazy_methods!)
+    nil
+  end
+
+  # Force every type object in the process to build its lazily-initialized
+  # fields (see `T::Types::Base#build_lazy_fields`).
+  #
+  # Call this before forking workers so that first use of a type in a worker
+  # doesn't write onto a type object shared with the parent via copy-on-write.
+  def self.build_all_types
+    require 'objspace'
+    ObjectSpace.each_object(T::Types::Base) do |type|
+      type.build_lazy_fields unless type.frozen?
+    end
+    nil
+  end
+
+  # Free the signatures whose runtime checks never run: the `.checked(:never)`
+  # sigs, plus the `.checked(:tests)` sigs outside of a test environment. After
+  # this call, `T::Utils.signature_for_method` returns `nil` for those methods,
+  # and nothing can rebuild them.
+  #
+  # Call this once after eagerly preloading a codebase (e.g. at service startup)
+  # and after `run_all_sig_blocks`, to trade that introspection for memory.
+  def self.drop_unchecked_sigs!
+    T::Private::Methods.drop_unchecked_sigs!
+    nil
   end
 
   def self.lift_enum(enum)

@@ -27,7 +27,7 @@ steps:
             # supported linux architectures.
             #
             # [0]: https://docs.docker.com/reference/cli/docker/manifest/#create-and-push-a-manifest-list
-            image: "sorbetruby/sorbet-build-image:latest"
+            image: "stripe/sorbet-build-image:latest"
             workdir: /app
             always-pull: false
             init: true
@@ -37,10 +37,12 @@ steps:
             volumes:
               - "/usr/local/var/bazelcache:/usr/local/var/bazelcache"
 
-  - label: ":mac: test-static-sanitized.sh (master only)"
+  - label: ":mac: test-static-sanitized.sh"
     command: '.buildkite/test-static-sanitized.sh < /dev/null'
-    branches: "master"
-    artifact_paths: _out_/profile.json
+    if: 'build.branch == "master" || build.branch =~ /\b(MACOS_CI|MACOS-CI)\b/'
+    artifact_paths:
+      - _out_/profile.json
+      - _out_/clang_tidy_profile.json
     agents:
       os: mac
     # TODO(jez) We should only retry for specific error.
@@ -50,7 +52,9 @@ steps:
 
   - label: ":linux: test-static-sanitized.sh"
     command: '.buildkite/test-static-sanitized.sh < /dev/null'
-    artifact_paths: _out_/profile.json
+    artifact_paths:
+      - _out_/profile.json
+      - _out_/clang_tidy_profile.json
     <<: *elastic
 
   - label: ":linux: test-vscode-extension.sh"
@@ -70,9 +74,9 @@ steps:
     artifact_paths: _out_/**/*
     <<: *elastic
 
-  - label: ":mac: build-static-release.sh (master only)"
+  - label: ":mac: build-static-release.sh"
     command: '.buildkite/build-static-release.sh < /dev/null'
-    branches: master
+    if: 'build.branch == "master" || build.branch =~ /\b(MACOS_CI|MACOS-CI)\b/'
     artifact_paths: _out_/**/*
     agents:
       os: mac
@@ -114,7 +118,7 @@ steps:
   - label: ":linux: build-static-release-java.sh (master only)"
     command: '.buildkite/build-static-release-java.sh < /dev/null'
     # this needs to be run when both linux & mac build-static-release
-    # are done. at the moment, mac is only done on master branch
+    # are done. Keep Java packaging limited to master.
     branches: master
     artifact_paths: _out_/**/*
     <<: *elastic
@@ -131,6 +135,15 @@ steps:
 # Success Phase - Allow the PR to be merged
   - label: "All tests and builds succeeded"
     command: '.buildkite/all-succeeded.sh'
+    agents:
+      # Run this on arbiter, because we already have the sparse-checkout plugin installed there,
+      # so we can be marginally faster by not having to re-download it all the
+      # time on each elastic CI worker when they start up.
+      os: arbiter
+    plugins:
+      - 'sparse-checkout#v1.6.0':
+          paths:
+            - .buildkite
 
   - label: ":linux: publish-ruby-gems.sh (non-blocking)"
     command: '.buildkite/publish-ruby-gems.sh < /dev/null'

@@ -13,12 +13,15 @@ These docs are somewhat low-level. For a higher-level description of how to chan
 
 ## Errors from inline type assertions
 
-There are four kinds of [inline type assertions](type-assertions.md):
+There are several kinds of [inline type assertions](type-assertions.md):
 
-- `T.let(expr, Type)`
-- `T.cast(expr, Type)`
-- `T.must(expr)`
+- `T.absurd(expr)`
 - `T.assert_type!(expr, Type)`
+- `T.bind(self, Type)`
+- `T.cast(expr, Type)`
+- `T.let(expr, Type)`
+- `T.must(expr)`
+- `T.must_because(expr) { reason }`
 
 To customize the behavior when one of these assertions fails:
 
@@ -66,7 +69,7 @@ When the `call_validation_error_handler` is called this time, it will be passed 
 
 We [write sigs](sigs.md) using valid Ruby syntax. The body of the proc passed to a sig is executed (lazily, on first method call) to compute an in-memory data structure representing that sig's types. The execution of this proc can be invalid (for example, if `returns` or `void` is never called).
 
-The default behavior when building a sig is invalid is to raise an `ArgumentError`. To customize this behavior, use this:
+The default behavior when building a sig fails is to raise an `ArgumentError`. To customize this behavior, use this:
 
 ```ruby
 T::Configuration.sig_builder_error_handler = lambda do |error, location|
@@ -76,7 +79,7 @@ end
 
 ## Errors from invalid sigs
 
-Method signatures that build correctly can still be invalid. For example, a sig marked `override` must actually override a method. Same for `abstract` methods. When overriding a parent sig, the variance must match on the input and output types. If a sig that built correctly is invalid in anyway, this error handler will be called:
+Method signatures that build correctly can still be invalid. For example, a sig marked `override` must actually override a method. Same for `abstract` methods. When overriding a parent sig, the variance must match on the input and output types. If a sig that built correctly is invalid in any way, this error handler will be called:
 
 ```ruby
 T::Configuration.sig_validation_error_handler = lambda do |error, opts|

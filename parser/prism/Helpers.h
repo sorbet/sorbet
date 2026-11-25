@@ -194,12 +194,35 @@ template <typename PrismNode> pm_node_t *up_cast(PrismNode *node) {
     return reinterpret_cast<pm_node_t *>(node);
 }
 
+// Check if a type-erased non-null `pm_node_t` pointer is of a specific Prism node "subclass".
+template <typename PrismNode> inline bool isa_node(pm_node_t *anyNode) {
+    static_assert(isPrismNode<PrismNode>, "The `isa_node` function should only be called on Prism node pointers.");
+
+    ENFORCE(anyNode != nullptr, "Cannot check the type of a null Prism AST Node pointer.");
+
+    return PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID);
+}
+
+// Like `isa_node`, but also returns `false` if the node is null.
+template <typename PrismNode> inline bool isa_node_nullable(pm_node_t *anyNode) {
+    return anyNode != nullptr && isa_node<PrismNode>(anyNode);
+}
+
+// Take a pointer to a type-erased `pm_node_t` and down-cast it to a pointer of a specific Prism node "subclass",
+// or return `nullptr` if the node is null or not of the expected type. Matches the convention of other Sorbet
+// downcasting helpers like `cast_tree`, `cast_node`, `cast_type`, and C++'s `dynamic_cast`.
+template <typename PrismNode> PrismNode *down_cast(pm_node_t *anyNode) {
+    if (isa_node_nullable<PrismNode>(anyNode)) {
+        return reinterpret_cast<PrismNode *>(anyNode);
+    }
+
+    return nullptr;
+}
+
 // Take a pointer to a type-erased `pm_node_t` and down-cast it to a pointer of a specific Prism node "subclass".
 // In debug builds, this helper checks the node's type before casting, to ensure it's casted correctly.
-template <typename PrismNode> PrismNode *down_cast(pm_node_t *anyNode) {
-    static_assert(std::is_same_v<decltype(PrismNode::base), pm_node_t>,
-                  "The `down_cast` function should only be called on Prism node pointers.");
-    ENFORCE(anyNode == nullptr || PM_NODE_TYPE_P(anyNode, PrismNodeTypeHelper<PrismNode>::TypeID),
+template <typename PrismNode> PrismNode *down_cast_nonnull(pm_node_t *anyNode) {
+    ENFORCE(anyNode == nullptr || isa_node<PrismNode>(anyNode),
             "Failed to cast a Prism AST Node. Expected {} (#{}), but got {} (#{}).",
             pm_node_type_to_str(PrismNodeTypeHelper<PrismNode>::TypeID), PrismNodeTypeHelper<PrismNode>::TypeID,
             pm_node_type_to_str(PM_NODE_TYPE(anyNode)), PM_NODE_TYPE(anyNode));
@@ -252,6 +275,23 @@ template <typename Visitor> void walkPrismAST(const pm_node_t *node, Visitor &&v
 
     // Pass the visitor lambda as the opaque `data` pointer
     pm_visit_node(node, callback, &visitor);
+}
+
+inline bool isAssignmentTarget(const pm_node_t *node) {
+    switch (PM_NODE_TYPE(node)) {
+        case PM_LOCAL_VARIABLE_TARGET_NODE:    // _, ex = []
+        case PM_INSTANCE_VARIABLE_TARGET_NODE: // _, @ivar = []
+        case PM_CLASS_VARIABLE_TARGET_NODE:    // _, @@cvar = []
+        case PM_GLOBAL_VARIABLE_TARGET_NODE:   // _, $gvar = []
+        case PM_CONSTANT_TARGET_NODE:          // _, Constant = []
+        case PM_CONSTANT_PATH_TARGET_NODE:     // _, Constant::Path = []
+        case PM_CALL_TARGET_NODE:              // _, self.call_target = []
+        case PM_INDEX_TARGET_NODE:             // _, self[index] = []
+        case PM_MULTI_TARGET_NODE:             // _, (a, b) = []
+            return true;
+        default:
+            return false;
+    }
 }
 
 } // namespace sorbet::parser::Prism

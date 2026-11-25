@@ -13,6 +13,27 @@ module Foo
   end
 end
 
+#: -> nil
+def returns_nil = nil;
+T.reveal_type(returns_nil) # error: Revealed type: `NilClass`
+
+#: (nil) -> void
+def takes_nil(n) = T.reveal_type(n) # error: Revealed type: `NilClass`
+
+#: -> false
+def returns_false = false;
+T.reveal_type(returns_false) # error: Revealed type: `FalseClass`
+
+#: (false) -> void
+def takes_false(f) = T.reveal_type(f) # error: Revealed type: `FalseClass`
+
+#: -> true
+def returns_true = true;
+T.reveal_type(returns_true) # error: Revealed type: `TrueClass`
+
+#: (true) -> void
+def takes_true(t) = T.reveal_type(t) # error: Revealed type: `TrueClass`
+
 # Class instance types
 
 #: -> Foo
@@ -56,6 +77,29 @@ T.reveal_type(class_singleton_type4) # error: Revealed type: `T.class_of(Foo::Ba
 #: -> singleton(::Foo::Bar)
 def class_singleton_type5; T.unsafe(nil); end
 T.reveal_type(class_singleton_type5) # error: Revealed type: `T.class_of(Foo::Bar)`
+
+# Class singleton generic types
+
+class GenericSingleton1
+  extend T::Generic
+
+  T1 = type_template
+end
+
+class GenericSingleton2
+  extend T::Generic
+
+  T1 = type_template
+  T2 = type_template
+end
+
+#: -> singleton(GenericSingleton1)[GenericSingleton1, Integer]
+def class_singleton_generic_type1; T.unsafe(nil); end
+T.reveal_type(class_singleton_generic_type1) # error: Revealed type: `T.class_of(GenericSingleton1)[GenericSingleton1, Integer]`
+
+#: -> singleton(GenericSingleton2)[GenericSingleton2, Integer, String]
+def class_singleton_generic_type2; T.unsafe(nil); end
+T.reveal_type(class_singleton_generic_type2) # error: Revealed type: `T.class_of(GenericSingleton2)[GenericSingleton2, Integer, String]`
 
 # Union types
 
@@ -279,11 +323,20 @@ T.reveal_type(shape_type2) # error: Revealed type: `{a: String, b: Integer} (sha
 def shape_type3; T.unsafe(nil); end
 T.reveal_type(shape_type3) # error: Revealed type: `{String("a") => String, b: Integer} (shape of T::Hash[T.untyped, T.untyped])`
 
+#: -> { ?optional: String, required: String }
+#       ^^^^^^^^^ error: Optional keys in Hash shapes are not supported
+def shape_type4; T.unsafe(nil); end
+
+#: -> { ? k1: String, ?  k2: Integer }
+#       ^^^^ error: Optional keys in Hash shapes are not supported
+#                     ^^^^^ error: Optional keys in Hash shapes are not supported
+def shape_type5; T.unsafe(nil); end
+
 # Proc types
 
-#: -> ^(Integer, String) -> String
+#: -> ^(Integer a, String, Symbol c, Float) -> String
 def proc_type1; T.unsafe(nil); end
-T.reveal_type(proc_type1) # error: Revealed type: `T.proc.params(arg0: Integer, arg1: String).returns(String)`
+T.reveal_type(proc_type1) # error: Revealed type: `T.proc.params(arg0: Integer, arg1: String, arg2: Symbol, arg3: Float).returns(String)`
 
 #: -> ^() [self: Foo] -> void # error: Using `bind` is not permitted here
 def proc_type2; T.unsafe(nil); end

@@ -40,7 +40,7 @@ class ThreadsWait
   # Creates a
   # [`ThreadsWait`](https://docs.ruby-lang.org/en/2.6.0/ThreadsWait.html)
   # object, specifying the threads to wait on. Non-blocking.
-  def self.new(*threads); end
+  def initialize(*threads); end
 
   def Fail(err = _, *rest); end
 

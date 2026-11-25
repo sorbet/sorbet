@@ -10,3 +10,13 @@ No errors! Great job.
 Errors: 1
 -- double.rb --
 No errors! Great job.
+-- user_only.rb --
+user_only.rb:7: Parent of class `UserOnly` redefined from `A` to `B` https://srb.help/5012
+     7 |class UserOnly < B; end
+                         ^
+
+???: `UserOnly` provided via `--suppress-payload-superclass-redefinition-for` is not defined in Sorbet's payload https://srb.help/5012
+  Note:
+    This option only applies to classes defined in Sorbet's payload.
+    Delete this option (from the command line args or from the `sorbet/config` file).
+Errors: 2

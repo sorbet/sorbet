@@ -5,5 +5,9 @@ class C < PackageSpec
   layer 'util'
 
   import A
+  import AnotherPack
   import D
+
+  visible_to DoesNotExist
+  visible_to AlsoDoesNotExist::*
 end

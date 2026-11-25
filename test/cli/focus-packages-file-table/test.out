@@ -1,0 +1,18 @@
+--- file-table-json ---
+   "path": "./focused/__package.rb",
+   "path": "./focused/value.rb",
+   "path": "./other/__package.rb",
+   "path": "./prelude/__package.rb",
+   "path": "./prelude/value.rb",
+   "path": "./upstream/__package.rb",
+   "path": "./upstream/value.rb",
+exit: 0
+--- file-table-full-json ---
+   "path": "./focused/__package.rb",
+   "path": "./focused/value.rb",
+   "path": "./other/__package.rb",
+   "path": "./prelude/__package.rb",
+   "path": "./prelude/value.rb",
+   "path": "./upstream/__package.rb",
+   "path": "./upstream/value.rb",
+exit: 0

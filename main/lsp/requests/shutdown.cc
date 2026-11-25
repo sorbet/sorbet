@@ -11,6 +11,10 @@ bool ShutdownTask::canPreempt(const LSPIndexer &indexer) const {
     return true;
 }
 
+core::packages::Stratum ShutdownTask::preemptionStratum(FileStratumMapping info) const {
+    return core::packages::Stratum(0);
+}
+
 unique_ptr<ResponseMessage> ShutdownTask::runRequest(LSPTypecheckerDelegate &ts) {
     auto response = make_unique<ResponseMessage>("2.0", id, LSPMethod::Shutdown);
     response->result = JSONNullObject();

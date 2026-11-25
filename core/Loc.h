@@ -13,10 +13,14 @@ class Context;
 class MutableContext;
 
 class Loc final {
-    struct {
+    struct storage {
         LocOffsets offsets;
         core::FileRef fileRef;
+
+        bool operator==(const storage &other) const noexcept = default;
+        bool operator!=(const storage &other) const noexcept = default;
     } storage;
+
     template <typename H> friend H AbslHashValue(H h, const Loc &m);
     friend class sorbet::core::serialize::SerializerImpl;
 
@@ -67,22 +71,13 @@ public:
         return storage.fileRef;
     }
 
-    bool isTombStoned(const GlobalState &gs) const {
-        auto f = file();
-        if (!f.exists()) {
-            return false;
-        } else {
-            return file().data(gs).sourceType == File::Type::TombStone;
-        }
-    }
-
-    inline Loc(FileRef file, uint32_t begin, uint32_t end) : storage{{begin, end}, file} {
+    inline Loc(FileRef file, uint32_t begin, uint32_t end) noexcept : storage{{begin, end}, file} {
         ENFORCE_NO_TIMER(storage.offsets.exists());
     }
 
-    inline Loc(FileRef file, LocOffsets offsets) : storage{offsets, file} {}
+    inline Loc(FileRef file, LocOffsets offsets) noexcept : storage{offsets, file} {}
 
-    Loc() : Loc(0, LocOffsets::none()){};
+    Loc() noexcept : Loc(0, LocOffsets::none()) {};
 
     Loc &operator=(const Loc &rhs) = default;
     Loc &operator=(Loc &&rhs) = default;
@@ -105,9 +100,9 @@ public:
     std::string filePosToString(const GlobalState &gs, bool showFull = false) const;
     std::optional<std::string_view> source(const GlobalState &gs) const;
 
-    bool operator==(const Loc &rhs) const;
+    bool operator==(const Loc &rhs) const noexcept = default;
+    bool operator!=(const Loc &rhs) const noexcept = default;
 
-    bool operator!=(const Loc &rhs) const;
     static std::optional<uint32_t> detail2Pos(const File &file, Detail detail);
     static Detail pos2Detail(const File &file, uint32_t off);
     static std::optional<Loc> fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
@@ -122,7 +117,7 @@ public:
     // For example:
     //
     //     `loc.adjust(gs, -1, 0).exists() == false` if `loc.beginPos() == 0`
-    //     `loc.adjust(gs, 0, 1).exists() == false` if `loc.endPos() == loc.file().data(gs).source().size()`
+    //     `loc.adjust(gs, 0, 1).exists() == false` if `loc.endPos() == loc.file().data(gs).sourceSize()`
     //
     // etc.
     Loc adjust(const GlobalState &gs, int32_t beginAdjust, int32_t endAdjust) const;

@@ -24,6 +24,16 @@ namespace sorbet::core {
 
 using namespace std;
 
+static_assert(is_nothrow_constructible_v<TypePtr>);
+static_assert(is_nothrow_default_constructible_v<TypePtr>);
+static_assert(is_nothrow_copy_constructible_v<TypePtr>);
+static_assert(is_nothrow_move_constructible_v<TypePtr>);
+static_assert(is_nothrow_assignable_v<TypePtr, TypePtr>);
+static_assert(is_nothrow_copy_assignable_v<TypePtr>);
+static_assert(is_nothrow_move_assignable_v<TypePtr>);
+static_assert(is_nothrow_destructible_v<TypePtr>);
+static_assert(is_nothrow_swappable_v<TypePtr>);
+
 namespace {
 // We create types pretty freely during inference, and even small programs can create a
 // large amount of types; see test/testdata/infer/is_subtype_timeout.rb for an example.
@@ -506,8 +516,7 @@ void TupleType::_sanityCheck(const GlobalState &gs) const {
 }
 
 ShapeType::ShapeType(vector<TypePtr> keys, vector<TypePtr> values) : keys(move(keys)), values(move(values)) {
-    DEBUG_ONLY(for (auto &k
-                    : this->keys) {
+    DEBUG_ONLY(for (auto &k : this->keys) {
         ENFORCE(isa_type<NamedLiteralType>(k) || isa_type<IntegerLiteralType>(k) || isa_type<FloatLiteralType>(k));
     };);
     recordAllocatedType("shapetype");
@@ -667,21 +676,18 @@ InlinedVector<TypeMemberRef, 4> Types::alignBaseTypeArgs(const GlobalState &gs, 
         auto members = what.data(gs)->typeMembers();
         currentAlignment.assign(members.begin(), members.end());
     } else {
+        auto members = what.data(gs)->typeMembers();
         currentAlignment.reserve(asIf.data(gs)->typeMembers().size());
-        for (auto originalTp : asIf.data(gs)->typeMembers()) {
-            auto name = originalTp.data(gs)->name;
-            SymbolRef align;
-            for (auto x : what.data(gs)->typeMembers()) {
-                if (x.data(gs)->name == name) {
-                    align = x;
-                    currentAlignment.emplace_back(x);
-                    break;
-                }
-            }
-            if (!align.exists()) {
-                currentAlignment.emplace_back(Symbols::noTypeMember());
-            }
-        }
+        absl::c_transform(asIf.data(gs)->typeMembers(), back_inserter(currentAlignment),
+                          [&gs, members](auto originalTp) -> TypeMemberRef {
+                              auto name = originalTp.data(gs)->name;
+                              auto it = absl::c_find_if(
+                                  members, [&gs, name](auto x) -> bool { return x.data(gs)->name == name; });
+                              if (it == members.end()) {
+                                  return Symbols::noTypeMember();
+                              }
+                              return *it;
+                          });
     }
     return currentAlignment;
 }
@@ -1190,11 +1196,13 @@ Loc DispatchArgs::argsLoc(const GlobalState &gs) const {
             result = callLoc().copyEndWithZeroLength();
         } else if (!locs.fun.exists()) {
             result = core::Loc(locs.file, this->block->loc.copyWithZeroLength());
-        } else {
+        } else if (funLoc().endPos() <= this->block->loc.beginPos()) {
             result = core::Loc(locs.file, funLoc().endPos(), this->block->loc.beginPos());
             if (result.copyEndWithZeroLength().adjust(gs, -1, 0).source(gs) == " ") {
                 result = result.adjust(gs, 0, -1);
             }
+        } else {
+            result = callLoc().copyEndWithZeroLength();
         }
     } else {
         if (locs.fun.exists()) {

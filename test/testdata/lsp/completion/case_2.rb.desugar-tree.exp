@@ -13,13 +13,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.test1<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
-        begin
-          <assignTemp>$2 = x
-          if <emptyTree>::<C ConstantCompletion>::<C <ConstantNameMissing>>.===(<assignTemp>$2)
-            <self>.puts("hello")
-          else
-            <emptyTree>
-          end
+        if <emptyTree>::<C ConstantCompletion>::<C <ConstantNameMissing>>.===(x)
+          <self>.puts("hello")
+        else
+          <emptyTree>
         end
       end
     end
@@ -27,13 +24,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.test2<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
-        begin
-          <assignTemp>$2 = x
-          if <emptyTree>::<C ConstantCompletion>.puts("hello").===(<assignTemp>$2)
-            <emptyTree>
-          else
-            <emptyTree>
-          end
+        if <emptyTree>::<C ConstantCompletion>.puts("hello").===(x)
+          <emptyTree>
+        else
+          <emptyTree>
         end
       end
     end
@@ -41,13 +35,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.test3<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
-        begin
-          <assignTemp>$2 = x
-          if <emptyTree>::<C ConstantCompletion>::<C Opus>::<C Log>.info("hello").===(<assignTemp>$2)
-            <emptyTree>
-          else
-            <emptyTree>
-          end
+        if <emptyTree>::<C ConstantCompletion>::<C Opus>::<C Log>.info("hello").===(x)
+          <emptyTree>
+        else
+          <emptyTree>
         end
       end
     end
@@ -55,13 +46,10 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def self.test4<<todo method>>(x, &<blk>)
       begin
         <self>.puts("before")
-        begin
-          <assignTemp>$2 = x
-          if <emptyTree>::<C ConstantCompletion>.y=(nil).===(<assignTemp>$2)
-            <emptyTree>
-          else
-            <emptyTree>
-          end
+        if <emptyTree>::<C ConstantCompletion>.y=(nil).===(x)
+          <emptyTree>
+        else
+          <emptyTree>
         end
       end
     end

@@ -1,6 +1,5 @@
 #ifndef SORBET_GLOBAL_STATE_H
 #define SORBET_GLOBAL_STATE_H
-#include "absl/synchronization/mutex.h"
 
 #include "common/StableStringStorage.h"
 #include "core/Error.h"
@@ -14,6 +13,7 @@
 #include "core/lsp/Query.h"
 #include "core/packages/PackageDB.h"
 #include "core/packages/PackageInfo.h"
+#include "core/packages/Stratum.h"
 #include "main/pipeline/semantic_extension/SemanticExtension.h"
 #include <memory>
 
@@ -33,7 +33,6 @@ class ErrorQueue;
 struct LocalSymbolTableHashes;
 
 namespace lsp {
-class Task;
 class TypecheckEpochManager;
 } // namespace lsp
 
@@ -96,6 +95,12 @@ private:
     void moveNames(Bucket *from, Bucket *to, unsigned int szFrom, unsigned int szTo);
 
 public:
+    // Return how big the hash table should be to hold `numNames` names.
+    static inline uint32_t sizeFor(size_t numNames) {
+        ENFORCE(numNames < std::numeric_limits<uint32_t>::max());
+        return 2 * nextPowerOfTwo(numNames);
+    }
+
     static inline Hash hashMixUTF8(std::string_view name) {
         return _hash(name);
     }
@@ -183,6 +188,78 @@ public:
     }
 };
 
+// Owns the name entries, their string storage and hash index, and the bookkeeping for caching and cloning them.
+class NameTable final {
+    friend class GlobalState;
+    friend class NameRef;
+    friend class NameSubstitution;
+    friend class serialize::Serializer;
+    friend class serialize::SerializerImpl;
+    friend struct NameRefDebugCheck;
+
+    struct DeepCloneHistoryEntry {
+        int nameTableId;
+        unsigned int lastUTF8NameKnownByParentNameTable;
+        unsigned int lastConstantNameKnownByParentNameTable;
+        unsigned int lastUniqueNameKnownByParentNameTable;
+    };
+    std::vector<DeepCloneHistoryEntry> deepCloneHistory;
+
+    static constexpr int STRINGS_PAGE_SIZE = 4096;
+    StableStringStorage<STRINGS_PAGE_SIZE> strings;
+    std::vector<UTF8Name> utf8Names;
+    std::vector<ConstantName> constantNames;
+    std::vector<UniqueName> uniqueNames;
+    NameHash namesByHash;
+
+    uint32_t nameTableDiffCount = 0;
+    unsigned int utf8NamesWritten_ = 0;
+    unsigned int constantNamesWritten_ = 0;
+    unsigned int uniqueNamesWritten_ = 0;
+    bool nameTableFrozen = true;
+
+    // Allows hashing states to bypass the name table ID counter.
+    explicit NameTable(int nameTableId);
+
+public:
+    int nameTableId;
+
+    NameTable();
+    NameTable(const NameTable &) = delete;
+    NameTable(NameTable &&) = default;
+    NameTable &operator=(const NameTable &) = delete;
+    NameTable &operator=(NameTable &&) = default;
+
+    unsigned int namesUsedTotal() const {
+        return this->utf8Names.size() + this->constantNames.size() + this->uniqueNames.size();
+    }
+
+    unsigned int utf8NamesUsed() const {
+        return this->utf8Names.size();
+    }
+
+    unsigned int constantNamesUsed() const {
+        return this->constantNames.size();
+    }
+
+    unsigned int uniqueNamesUsed() const {
+        return this->uniqueNames.size();
+    }
+
+    bool wasNameTableModified() const {
+        return this->utf8Names.size() > this->utf8NamesWritten_ ||
+               this->constantNames.size() > this->constantNamesWritten_ ||
+               this->uniqueNames.size() > this->uniqueNamesWritten_;
+    }
+
+    uint32_t getNameTableDiffCount() const {
+        return this->nameTableDiffCount;
+    }
+
+    // Copy names and clone history, optionally preserving the ID. Cache bookkeeping and freeze state use defaults.
+    std::unique_ptr<NameTable> deepCopy(bool keepId = false) const;
+};
+
 class FileTable {
     std::vector<std::shared_ptr<File>> files;
     UnorderedMap<std::string, FileRef> fileRefByPath;
@@ -232,6 +309,84 @@ public:
     }
 };
 
+template <typename T> class SymbolRange;
+
+template <typename T> class SymbolIterator {
+    friend class SymbolRange<T>;
+
+    uint32_t ix;
+
+    SymbolIterator(uint32_t ix) : ix{ix} {}
+
+public:
+    T operator*() {
+        return T::fromRaw(this->ix);
+    }
+
+    bool operator==(const SymbolIterator other) const {
+        return this->ix == other.ix;
+    }
+
+    bool operator!=(const SymbolIterator other) const {
+        return this->ix != other.ix;
+    }
+
+    SymbolIterator operator++() {
+        ++this->ix;
+        return *this;
+    }
+};
+
+template <typename T> class SymbolRange {
+    friend class SymbolTableOffsets;
+
+    const uint32_t _begin;
+    const uint32_t _end;
+
+    SymbolRange(uint32_t _begin, uint32_t _end) : _begin{_begin}, _end{_end} {}
+
+public:
+    using iterator = SymbolIterator<T>;
+
+    SymbolRange() = delete;
+
+    iterator begin() {
+        return SymbolIterator<T>{this->_begin};
+    }
+
+    iterator end() {
+        return SymbolIterator<T>{this->_end};
+    }
+};
+
+// A snapshot of the size of all of GlobalState's symbol tables at a point in time.
+class SymbolTableOffsets {
+    friend class GlobalState;
+
+    // The defaults of `1` are because all of our symbol tables reserve index `0` for the invalid entry, so all valid
+    // indices will start at offset `1` into their respective vector.
+    unsigned int classAndModulesOffset = 1;
+    unsigned int methodsOffset = 1;
+    unsigned int fieldsOffset = 1;
+    unsigned int typeMembersOffset = 1;
+    unsigned int typeParametersOffset = 1;
+
+public:
+    SymbolTableOffsets() = default;
+
+    explicit SymbolTableOffsets(const GlobalState &gs);
+
+    SymbolRange<ClassOrModuleRef> classOrModuleRefs(const GlobalState &gs) const;
+
+    SymbolRange<MethodRef> methodRefs(const GlobalState &gs) const;
+
+    SymbolRange<FieldRef> fieldRefs(const GlobalState &gs) const;
+
+    SymbolRange<TypeMemberRef> typeMemberRefs(const GlobalState &gs) const;
+
+    SymbolRange<TypeParameterRef> typeParameterRefs(const GlobalState &gs) const;
+};
+
 class GlobalState final {
     friend NameRef;
     friend ClassOrModule;
@@ -252,13 +407,14 @@ class GlobalState final {
     friend serialize::SerializerImpl;
     friend class UnfreezeNameTable;
     friend class UnfreezeSymbolTable;
+    friend class ForbidNewSymbols;
     friend class UnfreezeFileTable;
     friend struct NameRefDebugCheck;
 
-    // Private constructor that allows a specific globalStateId. Used in `makeEmptyGlobalStateForHashing` to avoid
-    // contention on the global state ID atomic.
+    // Private constructor that accepts a specific global state ID and a preallocated name table. Used in
+    // `makeEmptyGlobalStateForHashing` to avoid contention on the ID atomics.
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue, std::shared_ptr<lsp::TypecheckEpochManager> epochManager,
-                std::shared_ptr<FileTable> files, int globalStateId);
+                std::shared_ptr<FileTable> files, int globalStateId, std::shared_ptr<NameTable> nameTable);
 
 public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
@@ -293,7 +449,7 @@ public:
 
     ~GlobalState() = default;
 
-    ClassOrModuleRef enterClassSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
+    ClassOrModuleRef enterClassOrModuleSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
     TypeMemberRef enterTypeMember(Loc loc, ClassOrModuleRef owner, NameRef name, Variance variance);
     TypeParameterRef enterTypeParameter(Loc loc, MethodRef owner, NameRef name, Variance variance);
     MethodRef enterMethodSymbol(Loc loc, ClassOrModuleRef owner, NameRef name);
@@ -350,20 +506,28 @@ public:
     FileRef enterFile(std::shared_ptr<File> file);
     FileRef reserveFileRef(std::string path);
     std::shared_ptr<File> replaceFile(FileRef whatFile, std::shared_ptr<File> withWhat);
-    static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
     FileRef findFileByPath(std::string_view path) const {
         return this->files->findFileByPath(path);
     }
 
     const packages::PackageDB &packageDB() const;
     packages::PackageDB &packageDB();
-    void setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                            const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    void setPackagerOptions(const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                             const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
-                            const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                             const std::vector<std::string> &skipImportVisibilityCheckFor,
-                            const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages);
+                            const std::vector<std::string> &updateVisibilityFor,
+                            const std::vector<std::string> &packagerLayers, std::string errorHint,
+                            packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
+                            bool packageAttributedErrors);
     packages::UnfreezePackages unfreezePackages();
+
+    struct ClassOrModulePackageInfo final {
+        ClassOrModuleRef packageRegistryOwner;
+        packages::MangledName package;
+    };
+
+    // Computes the package metadata that enterClassOrModuleSymbol will assign to a new symbol.
+    ClassOrModulePackageInfo packageInfoForClassOrModule(ClassOrModuleRef owner, NameRef name) const;
 
     NameRef nextMangledName(ClassOrModuleRef owner, NameRef origName);
     void mangleRenameMethod(MethodRef what, NameRef origName);
@@ -377,10 +541,18 @@ public:
     // See the comment on the implementation for more.
     void deleteTypeMemberSymbol(TypeMemberRef what);
     spdlog::logger &tracer() const;
-    unsigned int namesUsedTotal() const;
-    unsigned int utf8NamesUsed() const;
-    unsigned int constantNamesUsed() const;
-    unsigned int uniqueNamesUsed() const;
+    unsigned int namesUsedTotal() const {
+        return this->nameTable->namesUsedTotal();
+    }
+    unsigned int utf8NamesUsed() const {
+        return this->nameTable->utf8NamesUsed();
+    }
+    unsigned int constantNamesUsed() const {
+        return this->nameTable->constantNamesUsed();
+    }
+    unsigned int uniqueNamesUsed() const {
+        return this->nameTable->uniqueNamesUsed();
+    }
 
     unsigned int classAndModulesUsed() const;
     unsigned int methodsUsed() const;
@@ -428,7 +600,16 @@ public:
     ErrorBuilder beginIndexerError(Loc loc, ErrorClass what);
 
     int totalErrors() const;
-    bool wasNameTableModified() const;
+    bool wasNameTableModified() const {
+        return this->nameTable->wasNameTableModified();
+    }
+    void markNameTableAsCached();
+
+    uint32_t getNameTableDiffCount() const {
+        return this->nameTable->getNameTableDiffCount();
+    }
+    void setNameTableDiffCount(uint32_t count);
+    void incrementNameTableDiffCount();
 
     int globalStateId;
     bool silenceErrors = false;
@@ -474,36 +655,34 @@ public:
     // have no overlap.
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
     // during indexing, and the name tables will only be written to.
-    std::unique_ptr<GlobalState>
-    copyForIndexThread(const bool packagerEnabled,
-                       const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                       const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                       const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
-                       const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
-                       const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                       const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages) const;
+    std::unique_ptr<GlobalState> copyForIndexThread(
+        const bool packagerEnabled, const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+        const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
+        const std::vector<std::string> &allowRelaxedPackagerChecksFor,
+        const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
+        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
+        bool packageAttributedErrors) const;
 
     // Minimally copy the global state, including the file table, to initialize the LSPTypechecker.
     // NOTE: this very intentionally will not copy the symbol or name tables. The symbol tables aren't used or populated
     // during indexing, and the name tables will only be written to.
     std::unique_ptr<GlobalState> copyForLSPTypechecker(
-        const bool packagerEnabled, const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-        const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+        const bool packagerEnabled, const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
         const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
-        const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
-        const std::vector<std::string> &allowRelaxedPackagerChecksFor, const std::vector<std::string> &packagerLayers,
-        std::string errorHint, bool genPackages) const;
+        const std::vector<std::string> &allowRelaxedPackagerChecksFor,
+        const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
+        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility) const;
 
-    // Copy the name table, file table and other parts of GlobalState that are required to start the slow path.
-    // NOTE: this very intentionally will not copy the symbol table, and the expectation is that the symbol table will
-    // be overwritten by immediately deserializaing the payload over it.
+    // Copy the name table, file table and other parts of GlobalState that are required to start the slow path. If the
+    // `toStratum` value is passed as something other than the `0` stratum, the prefix of the symbol table leading up to
+    // that stratum will be copied over as well.
     std::unique_ptr<GlobalState>
-    copyForSlowPath(const std::vector<std::string> &extraPackageFilesDirectoryUnderscorePrefixes,
-                    const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
+    copyForSlowPath(const std::vector<std::string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
-                    const std::vector<std::string> &packageSkipRBIExportEnforcementDirs,
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
-                    const std::vector<std::string> &packagerLayers, std::string errorHint, bool genPackages) const;
+                    const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
+                    std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
+                    bool packageAttributedErrors, core::packages::Stratum toStratum) const;
 
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;
@@ -519,9 +698,6 @@ public:
 
     FlowId creation; // used to track flow of global states
 
-    // Indicates the number of times LSP has run the type checker with this global state.
-    // Used to ensure GlobalState is in the correct state to process requests.
-    unsigned int lspTypecheckCount = 0;
     // [LSP] Manages typechecking epochs and cancelation.
     std::shared_ptr<lsp::TypecheckEpochManager> epochManager;
 
@@ -530,28 +706,6 @@ public:
     std::unique_ptr<LocalSymbolTableHashes> hash(uint32_t foundClassesHash) const;
     absl::Span<const std::shared_ptr<File>> getFiles() const {
         return this->files->span();
-    }
-
-    // NOTE: this only tracks the information required for computing what symbols needed to be exported, and not for
-    // find all references. For example, if a file references A::B::C::D, then only A::B::C::D will be in set returned,
-    // and not A, A::B, A::B::C.
-    const UnorderedSet<core::SymbolRef> &getSymbolsReferencedByFile(core::FileRef fref) const {
-        ENFORCE(packageDB().genPackages());
-        ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
-                "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files->size(),
-                symbolsReferencedByFile.size());
-        auto ix = fref.id();
-        ENFORCE(ix < symbolsReferencedByFile.size());
-        return this->symbolsReferencedByFile[ix];
-    }
-
-    void setSymbolsReferencedByFile(core::FileRef fref, UnorderedSet<core::SymbolRef> &referencedSymbols) {
-        ENFORCE(symbolsReferencedByFile.size() == this->files->size(),
-                "mismatch in files.size ({}) and symbolsReferencedByFile.size(): ({})", files->size(),
-                symbolsReferencedByFile.size());
-        auto ix = fref.id();
-        ENFORCE(ix < symbolsReferencedByFile.size());
-        this->symbolsReferencedByFile[ix].swap(referencedSymbols);
     }
 
     // Contains a string to be used as the base of the error URL.
@@ -566,6 +720,9 @@ public:
 
     // If 'true', use the Prism parser.
     bool parseWithPrism = false;
+
+    // Enable support experimental method modifiers, such as `abstract def foo; end`
+    bool experimentalMethodModifiers = false;
 
     // Some options change the behavior of things that might be cached, including ASTs, the file
     // table, the name table, the symbol table, etc.
@@ -610,33 +767,89 @@ public:
 
     bool shouldReportErrorOn(FileRef file, ErrorClass what) const;
 
-private:
-    struct DeepCloneHistoryEntry {
-        int globalStateId;
-        unsigned int lastUTF8NameKnownByParentGlobalState;
-        unsigned int lastConstantNameKnownByParentGlobalState;
-        unsigned int lastUniqueNameKnownByParentGlobalState;
-    };
-    std::vector<DeepCloneHistoryEntry> deepCloneHistory;
+    // Symbol table offset information for the current stratum of files.
+    const SymbolTableOffsets &newSymbols() const {
+        return this->symbolOffsets.back();
+    }
 
-    static constexpr int STRINGS_PAGE_SIZE = 4096;
-    StableStringStorage<STRINGS_PAGE_SIZE> strings;
+    // ClassOrModules that have been introduced in the current stratum of files.
+    SymbolRange<ClassOrModuleRef> newClassOrModules() const {
+        return this->newSymbols().classOrModuleRefs(*this);
+    }
+
+    // Methods that have been introduced in the current stratum of files.
+    SymbolRange<MethodRef> newMethods() const {
+        return this->newSymbols().methodRefs(*this);
+    }
+
+    // Fields that have been introduced in the current stratum of files.
+    SymbolRange<FieldRef> newFields() const {
+        return this->newSymbols().fieldRefs(*this);
+    }
+
+    // Type members that have been introduced in the current stratum of files.
+    SymbolRange<TypeMemberRef> newTypeMemberRefs() const {
+        return this->newSymbols().typeMemberRefs(*this);
+    }
+
+    // Type parameters that have been introduced in the current stratum of files.
+    SymbolRange<TypeParameterRef> newTypeParameterRefs() const {
+        return this->newSymbols().typeParameterRefs(*this);
+    }
+
+    // Reserve space for the boundary before the first stratum and one boundary after each stratum.
+    void preallocateForStrata(size_t len) {
+        this->symbolOffsets.reserve(len + 1);
+    }
+
+    void updateSymbolTableOffsets() {
+        this->symbolOffsets.emplace_back(SymbolTableOffsets(*this));
+    }
+
+    // The earliest stratum whose symbols are no longer a contiguous range of ids. Every stratum
+    // before it forms a self-contained prefix of the symbol table, in the sense that no symbol in
+    // it refers to a symbol outside it.
+    //
+    // That is, the range from from [0, contiguousStrataUntil()) is a contiguous prefix, and
+    // contiguousStrataUntil() is the first stratum that's not necessarily contiguous.
+    //
+    // A fast path can make this shorter than the number of boundaries recorded in symbolOffsets by
+    // re-processing an earlier stratum and entering its new symbols at the end of the symbol table.
+    packages::Stratum contiguousStrataUntil() const {
+        auto recorded = packages::Stratum(this->symbolOffsets.size() - 1);
+        return this->earliestReopenedStratum.has_value() ? std::min(this->earliestReopenedStratum.value(), recorded)
+                                                         : recorded;
+    }
+
+    // Records that a fast path will have entered new symbols for this stratum, so the reusable
+    // symbol table prefix must end before this stratum (because its symbols will live partly in the
+    // middle of the symbol table and partly at the end of the symbol table).
+    //
+    // This deliberately does not truncate `symbolOffsets` to make the fast & slow path
+    // representations "uniform", because a fast path can preempt a running slow path.
+    //
+    // This is also why only these helpers (not symbolOffsets itself) is exposed publicly, because
+    // the size of `symbolOffsets` will be different on e.g. the first traversal through the strata
+    // and a fast path edit that revisits an earlier stratum.
+    void reopenStratum(packages::Stratum stratum) {
+        this->earliestReopenedStratum = this->earliestReopenedStratum.has_value()
+                                            ? std::min(this->earliestReopenedStratum.value(), stratum)
+                                            : stratum;
+    }
+
+private:
+    std::shared_ptr<NameTable> nameTable;
+
     std::string_view enterString(std::string_view nm);
-    std::vector<UTF8Name> utf8Names;
-    std::vector<ConstantName> constantNames;
-    std::vector<UniqueName> uniqueNames;
     std::vector<ClassOrModule> classAndModules;
     std::vector<Method> methods;
     std::vector<Field> fields;
     std::vector<TypeParameter> typeMembers;
     std::vector<TypeParameter> typeParameters;
-    NameHash namesByHash;
     UnorderedSet<int> ignoredForSuggestTypedErrorClasses;
     UnorderedSet<int> suppressedErrorClasses;
     UnorderedSet<int> onlyErrorClasses;
     std::shared_ptr<FileTable> files;
-    std::vector<UnorderedSet<core::SymbolRef>> symbolsReferencedByFile;
-    bool wasNameTableModified_ = false;
 
     core::packages::PackageDB packageDB_;
 
@@ -646,9 +859,18 @@ private:
     bool unfreezeSymbolTable();
     bool unfreezeNameTable();
     bool unfreezeFileTable();
-    bool nameTableFrozen = true;
     bool symbolTableFrozen = true;
+    // Unlike symbolTableFrozen, this still allows updating existing symbols (e.g., adding locs).
+    bool newSymbolsForbidden = false;
     bool fileTableFrozen = true;
+
+    // Symbol table offsets at the boundaries of the package graph traversal. symbolOffsets[k]
+    // records the symbol table boundary after the prefix of strata [0, k), equivalently before
+    // stratum k. A completed traversal of N strata therefore records N + 1 entries.
+    std::vector<SymbolTableOffsets> symbolOffsets;
+
+    // The earliest stratum passed to `reopenStratum`, if any.
+    std::optional<packages::Stratum> earliestReopenedStratum;
 
     // Copy options over from another GlobalState. Private, as it's only meant to be used as a helper to implement other
     // copying strategies.
@@ -662,6 +884,13 @@ private:
                                    SymbolRef defaultReturnValue, bool ignoreKind = false) const;
 
     std::string toStringWithOptions(bool showFull, bool showRaw) const;
+
+    // Copy the symbol table from other, planning to start typechecking at the given stratum. Returns `true` if the copy
+    // took place, or `false` if the symbol table was left un-initialized.
+    //
+    // This method requires that `this` be derived from `other`, as the copied symbol table prefix will assume that
+    // their name tables and file tables to match.
+    void copySymbolTableFrom(const GlobalState &other, packages::Stratum toStratum);
 };
 // CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib

@@ -33,24 +33,46 @@ load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 
 bazel_toolchain_dependencies()
 
+# bazel_features is used by rules_cc and toolchains_llvm to detect Bazel version
+# capabilities. bazel_features_deps() sets up the @bazel_features_version repository
+# which is needed by bazel_features internally.
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
+
+bazel_features_deps()
+
+# rules_cc 0.2.14+ requires the @cc_compatibility_proxy repository to be set up
+# for WORKSPACE builds. This provides compatibility shims for native cc_* rules.
+load("@rules_cc//cc:extensions.bzl", "compatibility_proxy_repo")
+
+compatibility_proxy_repo()
+
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
+# To share one extracted copy of this toolchain between checkouts, see
+# "Multiple checkouts and worktrees" in README.md.
+#
+# The LLVM 22 ARM64 macOS archive has no x86_64 compiler-rt slice. Bundled
+# LLD ignored it in Intel cross-link probes; int128 helpers resolved via libSystem.
+# Keep driver defaults (not -nodefaultlibs, which also removes sanitizer
+# runtimes). Recheck the archive and older-macOS coverage on future upgrades.
 llvm_toolchain(
-    name = "llvm_toolchain_15_0_7",
-    absolute_paths = True,
+    name = "llvm_toolchain_22_1_3",
+    # (False is the default). We explicitly want `False` so that worktrees share caches
+    absolute_paths = False,
     alternative_llvm_sources = [
         "https://github.com/sorbet/llvm-project/releases/download/llvmorg-{llvm_version}/{basename}",
     ],
-    llvm_version = "15.0.7",
-    # The sysroots are needed for cross-compiling
-    sysroot = {
-        "": "",
-        "darwin-x86_64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
-        "darwin-aarch64": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+    # TODO(jez) Switch back to LLVM 22's lld once this is fixed:
+    # https://github.com/llvm/llvm-project/issues/224309
+    # "auto" uses xcrun to find ld on macOS; Linux keeps using the bundled lld.
+    linker = {
+        "darwin-aarch64": "auto",
+        "darwin-x86_64": "auto",
     },
+    llvm_version = "22.1.3",
 )
 
-load("@llvm_toolchain_15_0_7//:toolchains.bzl", "llvm_register_toolchains")
+load("@llvm_toolchain_22_1_3//:toolchains.bzl", "llvm_register_toolchains")
 
 llvm_register_toolchains()
 
@@ -58,9 +80,20 @@ load("@emsdk//:deps.bzl", emsdk_deps = "deps")
 
 emsdk_deps()
 
+load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
+
+py_repositories()
+
+# Register Python's execution toolchain for emsdk's upstream interpreter lookup.
+python_register_toolchains(
+    name = "emscripten_python",
+    ignore_root_user_error = True,
+    python_version = "3.11.10",
+)
+
 load("@emsdk//:emscripten_deps.bzl", emsdk_emscripten_deps = "emscripten_deps")
 
-emsdk_emscripten_deps(emscripten_version = "3.1.59")
+emsdk_emscripten_deps(emscripten_version = "4.0.23")
 
 load("@emsdk//:toolchains.bzl", "register_emscripten_toolchains")
 
@@ -78,14 +111,30 @@ ragel_register_toolchains()
 
 load("@rules_m4//m4:m4.bzl", "m4_register_toolchains")
 
-m4_register_toolchains()
+m4_register_toolchains(
+    extra_copts = [
+        # M4 1.4.18 and its bundled gnulib trigger the SDK's sprintf
+        # deprecation warning. Revisit when upgrading M4/gnulib.
+        "-Wno-deprecated-declarations",
+        # M4 1.4.18 marks a void fault_handler as pure. Clang ignores the
+        # invalid attribute; revisit this suppression on an M4 upgrade.
+        "-Wno-ignored-attributes",
+    ],
+)
 
 load("@rules_bison//bison:bison.bzl", "bison_register_toolchains")
 
 bison_register_toolchains(
-    # Clang 12+ introduced this flag. All versions of Bison at time of writing
-    # (up to 3.7.6) include code flagged by this warning.
-    extra_copts = ["-Wno-implicit-const-int-float-conversion"],
+    extra_copts = [
+        # Bundled gnulib formatting code triggers the macOS SDK's sprintf
+        # deprecation warning. Revisit when upgrading Bison's gnulib.
+        "-Wno-deprecated-declarations",
+        # Bison 3.3.2's bundled gnulib triggers this warning; remove for 3.8.2.
+        "-Wno-implicit-const-int-float-conversion",
+        # Bison 3.3.2's generated parse-gram.c sets gram_nerrs without using
+        # it. Revisit this suppression when upgrading the generator.
+        "-Wno-unused-but-set-variable",
+    ],
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")

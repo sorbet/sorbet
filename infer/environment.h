@@ -6,6 +6,7 @@
 #include "core/Context.h"
 #include "core/Error.h"
 #include "core/Names.h"
+#include "core/Refcounting.h"
 #include "core/Symbols.h"
 #include "core/errors/infer.h"
 #include "core/errors/internal.h"
@@ -37,7 +38,33 @@ public:
 };
 
 class Environment;
-struct KnowledgeFact;
+
+/**
+ * Encode things that we know hold and don't hold.
+ */
+struct KnowledgeFact : public core::RefCounted<KnowledgeFact> {
+    KnowledgeFact() = default;
+
+    bool isDead = false;
+    /* the following type tests are known to be true */
+    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> yesTypeTests;
+    /* the following type tests are known to be false */
+    InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> noTypeTests;
+
+    /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
+    void min(core::Context ctx, const KnowledgeFact &other);
+
+    void sanityCheck() const;
+
+    std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
+
+    // Can't use the regular copy constructor because `core::RefCounted` isn't copyable.
+    core::RefPtr<KnowledgeFact> freshCopy();
+
+    KnowledgeFact(bool isDead, const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &yesTypeTests,
+                  const InlinedVector<std::pair<cfg::LocalRef, core::TypePtr>, 1> &noTypeTests);
+};
+CheckSize(KnowledgeFact, 56, 8);
 
 // storing all the knowledge is slow
 // it only makes sense for us to store it if we are going to use it
@@ -59,7 +86,7 @@ class KnowledgeRef {
     // Is private to ensure that yes/no type test updates go through trusted paths that keep TypeTestReverseIndex
     // updated.
     KnowledgeFact &mutate();
-    std::shared_ptr<KnowledgeFact> knowledge;
+    core::RefPtr<KnowledgeFact> knowledge;
 
 public:
     KnowledgeRef();
@@ -84,6 +111,7 @@ public:
 
     void removeReferencesToVar(cfg::LocalRef ref);
 };
+CheckSize(KnowledgeRef, 8, 8);
 
 /** Almost a named pair of two KnowledgeFact-s. One holds knowledge that is true when a variable is falsy,
  * the other holds knowledge which is true if the same variable is falsy->
@@ -117,12 +145,13 @@ public:
 
     std::string toString(const core::GlobalState &gs, const cfg::CFG &cfg) const;
 
-    static TestedKnowledge empty; // optimization
+    static thread_local TestedKnowledge empty; // optimization
 
     void removeReferencesToVar(cfg::LocalRef ref);
     void sanityCheck() const;
     void emitKnowledgeSizeMetric() const;
 };
+CheckSize(TestedKnowledge, 24, 8);
 
 class Environment {
     const core::TypeAndOrigins uninitialized;
@@ -153,6 +182,13 @@ class Environment {
         TestedKnowledge knowledge;
         bool knownTruthy;
     };
+    struct VariableInfo {
+        const core::TypeAndOrigins &typeAndOrigins;
+        const TestedKnowledge &knowledge;
+        bool knownTruthy;
+        bool wasFound;
+    };
+
     // TODO(jvilk): Use vectors.
     UnorderedMap<cfg::LocalRef, VariableState> _vars;
 
@@ -162,6 +198,10 @@ class Environment {
     TypeTestReverseIndex typeTestsWithVar;
 
     bool hasType(core::Context ctx, cfg::LocalRef symbol) const;
+
+    // This is almost `_vars[symbol]` except with special handling
+    // in the case that `symbol` does not exist.
+    VariableInfo getRefInfo(cfg::LocalRef symbol) const;
 
     TestedKnowledge &getKnowledge(cfg::LocalRef symbol, bool shouldFail = true) {
         return const_cast<TestedKnowledge &>(const_cast<const Environment *>(this)->getKnowledge(symbol, shouldFail));
@@ -218,6 +258,7 @@ public:
     const core::TypeAndOrigins &getTypeAndOrigin(cfg::LocalRef symbol) const;
 
     const core::TypeAndOrigins &getAndFillTypeAndOrigin(cfg::VariableUseSite &symbol) const;
+    const core::TypeAndOrigins &getAndFillTypeAndOrigin(cfg::LocalRef symbol, core::TypePtr &ty) const;
 
     /*
      * Create an Environment out of this one that holds if final condition in
@@ -239,11 +280,11 @@ public:
 
     void populateFrom(core::Context ctx, const Environment &other);
 
-    core::TypePtr
-    processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount, int bindMinLoops,
-                   KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
-                   const core::TypePtr &methodReturnType,
-                   const std::optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver);
+    core::TypePtr processBinding(core::Context ctx, const cfg::CFG &inWhat, cfg::Binding &bind, int loopCount,
+                                 cfg::MinLoops bindMinLoops, KnowledgeFilter &knowledgeFilter,
+                                 core::TypeConstraint &constr, const core::TypePtr &methodReturnType,
+                                 const std::optional<cfg::BasicBlock::BlockExitCondInfo> &parentUpdateKnowledgeReceiver,
+                                 bool deadOnEntry);
 
     core::Loc locForUninitialized() const {
         return ownerLoc;
