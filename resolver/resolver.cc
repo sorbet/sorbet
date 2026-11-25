@@ -4248,7 +4248,7 @@ public:
             Timer timeit(gs.tracer(), "resolver.checkTrackedDescendants");
             for (const auto &threadTodos : combinedTodoCheckTrackDescendantItems) {
                 for (const auto &[superclass, subclass] : threadTodos) {
-                    if (!absl::c_contains(subclass.data(gs)->trackedSuperClassesToList(gs), superclass)) {
+                    if (!absl::c_contains(subclass.data(gs)->trackedSuperclasses(), superclass)) {
                         const auto subclassLoc = subclass.data(gs)->loc();
                         if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::UntrackedDescendant)) {
                             e.setHeader("add T::Descendants.register({}, {}, \"{}\") in an RBI file in this package",
