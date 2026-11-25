@@ -747,11 +747,11 @@ ast::ExpressionPtr Desugarer::desugarCallTargetNode(pm_call_target_node *node, c
 // ```rb
 // tmp = ::<Magic>.expandSplat(arr, 1, 0)
 // a = tmp[0]
-// b = tmp.to_ary
+// b = ::<Magic>.splatSlice(tmp, 1, 0)
 // ```
 //
-// While calling `to_ary` doesn't return the correct value if we were to execute this code,
-// it returns the correct type from a static point of view.
+// The splatSlice intrinsic extracts the correct slice of elements for the splat variable,
+// allowing for precise type inference of the splat portion.
 template <typename PrismNode>
 ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, ast::ExpressionPtr rhs) {
     static_assert(is_same_v<PrismNode, pm_multi_target_node> || is_same_v<PrismNode, pm_multi_write_node>);
@@ -821,18 +821,15 @@ ast::ExpressionPtr Desugarer::desugarMlhs(core::LocOffsets loc, PrismNode *lhs, 
         processTarget(c);
     }
     if (hasSplat) {
-        // Handle splat separately - use to_ary to capture remaining elements
+        // Handle splat separately, preserving the tuple slice for the remaining elements.
         auto *splat = down_cast_nonnull<pm_splat_node>(lhs->rest);
-        size_t totalSize = lefts.size() + 1 + rights.size();
-        int right = totalSize - i - 1;
-        if (right == 0) {
-            right = 1;
-        }
+        int right = rights.size();
         if (splat->expression) {
             ast::ExpressionPtr lh = desugar(splat->expression);
             auto lhloc = lh.loc();
             auto zlhloc = lhloc.copyWithZeroLength();
-            auto ary = MK::Send0(zloc, MK::Local(zloc, tempExpanded), core::Names::toAry(), zlhloc);
+            auto ary = MK::Send3(zloc, MK::Magic(zloc), core::Names::splatSlice(), zlhloc,
+                                 MK::Local(zloc, tempExpanded), MK::Int(zloc, before), MK::Int(zloc, right));
             stats.emplace_back(MK::Assign(lhloc, move(lh), move(ary)));
         }
         i = -right;
