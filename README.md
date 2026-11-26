@@ -944,6 +944,9 @@ In general,
   - `lldb bazel-bin/main/sorbet -- <args> ...`
   - (Consider using `--config=static-libs` for better debug symbols)
   - If you see weird Python errors on macOS, try `PATH=/usr/bin lldb`.
+  - Start `lldb` from the root of the checkout, or import `lldbinit.py`. Debug
+    info records source paths relative to there, so that checkouts can share a
+    Bazel disk cache.
 - to debug an existing Sorbet process (i.e., LSP)
   - launch Sorbet with the `--wait-for-dbg` flag
   - `lldb -p <pid>`

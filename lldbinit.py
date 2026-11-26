@@ -40,13 +40,15 @@ bazel_workspace = os.path.realpath(os.path.join(project_root, bazel_symlink))
 # `<output_base>/external`, which has all of them.
 external_path = os.path.join(os.path.dirname(os.path.dirname(bazel_workspace)), "external")
 
-# It seems like macOS builds get absolute paths in the debug info.
+# Builds record paths relative to the execroot (see `extra_compile_flags` in
+# WORKSPACE), which lldb resolves against its own working directory. Mapping
+# them makes them work from anywhere; lldb matches the `.` prefix against any
+# relative path. `external` has to come first, because lldb uses the first
+# mapping whose prefix matches and the checkout has no `external` directory.
 #
-# Linux builds with PWD=/proc/self/cwd, which lldb then resolves against its
-# own PWD, not the build sandbox, so we need to map them to the real path
-# (inside the bazel workspace).
-#
-# It's safe for macOS to see an extra mapping here, it will just never be used.
+# The other mappings are for binaries built before that: macOS builds used to
+# record absolute execroot paths, and Linux builds `/proc/self/cwd`, which lldb
+# resolves against its own working directory.
 #
 # NOTE: settings set replaces the full array setting, so we have to pass
 # everything we want in a single command. We could consider changing this to
@@ -54,6 +56,8 @@ external_path = os.path.join(os.path.dirname(os.path.dirname(bazel_workspace)), 
 # there, too.
 source_map_command = (
     "settings set -- target.source-map"
+    f' external "{external_path}"'
+    f' . "{project_root}"'
     f' "{bazel_workspace}" "{project_root}"'
     f' /proc/self/cwd/external "{external_path}"'
 )

@@ -70,6 +70,16 @@ llvm_toolchain(
         "darwin-x86_64": "auto",
     },
     llvm_version = "22.1.3",
+    # Record source paths in debug info relative to the execroot, so they don't
+    # depend on which checkout compiled an object. Otherwise, a checkout that
+    # got its objects from a shared disk cache would point the debugger at the
+    # sources of whichever checkout compiled them. A debugger resolves these
+    # paths against its working directory, so start it at the root of the
+    # checkout, or load lldbinit.py, which maps them. This replaces the
+    # `/proc/self/cwd` that Bazel records on Linux, which macOS doesn't have.
+    extra_compile_flags = {
+        "": ["-fdebug-compilation-dir=."],
+    },
 )
 
 load("@llvm_toolchain_22_1_3//:toolchains.bzl", "llvm_register_toolchains")
