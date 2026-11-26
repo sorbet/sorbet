@@ -344,6 +344,8 @@ public:
     ForeignPtr ast;
     // true when in indentation-aware error recovery mode
     bool indentationAware;
+    // Remaining bytes that indentation-aware body recovery may reprocess.
+    size_t remainingBodyRewindBytes;
     token_t last_token;
 
     // Stores a reference to the private yytname_ field from the generated bison parser,
@@ -469,6 +471,7 @@ public:
     }
 
 private:
+    bool rewind_body_and_reset(size_t newPos);
     void rewind_to_tok_start(token_t endToken);
     void rewind_to_tok_end(token_t endToken);
 };
