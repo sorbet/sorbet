@@ -1,4 +1,4 @@
-b/unregistered.rb:3: add T::Descendants.register(A::Parent, B::Unregistered, "b/unregistered.rb") in an RBI file in this package https://srb.help/5087
+b/unregistered.rb:3: add `B::Unregistered => "b/unregistered.rb"` to T::Descendants.register(A::Parent, ...) in an RBI file in this package https://srb.help/5087
      3 |class B::Unregistered < A::Parent
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1

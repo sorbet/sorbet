@@ -3150,7 +3150,7 @@ end
 
 A class or module marked with `track_descendants!` requires every class or module that directly inherits from it (or includes it) to be registered with `T::Descendants.register`. Like [sealed classes](sealed.md), this lets the codebase know the complete set of descendants of a class, but without requiring them all to be defined in the same file. Unlike `sealed!`, descendants may be defined in any package.
 
-Each registration must be made in an RBI file in the same package as the descendant, and must name the file where the descendant is defined:
+Each package registers its descendants of a given class or module with a single `T::Descendants.register` call in an RBI file in that package. The call takes the tracked ancestor and a hash literal mapping each descendant to the file where it is defined:
 
 ```ruby
 # -- a/parent.rb --
@@ -3160,16 +3160,23 @@ class A::Parent
 end
 
 # -- b/child.rb --
-class B::Child < A::Parent # error: add T::Descendants.register(A::Parent, B::Child, "b/child.rb") ...
+class B::Child < A::Parent # error: add `B::Child => "b/child.rb"` to T::Descendants.register(A::Parent, ...) ...
+end
+
+# -- b/other.rb --
+class B::Other < A::Parent
 end
 
 # -- b/descendants.rbi --
-T::Descendants.register(A::Parent, B::Child, "b/child.rb") # fixes the error
+T::Descendants.register(A::Parent, {
+  B::Child => "b/child.rb", # fixes the error
+  B::Other => "b/other.rb",
+})
 ```
 
-The error message contains the exact registration to add.
+The error message contains the exact hash entry to add, either to the existing registration for that ancestor in the package or to a new one.
 
-Descendants of a tracked class or module are themselves tracked, and must be registered against their **direct** parent. For example, if `B::GrandChild < B::Child`, the registration must be `T::Descendants.register(B::Child, B::GrandChild, ...)`, not `T::Descendants.register(A::Parent, B::GrandChild, ...)`.
+Descendants of a tracked class or module are themselves tracked, and must be registered against their **direct** parent. For example, if `B::GrandChild < B::Child`, the registration must be `T::Descendants.register(B::Child, {B::GrandChild => ...})`, not part of the registration for `A::Parent`.
 
 ## 5088
 
@@ -3178,20 +3185,25 @@ Descendants of a tracked class or module are themselves tracked, and must be reg
 A call to `T::Descendants.register` (see [5087](#5087)) is invalid. A valid registration:
 
 - appears in an RBI file,
-- has exactly three positional arguments, with no keyword arguments or block,
-- has a constant literal for each of the first two arguments: the first must resolve to a class or module (the tracked ancestor), and the second to a class or module that descends from it,
-- appears in the same package that defines the descendant (a package cannot register descendants defined in other packages, including its parent package or its subpackages), and
-- has a string literal for the third argument, naming the file where the descendant is defined.
+- has exactly two positional arguments, with no keyword arguments or block,
+- has a constant literal for the first argument that resolves to a class or module (the tracked ancestor),
+- has a hash literal for the second argument, where:
+  - each key is a constant literal that resolves to a class or module descending from the tracked ancestor,
+  - each key is defined in the same package as the registration (a package cannot register descendants defined in other packages, including its parent package or its subpackages), and
+  - each value is a string literal naming the file where that key is defined, and
+- is the only registration for that ancestor in its package.
 
 The file path is compared against the path that Sorbet shows for that file in error messages: any prefix that Sorbet strips when printing paths (for example, the input directory when Sorbet is run on a single directory) is ignored, as is a leading `./`.
 
 ```ruby
 # -- b/descendants.rbi --
-T::Descendants.register(A::Parent, B::Child)                 # error: missing the file argument
-T::Descendants.register(A::Parent, B::Child.itself, "...")   # error: not a constant literal
-T::Descendants.register(A::Parent, B::Unrelated, "...")      # error: not a descendant of `A::Parent`
-T::Descendants.register(A::Parent, C::Child, "c/child.rb")   # error: `C::Child` is defined in another package
-T::Descendants.register(A::Parent, B::Child, "b/other.rb")   # error: `B::Child` is defined in `b/child.rb`
+T::Descendants.register(A::Parent, {
+  B::Child.itself => "...",       # error: not a constant literal
+  B::Unrelated => "...",          # error: not a descendant of `A::Parent`
+  C::Child => "c/child.rb",       # error: `C::Child` is defined in another package
+  B::Child => "b/other.rb",       # error: `B::Child` is defined in `b/child.rb`
+})
+T::Descendants.register(A::Parent, {B::Other => "b/other.rb"}) # error: `A::Parent` is already registered in this package
 ```
 
 ## 6001

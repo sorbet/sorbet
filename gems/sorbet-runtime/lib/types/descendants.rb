@@ -1,3 +1,3 @@
 module T::Descendants
-  def self.register(superclass, subclass, file); end
+  def self.register(superclass, subclasses); end
 end
