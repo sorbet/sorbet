@@ -1615,7 +1615,8 @@ core::TypePtr Environment::processBinding(
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         e.addErrorSections(move(errorDetailsCollector));
                         if (i.whatLoc.exists() && i.whatLoc.empty()) {
-                            core::TypeErrorDiagnostics::maybeInsertElse(ctx, e, ctx.locAt(i.whatLoc));
+                            core::TypeErrorDiagnostics::maybeInsertElse(ctx, e, ctx.locAt(i.whatLoc),
+                                                                        ctx.owner.enclosingClass(ctx));
                         } else if (i.whatLoc != inWhat.implicitReturnLoc && i.whatLoc != inWhat.loc &&
                                    i.whatLoc != inWhat.declLoc) {
                             // Don't offer to wrap the `end` keyword of an implicit return, or the whole

@@ -20,9 +20,10 @@ public:
     static void maybeAutocorrect(const GlobalState &gs, ErrorBuilder &e, Loc loc, const TypeConstraint &constr,
                                  const TypePtr &expectedType, const TypePtr &actualType);
 
-    // With `--suggest-unsafe`, inserts an autocorrect that adds `else T.unsafe(nil)` to a conditional
-    // that has no `else`. `loc` is the zero-length start of the conditional's `end` keyword.
-    static void maybeInsertElse(const GlobalState &gs, ErrorBuilder &e, Loc loc);
+    // Inserts an autocorrect that adds an `else` branch to a conditional that has no `else`: `else
+    // T.unsafe(nil)` with `--suggest-unsafe`, and otherwise `else raise`. `loc` is the zero-length start
+    // of the conditional's `end` keyword, and `self` is the class of the method it's in.
+    static void maybeInsertElse(const GlobalState &gs, ErrorBuilder &e, Loc loc, ClassOrModuleRef self);
 
     static void insertTypeArguments(const GlobalState &gs, ErrorBuilder &e, ClassOrModuleRef klass,
                                     core::Loc replaceLoc);

@@ -6,18 +6,22 @@ sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def if_multi_line(c, u)
   if c
     u
+  else
+    raise("unimplemented!")
   end # error: Expected `String` but found `NilClass` for method result type
 end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def if_single_line(c, u)
-  if c then u end # error: Expected `String` but found `NilClass` for method result type
+  if c then u else raise("unimplemented!") end # error: Expected `String` but found `NilClass` for method result type
 end
 
 sig {params(x: Integer, u: T.untyped).returns(String)}
 def case_when(x, u)
   case x
   when 1 then u
+  else
+    raise("unimplemented!")
   end # error: Expected `String` but found `NilClass` for method result type
 end
 
@@ -33,6 +37,8 @@ class A
   def in_class(c, u)
     if c
       u
+    else
+      raise("unimplemented!")
     end # error: Expected `String` but found `NilClass` for method result type
   end
 
@@ -40,6 +46,8 @@ class A
   def self.in_singleton_class(c, u)
     if c
       u
+    else
+      raise("unimplemented!")
     end # error: Expected `String` but found `NilClass` for method result type
   end
 end
@@ -51,6 +59,8 @@ module M
   def in_module(c, u)
     if c
       u
+    else
+      ::Kernel.raise("unimplemented!")
     end # error: Expected `String` but found `NilClass` for method result type
   end
 
@@ -58,6 +68,8 @@ module M
   def self.in_module_singleton_class(c, u)
     if c
       u
+    else
+      raise("unimplemented!")
     end # error: Expected `String` but found `NilClass` for method result type
   end
 end
@@ -69,6 +81,8 @@ class B < BasicObject
   def in_basic_object(c, u)
     if c
       u
+    else
+      ::Kernel.raise("unimplemented!")
     end # error: Expected `String` but found `NilClass` for method result type
   end
 end
@@ -82,6 +96,8 @@ class OwnRaise
   def with_own_raise(c, u)
     if c
       u
+    else
+      raise("unimplemented!")
     end # error: Expected `String` but found `NilClass` for method result type
   end
 end

@@ -203,12 +203,14 @@ sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def if_multi_line(c, u)
   if c
     u
+  else
+    raise("unimplemented!")
   end
 end
 
 sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def if_single_line(c, u)
-  if c then u end
+  if c then u else raise("unimplemented!") end
 end
 
 sig {params(x: Integer, u: T.untyped).returns(String)}
@@ -217,6 +219,8 @@ def elsif_chain(x, u)
     u
   elsif x == 2
     u
+  else
+    raise("unimplemented!")
   end
 end
 
@@ -224,6 +228,8 @@ sig {params(c: T::Boolean, u: T.untyped).returns(String)}
 def unless_multi_line(c, u)
   unless c
     u
+  else
+    raise("unimplemented!")
   end
 end
 
@@ -233,6 +239,8 @@ def case_when(x, u)
   when 1 then u
   when 2
     u
+  else
+    raise("unimplemented!")
   end
 end
 
@@ -256,7 +264,11 @@ def both_missing_else(c, d, u)
   if c
     if d
       u
+    else
+      raise("unimplemented!")
     end
+  else
+    raise("unimplemented!")
   end
 end
 
@@ -264,6 +276,8 @@ sig {params(c: T::Boolean).returns(Integer)}
 def error_in_then_too(c)
   if c
     "not an integer"
+  else
+    raise("unimplemented!")
   end
 end
 
@@ -294,6 +308,8 @@ module M
   def in_module(c, u)
     if c
       u
+    else
+      ::Kernel.raise("unimplemented!")
     end
   end
 end
@@ -305,214 +321,96 @@ class B < BasicObject
   def in_basic_object(c, u)
     if c
       u
+    else
+      ::Kernel.raise("unimplemented!")
     end
   end
 end
 
 --- -a, after autocorrecting
 
-autocorrect-missing-else.rb:8: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-     8 |  end
-             ^
-  Expected `String` for result type of method `if_multi_line`:
-    autocorrect-missing-else.rb:5:
-     5 |def if_multi_line(c, u)
-        ^^^^^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    autocorrect-missing-else.rb:8:
-     8 |  end
-             ^
-
-autocorrect-missing-else.rb:13: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    13 |  if c then u end
-                         ^
-  Expected `String` for result type of method `if_single_line`:
-    autocorrect-missing-else.rb:12:
-    12 |def if_single_line(c, u)
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    autocorrect-missing-else.rb:13:
-    13 |  if c then u end
-                         ^
-
-autocorrect-missing-else.rb:22: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    22 |  end
-             ^
-  Expected `String` for result type of method `elsif_chain`:
-    autocorrect-missing-else.rb:17:
-    17 |def elsif_chain(x, u)
-        ^^^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    autocorrect-missing-else.rb:22:
-    22 |  end
-             ^
-
-autocorrect-missing-else.rb:29: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    29 |  end
-             ^
-  Expected `String` for result type of method `unless_multi_line`:
-    autocorrect-missing-else.rb:26:
-    26 |def unless_multi_line(c, u)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    autocorrect-missing-else.rb:29:
-    29 |  end
-             ^
-
-autocorrect-missing-else.rb:38: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    38 |  end
-             ^
-  Expected `String` for result type of method `case_when`:
-    autocorrect-missing-else.rb:33:
-    33 |def case_when(x, u)
-        ^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    autocorrect-missing-else.rb:38:
-    38 |  end
-             ^
-
-autocorrect-missing-else.rb:53: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    53 |  end
+autocorrect-missing-else.rb:61: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+    61 |  end
              ^
   Expected `String` for result type of method `if_empty_else`:
-    autocorrect-missing-else.rb:49:
-    49 |def if_empty_else(c, u)
+    autocorrect-missing-else.rb:57:
+    57 |def if_empty_else(c, u)
         ^^^^^^^^^^^^^^^^^^^^^^^
   Got `NilClass` originating from:
-    autocorrect-missing-else.rb:53:
-    53 |  end
-             ^
-
-autocorrect-missing-else.rb:61: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    61 |    end
-               ^
-  Expected `String` for result type of method `both_missing_else`:
-    autocorrect-missing-else.rb:57:
-    57 |def both_missing_else(c, d, u)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
     autocorrect-missing-else.rb:61:
-    61 |    end
-               ^
-
-autocorrect-missing-else.rb:62: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    62 |  end
-             ^
-  Expected `String` for result type of method `both_missing_else`:
-    autocorrect-missing-else.rb:57:
-    57 |def both_missing_else(c, d, u)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    autocorrect-missing-else.rb:62:
-    62 |  end
+    61 |  end
              ^
 
-autocorrect-missing-else.rb:68: Expected `Integer` but found `String("not an integer")` for method result type https://srb.help/7005
-    68 |    "not an integer"
+autocorrect-missing-else.rb:80: Expected `Integer` but found `String("not an integer")` for method result type https://srb.help/7005
+    80 |    "not an integer"
             ^^^^^^^^^^^^^^^^
   Expected `Integer` for result type of method `error_in_then_too`:
-    autocorrect-missing-else.rb:66:
-    66 |def error_in_then_too(c)
+    autocorrect-missing-else.rb:78:
+    78 |def error_in_then_too(c)
         ^^^^^^^^^^^^^^^^^^^^^^^^
   Got `String("not an integer")` originating from:
-    autocorrect-missing-else.rb:68:
-    68 |    "not an integer"
+    autocorrect-missing-else.rb:80:
+    80 |    "not an integer"
             ^^^^^^^^^^^^^^^^
 
-autocorrect-missing-else.rb:69: Expected `Integer` but found `NilClass` for method result type https://srb.help/7005
-    69 |  end
-             ^
-  Expected `Integer` for result type of method `error_in_then_too`:
-    autocorrect-missing-else.rb:66:
-    66 |def error_in_then_too(c)
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    autocorrect-missing-else.rb:69:
-    69 |  end
-             ^
-
-autocorrect-missing-else.rb:74: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    74 |  u if c
+autocorrect-missing-else.rb:88: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+    88 |  u if c
                 ^
   Expected `String` for result type of method `modifier_if`:
-    autocorrect-missing-else.rb:73:
-    73 |def modifier_if(c, u)
+    autocorrect-missing-else.rb:87:
+    87 |def modifier_if(c, u)
         ^^^^^^^^^^^^^^^^^^^^^
   Got `NilClass` originating from:
-    autocorrect-missing-else.rb:74:
-    74 |  u if c
+    autocorrect-missing-else.rb:88:
+    88 |  u if c
                 ^
 
-autocorrect-missing-else.rb:79: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    79 |  u unless c
+autocorrect-missing-else.rb:93: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+    93 |  u unless c
                     ^
   Expected `String` for result type of method `modifier_unless`:
-    autocorrect-missing-else.rb:78:
-    78 |def modifier_unless(c, u)
+    autocorrect-missing-else.rb:92:
+    92 |def modifier_unless(c, u)
         ^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `NilClass` originating from:
-    autocorrect-missing-else.rb:79:
-    79 |  u unless c
+    autocorrect-missing-else.rb:93:
+    93 |  u unless c
                     ^
 
-autocorrect-missing-else.rb:84: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    84 |  u if d if c
+autocorrect-missing-else.rb:98: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+    98 |  u if d if c
                 ^
   Expected `String` for result type of method `modifier_if_nested`:
-    autocorrect-missing-else.rb:83:
-    83 |def modifier_if_nested(c, d, u)
+    autocorrect-missing-else.rb:97:
+    97 |def modifier_if_nested(c, d, u)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `NilClass` originating from:
-    autocorrect-missing-else.rb:84:
-    84 |  u if d if c
+    autocorrect-missing-else.rb:98:
+    98 |  u if d if c
                 ^
 
-autocorrect-missing-else.rb:84: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    84 |  u if d if c
+autocorrect-missing-else.rb:98: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+    98 |  u if d if c
                      ^
   Expected `String` for result type of method `modifier_if_nested`:
-    autocorrect-missing-else.rb:83:
-    83 |def modifier_if_nested(c, d, u)
+    autocorrect-missing-else.rb:97:
+    97 |def modifier_if_nested(c, d, u)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `NilClass` originating from:
-    autocorrect-missing-else.rb:84:
-    84 |  u if d if c
+    autocorrect-missing-else.rb:98:
+    98 |  u if d if c
                      ^
 
-autocorrect-missing-else.rb:89: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    89 |  return "" if c
-                        ^
+autocorrect-missing-else.rb:103: Expected `String` but found `NilClass` for method result type https://srb.help/7005
+     103 |  return "" if c
+                          ^
   Expected `String` for result type of method `modifier_if_return`:
-    autocorrect-missing-else.rb:88:
-    88 |def modifier_if_return(c)
-        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    autocorrect-missing-else.rb:102:
+     102 |def modifier_if_return(c)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
   Got `NilClass` originating from:
-    autocorrect-missing-else.rb:89:
-    89 |  return "" if c
-                        ^
-
-autocorrect-missing-else.rb:99: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-    99 |    end
-               ^
-  Expected `String` for result type of method `in_module`:
-    autocorrect-missing-else.rb:96:
-    96 |  def in_module(c, u)
-          ^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    autocorrect-missing-else.rb:99:
-    99 |    end
-               ^
-
-autocorrect-missing-else.rb:110: Expected `String` but found `NilClass` for method result type https://srb.help/7005
-     110 |    end
-                 ^
-  Expected `String` for result type of method `in_basic_object`:
-    autocorrect-missing-else.rb:107:
-     107 |  def in_basic_object(c, u)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^
-  Got `NilClass` originating from:
-    autocorrect-missing-else.rb:110:
-     110 |    end
-                 ^
-Errors: 17
+    autocorrect-missing-else.rb:103:
+     103 |  return "" if c
+                          ^
+Errors: 7
 
