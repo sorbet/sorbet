@@ -1,7 +1,7 @@
 # typed: strict
 # enable-packager: true
 
-module Consumer
+module Consumer::Probe
   ::RootQualifiedPackage::Thing # error: is not imported
 
   # A registry-only namespace must not count as resolving when it is the complete reference.

@@ -1,6 +1,6 @@
 # typed: strict
 
 module Test::D
-  puts E::CONSTANT_FROM_E
-  puts D::ShouldNotBeExported
+  FROM_E = T.let(E::CONSTANT_FROM_E, String)
+  NOT_EXPORTED = D::ShouldNotBeExported
 end

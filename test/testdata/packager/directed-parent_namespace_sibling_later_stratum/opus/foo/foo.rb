@@ -1,6 +1,7 @@
 # typed: true
 
 module Opus::Foo
-  X = Baz          # error: `Opus::Foo::Baz` is not imported
-  T.reveal_type(X) # error: Revealed type: `T.untyped`
+  X = Baz # error: `Opus::Foo::Baz` is not imported
 end
+
+T.reveal_type(Opus::Foo::X) # error: Revealed type: `T.untyped`
