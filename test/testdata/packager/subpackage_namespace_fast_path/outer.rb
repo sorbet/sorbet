@@ -1,0 +1,10 @@
+# typed: true
+
+module Outer # error: `Outer` cannot define behavior, because packages are nested under `Outer`
+  def self.helper; end
+
+  class Thing; end
+end
+
+Outer.helper # error: Method `helper` does not exist on `T.class_of(Outer)`
+Outer::Thing # error: Unable to resolve constant `Thing`

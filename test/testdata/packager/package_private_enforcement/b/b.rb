@@ -8,9 +8,6 @@ module Root::B
   Root::A::Outer::Inner
 # ^^^^^^^^^^^^^^ error: `Root::A::Outer` is `package_private!` in package `Root::A`
 
-  Root::A::SECRET
-# ^^^^^^^^^^^^^^^ error: `Root::A::SECRET` is `package_private!` in package `Root::A`
-
   Root::A::Public
   Root::A::Public::Y
   Root::A::Public::X
@@ -20,8 +17,8 @@ module Root::B
   Root::A::PublicAlias
   Root::A::PublicAlias::Inner
 
-  Root::A::PrivateAlias
-# ^^^^^^^^^^^^^^^^^^^^^ error: `Root::A::PrivateAlias` is `package_private!` in package `Root::A`
+  Root::A::Aliases::PrivateAlias
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Root::A::Aliases::PrivateAlias` is `package_private!` in package `Root::A`
 
   Root::A::MyEnum::Open
   Root::A::MyEnum::Secret

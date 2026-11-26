@@ -37,6 +37,7 @@ inline constexpr ErrorClass DefinitionPackageMismatch{4031, StrictLevel::False};
 inline constexpr ErrorClass UnpackagedFile{4032, StrictLevel::False};
 inline constexpr ErrorClass BarePackagePrivate{4033, StrictLevel::False};
 inline constexpr ErrorClass InvalidPackagePrivate{4034, StrictLevel::False};
+inline constexpr ErrorClass PackageNamespaceDefinition{4035, StrictLevel::False};
 } // namespace sorbet::core::errors::Namer
 
 #endif

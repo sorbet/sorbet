@@ -1,9 +1,6 @@
 # typed: strict
 
 module Root::A
-  SECRET = 1
-  package_private!(:SECRET)
-
   class Outer
     package_private!
 
@@ -21,12 +18,14 @@ module Root::A
   PublicAlias = Outer
 # ^^^^^^^^^^^ error: `Root::A::PublicAlias` is a public alias of package-private `Root::A::Outer`
 
-  PrivateAlias = Outer
-  package_private!(:PrivateAlias)
+  module Aliases
+    PrivateAlias = Outer
+    package_private!(:PrivateAlias)
 
-  PrivateConstantAlias = Outer
-# ^^^^^^^^^^^^^^^^^^^^ error: `Root::A::PrivateConstantAlias` is a public alias of package-private `Root::A::Outer`
-  private_constant :PrivateConstantAlias
+    PrivateConstantAlias = Outer
+  # ^^^^^^^^^^^^^^^^^^^^ error: `Root::A::Aliases::PrivateConstantAlias` is a public alias of package-private `Root::A::Outer`
+    private_constant :PrivateConstantAlias
+  end
 
   # Includes a module covered by the marker on `Outer`.
   module ReExports
@@ -62,7 +61,9 @@ module Root::A
   end
 
   # References from the same package.
-  Outer::Inner
-  Public::X
-  SECRET
+  module SamePackage
+    Outer::Inner
+    Public::X
+    Aliases::PrivateAlias
+  end
 end
