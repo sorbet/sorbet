@@ -434,7 +434,8 @@ Begin {
               scope = NULL
               name = <C <U <ErrorNode>>>
             }
-            then_ = NULL
+            then_ = EmptyElse {
+            }
             else_ = NULL
           }
         ]
@@ -908,7 +909,8 @@ Begin {
               name = <C <U <ErrorNode>>>
             }
             then_ = NULL
-            else_ = NULL
+            else_ = EmptyElse {
+            }
           }
         ]
       }

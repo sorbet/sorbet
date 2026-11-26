@@ -4,7 +4,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         x = nil
         if <emptyTree>::<C <ErrorNode>>
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end
@@ -15,7 +15,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         x = nil
         if x
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end
@@ -26,7 +26,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         x = nil
         if x.<method-name-missing>()
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end
@@ -37,7 +37,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         x = nil
         if x.f()
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end
@@ -46,7 +46,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def no_syntax_error_1<<todo method>>(&<blk>)
       x = if <self>.y()
-        <emptyTree>
+        nil
       else
         <emptyTree>
       end
@@ -54,7 +54,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
     def no_syntax_error_2<<todo method>>(&<blk>)
       x = if <self>.y()
-        <emptyTree>
+        nil
       else
         <emptyTree>
       end
@@ -63,7 +63,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     def no_syntax_error_3<<todo method>>(&<blk>)
       begin
         x = if <self>.y()
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end

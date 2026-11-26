@@ -2480,7 +2480,12 @@ array_premature_end: eof
 
          if_tail: opt_else kend_or_eof
                     {
-                      $$ = driver.alloc.node_with_token($2, $1 ? $1->nod : nullptr);
+                      auto &else_ = $1;
+                      auto elseBody = else_ ? else_->nod : nullptr;
+                      if (else_ && elseBody == nullptr) {
+                        elseBody = driver.build.empty_else(self, else_->tok);
+                      }
+                      $$ = driver.alloc.node_with_token($2, elseBody);
                     }
                 | kELSIF expr_value then compstmt if_tail
                     {

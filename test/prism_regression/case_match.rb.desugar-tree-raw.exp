@@ -638,7 +638,19 @@ ClassDef{
                               ]
                             }
                           }
-                          elsep = EmptyTree
+                          elsep = Send{
+                            flags = {rewriterSynthesized}
+                            recv = ConstantLit{
+                              symbol = (module ::Kernel)
+                              orig = nullptr
+                            }
+                            fun = <U raise>
+                            block = nullptr
+                            pos_args = 1
+                            args = [
+                              Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                            ]
+                          }
                         }
                       }
                     }
@@ -1547,7 +1559,19 @@ ClassDef{
                                 Literal{ value = "splat nil!" }
                               ]
                             }
-                            elsep = EmptyTree
+                            elsep = Send{
+                              flags = {rewriterSynthesized}
+                              recv = ConstantLit{
+                                symbol = (module ::Kernel)
+                                orig = nullptr
+                              }
+                              fun = <U raise>
+                              block = nullptr
+                              pos_args = 1
+                              args = [
+                                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                              ]
+                            }
                           }
                         }
                       }
@@ -1620,7 +1644,19 @@ ClassDef{
             ]
           }
         }
-        elsep = EmptyTree
+        elsep = Send{
+          flags = {rewriterSynthesized}
+          recv = ConstantLit{
+            symbol = (module ::Kernel)
+            orig = nullptr
+          }
+          fun = <U raise>
+          block = nullptr
+          pos_args = 1
+          args = [
+            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+          ]
+        }
       }
     }
 
@@ -1914,7 +1950,19 @@ ClassDef{
                 expr = Literal{ value = "in with 2 args, semicolon, and if" }
               }
             }
-            elsep = EmptyTree
+            elsep = Send{
+              flags = {rewriterSynthesized}
+              recv = ConstantLit{
+                symbol = (module ::Kernel)
+                orig = nullptr
+              }
+              fun = <U raise>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+              ]
+            }
           }
         }
       }
@@ -2210,7 +2258,19 @@ ClassDef{
                 expr = Literal{ value = "in with 2 args, semicolon, and unless" }
               }
             }
-            elsep = EmptyTree
+            elsep = Send{
+              flags = {rewriterSynthesized}
+              recv = ConstantLit{
+                symbol = (module ::Kernel)
+                orig = nullptr
+              }
+              fun = <U raise>
+              block = nullptr
+              pos_args = 1
+              args = [
+                Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+              ]
+            }
           }
         }
       }

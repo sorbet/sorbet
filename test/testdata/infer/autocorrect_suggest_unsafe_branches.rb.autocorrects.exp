@@ -87,12 +87,12 @@ end
 
 sig {params(x: T.nilable(Integer)).returns(T.noreturn)}
 def modifier_if(x)
-  T.unsafe(raise "boom" if x) # error: Expected `T.noreturn` but found `NilClass` for method result type
+  raise "boom" if x # error: Expected `T.noreturn` but found `NilClass` for method result type
 end
 
 sig {params(x: T.nilable(Integer)).returns(Integer)}
 def modifier_unless(x)
-  T.unsafe(x unless x.nil?) # error: Expected `Integer` but found `NilClass` for method result type
+  x unless x.nil? # error: Expected `Integer` but found `NilClass` for method result type
 end
 
 sig {params(c: T::Boolean, d: T::Boolean, u: T.untyped).returns(String)}
@@ -108,7 +108,7 @@ sig {params(t: Symbol, x: T.nilable(String)).returns(String)}
 def nested_modifier_if(t, x)
   case t
   when :a
-    T.unsafe(x if x) # error: Expected `String` but found `NilClass` for method result type
+    x if x # error: Expected `String` but found `NilClass` for method result type
   else
     T.unsafe(t) # error: Expected `String` but found `Symbol` for method result type
   end
@@ -119,6 +119,8 @@ def nested_in_missing_else(t, c, u)
   case t
   when :a
     if c then T.unsafe(0) else u end # error: Expected `String` but found `Integer(0)` for method result type
+  else
+    T.unsafe(nil)
   end # error: Expected `String` but found `NilClass` for method result type
 end
 

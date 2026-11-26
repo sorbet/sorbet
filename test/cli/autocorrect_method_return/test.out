@@ -52,6 +52,11 @@ autocorrect_method_return.rb:29: Expected `String` but found `NilClass` for meth
     autocorrect_method_return.rb:29:
     29 |  end
              ^
+  Autocorrect: Done
+    autocorrect_method_return.rb:29: Inserted `else
+        raise("unimplemented!")`
+    29 |  end
+          ^
 
 autocorrect_method_return.rb:34: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
     34 |  T.let("", T.nilable(String))
@@ -115,6 +120,11 @@ autocorrect_method_return.rb:54: Expected `String` but found `NilClass` for meth
     autocorrect_method_return.rb:54:
     54 |  end
              ^
+  Autocorrect: Done
+    autocorrect_method_return.rb:54: Inserted `else
+        raise("unimplemented!")`
+    54 |  end
+          ^
 Errors: 8
 
 --------------------------------------------------------------------------
@@ -147,6 +157,8 @@ sig {returns(String)}
 def implicit_return_via_else
   if T.unsafe(nil)
     return 'yep'
+  else
+    raise("unimplemented!")
   end
 end
 
@@ -172,6 +184,8 @@ sig {params(x: T.nilable(String)).returns(String)}
 def implicit_return_without_keyword(x)
   if T.unsafe(nil)
     ""
+  else
+    raise("unimplemented!")
   end
 end
 
@@ -240,12 +254,10 @@ autocorrect_method_return.rb:29: Expected `String` but found `NilClass` for meth
     29 |  end
              ^
   Autocorrect: Done
-    autocorrect_method_return.rb:27: Replaced with `T.unsafe(if T.unsafe(nil)
-        return 'yep'
-      end)`
-    27 |  if T.unsafe(nil)
-    28 |    return 'yep'
+    autocorrect_method_return.rb:29: Inserted `else
+        T.unsafe(nil)`
     29 |  end
+          ^
 
 autocorrect_method_return.rb:34: Expected `String` but found `T.nilable(String)` for method result type https://srb.help/7005
     34 |  T.let("", T.nilable(String))
@@ -310,12 +322,10 @@ autocorrect_method_return.rb:54: Expected `String` but found `NilClass` for meth
     54 |  end
              ^
   Autocorrect: Done
-    autocorrect_method_return.rb:52: Replaced with `T.unsafe(if T.unsafe(nil)
-        ""
-      end)`
-    52 |  if T.unsafe(nil)
-    53 |    ""
+    autocorrect_method_return.rb:54: Inserted `else
+        T.unsafe(nil)`
     54 |  end
+          ^
 Errors: 8
 
 --------------------------------------------------------------------------
@@ -346,9 +356,11 @@ end
 
 sig {returns(String)}
 def implicit_return_via_else
-  T.unsafe(if T.unsafe(nil)
+  if T.unsafe(nil)
     return 'yep'
-  end)
+  else
+    T.unsafe(nil)
+  end
 end
 
 sig {returns(String)}
@@ -371,7 +383,9 @@ end
 
 sig {params(x: T.nilable(String)).returns(String)}
 def implicit_return_without_keyword(x)
-  T.unsafe(if T.unsafe(nil)
+  if T.unsafe(nil)
     ""
-  end)
+  else
+    T.unsafe(nil)
+  end
 end

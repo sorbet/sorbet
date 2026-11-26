@@ -42,6 +42,34 @@ void TypeErrorDiagnostics::maybeAutocorrect(const GlobalState &gs, ErrorBuilder 
     }
 }
 
+void TypeErrorDiagnostics::maybeInsertElse(const GlobalState &gs, ErrorBuilder &e, Loc loc, ClassOrModuleRef self) {
+    if (loc.adjustLen(gs, 0, 3).source(gs) != "end") {
+        return;
+    }
+
+    string body;
+    if (gs.suggestUnsafe.has_value()) {
+        body = fmt::format("{}(nil)", *gs.suggestUnsafe);
+    } else if (self.exists() && self.data(gs)->findMethodTransitive(gs, Names::raise()).exists()) {
+        // Usually `Kernel#raise`. If it's some other `raise`, the user can fix any error that calling it reports.
+        body = "raise(\"unimplemented!\")";
+    } else {
+        // `self` doesn't inherit from `Kernel` (e.g., it's a module or a `BasicObject`). In a
+        // `BasicObject`, even `Kernel` has to be written as `::Kernel`.
+        body = "::Kernel.raise(\"unimplemented!\")";
+    }
+
+    auto title = fmt::format("Insert `else {}`", body);
+    auto [startOfLine, indentation] = loc.findStartOfIndentation(gs);
+    if (startOfLine == loc) {
+        // The `end` starts its own line, so give the `else` its own lines too, indented like the `end`.
+        auto indent = Loc(loc.file(), loc.beginPos() - indentation, loc.beginPos()).source(gs).value();
+        e.replaceWith(title, loc, "else\n{}  {}\n{}", indent, body, indent);
+    } else {
+        e.replaceWith(title, loc, "else {} ", body);
+    }
+}
+
 void TypeErrorDiagnostics::insertTypeArguments(const GlobalState &gs, ErrorBuilder &e, ClassOrModuleRef klass,
                                                core::Loc replaceLoc) {
     // if we're looking at `Array`, we want the autocorrect to include `T::`, but we don't need to

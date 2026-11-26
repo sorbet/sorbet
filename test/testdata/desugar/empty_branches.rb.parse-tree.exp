@@ -1,0 +1,487 @@
+Begin {
+  stmts = [
+    DefMethod {
+      name = <U missing_else>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = Integer {
+          val = "1"
+        }
+        else_ = NULL
+      }
+    }
+    DefMethod {
+      name = <U empty_else>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = Integer {
+          val = "1"
+        }
+        else_ = EmptyElse {
+        }
+      }
+    }
+    DefMethod {
+      name = <U empty_then>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = EmptyElse {
+        }
+        else_ = Integer {
+          val = "1"
+        }
+      }
+    }
+    DefMethod {
+      name = <U empty_if>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = EmptyElse {
+        }
+        else_ = NULL
+      }
+    }
+    DefMethod {
+      name = <U missing_elsif_else>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+          Param {
+            name = <U d>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = Integer {
+          val = "1"
+        }
+        else_ = If {
+          condition = LVar {
+            name = <U d>
+          }
+          then_ = Integer {
+            val = "2"
+          }
+          else_ = NULL
+        }
+      }
+    }
+    DefMethod {
+      name = <U empty_elsif_else>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+          Param {
+            name = <U d>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = Integer {
+          val = "1"
+        }
+        else_ = If {
+          condition = LVar {
+            name = <U d>
+          }
+          then_ = Integer {
+            val = "2"
+          }
+          else_ = EmptyElse {
+          }
+        }
+      }
+    }
+    DefMethod {
+      name = <U empty_elsif>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+          Param {
+            name = <U d>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = Integer {
+          val = "1"
+        }
+        else_ = If {
+          condition = LVar {
+            name = <U d>
+          }
+          then_ = EmptyElse {
+          }
+          else_ = Integer {
+            val = "3"
+          }
+        }
+      }
+    }
+    DefMethod {
+      name = <U unless_missing_else>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = NULL
+        else_ = Integer {
+          val = "1"
+        }
+      }
+    }
+    DefMethod {
+      name = <U unless_empty_else>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = EmptyElse {
+        }
+        else_ = Integer {
+          val = "1"
+        }
+      }
+    }
+    DefMethod {
+      name = <U unless_empty_body>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = Integer {
+          val = "1"
+        }
+        else_ = EmptyElse {
+        }
+      }
+    }
+    DefMethod {
+      name = <U empty_unless>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = NULL
+        else_ = EmptyElse {
+        }
+      }
+    }
+    DefMethod {
+      name = <U modifier_if>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = Integer {
+          val = "1"
+        }
+        else_ = NULL
+      }
+    }
+    DefMethod {
+      name = <U modifier_unless>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = NULL
+        else_ = Integer {
+          val = "1"
+        }
+      }
+    }
+    DefMethod {
+      name = <U ternary>
+      params = Params {
+        params = [
+          Param {
+            name = <U c>
+          }
+        ]
+      }
+      body = If {
+        condition = LVar {
+          name = <U c>
+        }
+        then_ = Integer {
+          val = "1"
+        }
+        else_ = Integer {
+          val = "2"
+        }
+      }
+    }
+    DefMethod {
+      name = <U case_missing_else>
+      params = Params {
+        params = [
+          Param {
+            name = <U x>
+          }
+        ]
+      }
+      body = Case {
+        condition = LVar {
+          name = <U x>
+        }
+        whens = [
+          When {
+            patterns = [
+              Integer {
+                val = "1"
+              }
+            ]
+            body = Integer {
+              val = "2"
+            }
+          }
+        ]
+        else_ = NULL
+      }
+    }
+    DefMethod {
+      name = <U case_empty_else>
+      params = Params {
+        params = [
+          Param {
+            name = <U x>
+          }
+        ]
+      }
+      body = Case {
+        condition = LVar {
+          name = <U x>
+        }
+        whens = [
+          When {
+            patterns = [
+              Integer {
+                val = "1"
+              }
+            ]
+            body = Integer {
+              val = "2"
+            }
+          }
+        ]
+        else_ = EmptyElse {
+        }
+      }
+    }
+    DefMethod {
+      name = <U case_empty_when>
+      params = Params {
+        params = [
+          Param {
+            name = <U x>
+          }
+        ]
+      }
+      body = Case {
+        condition = LVar {
+          name = <U x>
+        }
+        whens = [
+          When {
+            patterns = [
+              Integer {
+                val = "1"
+              }
+            ]
+            body = NULL
+          }
+        ]
+        else_ = Integer {
+          val = "3"
+        }
+      }
+    }
+    DefMethod {
+      name = <U case_in_missing_else>
+      params = Params {
+        params = [
+          Param {
+            name = <U x>
+          }
+        ]
+      }
+      body = CaseMatch {
+        expr = LVar {
+          name = <U x>
+        }
+        inBodies = [
+          InPattern {
+            pattern = Integer {
+              val = "1"
+            }
+            guard = NULL
+            body = Integer {
+              val = "2"
+            }
+          }
+        ]
+        elseBody = NULL
+      }
+    }
+    DefMethod {
+      name = <U case_in_empty_else>
+      params = Params {
+        params = [
+          Param {
+            name = <U x>
+          }
+        ]
+      }
+      body = CaseMatch {
+        expr = LVar {
+          name = <U x>
+        }
+        inBodies = [
+          InPattern {
+            pattern = Integer {
+              val = "1"
+            }
+            guard = NULL
+            body = Integer {
+              val = "2"
+            }
+          }
+        ]
+        elseBody = EmptyElse {
+        }
+      }
+    }
+    DefMethod {
+      name = <U case_in_empty_in>
+      params = Params {
+        params = [
+          Param {
+            name = <U x>
+          }
+        ]
+      }
+      body = CaseMatch {
+        expr = LVar {
+          name = <U x>
+        }
+        inBodies = [
+          InPattern {
+            pattern = Integer {
+              val = "1"
+            }
+            guard = NULL
+            body = NULL
+          }
+        ]
+        elseBody = Integer {
+          val = "3"
+        }
+      }
+    }
+    DefMethod {
+      name = <U dead_empty_body>
+      params = NULL
+      body = If {
+        condition = Nil {
+        }
+        then_ = EmptyElse {
+        }
+        else_ = NULL
+      }
+    }
+  ]
+}

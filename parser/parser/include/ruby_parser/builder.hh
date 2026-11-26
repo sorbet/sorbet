@@ -74,6 +74,7 @@ struct builder {
     ForeignPtr (*defsHead)(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot, const token *name);
     ForeignPtr (*defsHeadError)(SelfPtr builder, const token *def, ForeignPtr definee, const token *dot);
     ForeignPtr (*defSingleton)(SelfPtr builder, ForeignPtr defHead, ForeignPtr args, ForeignPtr body, const token *end);
+    ForeignPtr (*empty_else)(SelfPtr builder, const token *tok);
     ForeignPtr (*encodingLiteral)(SelfPtr builder, const token *tok);
     ForeignPtr (*error_node)(SelfPtr builder, size_t begin, size_t end);
     ForeignPtr (*false_)(SelfPtr builder, const token *tok);

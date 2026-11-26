@@ -285,7 +285,19 @@ ClassDef{
                           ]
                         }
                         thenp = Literal{ value = "ConstPattern with nested HashPattern with 2 pairs" }
-                        elsep = EmptyTree
+                        elsep = Send{
+                          flags = {rewriterSynthesized}
+                          recv = ConstantLit{
+                            symbol = (module ::Kernel)
+                            orig = nullptr
+                          }
+                          fun = <U raise>
+                          block = nullptr
+                          pos_args = 1
+                          args = [
+                            Literal{ value = "Sorbet rewriter pass partially unimplemented" }
+                          ]
+                        }
                       }
                     }
                   }

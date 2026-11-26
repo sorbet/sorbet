@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <self>.puts(::<Magic>.<build-range>(0, 0, false))
         <self>.puts(::<Magic>.<build-range>(0, <emptyTree>, false))
         if <emptyTree>::<C <ErrorNode>>
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end
@@ -31,7 +31,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
     <self>.puts(::<Magic>.<build-range>(1, <emptyTree>, true))
 
     if <emptyTree>::<C <ErrorNode>>
-      <emptyTree>
+      nil
     else
       <emptyTree>
     end
@@ -48,7 +48,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(2.+(<emptyTree>::<C <ErrorNode>>))
 
   if 2.+(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -64,7 +64,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(3.-(<emptyTree>::<C <ErrorNode>>))
 
   if 3.-(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -80,7 +80,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(4.*(<emptyTree>::<C <ErrorNode>>))
 
   if 4.*(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -96,7 +96,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(5./(<emptyTree>::<C <ErrorNode>>))
 
   if 5./(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -112,7 +112,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(6.%(<emptyTree>::<C <ErrorNode>>))
 
   if 6.%(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -128,7 +128,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(7.**(<emptyTree>::<C <ErrorNode>>))
 
   if 7.**(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -144,7 +144,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(8.**(<emptyTree>::<C <ErrorNode>>).-@())
 
   if 8.**(<emptyTree>::<C <ErrorNode>>).-@()
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -160,7 +160,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(9.**(<emptyTree>::<C <ErrorNode>>).+@())
 
   if 9.**(<emptyTree>::<C <ErrorNode>>).+@()
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -176,7 +176,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(<emptyTree>::<C <ErrorNode>>.-@())
 
   if <emptyTree>::<C <ErrorNode>>.-@()
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -192,7 +192,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(<emptyTree>::<C <ErrorNode>>.+@())
 
   if <emptyTree>::<C <ErrorNode>>.+@()
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -208,7 +208,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(10.|(<emptyTree>::<C <ErrorNode>>))
 
   if 10.|(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -224,7 +224,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(11.^(<emptyTree>::<C <ErrorNode>>))
 
   if 11.^(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -240,7 +240,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(12.&(<emptyTree>::<C <ErrorNode>>))
 
   if 12.&(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -256,7 +256,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(13.<=>(<emptyTree>::<C <ErrorNode>>))
 
   if 13.<=>(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -272,7 +272,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(14.==(<emptyTree>::<C <ErrorNode>>))
 
   if 14.==(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -288,7 +288,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(15.===(<emptyTree>::<C <ErrorNode>>))
 
   if 15.===(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -304,7 +304,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(16.!=(<emptyTree>::<C <ErrorNode>>))
 
   if 16.!=(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -320,7 +320,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(::Regexp.new("17", 0).=~(<emptyTree>::<C <ErrorNode>>))
 
   if ::Regexp.new("17", 0).=~(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -336,7 +336,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(::Regexp.new("18", 0).!~(<emptyTree>::<C <ErrorNode>>))
 
   if ::Regexp.new("18", 0).!~(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -352,13 +352,13 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(<emptyTree>::<C <ErrorNode>>.!())
 
   if <emptyTree>::<C <ErrorNode>>.!()
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
 
   if <self>.puts("hello").!()
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -368,7 +368,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(<emptyTree>::<C <ErrorNode>>.~())
 
   if <emptyTree>::<C <ErrorNode>>.~()
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -384,7 +384,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(20.<<(<emptyTree>::<C <ErrorNode>>))
 
   if 20.<<(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -400,7 +400,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(21.>>(<emptyTree>::<C <ErrorNode>>))
 
   if 21.>>(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -437,7 +437,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         &&$4
       end
     end
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -481,7 +481,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
         <emptyTree>::<C <ErrorNode>>
       end
     end
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -504,7 +504,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(24.>(<emptyTree>::<C <ErrorNode>>))
 
   if 24.>(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -520,7 +520,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(25.<(<emptyTree>::<C <ErrorNode>>))
 
   if 25.<(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -536,7 +536,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(26.>=(<emptyTree>::<C <ErrorNode>>))
 
   if 26.>=(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end
@@ -552,7 +552,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
   <self>.puts(27.<=(<emptyTree>::<C <ErrorNode>>))
 
   if 27.<=(<emptyTree>::<C <ErrorNode>>)
-    <emptyTree>
+    nil
   else
     <emptyTree>
   end

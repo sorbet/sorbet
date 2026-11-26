@@ -13,6 +13,7 @@ If {
       ]
     }
   }
-  then_ = NULL
+  then_ = EmptyElse {
+  }
   else_ = NULL
 }

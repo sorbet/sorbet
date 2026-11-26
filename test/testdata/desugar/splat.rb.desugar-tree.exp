@@ -43,7 +43,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
       begin
         <assignTemp>$2 = 1
         if ::<Magic>.<check-match-array>(<assignTemp>$2, ::<Magic>.<splat>(<emptyTree>::<C Integer>))
-          <emptyTree>
+          nil
         else
           <emptyTree>
         end

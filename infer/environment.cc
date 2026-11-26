@@ -1614,11 +1614,14 @@ core::TypePtr Environment::processBinding(
                             core::TypeAndOrigins::explainExpected(ctx, expectedReturnType, owner.loc(ctx), for_));
                         e.addErrorSection(typeAndOrigin.explainGot(ctx, ownerLoc));
                         e.addErrorSections(move(errorDetailsCollector));
-                        // Don't offer to wrap the `end` keyword of an implicit return, or the whole
-                        // method definition, which is what a method synthesized by a DSL (e.g.,
-                        // `attr_writer`) uses as the loc of its return value.
-                        if (i.whatLoc != inWhat.implicitReturnLoc && i.whatLoc != inWhat.loc &&
-                            i.whatLoc != inWhat.declLoc) {
+                        if (i.whatLoc.exists() && i.whatLoc.empty()) {
+                            core::TypeErrorDiagnostics::maybeInsertElse(ctx, e, ctx.locAt(i.whatLoc),
+                                                                        ctx.owner.enclosingClass(ctx));
+                        } else if (i.whatLoc != inWhat.implicitReturnLoc && i.whatLoc != inWhat.loc &&
+                                   i.whatLoc != inWhat.declLoc) {
+                            // Don't offer to wrap the `end` keyword of an implicit return, or the whole
+                            // method definition, which is what a method synthesized by a DSL (e.g.,
+                            // `attr_writer`) uses as the loc of its return value.
                             auto replaceLoc = ctx.locAt(i.whatLoc);
                             core::TypeErrorDiagnostics::maybeAutocorrect(ctx, e, replaceLoc, constr, expectedReturnType,
                                                                          typeAndOrigin.type);

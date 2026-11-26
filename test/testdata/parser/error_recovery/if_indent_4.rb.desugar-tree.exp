@@ -13,7 +13,7 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   def test2<<todo method>>(&<blk>)
     if <self>.x().f()
-      <emptyTree>
+      nil
     else
       <emptyTree>
     end

@@ -1,0 +1,86 @@
+# typed: true
+extend T::Sig
+
+sig {params(c: T::Boolean, u: T.untyped).returns(String)}
+def if_multi_line(c, u)
+  if c
+    u
+  end # error: Expected `String` but found `NilClass` for method result type
+end
+
+sig {params(c: T::Boolean, u: T.untyped).returns(String)}
+def if_single_line(c, u)
+  if c then u end # error: Expected `String` but found `NilClass` for method result type
+end
+
+sig {params(x: Integer, u: T.untyped).returns(String)}
+def case_when(x, u)
+  case x
+  when 1 then u
+  end # error: Expected `String` but found `NilClass` for method result type
+end
+
+sig {params(c: T::Boolean, u: T.untyped).returns(String)}
+def modifier_if(c, u)
+  u if c # error: Expected `String` but found `NilClass` for method result type
+end
+
+class A
+  extend T::Sig
+
+  sig {params(c: T::Boolean, u: T.untyped).returns(String)}
+  def in_class(c, u)
+    if c
+      u
+    end # error: Expected `String` but found `NilClass` for method result type
+  end
+
+  sig {params(c: T::Boolean, u: T.untyped).returns(String)}
+  def self.in_singleton_class(c, u)
+    if c
+      u
+    end # error: Expected `String` but found `NilClass` for method result type
+  end
+end
+
+module M
+  extend T::Sig
+
+  sig {params(c: T::Boolean, u: T.untyped).returns(String)}
+  def in_module(c, u)
+    if c
+      u
+    end # error: Expected `String` but found `NilClass` for method result type
+  end
+
+  sig {params(c: T::Boolean, u: T.untyped).returns(String)}
+  def self.in_module_singleton_class(c, u)
+    if c
+      u
+    end # error: Expected `String` but found `NilClass` for method result type
+  end
+end
+
+class B < BasicObject
+  extend T::Sig
+
+  sig {params(c: T::Boolean, u: T.untyped).returns(String)}
+  def in_basic_object(c, u)
+    if c
+      u
+    end # error: Expected `String` but found `NilClass` for method result type
+  end
+end
+
+class OwnRaise
+  extend T::Sig
+
+  def raise(message); end
+
+  sig {params(c: T::Boolean, u: T.untyped).returns(String)}
+  def with_own_raise(c, u)
+    if c
+      u
+    end # error: Expected `String` but found `NilClass` for method result type
+  end
+end
