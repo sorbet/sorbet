@@ -30,7 +30,7 @@ import os
 project_root = os.path.dirname(os.path.realpath(__file__))
 # Bazel names its convenience symlinks after the directory containing the
 # workspace, which isn't `sorbet` in a worktree or a renamed checkout.
-bazel_symlink = "bazel-%s" % os.path.basename(project_root)
+bazel_symlink = f"bazel-{os.path.basename(project_root)}"
 if not(os.path.isdir(os.path.join(project_root, bazel_symlink))):
     bazel_symlink = "bazel-sorbet"
 bazel_workspace = os.path.realpath(os.path.join(project_root, bazel_symlink))
@@ -52,14 +52,16 @@ external_path = os.path.join(os.path.dirname(os.path.dirname(bazel_workspace)), 
 # everything we want in a single command. We could consider changing this to
 # e.g. `append` if we wanted something more robust, but there are edge cases
 # there, too.
-source_map_command = 'settings set -- target.source-map "%s" "%s" /proc/self/cwd/external "%s"' % (
-    bazel_workspace, project_root, external_path
+source_map_command = (
+    "settings set -- target.source-map"
+    f' "{bazel_workspace}" "{project_root}"'
+    f' /proc/self/cwd/external "{external_path}"'
 )
 
 if not(os.path.isdir(bazel_workspace)):
     print("You need to compile Sorbet first before loading this file")
 else:
-    print("(lldb) %s" % source_map_command)
+    print(f"(lldb) {source_map_command}")
     ci = lldb.debugger.GetCommandInterpreter()
     res = lldb.SBCommandReturnObject()
     ci.HandleCommand(source_map_command, res)
@@ -75,6 +77,6 @@ def cmd_bazelsourcemap(debugger, command, result, dict):
     # Loading this file already applies the source map. This command applies it
     # again, e.g. after something else has changed target.source-map.
     ci = debugger.GetCommandInterpreter()
-    print('(lldb) %s' % source_map_command)
+    print(f"(lldb) {source_map_command}")
     ci.HandleCommand(source_map_command, result)
 
