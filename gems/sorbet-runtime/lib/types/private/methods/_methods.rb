@@ -227,6 +227,7 @@ module T::Private::Methods
       source_ancestors = T.let(nil, T.nilable(T::Array[T::Module[T.anything]]))
       found_error = T.let(false, T::Boolean)
     end
+
     found_error = false
     # use reverse_each to check farther-up ancestors first, for better error messages.
     target.ancestors.reverse_each do |ancestor|
@@ -257,6 +258,18 @@ module T::Private::Methods
             @modules_with_final.fetch(a).include?(method_name)
           end
           next if defining_ancestor_idx && source_ancestors[defining_ancestor_idx] == ancestor
+        end
+
+        if source && T::AbstractUtils.abstract_module?(source)
+          # If the source is abstract, then it's possible that the
+          # method we're "redefining" was declared as abstract
+          # there. In that case, this may not be actually redefining,
+          # but rather implementing an interface that would defer back
+          # to this implementation.
+          source_sig = T::Private::Methods.signature_for_method(source.instance_method(method_name))
+          if source_sig&.mode == T::Private::Methods::Modes.abstract
+            next
+          end
         end
 
         found_error = true

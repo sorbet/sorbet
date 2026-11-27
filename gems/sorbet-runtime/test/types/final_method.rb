@@ -596,4 +596,81 @@ class Opus::Types::Test::FinalMethodTest < Critic::Unit::UnitTest
   ensure
     T::Configuration.sig_validation_error_handler = nil
   end
+
+  it 'allows final "overriding" when the override is abstract' do
+    parent = Class.new do
+      extend T::Sig
+      sig(:final) { returns(String) }
+      def foo = "hello"
+    end
+
+    ifoo = Module.new do
+      extend T::Sig
+      extend T::Helpers
+      abstract!
+
+      sig { abstract.returns(String) }
+      def foo; end
+    end
+
+    Class.new(parent) do
+      include ifoo
+    end
+  end
+
+  it 'only allows "final overriding" if the method is actually abstract' do
+    parent = Class.new do
+      extend T::Sig
+      sig(:final) { returns(String) }
+      def foo = "hello"
+    end
+
+    ifoo = Module.new do
+      extend T::Sig
+      extend T::Helpers
+      abstract!
+
+      sig { void }
+      def foo; end
+    end
+
+    assert_raises(RuntimeError) do
+      Class.new(parent) do
+        include ifoo
+      end
+    end
+  end
+
+  it 'doesnt let one "final override" stop us from finding another' do
+    parent = Class.new do
+      extend T::Sig
+      sig(:final) { returns(String) }
+      def foo = "hello"
+    end
+
+    good_mod = Module.new do
+      extend T::Sig
+      extend T::Helpers
+      abstract!
+
+      sig { abstract.returns(String) }
+      def foo; end
+    end
+
+    bad_mod = Module.new do
+      extend T::Sig
+      extend T::Helpers
+      abstract!
+
+      sig { returns(String) }
+      def foo = "goodbye"
+    end
+
+    assert_raises(RuntimeError) do
+      Class.new(parent) do
+        include good_mod
+        include bad_mod
+      end
+    end
+  end
 end
