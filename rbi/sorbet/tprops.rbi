@@ -149,8 +149,10 @@ module T::Props::PrettyPrintable::DecoratorMethods
 end
 
 module T::Props::Serializable
+  sig {params(hash: T::Hash[T.untyped, T.untyped], strict: T.nilable(T::Boolean)).returns(T.self_type)}
   def deserialize(hash, strict = nil); end
   def recursive_stringify_keys(obj); end
+  sig {params(strict: T.nilable(T::Boolean)).returns(T.untyped)}
   def serialize(strict = nil); end
   sig {params(changed_props: T.untyped).returns(T.self_type)}
   def with(changed_props); end
