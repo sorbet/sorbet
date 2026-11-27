@@ -208,7 +208,7 @@ module Marshal
   sig do
     params(
         arg0: T.any(String, IO),
-        arg1: Proc,
+        arg1: T::Proc[T.untyped],
     )
     .returns(Object)
   end
