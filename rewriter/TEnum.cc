@@ -97,7 +97,7 @@ struct ProcessStatResult {
 };
 
 optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::ClassDef *klass, ast::ExpressionPtr &stat,
-                                        FromWhere fromWhere) {
+                                        FromWhere fromWhere, UnorderedSet<core::NameRef> &seenEnums) {
     auto asgn = ast::cast_tree<ast::Assign>(stat);
     if (asgn == nullptr) {
         return {};
@@ -144,6 +144,15 @@ optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::ClassDef 
                         lhs->cnst.show(ctx), "enums do", "T::Enum");
             e.addErrorLine(ctx.locAt(klass->declLoc), "Enclosing definition here");
         }
+    } else {
+        core::NameRef enumName = lhs->cnst;
+        if (seenEnums.contains(enumName)) {
+            if (auto e = ctx.beginIndexerError(stat.loc(), core::errors::Rewriter::BadTEnumSyntax)) {
+                e.setHeader("Duplicate enum value `{}`", enumName.show(ctx));
+            }
+        } else {
+            seenEnums.insert(enumName);
+        }
     }
 
     auto statLocZero = stat.loc().copyWithZeroLength();
@@ -168,8 +177,9 @@ optional<ProcessStatResult> processStat(core::MutableContext ctx, ast::ClassDef 
 }
 
 core::TypePtr collectNewStats(core::MutableContext ctx, ast::ClassDef *klass, ast::ExpressionPtr stat,
-                              FromWhere fromWhere, vector<ast::ExpressionPtr> &into) {
-    auto result = processStat(ctx, klass, stat, fromWhere);
+                              FromWhere fromWhere, vector<ast::ExpressionPtr> &into,
+                              UnorderedSet<core::NameRef> &seenEnums) {
+    auto result = processStat(ctx, klass, stat, fromWhere, seenEnums);
     if (result) {
         auto [newStats, type] = std::move(*result);
         for (auto &newStat : newStats) {
@@ -205,6 +215,8 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
     core::TypePtr serializeReturnType = core::Types::bottom();
     auto fromWhere = FromWhere::Before;
     core::Loc enumsDoLoc;
+    UnorderedSet<core::NameRef> seenEnums;
+
     for (auto &stat : oldRHS) {
         if (auto enumsDo = asEnumsDo(stat)) {
             if (fromWhere != FromWhere::Before) {
@@ -221,13 +233,13 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
             vector<ast::ExpressionPtr> newStats;
             if (auto insSeq = ast::cast_tree<ast::InsSeq>(block->body)) {
                 for (auto &stat : insSeq->stats) {
-                    auto type = collectNewStats(ctx, klass, std::move(stat), fromWhere, newStats);
+                    auto type = collectNewStats(ctx, klass, std::move(stat), fromWhere, newStats, seenEnums);
                     serializeReturnType = core::Types::any(ctx, serializeReturnType, type);
                 }
-                auto type = collectNewStats(ctx, klass, std::move(insSeq->expr), fromWhere, newStats);
+                auto type = collectNewStats(ctx, klass, std::move(insSeq->expr), fromWhere, newStats, seenEnums);
                 serializeReturnType = core::Types::any(ctx, serializeReturnType, type);
             } else {
-                auto type = collectNewStats(ctx, klass, std::move(block->body), fromWhere, newStats);
+                auto type = collectNewStats(ctx, klass, std::move(block->body), fromWhere, newStats, seenEnums);
                 serializeReturnType = core::Types::any(ctx, serializeReturnType, type);
             }
 
@@ -241,7 +253,7 @@ void TEnum::run(core::MutableContext ctx, ast::ClassDef *klass) {
             fromWhere = FromWhere::After;
         } else {
             vector<ast::ExpressionPtr> newStats;
-            collectNewStats(ctx, klass, std::move(stat), fromWhere, newStats);
+            collectNewStats(ctx, klass, std::move(stat), fromWhere, newStats, seenEnums);
             for (auto &newStat : newStats) {
                 klass->rhs.emplace_back(std::move(newStat));
             }
