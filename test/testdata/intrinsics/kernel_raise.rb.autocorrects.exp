@@ -102,4 +102,38 @@ def example(cls)
     #           ^ error: Missing required keyword argument `input` for method `MyError#initialize`
   end
 end
+
+class AbstractError < StandardError
+  extend T::Helpers
+  abstract!
+end
+
+class ConcreteError < AbstractError; end
+
+class AbstractErrorWithCustomNew < StandardError
+  extend T::Helpers
+  abstract!
+
+  def self.new
+    super
+  end
+end
+
+def raise_abstract
+  0.times do
+    raise AbstractError # error: Attempting to instantiate abstract class `AbstractError`
+  end
+
+  0.times do
+    raise ConcreteError # no error: concrete subclass
+  end
+
+  0.times do
+    raise AbstractErrorWithCustomNew # no error: has custom .new
+  end
+
+  0.times do
+    fail AbstractError # error: Attempting to instantiate abstract class `AbstractError`
+  end
+end
 # ------------------------------
