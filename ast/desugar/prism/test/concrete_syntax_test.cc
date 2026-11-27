@@ -68,4 +68,13 @@ TEST_CASE("Prism preserves safe navigation assignment targets for refactoring") 
     }
 }
 
+TEST_CASE("Prism preserves indexed compound assignment arguments for refactoring") {
+    for (auto lhs : {"object[*indices]", "object[index, *indices]", "object[key: value]", "object[index, key: value]",
+                     "object[**kwargs]", "object[key: value, **kwargs]"}) {
+        for (auto op : {"||=", "&&=", "+="}) {
+            checkPreservedSyntax(fmt::format("{} {} rhs", lhs, op));
+        }
+    }
+}
+
 } // namespace sorbet::ast::Desugar::Prism
