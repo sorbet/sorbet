@@ -81,6 +81,11 @@ DispatchResult OrType::dispatchCall(const GlobalState &gs, const DispatchArgs &a
     return DispatchResult::merge(gs, DispatchResult::Combinator::OR, std::move(leftRet), std::move(rightRet));
 }
 
+DispatchResult EnumUnion::dispatchCall(const GlobalState &gs, const DispatchArgs &args) const {
+    categoryCounterInc("dispatch_call", "enumunion");
+    return toOrType(gs).dispatchCall(gs, args);
+}
+
 TypePtr OrType::getCallArguments(const GlobalState &gs, NameRef name) const {
     auto largs = left.getCallArguments(gs, name);
     auto rargs = right.getCallArguments(gs, name);
