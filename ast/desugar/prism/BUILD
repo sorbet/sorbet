@@ -17,3 +17,19 @@ cc_library(
         "@prism",
     ],
 )
+
+cc_test(
+    name = "concrete_syntax_test",
+    size = "small",
+    srcs = ["test/concrete_syntax_test.cc"],
+    deps = [
+        ":prism",
+        "//ast",
+        "//ast/desugar",
+        "//core",
+        "//parser",
+        "//parser/prism",
+        "@doctest//doctest",
+        "@doctest//doctest:main",
+    ],
+)
