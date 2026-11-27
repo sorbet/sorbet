@@ -45,10 +45,10 @@ def example(opts, nilable_opts, mixed_opts, untyped_opts, string_keys)
   takes_some_required_nilable(**opts)
   #                           ^^^^^^ error: Cannot call `Object#takes_some_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
 
-  # It might be nice to get better locations for these two in the future, and
-  # also to somehow allow them.
+  # `x:` is passed explicitly, so the splat is only left to supply `y:`, which is optional.
   takes_some_required_nilable(x: nil, **opts)
-  #                           ^^^^^^^^^^^^^^ error: Cannot call `Object#takes_some_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
+  # A splat that isn't in trailing position can overwrite the keys before it, so `x:` isn't
+  # guaranteed here. It might be nice to somehow allow this in the future.
   takes_some_required_nilable(**opts, x: nil)
   #                           ^^^^^^^^^^^^^^ error: Cannot call `Object#takes_some_required_nilable` with a `Hash` keyword splat because the method has required keyword parameters
 
