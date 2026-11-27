@@ -29,6 +29,7 @@ cc_binary(
         "//main/pipeline/semantic_extension:none",
         "//payload/binary:some",
         "//payload/text:empty",
+        "@com_google_absl//absl/strings",
     ],
 )
 
