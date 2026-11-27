@@ -318,14 +318,14 @@ ast::ExpressionPtr runDesugar(core::GlobalState &gs, core::FileRef file, unique_
 }
 
 ast::ExpressionPtr runPrismDesugar(core::GlobalState &gs, core::FileRef file, parser::Prism::ParseResult parseResult,
-                                   const options::Printers &print) {
+                                   const options::Printers &print, bool preserveConcreteSyntax = false) {
     ast::ExpressionPtr ast;
     {
         core::UnfreezeNameTable nameTableAccess(gs);
         core::MutableContext ctx(gs, core::Symbols::root(), file);
 
         Timer timeit(gs.tracer(), "runDesugar", {{"file", string(file.data(gs).path())}});
-        ast = ast::Desugar::Prism::node2Tree(ctx, move(parseResult));
+        ast = ast::Desugar::Prism::node2Tree(ctx, move(parseResult), preserveConcreteSyntax);
     }
 
     if (print.DesugarTree.enabled) {
@@ -369,6 +369,14 @@ ast::ExpressionPtr desugarOne(const options::Options &opts, core::GlobalState &g
     try {
         if (file.data(gs).strictLevel == core::StrictLevel::Ignore) {
             return ast::MK::EmptyTree();
+        }
+        if (opts.cacheSensitiveOptions.usePrismParser) {
+            auto parseResult = runPrismParser(gs, file, opts);
+            if (print.ParseTree.enabled) {
+                print.ParseTree.fmt("{}\n", parseResult.prettyPrint());
+            }
+            runRBSRewrite(gs, file, parseResult, print);
+            return runPrismDesugar(gs, file, move(parseResult), print, preserveConcreteSyntax);
         }
         auto parseResult = runParser(gs, file, print, opts.traceLexer, opts.traceParser);
 
