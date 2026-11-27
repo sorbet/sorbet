@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+# typed: false
+# assert-fast-path: namespace.rb,__package.rb
+
+module Package
+  module Namespace
+    def foo
+    end
+  end
+end
