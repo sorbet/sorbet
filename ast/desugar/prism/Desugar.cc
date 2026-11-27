@@ -919,6 +919,15 @@ ast::ExpressionPtr Desugarer::translateIndexAssignment(pm_node_t *untypedNode, c
     auto openingLoc = translateLoc(node->opening_loc);
     auto lBracketLoc = core::LocOffsets{openingLoc.beginLoc, openingLoc.endLoc - 1};
 
+    if (preserveConcreteSyntax) {
+        // Preserve the argument kinds and locations of an ordinary indexed read.
+        // Treating a splat as a positional argument makes its entire source span extractable.
+        auto block = desugarBlock(up_cast(node->block), node->arguments, node->base.location);
+        auto lhs = desugarMethodCall(move(receiver), core::Names::squareBrackets(), lBracketLoc, node->arguments,
+                                     node->closing_loc, move(block), lhsLoc, /*isPrivateOk=*/false);
+        return translateAnyOpAssignment<PrismAssignmentNode, SorbetAssignmentNode, void>(node, location, move(lhs));
+    }
+
     auto args = desugarArguments<ast::Send::ARGS_store>(node->arguments);
     auto argsSize = args.size(); // Grab the size before moving out of `args`
 
