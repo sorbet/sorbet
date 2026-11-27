@@ -1341,6 +1341,14 @@ template <OpAssignKind Kind>
 ast::ExpressionPtr Desugarer::desugarAnyOpAssign(core::LocOffsets location, ast::ExpressionPtr lhs,
                                                  ast::ExpressionPtr rhs, core::NameRef op, core::LocOffsets opLoc,
                                                  bool isIvarOrCvar) {
+    if (preserveConcreteSyntax) {
+        auto magicName = Kind == OpAssignKind::And  ? core::Names::andAsgn()
+                         : Kind == OpAssignKind::Or ? core::Names::orAsgn()
+                                                    : core::Names::opAsgn();
+        auto locZeroLen = location.copyWithZeroLength();
+        return MK::Send2(location, MK::Magic(locZeroLen), magicName, locZeroLen, move(lhs), move(rhs));
+    }
+
     if (auto s = ast::cast_tree<ast::Send>(lhs)) {
         return desugarOpAssignSend<Kind>(location, s, move(rhs), op, opLoc);
     }
@@ -1420,13 +1428,14 @@ ast::ExpressionPtr Desugarer::desugarConstantOpAssign(pm_node_t *untypedNode) {
         if constexpr (Kind == OpAssignKind::Operator) {
             auto opLoc = translateLoc(node->binary_operator_loc);
             auto op = translateConstantName(node->binary_operator);
-            return desugarOpReference(location, move(lhs), op, opLoc, move(rhs));
+            return desugarAnyOpAssign<Kind>(location, move(lhs), move(rhs), op, opLoc, false);
         } else {
-            return desugarAndOrReference<Kind>(location, move(lhs), move(rhs), false);
+            return desugarAnyOpAssign<Kind>(location, move(lhs), move(rhs), core::NameRef::noName(),
+                                            core::LocOffsets::none(), false);
         }
     }
 
-    auto lhs = MK::UnresolvedConstant(nameLoc, MK::EmptyTree(), name);
+    auto lhs = MK::UnresolvedConstant(nameLoc, MK::EmptyTree(), ctx.state.enterNameConstant(name));
     auto rhs = desugar(node->value);
 
     if constexpr (Kind == OpAssignKind::Operator) {
@@ -1449,21 +1458,7 @@ ast::ExpressionPtr Desugarer::desugarConstantPathOpAssign(pm_node_t *untypedNode
     }
 
     auto node = down_cast_nonnull<PrismConstantPathNode>(untypedNode);
-    auto target = node->target;
-
-    auto nameLoc = translateLoc(target->name_loc);
-    auto name = translateConstantName(target->name);
-
-    // Translate the constant path to an UnresolvedConstantLit
-    ast::ExpressionPtr scope;
-    if (target->parent == nullptr) {
-        // `::Constant` - top level constant
-        scope = MK::Constant(location, core::Symbols::root());
-    } else {
-        scope = desugar(target->parent);
-    }
-
-    auto lhs = MK::UnresolvedConstant(nameLoc, move(scope), name);
+    auto lhs = desugar(up_cast(node->target));
     auto rhs = desugar(node->value);
 
     if constexpr (Kind == OpAssignKind::Operator) {
