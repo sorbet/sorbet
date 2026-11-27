@@ -658,6 +658,14 @@ ast::ExpressionPtr Desugarer::desugarConditionalSend(core::LocOffsets location, 
                                                      Lambda &&body) {
     ENFORCE(receiver != nullptr, "Conditional sends should always have a receiver.");
 
+    if (preserveConcreteSyntax) {
+        // Keep the receiver in its source position and distinguish safe navigation
+        // from an ordinary send when refactoring compares expressions.
+        auto methodName =
+            ctx.state.freshNameUnique(core::UniqueNameKind::DesugarCsend, translateConstantName(methodNameID), 1);
+        return body(desugar(receiver), location, methodName, translateLoc(methodNamePrismLoc));
+    }
+
     auto loc0 = location.copyWithZeroLength();
 
     // Create the temporary local variable before desugaring the receiver,

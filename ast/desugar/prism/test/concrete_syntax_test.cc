@@ -51,4 +51,21 @@ TEST_CASE("Prism preserves compound constant assignments during error recovery")
     }
 }
 
+TEST_CASE("Prism preserves safe navigation for refactoring") {
+    for (auto lhs : {"object&.value", "object&.child&.value", "(object)&.value"}) {
+        for (auto op : {"||=", "&&=", "+="}) {
+            checkPreservedSyntax(fmt::format("{} {} rhs", lhs, op));
+        }
+        checkPreservedSyntax(lhs);
+        checkPreservedSyntax(fmt::format("{} = rhs", lhs));
+    }
+}
+
+TEST_CASE("Prism preserves safe navigation assignment targets for refactoring") {
+    for (auto source : {"object&.value, other = values", "for object&.value in values; body; end",
+                        "begin; body; rescue => object&.value; handler; end"}) {
+        checkPreservedSyntax(source);
+    }
+}
+
 } // namespace sorbet::ast::Desugar::Prism
