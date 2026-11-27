@@ -56,6 +56,10 @@ module T::Props
             end
           end
 
+          if default.frozen?
+            return ApplyPrimitiveDefault.new(default, accessor_key, bound_setter)
+          end
+
           ApplyComplexDefault.new(default, accessor_key, bound_setter)
         else
           nil
@@ -97,6 +101,10 @@ module T::Props
       sig { override.returns(T.untyped).checked(:never) }
       def default
         T::Props::Utils.deep_clone(@default)
+      rescue TypeError
+        raise TypeError, "#{@default.inspect} is not a valid prop default: it is not frozen " \
+          "and cannot be cloned. Prop defaults must be primitives " \
+          "(#{NO_CLONE_TYPES.map { |t| T.unsafe(t).to_s }.join(', ')}), frozen objects, or clone-able objects."
       end
     end
 
