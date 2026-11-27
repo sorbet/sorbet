@@ -358,14 +358,18 @@ class <emptyTree><<C <root>>> < (::<todo sym>)
 
   <runtime method definition of self.def21>
 
-  ::<Magic>.<build-range>(1, 10, false).each() do |i|
-    <runtime method definition of def23>
+  begin
+    forTemp$2 = ::<Magic>.<build-range>(1, 10, false)
+    i = ::<Magic>.<element-or-nil>(forTemp$2)
+    forTemp$2.each() do |i|
+      <runtime method definition of def23>
+    end
   end
 
   [<runtime method definition of def24>]
 
   <runtime method definition of def25>
-rescue => <rescueTemp>$2
+rescue => <rescueTemp>$3
   <runtime method definition of def26>
 ensure
   <runtime method definition of def27>
@@ -377,16 +381,16 @@ ensure
   end
 
   begin
-    <assignTemp>$3 = <runtime method definition of def30>
-    <assignTemp>$4 = ::<Magic>.<expand-splat>(<assignTemp>$3, 2, 0)
-    var5 = <assignTemp>$4.[](0)
-    var6 = <assignTemp>$4.[](1)
-    <assignTemp>$3
+    <assignTemp>$4 = <runtime method definition of def30>
+    <assignTemp>$5 = ::<Magic>.<expand-splat>(<assignTemp>$4, 2, 0)
+    var5 = <assignTemp>$5.[](0)
+    var6 = <assignTemp>$5.[](1)
+    <assignTemp>$4
   end
 
   begin
-    <assignTemp>$5 = <emptyTree>::<C ARGV>.first()
-    if "foo".===(<assignTemp>$5)
+    <assignTemp>$6 = <emptyTree>::<C ARGV>.first()
+    if "foo".===(<assignTemp>$6)
       <runtime method definition of def31>
     else
       <runtime method definition of def32>
