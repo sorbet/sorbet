@@ -63,4 +63,27 @@ class Opus::Types::Test::SigTest < Critic::Unit::UnitTest
 
     assert_equal(output, '')
   end
+
+  it 'stores sig keys without copying them' do
+    klass = Class.new do
+      extend T::Sig
+      sig { returns(Symbol) }
+      def foo
+        :foo
+      end
+    end
+
+    key = T::Private::Methods.send(:method_owner_and_name_to_key, klass, :foo)
+    assert_predicate(key, :frozen?)
+
+    sig_wrappers = T::Private::Methods.instance_variable_get(:@sig_wrappers)
+    stored_key = sig_wrappers.keys.find { |k| k == key }
+    refute_nil(stored_key)
+    # The key captured by the method wrapper and the key stored in the Hash
+    # should be the same object, not a frozen copy made by Hash#[]=.
+    sig_block = sig_wrappers.fetch(key)
+    assert_same(stored_key, sig_block.binding.local_variable_get(:key))
+
+    assert_equal(:foo, klass.new.foo)
+  end
 end
