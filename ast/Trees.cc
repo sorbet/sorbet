@@ -346,6 +346,11 @@ ExpressionPtr &UnresolvedConstantLit::outermostScope() {
 
 ConstantLit::ConstantLit(core::LocOffsets loc, core::SymbolRef symbol) : storage(loc, symbol) {
     categoryCounterInc("trees", "resolvedconstantlit");
+    if (this->original == nullptr) {
+        prodHistogramInc("trees.constantlit.original", 0);
+    } else {
+        prodHistogramInc("trees.constantlit.original", 1);
+    }
     _sanityCheck();
 }
 
