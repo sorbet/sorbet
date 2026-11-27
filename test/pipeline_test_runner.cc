@@ -246,6 +246,9 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
             core::MutableContext ctx(gs, core::Symbols::root(), file);
 
             // Always run the legacy parser.
+            if (parser == realmain::options::Parser::PRISM) {
+                handler.drainErrors(gs);
+            }
             auto settings = parser::Parser::Settings{false, false, false};
             legacyParseResult = parser::Parser::run(gs, file, settings);
 
@@ -265,6 +268,9 @@ vector<ast::ParsedFile> index(core::GlobalState &gs, absl::Span<core::FileRef> f
                     break;
                 }
                 case realmain::options::Parser::PRISM: {
+                    // Discard the original parser's errors for the Prism case. It only runs to compare trees.
+                    handler.dropErrors(gs);
+
                     prismParseResult.emplace(parser::Prism::Parser::run(ctx));
 
                     if (gs.cacheSensitiveOptions.rbsEnabled) {
