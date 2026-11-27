@@ -5,6 +5,8 @@ module T::Private::Abstract::Declare
   Abstract = T::Private::Abstract
   AbstractUtils = T::AbstractUtils
 
+  HAS_ATTACHED_OBJECT = RUBY_VERSION >= "3.3.0"
+
   def self.declare_abstract(mod, type:)
     if AbstractUtils.abstract_module?(mod)
       raise "#{mod} is already declared as abstract"
@@ -37,6 +39,35 @@ module T::Private::Abstract::Declare
         result = super(*args, &blk)
         if result.instance_of?(mod)
           raise "#{mod} is declared as abstract; it cannot be instantiated"
+        end
+
+        # Don't even bother if we can't go from the singleton class to the attached class.
+        if !HAS_ATTACHED_OBJECT
+          return result
+        end
+
+        # See if we were called on a module that resolved to the abstract override, and
+        # bypass the abstract override for the next call.
+        me = self.method(:new)
+        loc = me.source_location&.[](0)
+        # If the first resolved method on `self` is not in this file, then we can't apply
+        # this optimization, because the `new` that we're now in is somewhere in the
+        # hierarchy above the first resolved method.
+        if loc != __FILE__
+          return result
+        end
+
+        while loc == __FILE__
+          # This method must exist, or we would have errored in the earlier `super` call.
+          me = T.must(me.super_method)
+          loc = me.source_location&.[](0)
+        end
+
+        # TODO(froydnj) we should be able to ladder up the method inheritance
+        # chain to see if there are multiple abstract .new methods and resolve
+        # to the farthest-away non-abstract one.
+        T::Private::DeclState.current.without_on_method_added do
+          self.send(:define_singleton_method, :new, me.unbind)
         end
         result
       end
