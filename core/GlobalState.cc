@@ -170,6 +170,9 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
     if (!data->flags.isLinearizationComputed) {
         if (data->superClass().exists()) {
             computeClassLinearization(gs, data->superClass());
+            if (!data->flags.isTrackedSuperclass && data->superClass().data(gs)->flags.isTrackedSuperclass) {
+                data->flags.isTrackedSuperclass = true;
+            }
         }
         InlinedVector<core::ClassOrModuleRef, 4> currentMixinsOrig;
         if constexpr (!debug_mode) {
@@ -189,6 +192,9 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
                 continue;
             }
             ParentLinearizationInformation mixinLinearization = computeClassLinearization(gs, mixin);
+            if (!data->flags.isTrackedSuperclass && mixin.data(gs)->flags.isTrackedSuperclass) {
+                data->flags.isTrackedSuperclass = true;
+            }
 
             if (!mixin.data(gs)->flags.isModule) {
                 // insert all transitive parents of class to bring methods back.

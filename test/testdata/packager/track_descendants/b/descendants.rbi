@@ -4,6 +4,7 @@ T::Descendants.register(
   Root::A::Parent,
   {
     Root::B::Child => "test/testdata/packager/track_descendants/b/b.rb",
+    Root::B::OutOfOrderParent => "test/testdata/packager/track_descendants/b/out_of_order.rb",
     Root::B::WrongSuperclass => "test/testdata/packager/track_descendants/b/b.rb",
   # ^^^^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::WrongSuperclass` must only be a direct descendant of `Root::A::Parent`
     Root::B::Child.itself => "test/testdata/packager/track_descendants/b/b.rb",
@@ -38,6 +39,7 @@ T::Descendants.register(
   Root::A::Mixin,
   Root::B::Includer => "test/testdata/packager/track_descendants/b/b.rb",
   Root::B::SubMixin => "test/testdata/packager/track_descendants/b/b.rb",
+  Root::B::OutOfOrderSubMixin => "test/testdata/packager/track_descendants/b/out_of_order.rb",
   # Only direct descendants may be registered, whether they're indirect through a superclass or through a module.
   Root::B::GrandIncluder => "test/testdata/packager/track_descendants/b/b.rb",
 # ^^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::GrandIncluder` must only be a direct descendant of `Root::A::Mixin`
@@ -55,6 +57,8 @@ T::Descendants.register(Root::B::SubMixin, {
   Root::B::DeepMixin => "test/testdata/packager/track_descendants/b/b.rb",
 })
 T::Descendants.register(Root::B::DeepMixin, {Root::B::DeepIncluder => "test/testdata/packager/track_descendants/b/b.rb"})
+T::Descendants.register(Root::B::OutOfOrderParent, {Root::B::OutOfOrderChild => "test/testdata/packager/track_descendants/b/out_of_order.rb"})
+T::Descendants.register(Root::B::OutOfOrderSubMixin, {Root::B::OutOfOrderDeepMixin => "test/testdata/packager/track_descendants/b/out_of_order.rb"})
 
 # Each superclass may only be registered once per package.
 T::Descendants.register(Root::A::Parent, {Root::B::Child => "test/testdata/packager/track_descendants/b/b.rb"}) # error: Descendants of `Root::A::Parent` have already been registered in this package
