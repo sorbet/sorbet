@@ -25,6 +25,9 @@ T::Descendants.register(
   # ^^^^^^^^^^^^^^^^^^^ error: `Root::A::LocalChild` must be tracked in its own package
     Root::B::Plain => "test/testdata/packager/track_descendants/b/b.rb",
   # ^^^^^^^^^^^^^^ error: `Root::B::Plain` is not a descendant of `Root::A::Parent`
+    # A subclass may only be registered once per call. (The invalid `Root::B::Child` entries above don't count.)
+    Root::B::Child => "test/testdata/packager/track_descendants/b/b.rb",
+  # ^^^^^^^^^^^^^^ error: `Root::B::Child` is already registered in this call
     # Only direct descendants may be registered: `GrandChild` must be registered against `Child` instead.
     Root::B::GrandChild => "test/testdata/packager/track_descendants/b/b.rb",
   # ^^^^^^^^^^^^^^^^^^^ error: `Root::B::GrandChild` must only be a direct descendant of `Root::A::Parent`

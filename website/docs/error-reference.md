@@ -3190,7 +3190,8 @@ A call to `T::Descendants.register` (see [5087](#5087)) is invalid. A valid regi
 - has a hash literal for the second argument, where:
   - each key is a constant literal that resolves to a class or module that descends from the tracked ancestor directly, and not also through another of its ancestors (in which case it must be registered against that ancestor instead),
   - each key is defined in the same package as the registration (a package cannot register descendants defined in other packages, including its parent package or its subpackages), and
-  - each value is a string literal naming the file where that key is defined, and
+  - each value is a string literal naming the file where that key is defined,
+  - no key is registered more than once, and
 - is the only registration for that ancestor in its package.
 
 The file path is compared against the path that Sorbet shows for that file in error messages: any prefix that Sorbet strips when printing paths (for example, the input directory when Sorbet is run on a single directory) is ignored, as is a leading `./`.
@@ -3203,6 +3204,7 @@ T::Descendants.register(A::Parent, {
   C::Child => "c/child.rb",       # error: `C::Child` is defined in another package
   B::Child => "b/other.rb",       # error: `B::Child` is defined in `b/child.rb`
   B::GrandChild => "b/child.rb",  # error: must only be a direct descendant of `A::Parent`
+  B::Child => "b/child.rb",       # error: `B::Child` is already registered in this call
 })
 T::Descendants.register(A::Parent, {B::Other => "b/other.rb"}) # error: `A::Parent` is already registered in this package
 ```

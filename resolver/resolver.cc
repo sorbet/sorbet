@@ -3567,6 +3567,8 @@ class ResolveTypeMembersAndFieldsWalk {
             }
         }
 
+        // Subclasses successfully registered by this call, mapped to the key that registered them.
+        UnorderedMap<core::ClassOrModuleRef, core::Loc> registeredSubclasses;
         for (const auto [subclassArg, fileArg] : subclasses->kviter()) {
             const auto subclassLoc = core::Loc(todo.file, subclassArg.loc());
             const auto subclassSym = registeredClassOrModule(gs, subclassArg);
@@ -3621,6 +3623,15 @@ class ResolveTypeMembersAndFieldsWalk {
             if (fileStr != subclassPath) {
                 if (auto e = gs.beginError(fileLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
                     e.setHeader("`{}` is defined in `{}`, not in `{}`", subclassSym.show(gs), subclassPath, fileStr);
+                }
+                continue;
+            }
+
+            const auto [prevSubclass, subclassInserted] = registeredSubclasses.try_emplace(subclassSym, subclassLoc);
+            if (!subclassInserted) {
+                if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
+                    e.setHeader("`{}` is already registered in this call", subclassSym.show(gs));
+                    e.addErrorLine(prevSubclass->second, "Previously registered here");
                 }
                 continue;
             }
