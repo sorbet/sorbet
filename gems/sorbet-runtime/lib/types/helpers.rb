@@ -28,7 +28,7 @@ module T::Helpers
   end
 
   def sealed!
-    Private::Sealed.declare(self, Kernel.caller(1..1)&.first&.split(":")&.first)
+    Private::Sealed.declare(self, Kernel.caller(1..1)&.first&.split(':')&.first)
   end
 
   # Similar to sealed but allows for descendant class tracking across the whole codebase
