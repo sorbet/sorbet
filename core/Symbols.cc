@@ -148,6 +148,9 @@ bool ClassOrModule::transitivelyDerivesFromModule(const GlobalState &gs, ClassOr
             return true;
         }
     }
+    if (this->superClass().exists() && this->superClass().data(gs)->isPresentInMixins(sym)) {
+        return true;
+    }
 
     return false;
 }

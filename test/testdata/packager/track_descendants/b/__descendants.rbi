@@ -46,6 +46,8 @@ T::Descendants.register(
   # Only direct descendants may be registered, whether they're indirect through a superclass or through a module.
   Root::B::GrandIncluder => "test/testdata/packager/track_descendants/b/b.rb",
 # ^^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::GrandIncluder` must only be a direct descendant of `Root::A::Mixin`
+  Root::B::RedundantIncluder => "test/testdata/packager/track_descendants/b/b.rb",
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::RedundantIncluder` must only be a direct descendant of `Root::A::Mixin`
   Root::B::IndirectIncluder => "test/testdata/packager/track_descendants/b/b.rb",
 # ^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::IndirectIncluder` must only be a direct descendant of `Root::A::Mixin`
   Root::B::BothIncluder => "test/testdata/packager/track_descendants/b/b.rb",
@@ -53,7 +55,10 @@ T::Descendants.register(
   Root::B::DeepIncluder => "test/testdata/packager/track_descendants/b/b.rb",
 # ^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::DeepIncluder` must only be a direct descendant of `Root::A::Mixin`
 )
-T::Descendants.register(Root::B::Includer, {Root::B::GrandIncluder => "test/testdata/packager/track_descendants/b/b.rb"})
+T::Descendants.register(Root::B::Includer, {
+  Root::B::GrandIncluder => "test/testdata/packager/track_descendants/b/b.rb",
+  Root::B::RedundantIncluder => "test/testdata/packager/track_descendants/b/b.rb",
+})
 T::Descendants.register(Root::B::SubMixin, {
   Root::B::IndirectIncluder => "test/testdata/packager/track_descendants/b/b.rb",
   Root::B::BothIncluder => "test/testdata/packager/track_descendants/b/b.rb",

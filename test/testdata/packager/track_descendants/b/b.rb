@@ -13,6 +13,12 @@ module Root::B
   # Descendants of tracked modules are tracked too, through both subclasses and modules.
   class GrandIncluder < Includer; end
 
+  # Includes `Root::A::Mixin` directly, but also through its superclass, so it only needs to be registered against
+  # `Includer`.
+  class RedundantIncluder < Includer
+    include Root::A::Mixin
+  end
+
   module SubMixin
     include Root::A::Mixin
   end
