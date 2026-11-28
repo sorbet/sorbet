@@ -37,14 +37,14 @@ module Root::B
   end
 
   class Unregistered < Root::A::Parent; end
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: add `Root::B::Unregistered => "test/testdata/packager/track_descendants/b/b.rb"` to T::Descendants.register(Root::A::Parent, ...) in an RBI file in this package
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: add `Root::B::Unregistered => "test/testdata/packager/track_descendants/b/b.rb"` to T::Descendants.register(Root::A::Parent, ...) in `__descendants.rbi` in this package
 
   # Registered, but against the wrong superclass.
   class WrongSuperclass < Child; end
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: add `Root::B::WrongSuperclass => "test/testdata/packager/track_descendants/b/b.rb"` to T::Descendants.register(Root::B::Child, ...) in an RBI file in this package
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: add `Root::B::WrongSuperclass => "test/testdata/packager/track_descendants/b/b.rb"` to T::Descendants.register(Root::B::Child, ...) in `__descendants.rbi` in this package
 
   # Not a descendant of a tracked class, so it doesn't need to be registered.
   class Plain < Root::A::Untracked; end
 end
 
-T::Descendants.register(Root::A::Untracked, {Root::B::Plain => "test/testdata/packager/track_descendants/b/b.rb"}) # error: `register` can only be called in an RBI file
+T::Descendants.register(Root::A::Untracked, {Root::B::Plain => "test/testdata/packager/track_descendants/b/b.rb"}) # error: `register` can only be called in a file named `__descendants.rbi`

@@ -18,8 +18,8 @@ T::Descendants.register(
   #                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected a string file path for `Root::B::Child`
     Root::B::Child => "test/testdata/packager/track_descendants/b/" + "b.rb",
   #                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: Expected a string file path for `Root::B::Child`
-    Root::B::Child => "test/testdata/packager/track_descendants/b/descendants.rbi",
-  #                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::Child` is defined in `test/testdata/packager/track_descendants/b/b.rb`, not in `test/testdata/packager/track_descendants/b/descendants.rbi`
+    Root::B::Child => "test/testdata/packager/track_descendants/b/__descendants.rbi",
+  #                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::Child` is defined in `test/testdata/packager/track_descendants/b/b.rb`, not in `test/testdata/packager/track_descendants/b/__descendants.rbi`
     # A descendant may only be registered from the package that defines it.
     Root::A::LocalChild => "test/testdata/packager/track_descendants/a/a.rb",
   # ^^^^^^^^^^^^^^^^^^^ error: `Root::A::LocalChild` must be tracked in its own package

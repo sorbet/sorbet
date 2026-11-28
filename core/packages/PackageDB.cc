@@ -160,6 +160,10 @@ const bool PackageDB::enforceLayering() const {
     return !layers_.empty();
 }
 
+string_view PackageDB::descendantsRegistryFilename() const {
+    return descendantsRegistryFilename_;
+}
+
 absl::Span<const string> PackageDB::extraPackageFilesDirectorySlashDeprecatedPrefixes() const {
     return absl::MakeSpan(extraPackageFilesDirectorySlashDeprecatedPrefixes_);
 }
@@ -230,6 +234,7 @@ PackageDB PackageDB::deepCopy() const {
     result.updateVisibilityFor_ = this->updateVisibilityFor_;
     result.packagesToUpdateVisibilityFor_ = this->packagesToUpdateVisibilityFor_;
     result.errorHint_ = this->errorHint_;
+    result.descendantsRegistryFilename_ = this->descendantsRegistryFilename_;
 
     return result;
 }

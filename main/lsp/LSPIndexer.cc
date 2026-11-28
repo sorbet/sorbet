@@ -285,7 +285,8 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
                       this->config->opts.extraPackageFilesDirectorySlashPrefixes,
                       this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.updateVisibilityFor,
                       this->config->opts.packagerLayers, this->config->opts.sorbetPackagesHint,
-                      core::packages::GenPackagesMode::Disabled, enableGenPackagesAllowRelaxingTestVisibility));
+                      this->config->opts.descendantsRegistryFilename, core::packages::GenPackagesMode::Disabled,
+                      enableGenPackagesAllowRelaxingTestVisibility));
 
     task.setGlobalState(std::move(typecheckerGS));
     task.setSessionCache(std::move(this->sessionCache));

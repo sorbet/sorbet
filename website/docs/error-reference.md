@@ -3150,7 +3150,7 @@ end
 
 A class or module marked with `track_descendants!` requires every class or module that directly inherits from it (or includes it) to be registered with `T::Descendants.register`. Like [sealed classes](sealed.md), this lets the codebase know the complete set of descendants of a class, but without requiring them all to be defined in the same file. Unlike `sealed!`, descendants may be defined in any package.
 
-Each package registers its descendants of a given class or module with a single `T::Descendants.register` call in an RBI file in that package. The call takes the tracked ancestor and a hash literal mapping each descendant to the file where it is defined:
+Each package registers its descendants of a given class or module with a single `T::Descendants.register` call in the package's `__descendants.rbi` file. (The file name can be changed with `--descendants-registry-filename`.) The call takes the tracked ancestor and a hash literal mapping each descendant to the file where it is defined:
 
 ```ruby
 # -- a/parent.rb --
@@ -3167,7 +3167,7 @@ end
 class B::Other < A::Parent
 end
 
-# -- b/descendants.rbi --
+# -- b/__descendants.rbi --
 T::Descendants.register(A::Parent, {
   B::Child => "b/child.rb", # fixes the error
   B::Other => "b/other.rb",
@@ -3184,7 +3184,7 @@ Descendants of a tracked class or module are themselves tracked, and must be reg
 
 A call to `T::Descendants.register` (see [5087](#5087)) is invalid. A valid registration:
 
-- appears in an RBI file,
+- appears in a file named `__descendants.rbi` (or the name given by `--descendants-registry-filename`),
 - has exactly two positional arguments, with no keyword arguments or block,
 - has a constant literal for the first argument that resolves to a class or module (the tracked ancestor),
 - has a hash literal for the second argument, where:
@@ -3196,7 +3196,7 @@ A call to `T::Descendants.register` (see [5087](#5087)) is invalid. A valid regi
 The file path is compared against the path that Sorbet shows for that file in error messages: any prefix that Sorbet strips when printing paths (for example, the input directory when Sorbet is run on a single directory) is ignored, as is a leading `./`.
 
 ```ruby
-# -- b/descendants.rbi --
+# -- b/__descendants.rbi --
 T::Descendants.register(A::Parent, {
   B::Child.itself => "...",       # error: not a constant literal
   B::Unrelated => "...",          # error: not a descendant of `A::Parent`

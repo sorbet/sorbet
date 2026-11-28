@@ -4,6 +4,7 @@
 #include <cxxopts.hpp>
 
 #include "absl/algorithm/container.h"
+#include "absl/strings/match.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_split.h"
 #include "common/FileOps.h"
@@ -714,6 +715,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "enables layering checks. (repeatable)",
                                  cxxopts::value<vector<string>>()->implicit_value("library,application"),
                                  "<layer-name>[,<layer-name>...]");
+    options.add_options(section)("descendants-registry-filename",
+                                 "Name of the RBI file in each package that must contain the package's "
+                                 "`T::Descendants.register` calls (default: __descendants.rbi)",
+                                 cxxopts::value<string>(), "<filename>");
     options.add_options(section)("package-attributed-errors",
                                  "Attribute errors to their enclosing package in the error output",
                                  cxxopts::value<bool>());
@@ -1516,6 +1521,19 @@ void readOptions(Options &opts,
         if (!opts.sorbetPackagesHint.empty() && !opts.cacheSensitiveOptions.sorbetPackages) {
             if (!opts.cacheSensitiveOptions.sorbetPackages) {
                 logger->error("--sorbet-packages-hint-message can only be specified in --sorbet-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+        }
+
+        if (raw.count("descendants-registry-filename")) {
+            if (!opts.cacheSensitiveOptions.sorbetPackages) {
+                logger->error("--descendants-registry-filename can only be specified in --sorbet-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            opts.descendantsRegistryFilename = raw["descendants-registry-filename"].as<string>();
+            if (opts.descendantsRegistryFilename.find('/') != string::npos ||
+                !absl::EndsWith(opts.descendantsRegistryFilename, ".rbi")) {
+                logger->error("--descendants-registry-filename must be a file name (not a path) ending in `.rbi`");
                 throw EarlyReturnWithCode(1);
             }
         }

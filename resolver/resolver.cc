@@ -5,6 +5,7 @@
 #include "ast/Trees.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "common/FileOps.h"
 #include "common/sort/sort.h"
 #include "core/Error.h"
 #include "core/Names.h"
@@ -3526,9 +3527,10 @@ class ResolveTypeMembersAndFieldsWalk {
                                        TrackedDescendantRegistrations &registrations) {
         const auto *send = todo.send;
         const auto loc = core::Loc(todo.file, send->loc);
-        if (!todo.file.data(gs).isRBI()) {
+        const auto registryFilename = gs.packageDB().descendantsRegistryFilename();
+        if (FileOps::getFileName(todo.file.data(gs).path()) != registryFilename) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::InvalidDescendantRegistration)) {
-                e.setHeader("`{}` can only be called in an RBI file", send->fun.show(gs));
+                e.setHeader("`{}` can only be called in a file named `{}`", send->fun.show(gs), registryFilename);
             }
             return;
         }
@@ -4298,10 +4300,9 @@ public:
 
                     const auto subclassLoc = subclass.data(gs)->loc();
                     if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::UntrackedDescendant)) {
-                        e.setHeader(
-                            "add `{} => \"{}\"` to T::Descendants.register({}, ...) in an RBI file in this package",
-                            subclass.show(gs), trackedDescendantPath(gs, subclassLoc.file().data(gs).path()),
-                            superclass.show(gs));
+                        e.setHeader("add `{} => \"{}\"` to T::Descendants.register({}, ...) in `{}` in this package",
+                                    subclass.show(gs), trackedDescendantPath(gs, subclassLoc.file().data(gs).path()),
+                                    superclass.show(gs), gs.packageDB().descendantsRegistryFilename());
                     }
                 }
             }

@@ -4,7 +4,7 @@
 # defined before its superclass.
 module Root::B
   class OutOfOrderGrandChild < OutOfOrderChild; end
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: add `Root::B::OutOfOrderGrandChild => "test/testdata/packager/track_descendants/b/out_of_order.rb"` to T::Descendants.register(Root::B::OutOfOrderChild, ...) in an RBI file in this package
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: add `Root::B::OutOfOrderGrandChild => "test/testdata/packager/track_descendants/b/out_of_order.rb"` to T::Descendants.register(Root::B::OutOfOrderChild, ...) in `__descendants.rbi` in this package
 
   class OutOfOrderChild < OutOfOrderParent; end
 
@@ -12,7 +12,7 @@ module Root::B
 
   # Same, but through modules.
   class OutOfOrderIncluder
-# ^^^^^^^^^^^^^^^^^^^^^^^^ error: add `Root::B::OutOfOrderIncluder => "test/testdata/packager/track_descendants/b/out_of_order.rb"` to T::Descendants.register(Root::B::OutOfOrderDeepMixin, ...) in an RBI file in this package
+# ^^^^^^^^^^^^^^^^^^^^^^^^ error: add `Root::B::OutOfOrderIncluder => "test/testdata/packager/track_descendants/b/out_of_order.rb"` to T::Descendants.register(Root::B::OutOfOrderDeepMixin, ...) in `__descendants.rbi` in this package
     include OutOfOrderDeepMixin
   end
 
