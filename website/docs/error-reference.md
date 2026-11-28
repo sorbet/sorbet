@@ -1490,6 +1490,22 @@ To control which packages may import your package at all, rather than which of i
 
 `package_private!` is for constants. To make a method package-private, use `package_private` (or `package_private_class_method`) instead.
 
+## 4035
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+With `--descendants-registry-ignore-tracking-in-tests`, descendants defined in test files (files in a `/test/` directory) don't need to be registered with `T::Descendants.register` (see [5087](#5087)). Because test descendants aren't tracked, `track_descendants!` can't be used in test files either: the class or module it's called in won't be tracked.
+
+```ruby
+# -- b/test/helper.rb --
+class Test::B::Helper
+  extend T::Helpers
+  track_descendants! # error: `track_descendants!` can't be used in test files
+end
+```
+
+To fix, remove the `track_descendants!` call, or mark a class or module outside of a test file.
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs when a constant is dynamically referenced through the singleton class of `self`:
@@ -3142,6 +3158,73 @@ module Opus::Foo::Bar
     ...
   end
 end
+```
+
+## 5087
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A class or module marked with `track_descendants!` requires every class or module that directly inherits from it (or includes it) to be registered with `T::Descendants.register`. Like [sealed classes](sealed.md), this lets the codebase know the complete set of descendants of a class, but without requiring them all to be defined in the same file. Unlike `sealed!`, descendants may be defined in any package.
+
+Each package registers its descendants of a given class or module with a single `T::Descendants.register` call in the package's `__descendants.rbi` file. (The file name can be changed with `--descendants-registry-filename`.) The call takes the tracked ancestor and a hash literal mapping each descendant to the file where it is defined:
+
+```ruby
+# -- a/parent.rb --
+class A::Parent
+  extend T::Helpers
+  track_descendants!
+end
+
+# -- b/child.rb --
+class B::Child < A::Parent # error: add `B::Child => "b/child.rb"` to T::Descendants.register(A::Parent, ...) ...
+end
+
+# -- b/other.rb --
+class B::Other < A::Parent
+end
+
+# -- b/__descendants.rbi --
+T::Descendants.register(A::Parent, {
+  B::Child => "b/child.rb", # fixes the error
+  B::Other => "b/other.rb",
+})
+```
+
+The error message contains the exact hash entry to add, either to the existing registration for that ancestor in the package or to a new one.
+
+With `--descendants-registry-ignore-tracking-in-tests`, descendants defined in test files (files in a `/test/` directory) don't need to be registered, although registering them is still allowed. See also [4035](#4035).
+
+Descendants of a tracked class or module are themselves tracked, and must be registered against their **direct** parent. For example, if `B::GrandChild < B::Child`, the registration must be `T::Descendants.register(B::Child, {B::GrandChild => ...})`, not part of the registration for `A::Parent`.
+
+## 5088
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+A call to `T::Descendants.register` (see [5087](#5087)) is invalid. A valid registration:
+
+- appears in a file named `__descendants.rbi` (or the name given by `--descendants-registry-filename`),
+- has exactly two positional arguments, with no keyword arguments or block,
+- has a constant literal for the first argument that resolves to a class or module (the tracked ancestor),
+- has a hash literal for the second argument, where:
+  - each key is a constant literal that resolves to a class or module that descends from the tracked ancestor directly, and not also through another of its ancestors (in which case it must be registered against that ancestor instead),
+  - each key is defined in the same package as the registration (a package cannot register descendants defined in other packages, including its parent package or its subpackages), and
+  - each value is a string literal naming the file where that key is defined,
+  - no key is registered more than once, and
+- is the only registration for that ancestor in its package.
+
+The file path is compared against the path that Sorbet shows for that file in error messages: any prefix that Sorbet strips when printing paths (for example, the input directory when Sorbet is run on a single directory) is ignored, as is a leading `./`.
+
+```ruby
+# -- b/__descendants.rbi --
+T::Descendants.register(A::Parent, {
+  B::Child.itself => "...",       # error: not a constant literal
+  B::Unrelated => "...",          # error: not a descendant of `A::Parent`
+  C::Child => "c/child.rb",       # error: `C::Child` is defined in another package
+  B::Child => "b/other.rb",       # error: `B::Child` is defined in `b/child.rb`
+  B::GrandChild => "b/child.rb",  # error: must only be a direct descendant of `A::Parent`
+  B::Child => "b/child.rb",       # error: `B::Child` is already registered in this call
+})
+T::Descendants.register(A::Parent, {B::Other => "b/other.rb"}) # error: `A::Parent` is already registered in this package
 ```
 
 ## 6001

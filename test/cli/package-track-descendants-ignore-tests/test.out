@@ -1,0 +1,20 @@
+--- without --descendants-registry-ignore-tracking-in-tests
+b/unregistered.rb:4: add `B::Unregistered => "b/unregistered.rb"` to T::Descendants.register(A::Parent, ...) in `__descendants.rbi` in this package https://srb.help/5087
+     4 |class B::Unregistered < A::Parent
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+b/test/unregistered_test_child.rb:3: add `Test::B::UnregisteredTestChild => "b/test/unregistered_test_child.rb"` to T::Descendants.register(A::Parent, ...) in `__descendants.rbi` in this package https://srb.help/5087
+     3 |class Test::B::UnregisteredTestChild < A::Parent
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 2
+--- with --descendants-registry-ignore-tracking-in-tests
+b/unregistered.rb:4: add `B::Unregistered => "b/unregistered.rb"` to T::Descendants.register(A::Parent, ...) in `__descendants.rbi` in this package https://srb.help/5087
+     4 |class B::Unregistered < A::Parent
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+b/test/tracked_in_test.rb:6: `track_descendants!` can't be used in test files https://srb.help/4035
+     6 |  track_descendants!
+          ^^^^^^^^^^^^^^^^^^
+Errors: 2
+--- without --sorbet-packages
+--descendants-registry-ignore-tracking-in-tests can only be specified in --sorbet-packages mode

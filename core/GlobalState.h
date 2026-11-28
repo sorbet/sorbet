@@ -517,6 +517,7 @@ public:
                             const std::vector<std::string> &skipImportVisibilityCheckFor,
                             const std::vector<std::string> &updateVisibilityFor,
                             const std::vector<std::string> &packagerLayers, std::string errorHint,
+                            std::string descendantsRegistryFilename, bool descendantsRegistryIgnoreTrackingInTests,
                             packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
                             bool packageAttributedErrors);
     packages::UnfreezePackages unfreezePackages();
@@ -660,7 +661,8 @@ public:
         const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
-        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
+        std::string errorHint, std::string descendantsRegistryFilename, bool descendantsRegistryIgnoreTrackingInTests,
+        packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
         bool packageAttributedErrors) const;
 
     // Minimally copy the global state, including the file table, to initialize the LSPTypechecker.
@@ -671,7 +673,8 @@ public:
         const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
         const std::vector<std::string> &allowRelaxedPackagerChecksFor,
         const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
-        std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility) const;
+        std::string errorHint, std::string descendantsRegistryFilename, bool descendantsRegistryIgnoreTrackingInTests,
+        packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility) const;
 
     // Copy the name table, file table and other parts of GlobalState that are required to start the slow path. If the
     // `toStratum` value is passed as something other than the `0` stratum, the prefix of the symbol table leading up to
@@ -681,8 +684,10 @@ public:
                     const std::vector<std::string> &extraPackageFilesDirectorySlashPrefixes,
                     const std::vector<std::string> &allowRelaxedPackagerChecksFor,
                     const std::vector<std::string> &updateVisibilityFor, const std::vector<std::string> &packagerLayers,
-                    std::string errorHint, packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
-                    bool packageAttributedErrors, core::packages::Stratum toStratum) const;
+                    std::string errorHint, std::string descendantsRegistryFilename,
+                    bool descendantsRegistryIgnoreTrackingInTests, packages::GenPackagesMode genPackagesMode,
+                    bool allowRelaxingTestVisibility, bool packageAttributedErrors,
+                    core::packages::Stratum toStratum) const;
 
     // Contains a path prefix that should be stripped from all printed paths.
     std::string pathPrefix;

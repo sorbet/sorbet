@@ -1,0 +1,15 @@
+--- custom registry filename
+b/__descendants.rbi:4: `register` can only be called in a file named `registry.rbi` https://srb.help/5088
+     4 |T::Descendants.register(A::Parent, {B::OtherChild => "b/other_child.rb"})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+b/other_child.rb:3: add `B::OtherChild => "b/other_child.rb"` to T::Descendants.register(A::Parent, ...) in `registry.rbi` in this package https://srb.help/5087
+     3 |class B::OtherChild < A::Parent
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 2
+--- path instead of a file name
+--descendants-registry-filename must be a file name (not a path) ending in `.rbi`
+--- not an RBI file
+--descendants-registry-filename must be a file name (not a path) ending in `.rbi`
+--- without --sorbet-packages
+--descendants-registry-filename can only be specified in --sorbet-packages mode

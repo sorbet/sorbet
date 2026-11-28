@@ -344,6 +344,14 @@ Usage:
                                 Valid layer names for packages, ordered lowest to
                                 highest. Passing this flag also enables layering checks.
                                 (repeatable)
+      --descendants-registry-filename <filename>
+                                Name of the RBI file in each package that must contain
+                                the package's `T::Descendants.register` calls (default:
+                                __descendants.rbi)
+      --descendants-registry-ignore-tracking-in-tests
+                                Don't require descendants defined in test files to be
+                                registered with `T::Descendants.register`, and disallow
+                                `track_descendants!` in test files
       --package-attributed-errors
                                 Attribute errors to their enclosing package in the error
                                 output

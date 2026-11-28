@@ -135,6 +135,7 @@ class SymbolFinder {
                 [[fallthrough]];
             case core::Names::declareFinal().rawId():
             case core::Names::declareSealed().rawId():
+            case core::Names::declareTrackDescendants().rawId():
             case core::Names::declareInterface().rawId():
             case core::Names::declareAbstract().rawId(): {
                 core::FoundModifier mod;
@@ -1873,6 +1874,20 @@ private:
                 // T.noreturn here represents the zero-length list of subclasses of this sealed class.
                 // We will use T.any to record subclasses when they're resolved.
                 sealedSubclasses.data(ctx)->resultType = core::Types::setOf(core::Types::bottom());
+                break;
+            }
+            case core::Names::declareTrackDescendants().rawId(): {
+                if (!ctx.state.packageDB().enabled()) {
+                    break;
+                }
+                if (ctx.state.packageDB().descendantsRegistryIgnoreTrackingInTests() &&
+                    ctx.file.data(ctx).isTestPath()) {
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::TrackDescendantsInTest)) {
+                        e.setHeader("`{}` can't be used in test files", "track_descendants!");
+                    }
+                    break;
+                }
+                symbolData->flags.isTrackedSuperclass = true;
                 break;
             }
             case core::Names::declareInterface().rawId():

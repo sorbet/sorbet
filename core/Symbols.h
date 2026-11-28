@@ -402,14 +402,15 @@ public:
         // Marked with `package_private!`. Constants nested inside it are package-private too, but this bit is only set
         // on the marked class itself.
         bool isPackagePrivate : 1;
+        bool isTrackedSuperclass : 1;
 
-        constexpr static uint16_t NUMBER_OF_FLAGS = 12;
+        constexpr static uint16_t NUMBER_OF_FLAGS = 13;
         constexpr static uint16_t VALID_BITS_MASK = (1 << NUMBER_OF_FLAGS) - 1;
 
         Flags() noexcept
             : isClass(false), isModule(false), isAbstract(false), isInterface(false), isLinearizationComputed(false),
               isFinal(false), isSealed(false), isPrivate(false), isDeclared(false), isDeclaredInPackage(false),
-              isBehaviorDefining(false), isPackagePrivate(false) {}
+              isBehaviorDefining(false), isPackagePrivate(false), isTrackedSuperclass(false) {}
 
         uint16_t serialize() const {
             static_assert(sizeof(Flags) == sizeof(uint16_t));
@@ -458,6 +459,13 @@ public:
     [[nodiscard]] bool addMixin(const GlobalState &gs, ClassOrModuleRef sym,
                                 std::optional<uint16_t> index = std::nullopt);
 
+    inline const InlinedVector<ClassOrModuleRef, 4> &trackedSuperclasses() const {
+        return trackedSuperclasses_;
+    }
+
+    // Records `superclass` in the `trackedSuperclasses` vector.
+    void recordTrackedSuperclass(GlobalState &gs, ClassOrModuleRef superclass);
+
     // Add a placeholder for a mixin and return index in mixins()
     uint16_t addMixinPlaceholder(const GlobalState &gs);
 
@@ -487,6 +495,12 @@ public:
     int typeArity(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const;
+    // These may only be called once linearization has been computed.
+    //
+    // `transitivelyDerivesFromModule` is whether the module `sym` is also included by another of this symbol's mixins.
+    bool isPresentInMixins(ClassOrModuleRef sym) const;
+    bool transitivelyDerivesFromModule(const GlobalState &gs, ClassOrModuleRef sym) const;
+    bool onlyDirectlyDerivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const;
 
     // TODO(dmitry) perf: most calls to this method could be eliminated as part of perf work.
     ClassOrModuleRef ref(const GlobalState &gs) const;
@@ -743,6 +757,7 @@ private:
      *   Resolver::finalize(), these will be rewritten to `Object()`.
      */
     InlinedVector<ClassOrModuleRef, 4> mixins_;
+    InlinedVector<ClassOrModuleRef, 4> trackedSuperclasses_;
 
     /** For Class or module - ordered type members of the class,
      */
@@ -763,7 +778,7 @@ private:
 
     void addMixinAt(ClassOrModuleRef sym, std::optional<uint16_t> index);
 };
-CheckSize(ClassOrModule, 128, 8);
+CheckSize(ClassOrModule, 152, 8);
 
 } // namespace sorbet::core
 #endif // SORBET_SYMBOLS_H

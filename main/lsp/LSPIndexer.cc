@@ -279,13 +279,15 @@ void LSPIndexer::transferInitializeState(InitializedTask &task) {
     // `core::FileRef` values between the two.
     auto enableGenPackagesAllowRelaxingTestVisibility = false;
     auto typecheckerGS = std::exchange(
-        this->gs, this->gs->copyForLSPTypechecker(
-                      this->config->opts.cacheSensitiveOptions.sorbetPackages,
-                      this->config->opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
-                      this->config->opts.extraPackageFilesDirectorySlashPrefixes,
-                      this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.updateVisibilityFor,
-                      this->config->opts.packagerLayers, this->config->opts.sorbetPackagesHint,
-                      core::packages::GenPackagesMode::Disabled, enableGenPackagesAllowRelaxingTestVisibility));
+        this->gs,
+        this->gs->copyForLSPTypechecker(
+            this->config->opts.cacheSensitiveOptions.sorbetPackages,
+            this->config->opts.extraPackageFilesDirectorySlashDeprecatedPrefixes,
+            this->config->opts.extraPackageFilesDirectorySlashPrefixes,
+            this->config->opts.allowRelaxedPackagerChecksFor, this->config->opts.updateVisibilityFor,
+            this->config->opts.packagerLayers, this->config->opts.sorbetPackagesHint,
+            this->config->opts.descendantsRegistryFilename, this->config->opts.descendantsRegistryIgnoreTrackingInTests,
+            core::packages::GenPackagesMode::Disabled, enableGenPackagesAllowRelaxingTestVisibility));
 
     task.setGlobalState(std::move(typecheckerGS));
     task.setSessionCache(std::move(this->sessionCache));

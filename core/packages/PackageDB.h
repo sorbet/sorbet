@@ -91,6 +91,13 @@ public:
         return this->packageAttributedErrors_;
     }
 
+    // The name of the file in each package that must contain its `T::Descendants.register` calls.
+    std::string_view descendantsRegistryFilename() const;
+    // Whether descendants defined in test files are exempt from tracking (and `track_descendants!` is disallowed in
+    // test files).
+    bool descendantsRegistryIgnoreTrackingInTests() const {
+        return this->descendantsRegistryIgnoreTrackingInTests_;
+    }
     absl::Span<const std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes() const;
     absl::Span<const std::string> extraPackageFilesDirectorySlashPrefixes() const;
     // Possible layers for packages to be in. The layers are ordered lowest to highest.
@@ -130,6 +137,8 @@ private:
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes_;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes_;
     std::string errorHint_;
+    std::string descendantsRegistryFilename_;
+    bool descendantsRegistryIgnoreTrackingInTests_ = false;
     std::vector<std::string> allowRelaxedPackagerChecksFor_;
     UnorderedSet<MangledName> packagesWithRelaxedChecks_;
     std::vector<std::string> updateVisibilityFor_;

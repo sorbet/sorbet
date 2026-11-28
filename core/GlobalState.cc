@@ -170,6 +170,9 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
     if (!data->flags.isLinearizationComputed) {
         if (data->superClass().exists()) {
             computeClassLinearization(gs, data->superClass());
+            if (!data->flags.isTrackedSuperclass && data->superClass().data(gs)->flags.isTrackedSuperclass) {
+                data->flags.isTrackedSuperclass = true;
+            }
         }
         InlinedVector<core::ClassOrModuleRef, 4> currentMixinsOrig;
         if constexpr (!debug_mode) {
@@ -189,6 +192,9 @@ ParentLinearizationInformation computeClassLinearization(core::GlobalState &gs, 
                 continue;
             }
             ParentLinearizationInformation mixinLinearization = computeClassLinearization(gs, mixin);
+            if (!data->flags.isTrackedSuperclass && mixin.data(gs)->flags.isTrackedSuperclass) {
+                data->flags.isTrackedSuperclass = true;
+            }
 
             if (!mixin.data(gs)->flags.isModule) {
                 // insert all transitive parents of class to bring methods back.
@@ -914,6 +920,10 @@ void GlobalState::initEmpty() {
 
     field = enterFieldSymbol(Loc::none(), Symbols::Magic_UntypedSource(), core::Names::Constants::LoadYieldParams());
     ENFORCE_NO_TIMER(field == Symbols::Magic_UntypedSource_LoadYieldParams());
+
+    klass = enterClassOrModuleSymbol(Loc::none(), Symbols::T(), core::Names::Constants::Descendants());
+    klass.data(*this)->setIsModule(true);
+    ENFORCE_NO_TIMER(klass == Symbols::T_Descendants());
 
     int reservedCount = 0;
 
@@ -2116,6 +2126,7 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
     const bool packagerEnabled, const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
+    string descendantsRegistryFilename, bool descendantsRegistryIgnoreTrackingInTests,
     packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors) const {
     ENFORCE(fileTableFrozen);
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
@@ -2140,7 +2151,8 @@ unique_ptr<GlobalState> GlobalState::copyForIndexThread(
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
         result->setPackagerOptions(extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                    extraPackageFilesDirectorySlashPrefixes, allowRelaxedPackagerChecksFor,
-                                   updateVisibilityFor, packagerLayers, errorHint, genPackagesMode,
+                                   updateVisibilityFor, packagerLayers, errorHint, descendantsRegistryFilename,
+                                   descendantsRegistryIgnoreTrackingInTests, genPackagesMode,
                                    allowRelaxingTestVisibility, packageAttributedErrors);
     }
 
@@ -2151,6 +2163,7 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
     const bool packagerEnabled, const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
+    string descendantsRegistryFilename, bool descendantsRegistryIgnoreTrackingInTests,
     packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility) const {
     auto result = make_unique<GlobalState>(this->errorQueue, this->epochManager);
 
@@ -2169,7 +2182,8 @@ unique_ptr<GlobalState> GlobalState::copyForLSPTypechecker(
         core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
         result->setPackagerOptions(extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                    extraPackageFilesDirectorySlashPrefixes, allowRelaxedPackagerChecksFor,
-                                   updateVisibilityFor, packagerLayers, errorHint, genPackagesMode,
+                                   updateVisibilityFor, packagerLayers, errorHint, descendantsRegistryFilename,
+                                   descendantsRegistryIgnoreTrackingInTests, genPackagesMode,
                                    allowRelaxingTestVisibility, packageAttributedErrors);
     }
 
@@ -2180,6 +2194,7 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
     const vector<string> &extraPackageFilesDirectorySlashDeprecatedPrefixes,
     const vector<string> &extraPackageFilesDirectorySlashPrefixes, const vector<string> &allowRelaxedPackagerChecksFor,
     const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers, string errorHint,
+    string descendantsRegistryFilename, bool descendantsRegistryIgnoreTrackingInTests,
     packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility, bool packageAttributedErrors,
     core::packages::Stratum toStratum) const {
     Timer timeit(this->tracer(), "copyForSlowPath");
@@ -2216,7 +2231,8 @@ unique_ptr<GlobalState> GlobalState::copyForSlowPath(
             core::packages::UnfreezePackages unfreezeToEnterPackagerOptionsPackageDB = result->unfreezePackages();
             result->setPackagerOptions(extraPackageFilesDirectorySlashDeprecatedPrefixes,
                                        extraPackageFilesDirectorySlashPrefixes, allowRelaxedPackagerChecksFor,
-                                       updateVisibilityFor, packagerLayers, errorHint, genPackagesMode,
+                                       updateVisibilityFor, packagerLayers, errorHint, descendantsRegistryFilename,
+                                       descendantsRegistryIgnoreTrackingInTests, genPackagesMode,
                                        allowRelaxingTestVisibility, packageAttributedErrors);
         }
 
@@ -2456,8 +2472,10 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
                                      const vector<string> &extraPackageFilesDirectorySlashPrefixes,
                                      const vector<string> &allowRelaxedPackagerChecksFor,
                                      const vector<string> &updateVisibilityFor, const vector<string> &packagerLayers,
-                                     string errorHint, packages::GenPackagesMode genPackagesMode,
-                                     bool allowRelaxingTestVisibility, bool packageAttributedErrors) {
+                                     string errorHint, string descendantsRegistryFilename,
+                                     bool descendantsRegistryIgnoreTrackingInTests,
+                                     packages::GenPackagesMode genPackagesMode, bool allowRelaxingTestVisibility,
+                                     bool packageAttributedErrors) {
     ENFORCE_NO_TIMER(!packageDB_.frozen);
 
     packageDB_.enabled_ = true;
@@ -2471,6 +2489,8 @@ void GlobalState::setPackagerOptions(const vector<string> &extraPackageFilesDire
     absl::c_transform(packagerLayers, std::back_inserter(packageDB_.layers_),
                       [this](const auto &layer) { return enterNameUTF8(layer); });
     packageDB_.errorHint_ = errorHint;
+    packageDB_.descendantsRegistryFilename_ = descendantsRegistryFilename;
+    packageDB_.descendantsRegistryIgnoreTrackingInTests_ = descendantsRegistryIgnoreTrackingInTests;
 }
 
 packages::UnfreezePackages GlobalState::unfreezePackages() {

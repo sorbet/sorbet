@@ -156,6 +156,8 @@ struct Options {
     int autogenVersion = 0;
     bool uniquelyDefinedBehavior = false;
     std::string sorbetPackagesHint = "";
+    std::string descendantsRegistryFilename = "__descendants.rbi";
+    bool descendantsRegistryIgnoreTrackingInTests = false;
     std::vector<std::string> extraPackageFilesDirectorySlashDeprecatedPrefixes;
     std::vector<std::string> extraPackageFilesDirectorySlashPrefixes;
     std::vector<std::string> allowRelaxedPackagerChecksFor;

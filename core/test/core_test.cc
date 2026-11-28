@@ -247,8 +247,8 @@ TEST_CASE("CopyForSlowPathPreservesNameRefOwnership") {
     }
     CHECK_NOTHROW(constant.dataCnst(gs)->original.enforceCorrectGlobalState(gs));
 
-    auto copy = gs.copyForSlowPath({}, {}, {}, {}, {}, "", packages::GenPackagesMode::Disabled, false, false,
-                                   packages::Stratum(0));
+    auto copy = gs.copyForSlowPath({}, {}, {}, {}, {}, "", "__descendants.rbi", false,
+                                   packages::GenPackagesMode::Disabled, false, false, packages::Stratum(0));
     CHECK_NE(gs.globalStateId, copy->globalStateId);
 
     auto copiedConstant = copy->lookupNameConstant("SlowPathCopyName");
@@ -542,7 +542,8 @@ TEST_CASE("isPackageSpecSymbol") {
 
     {
         auto unfrezePackages = gs.packageDB().unfreeze();
-        gs.setPackagerOptions({}, {}, {}, {}, {}, "", packages::GenPackagesMode::Disabled, false, false);
+        gs.setPackagerOptions({}, {}, {}, {}, {}, "", "__descendants.rbi", false, packages::GenPackagesMode::Disabled,
+                              false, false);
     }
 
     CHECK_FALSE(Symbols::root().isPackageSpecSymbol(gs));

@@ -24,7 +24,7 @@ const int Symbols::MAX_SYNTHETIC_CLASS_SYMBOLS = 211;
 const int Symbols::MAX_SYNTHETIC_METHOD_SYMBOLS = 53;
 const int Symbols::MAX_SYNTHETIC_FIELD_SYMBOLS = 20;
 const int Symbols::MAX_SYNTHETIC_TYPEPARAMETER_SYMBOLS = 6;
-const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 103;
+const int Symbols::MAX_SYNTHETIC_TYPEMEMBER_SYMBOLS = 104;
 
 namespace {
 constexpr string_view COLON_SEPARATOR = "::"sv;
@@ -133,6 +133,35 @@ bool ClassOrModule::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) con
         return sym == this->superClass() || this->superClass().data(gs)->derivesFrom(gs, sym);
     }
     return false;
+}
+
+bool ClassOrModule::isPresentInMixins(ClassOrModuleRef sym) const {
+    ENFORCE(flags.isLinearizationComputed);
+    return absl::c_contains(mixins(), sym);
+}
+
+bool ClassOrModule::transitivelyDerivesFromModule(const GlobalState &gs, ClassOrModuleRef sym) const {
+    ENFORCE(flags.isLinearizationComputed);
+    ENFORCE(sym.data(gs)->isModule());
+    for (ClassOrModuleRef a : mixins()) {
+        if (a != sym && a.data(gs)->isPresentInMixins(sym)) {
+            return true;
+        }
+    }
+    if (this->superClass().exists() && this->superClass().data(gs)->isPresentInMixins(sym)) {
+        return true;
+    }
+
+    return false;
+}
+
+bool ClassOrModule::onlyDirectlyDerivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
+    ENFORCE(flags.isLinearizationComputed);
+    if (sym.data(gs)->isClass()) {
+        return this->superClass().exists() && sym == this->superClass();
+    }
+
+    return isPresentInMixins(sym) && !transitivelyDerivesFromModule(gs, sym);
 }
 
 ClassOrModuleRef ClassOrModule::ref(const GlobalState &gs) const {
@@ -1828,6 +1857,10 @@ void ClassOrModule::recordSealedSubclass(GlobalState &gs, ClassOrModuleRef subcl
     } else {
         appliedType->targs[0] = classOfSubclass.data(gs)->externalType();
     }
+}
+
+void ClassOrModule::recordTrackedSuperclass(GlobalState &gs, ClassOrModuleRef superclass) {
+    trackedSuperclasses_.emplace_back(superclass);
 }
 
 absl::Span<const Loc> ClassOrModule::sealedLocs(const GlobalState &gs) const {

@@ -65,6 +65,8 @@ public:
     // flag accessors
     // TODO(jez) Delete this, replace with configurable patterns or accessing the packageDB
     bool isPackagedTest() const;
+    // Whether the file is contained in a `/test/` directory.
+    bool isTestPath() const;
 
     bool hasIndexErrors() const;
     void setHasIndexErrors(bool value);

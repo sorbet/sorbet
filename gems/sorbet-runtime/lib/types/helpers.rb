@@ -31,6 +31,9 @@ module T::Helpers
     Private::Sealed.declare(self, Kernel.caller(1..1)&.first&.split(':')&.first)
   end
 
+  # Similar to sealed but allows for descendant class tracking across the whole codebase
+  def track_descendants!; end
+
   # Causes a mixin to also mix in class methods from the named module.
   #
   # Nearly equivalent to
