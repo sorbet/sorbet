@@ -235,6 +235,7 @@ PackageDB PackageDB::deepCopy() const {
     result.packagesToUpdateVisibilityFor_ = this->packagesToUpdateVisibilityFor_;
     result.errorHint_ = this->errorHint_;
     result.descendantsRegistryFilename_ = this->descendantsRegistryFilename_;
+    result.descendantsRegistryIgnoreTrackingInTests_ = this->descendantsRegistryIgnoreTrackingInTests_;
 
     return result;
 }

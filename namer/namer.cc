@@ -1877,9 +1877,17 @@ private:
                 break;
             }
             case core::Names::declareTrackDescendants().rawId(): {
-                if (ctx.state.packageDB().enabled()) {
-                    symbolData->flags.isTrackedSuperclass = true;
+                if (!ctx.state.packageDB().enabled()) {
+                    break;
                 }
+                if (ctx.state.packageDB().descendantsRegistryIgnoreTrackingInTests() &&
+                    ctx.file.data(ctx).isTestPath()) {
+                    if (auto e = ctx.beginError(mod.loc, core::errors::Namer::TrackDescendantsInTest)) {
+                        e.setHeader("`{}` can't be used in test files", "track_descendants!");
+                    }
+                    break;
+                }
+                symbolData->flags.isTrackedSuperclass = true;
                 break;
             }
             case core::Names::declareInterface().rawId():

@@ -4310,6 +4310,11 @@ public:
                     }
 
                     const auto subclassLoc = subclass.data(gs)->loc();
+                    if (gs.packageDB().descendantsRegistryIgnoreTrackingInTests() &&
+                        subclassLoc.file().data(gs).isTestPath()) {
+                        continue;
+                    }
+
                     if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::UntrackedDescendant)) {
                         e.setHeader("add `{} => \"{}\"` to T::Descendants.register({}, ...) in `{}` in this package",
                                     subclass.show(gs), trackedDescendantPath(gs, subclassLoc.file().data(gs).path()),

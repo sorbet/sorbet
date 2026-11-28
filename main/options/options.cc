@@ -719,6 +719,10 @@ buildOptions(const vector<pipeline::semantic_extension::SemanticExtensionProvide
                                  "Name of the RBI file in each package that must contain the package's "
                                  "`T::Descendants.register` calls (default: __descendants.rbi)",
                                  cxxopts::value<string>(), "<filename>");
+    options.add_options(section)("descendants-registry-ignore-tracking-in-tests",
+                                 "Don't require descendants defined in test files to be registered with "
+                                 "`T::Descendants.register`, and disallow `track_descendants!` in test files",
+                                 cxxopts::value<bool>());
     options.add_options(section)("package-attributed-errors",
                                  "Attribute errors to their enclosing package in the error output",
                                  cxxopts::value<bool>());
@@ -1536,6 +1540,16 @@ void readOptions(Options &opts,
                 logger->error("--descendants-registry-filename must be a file name (not a path) ending in `.rbi`");
                 throw EarlyReturnWithCode(1);
             }
+        }
+
+        if (raw.count("descendants-registry-ignore-tracking-in-tests")) {
+            if (!opts.cacheSensitiveOptions.sorbetPackages) {
+                logger->error(
+                    "--descendants-registry-ignore-tracking-in-tests can only be specified in --sorbet-packages mode");
+                throw EarlyReturnWithCode(1);
+            }
+            opts.descendantsRegistryIgnoreTrackingInTests =
+                raw["descendants-registry-ignore-tracking-in-tests"].as<bool>();
         }
 
         opts.errorUrlBase = raw["error-url-base"].as<string>();

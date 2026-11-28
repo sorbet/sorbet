@@ -1490,6 +1490,22 @@ To control which packages may import your package at all, rather than which of i
 
 `package_private!` is for constants. To make a method package-private, use `package_private` (or `package_private_class_method`) instead.
 
+## 4035
+
+> This error is specific to Stripe's custom `--sorbet-packages` mode. If you are at Stripe, please see [go/modularity](http://go/modularity) for more.
+
+With `--descendants-registry-ignore-tracking-in-tests`, descendants defined in test files (files in a `/test/` directory) don't need to be registered with `T::Descendants.register` (see [5087](#5087)). Because test descendants aren't tracked, `track_descendants!` can't be used in test files either: the class or module it's called in won't be tracked.
+
+```ruby
+# -- b/test/helper.rb --
+class Test::B::Helper
+  extend T::Helpers
+  track_descendants! # error: `track_descendants!` can't be used in test files
+end
+```
+
+To fix, remove the `track_descendants!` call, or mark a class or module outside of a test file.
+
 ## 5001
 
 Sorbet cannot resolve references to dynamic constants. The common case occurs when a constant is dynamically referenced through the singleton class of `self`:
@@ -3175,6 +3191,8 @@ T::Descendants.register(A::Parent, {
 ```
 
 The error message contains the exact hash entry to add, either to the existing registration for that ancestor in the package or to a new one.
+
+With `--descendants-registry-ignore-tracking-in-tests`, descendants defined in test files (files in a `/test/` directory) don't need to be registered, although registering them is still allowed. See also [4035](#4035).
 
 Descendants of a tracked class or module are themselves tracked, and must be registered against their **direct** parent. For example, if `B::GrandChild < B::Child`, the registration must be `T::Descendants.register(B::Child, {B::GrandChild => ...})`, not part of the registration for `A::Parent`.
 
