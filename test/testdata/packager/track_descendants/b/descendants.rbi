@@ -5,6 +5,7 @@ T::Descendants.register(
   {
     Root::B::Child => "test/testdata/packager/track_descendants/b/b.rb",
     Root::B::WrongSuperclass => "test/testdata/packager/track_descendants/b/b.rb",
+  # ^^^^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::WrongSuperclass` must only be a direct descendant of `Root::A::Parent`
     Root::B::Child.itself => "test/testdata/packager/track_descendants/b/b.rb",
   # ^^^^^^^^^^^^^^^^^^^^^ error: Subclasses passed to `register` must be statically resolvable to classes or modules
     Root::A::NotAModule => "test/testdata/packager/track_descendants/a/a.rb",
@@ -23,13 +24,37 @@ T::Descendants.register(
   # ^^^^^^^^^^^^^^^^^^^ error: `Root::A::LocalChild` must be tracked in its own package
     Root::B::Plain => "test/testdata/packager/track_descendants/b/b.rb",
   # ^^^^^^^^^^^^^^ error: `Root::B::Plain` is not a descendant of `Root::A::Parent`
+    # Only direct descendants may be registered: `GrandChild` must be registered against `Child` instead.
+    Root::B::GrandChild => "test/testdata/packager/track_descendants/b/b.rb",
+  # ^^^^^^^^^^^^^^^^^^^ error: `Root::B::GrandChild` must only be a direct descendant of `Root::A::Parent`
   }
 )
 
 # A leading `./` is ignored.
 T::Descendants.register(Root::B::Child, {Root::B::GrandChild => "./test/testdata/packager/track_descendants/b/b.rb"})
+
 # The braces around the hash are optional.
-T::Descendants.register(Root::A::Mixin, Root::B::Includer => "test/testdata/packager/track_descendants/b/b.rb")
+T::Descendants.register(
+  Root::A::Mixin,
+  Root::B::Includer => "test/testdata/packager/track_descendants/b/b.rb",
+  Root::B::SubMixin => "test/testdata/packager/track_descendants/b/b.rb",
+  # Only direct descendants may be registered, whether they're indirect through a superclass or through a module.
+  Root::B::GrandIncluder => "test/testdata/packager/track_descendants/b/b.rb",
+# ^^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::GrandIncluder` must only be a direct descendant of `Root::A::Mixin`
+  Root::B::IndirectIncluder => "test/testdata/packager/track_descendants/b/b.rb",
+# ^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::IndirectIncluder` must only be a direct descendant of `Root::A::Mixin`
+  Root::B::BothIncluder => "test/testdata/packager/track_descendants/b/b.rb",
+# ^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::BothIncluder` must only be a direct descendant of `Root::A::Mixin`
+  Root::B::DeepIncluder => "test/testdata/packager/track_descendants/b/b.rb",
+# ^^^^^^^^^^^^^^^^^^^^^ error: `Root::B::DeepIncluder` must only be a direct descendant of `Root::A::Mixin`
+)
+T::Descendants.register(Root::B::Includer, {Root::B::GrandIncluder => "test/testdata/packager/track_descendants/b/b.rb"})
+T::Descendants.register(Root::B::SubMixin, {
+  Root::B::IndirectIncluder => "test/testdata/packager/track_descendants/b/b.rb",
+  Root::B::BothIncluder => "test/testdata/packager/track_descendants/b/b.rb",
+  Root::B::DeepMixin => "test/testdata/packager/track_descendants/b/b.rb",
+})
+T::Descendants.register(Root::B::DeepMixin, {Root::B::DeepIncluder => "test/testdata/packager/track_descendants/b/b.rb"})
 
 # Each superclass may only be registered once per package.
 T::Descendants.register(Root::A::Parent, {Root::B::Child => "test/testdata/packager/track_descendants/b/b.rb"}) # error: Descendants of `Root::A::Parent` have already been registered in this package

@@ -135,6 +135,32 @@ bool ClassOrModule::derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) con
     return false;
 }
 
+bool ClassOrModule::isPresentInMixins(ClassOrModuleRef sym) const {
+    ENFORCE(flags.isLinearizationComputed);
+    return absl::c_contains(mixins(), sym);
+}
+
+bool ClassOrModule::transitivelyDerivesFromModule(const GlobalState &gs, ClassOrModuleRef sym) const {
+    ENFORCE(flags.isLinearizationComputed);
+    ENFORCE(sym.data(gs)->isModule());
+    for (ClassOrModuleRef a : mixins()) {
+        if (a != sym && a.data(gs)->isPresentInMixins(sym)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool ClassOrModule::onlyDirectlyDerivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const {
+    ENFORCE(flags.isLinearizationComputed);
+    if (sym.data(gs)->isClass()) {
+        return this->superClass().exists() && sym == this->superClass();
+    }
+
+    return isPresentInMixins(sym) && !transitivelyDerivesFromModule(gs, sym);
+}
+
 ClassOrModuleRef ClassOrModule::ref(const GlobalState &gs) const {
     uint32_t distance = this - gs.classAndModules.data();
     return ClassOrModuleRef(gs, distance);

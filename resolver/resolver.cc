@@ -3601,9 +3601,19 @@ class ResolveTypeMembersAndFieldsWalk {
                 continue;
             }
 
-            if (!subclassSym.data(gs)->derivesFrom(gs, superclassSym)) {
+            const auto subclassData = subclassSym.data(gs);
+            if (!subclassData->derivesFrom(gs, superclassSym)) {
                 if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
                     e.setHeader("`{}` is not a descendant of `{}`", subclassSym.show(gs), superclassSym.show(gs));
+                    e.addErrorLine(subclassDefLoc, "`{}` defined here", subclassSym.show(gs));
+                }
+                continue;
+            }
+
+            if (!subclassData->onlyDirectlyDerivesFrom(gs, superclassSym)) {
+                if (auto e = gs.beginError(subclassLoc, core::errors::Resolver::InvalidDescendantRegistration)) {
+                    e.setHeader("`{}` must only be a direct descendant of `{}`", subclassSym.show(gs),
+                                superclassSym.show(gs));
                     e.addErrorLine(subclassDefLoc, "`{}` defined here", subclassSym.show(gs));
                 }
                 continue;
@@ -4283,7 +4293,11 @@ public:
             Timer timeit(gs.tracer(), "resolver.checkTrackedDescendants");
             for (const auto &threadTodos : combinedTodoCheckTrackDescendantItems) {
                 for (const auto &[superclass, subclass] : threadTodos) {
-                    if (absl::c_contains(subclass.data(gs)->trackedSuperclasses(), superclass)) {
+                    // If the module `superclass` is also included through another mixin, `subclass` is registered
+                    // against that mixin instead. Classes only ever reach here as the direct superclass.
+                    if ((superclass.data(gs)->isModule() &&
+                         subclass.data(gs)->transitivelyDerivesFromModule(gs, superclass)) ||
+                        absl::c_contains(subclass.data(gs)->trackedSuperclasses(), superclass)) {
                         continue;
                     }
 

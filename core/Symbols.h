@@ -495,6 +495,12 @@ public:
     int typeArity(const GlobalState &gs) const;
 
     bool derivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const;
+    // These may only be called once linearization has been computed.
+    //
+    // `transitivelyDerivesFromModule` is whether the module `sym` is also included by another of this symbol's mixins.
+    bool isPresentInMixins(ClassOrModuleRef sym) const;
+    bool transitivelyDerivesFromModule(const GlobalState &gs, ClassOrModuleRef sym) const;
+    bool onlyDirectlyDerivesFrom(const GlobalState &gs, ClassOrModuleRef sym) const;
 
     // TODO(dmitry) perf: most calls to this method could be eliminated as part of perf work.
     ClassOrModuleRef ref(const GlobalState &gs) const;

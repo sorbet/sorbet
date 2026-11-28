@@ -10,6 +10,32 @@ module Root::B
     include Root::A::Mixin
   end
 
+  # Descendants of tracked modules are tracked too, through both subclasses and modules.
+  class GrandIncluder < Includer; end
+
+  module SubMixin
+    include Root::A::Mixin
+  end
+
+  class IndirectIncluder
+    include SubMixin
+  end
+
+  module DeepMixin
+    include SubMixin
+  end
+
+  # Includes `Root::A::Mixin` through a chain of modules.
+  class DeepIncluder
+    include DeepMixin
+  end
+
+  # Also includes `Root::A::Mixin` through `SubMixin`, so it only needs to be registered against `SubMixin`.
+  class BothIncluder
+    include Root::A::Mixin
+    include SubMixin
+  end
+
   class Unregistered < Root::A::Parent; end
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: add `Root::B::Unregistered => "test/testdata/packager/track_descendants/b/b.rb"` to T::Descendants.register(Root::A::Parent, ...) in an RBI file in this package
 
